@@ -4,7 +4,7 @@ Validate: pip install -e .
 Validate: forma --help
 Constraint: no Layer 1 bundle content, no verifier rules, no creator logic, no tests in this task; cli.py subcommands may exit 0 with a placeholder message
 
-- [ ] [layer-1-and-verifier] Ship Layer 1 meta skill source with Layer 2 verifier organizationally inside it
+- [x] [layer-1-and-verifier] Ship Layer 1 meta skill source with Layer 2 verifier organizationally inside it
 Accept: Task Type=step; source/skill-creator/SKILL.md has strict Codex-compatible skill frontmatter (name: forma-creator, description only), progressive-disclosure load pointers, and instructs the agent to invoke scripts/verify.py before reporting success; Codex UI metadata lives in source/skill-creator/interfaces/codex/openai.yaml for adapter emission; source/skill-creator/references/*.md are hand-derived from source/methodology/references and are referenced by the SKILL.md; source/skill-creator/scripts/verify.py and source/skill-creator/scripts/forma_verifier/{rules,runner,report}.py implement structural + methodology rules using stdlib only; `forma verify` CLI wires through forma_verifier; tests/test_verifier.py covers each rule with paired valid + invalid fixtures under tests/fixtures/{valid-suite,invalid-suite}/; tests/test_layer_1_dogfood.py asserts the Layer 1 source passes verification
 Validate: forma verify source/skill-creator/
 Validate: python -m pytest tests/test_verifier.py tests/test_layer_1_dogfood.py

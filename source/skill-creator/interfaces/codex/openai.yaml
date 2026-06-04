@@ -1,0 +1,6 @@
+interface:
+  display_name: "Forma Creator"
+  short_description: "Create verified plan-first suites"
+  default_prompt: "Use $forma-creator to create a verified plan-first skill suite."
+policy:
+  allow_implicit_invocation: true
