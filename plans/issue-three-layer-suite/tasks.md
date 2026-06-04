@@ -1,4 +1,4 @@
-- [ ] [skeleton-and-methodology] Establish the Python project skeleton and author the canonical plan-first methodology source
+- [x] [skeleton-and-methodology] Establish the Python project skeleton and author the canonical plan-first methodology source
 Accept: Task Type=step; pyproject.toml at the repo root discovers both `forma` (from src/forma) and `forma_verifier` (from source/skill-creator/scripts), declares deps click/pyyaml/pytest, and exposes the `forma` console script; `.gitignore` covers the standard Python transient set; `src/forma/{__init__,cli}.py` exists with the `verify` / `create` subcommands wired to placeholder functions; `pip install -e .` succeeds; `source/methodology/{shape,gauge,seal,pour,flow}.md` and `source/methodology/references/{decision-gate,plan-strategy,task-structure,output-format}.md` contain the canonical plan-first rules (shape = chat convergence, gauge = read-only repo grounding, seal = lock plan files, pour = single-task execution with review gate, flow = autopilot)
 Validate: pip install -e .
 Validate: forma --help
