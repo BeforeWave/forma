@@ -1,0 +1,18 @@
+profile:
+  id: sample-base
+  description: Sanitized sample organization defaults for Forma examples.
+bundle:
+  name: sample-plan-first
+  description: Sample plan-first workflow bundle.
+org:
+  name: Example Team
+terminology:
+  issue: work item
+  repository: workspace
+constraints:
+  default:
+    - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
+    - Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+validation_commands:
+  default:
+    - python -m pytest tests/

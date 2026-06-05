@@ -1,0 +1,17 @@
+profile:
+  id: sample-backend-py
+  description: Top-level sanitized Python backend sample profile.
+includes:
+  - sample-base
+  - sample-dev
+  - sample-backend
+  - languages/py.yaml
+bundle:
+  name: sample-backend-py
+  description: Sanitized sample Python backend plan-first workflow bundle.
+constraints:
+  default:
+    - This sample demonstrates tracked profile composition without organization-specific workflow details.
+decision_gate_extras:
+  - API or stream impact
+  - Data migration or persistence impact

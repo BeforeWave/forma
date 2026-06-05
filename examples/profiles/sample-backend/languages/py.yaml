@@ -1,0 +1,17 @@
+profile:
+  id: sample-py
+  description: Sanitized Python language overlay.
+constraints:
+  default:
+    - Keep dependency impact explicit and preserve test isolation.
+    - Respect exception boundaries when Python behavior changes.
+  pour:
+    - Add or update Python tests when changing Python behavior.
+validation_commands:
+  default:
+    - python -m pytest tests/
+skills:
+  pour:
+    description: Execute one planned Python task through tests and review handoff.
+  flow:
+    description: Execute remaining Python tasks automatically with Python validation gates.

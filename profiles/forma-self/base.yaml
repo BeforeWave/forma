@@ -1,0 +1,25 @@
+profile:
+  id: forma-self-base
+  description: Forma project-owned defaults for managing Forma development iterations.
+bundle:
+  name: forma
+  description: Forma plan-first workflow bundle configured for self-iteration management.
+org:
+  name: Forma Maintainers
+terminology:
+  issue: Forma issue
+  repository: Forma workspace
+  profile: tracked Forma profile
+  generated suite: target-specific Mode-S output
+constraints:
+  default:
+    - Treat this profile stack as Forma-owned project source, not a sanitized public example.
+    - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface.
+    - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
+    - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
+validation_commands:
+  default:
+    - uv run --extra dev pytest -p no:cacheprovider tests/
+    - uv run --extra dev forma verify source/skill-creator/
+    - git diff --check

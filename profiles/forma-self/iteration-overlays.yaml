@@ -1,0 +1,90 @@
+profile:
+  id: forma-self-iteration-overlays
+  description: Conditional overlays for routing Forma self-iteration work by primary impact area.
+conditional_overlays:
+  decision:
+    name: Iteration Area
+    must_record_in_plan: true
+    missing_during_execution: stop-for-plan-correction
+  routes:
+    - id: docs-only
+      description: Documentation-only changes.
+      overlays: [docs]
+    - id: methodology-verifier
+      description: Canonical methodology or Layer 2 verifier changes.
+      overlays: [methodology, verifier]
+    - id: creator-profile
+      description: Layer 3 creator, profile schema, or profile stack changes.
+      overlays: [creator, profiles]
+    - id: generated-baseline
+      description: Committed generated output replacement or drift baseline update.
+      overlays: [generated]
+    - id: cross-layer
+      description: Coordinated Layer 1, Layer 2, Layer 3, docs, tests, and generated output work.
+      overlays: [methodology, verifier, creator, profiles, generated, docs]
+  overlays:
+    docs:
+      description: Documentation update rules.
+      constraints:
+        shape:
+          - Identify affected docs and whether README.zh-CN.md must stay aligned with README.md.
+        pour:
+          - Remove stale command examples, deprecated flags, and references to superseded profile locations.
+      validation_commands:
+        pour:
+          - rg -n -e "--inject|sample-|workflow skills|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
+          - git diff --check README.md README.zh-CN.md STRUCTURE.md
+    methodology:
+      description: Methodology source and generated skill body rules.
+      constraints:
+        shape:
+          - State which canonical methodology stage, fragment, or fixed resource changes and how it affects generated skills.
+        pour:
+          - Keep source/methodology as the canonical source and do not duplicate methodology truth inside source/skill-creator.
+      validation_commands:
+        pour:
+          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py
+          - uv run --extra dev forma verify source/skill-creator/
+    verifier:
+      description: Layer 2 verifier rules.
+      constraints:
+        shape:
+          - Define the rule being added, relaxed, or tightened and the target suite shape it protects.
+        pour:
+          - Add paired positive and negative verifier coverage for rule changes.
+      validation_commands:
+        pour:
+          - uv run --extra dev pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
+    creator:
+      description: Layer 3 composer, emitter, manifest, adapter, and CLI rules.
+      constraints:
+        shape:
+          - Identify whether the change affects profile loading, composition, target emission, manifest provenance, output replacement, or creator builder behavior.
+        pour:
+          - Keep generated skill bodies deterministic except for generated_at unless a plan explicitly changes that contract.
+      validation_commands:
+        pour:
+          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
+    profiles:
+      description: Tracked profile stack rules.
+      constraints:
+        shape:
+          - Decide whether a profile is Forma-owned under profiles/, sanitized example content under examples/profiles/, or downstream-owned outside this repository.
+        pour:
+          - Verify every affected top-level profile by running forma create and forma verify for at least one target.
+      validation_commands:
+        pour:
+          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py
+    generated:
+      description: Committed generated output baseline rules.
+      constraints:
+        shape:
+          - State which committed generated output paths are drift baselines and why they must change.
+        pour:
+          - Regenerate committed outputs from committed profiles and stage removed old directories plus new generated directories together.
+      validation_commands:
+        pour:
+          - uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
+          - uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+        flow:
+          - uv run --extra dev pytest -p no:cacheprovider tests/

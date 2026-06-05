@@ -1,0 +1,17 @@
+profile:
+  id: sample-go
+  description: Sanitized Go language overlay.
+constraints:
+  default:
+    - Run the project's Go formatter on edited Go files.
+    - Prefer module-local Go tests when available.
+  pour:
+    - Add or update Go tests when changing Go behavior.
+validation_commands:
+  default:
+    - go test ./...
+skills:
+  pour:
+    description: Execute one planned Go task through tests and review handoff.
+  flow:
+    description: Execute remaining Go tasks automatically with Go validation gates.

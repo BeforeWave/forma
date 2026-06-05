@@ -1,0 +1,48 @@
+profile:
+  id: sample-software-plan-first
+  description: Top-level sanitized software plan-first sample profile modeled after a Chinese software workflow family.
+includes:
+  - sample-software-base
+  - sample-software
+bundle:
+  name: sample-software-plan-first
+  description: Sanitized sample software plan-first workflow bundle.
+stages:
+  shape:
+    name: software-plan-first-plan-issue
+    directory: software-plan-first-plan-issue
+    display_name: Software Plan-First Plan Issue
+    short_description: Converge a Chinese implementation plan in chat without repo reads or coding.
+    default_prompt: >-
+      $software-plan-first-plan-issue: 收敛这个软件需求的目标、范围、方案、验证和影响边界，不读仓库也不写代码。
+  gauge:
+    name: software-plan-first-ground-plan
+    directory: software-plan-first-ground-plan
+    display_name: Software Plan-First Ground Plan
+    short_description: Read-only grounding for project facts, contracts, rules, paths, and validation.
+    default_prompt: >-
+      $software-plan-first-ground-plan: 只读确认这个计划需要的仓库事实、source of truth、项目规则和验证命令。
+  seal:
+    name: software-plan-first-finalize-plan
+    directory: software-plan-first-finalize-plan
+    display_name: Software Plan-First Finalize Plan
+    short_description: Write Chinese plan.md/tasks.md, validate task structure, and seal the workflow.
+    default_prompt: >-
+      $software-plan-first-finalize-plan: 把已收敛并 grounding 过的计划写入 plan.md/tasks.md，然后 seal workflow。
+  pour:
+    name: software-plan-first-implement-feature
+    directory: software-plan-first-implement-feature
+    display_name: Software Plan-First Implement Feature
+    short_description: Execute exactly one current task, validate it, and stop for review.
+    default_prompt: >-
+      $software-plan-first-implement-feature: 按 sealed tasks.md 执行第一个未完成 task，验证后进入 review-ready。
+  flow:
+    name: software-plan-first-showhand
+    directory: software-plan-first-showhand
+    display_name: Software Plan-First Showhand
+    short_description: Run the full plan-first workflow only when all automation safety gates pass.
+    default_prompt: >-
+      $software-plan-first-showhand: 在决策、grounding、验证、source of truth 和工作区安全门禁都满足时自动执行完整计划。
+constraints:
+  default:
+    - This sample demonstrates tracked profile composition for a generic software workflow without downstream-specific names or paths.

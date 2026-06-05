@@ -1,0 +1,20 @@
+profile:
+  id: sample-software-base
+  description: Sanitized sample organization defaults for a software plan-first workflow.
+bundle:
+  name: sample-software-plan-first
+  description: Sample software plan-first workflow bundle.
+org:
+  name: Example Team
+terminology:
+  issue: work item
+  repository: workspace
+  grounding: grounding handoff
+constraints:
+  default:
+    - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
+    - Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+    - Use Chinese for plan summaries, evidence, and review handoffs when the user is collaborating in Chinese.
+validation_commands:
+  default:
+    - python -m pytest tests/

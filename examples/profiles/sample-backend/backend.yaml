@@ -1,0 +1,50 @@
+profile:
+  id: sample-backend
+  description: Sanitized backend plan-first behavior overlay derived from a downstream backend plan-first skill family.
+constraints:
+  default:
+    - Keep changes scoped to the backend behavior required by the current issue.
+    - Prefer fixing the root cause over masking symptoms.
+    - Preserve backward compatibility unless the plan explicitly allows breaking changes.
+    - Avoid leaking sensitive data through logs, errors, or debug output.
+  shape:
+    - Settle whether the request changes public API behavior, service behavior, stream payloads, persistence, or data flow.
+    - Distinguish API or stream contract-visible changes from internal logic, storage, queue, or computation changes before proposal-ready.
+  seal:
+    - Include task-local validation for behavior-changing backend work.
+    - Require an approved contract or source handoff before finalizing API- or stream-changing backend work.
+  pour:
+    - Stop and re-plan if implementation requires API or stream changes missing from the sealed plan.
+    - Call out contract, compatibility, data, or operational risk in the task summary when behavior changes.
+  flow:
+    - Do not let automated execution bypass developer clarification, contract/source handoff, or plan correction when API or stream impact is unclear.
+resources:
+  shape:
+    references:
+      - source: references/backend-plan-first-rules.md
+        dest: backend-rules.md
+      - source: references/backend-review-checks.md
+        dest: backend-review-checks.md
+  seal:
+    references:
+      - source: references/backend-plan-first-rules.md
+        dest: backend-rules.md
+      - source: references/backend-review-checks.md
+        dest: backend-review-checks.md
+  pour:
+    references:
+      - source: references/backend-plan-first-rules.md
+        dest: backend-rules.md
+      - source: references/backend-review-checks.md
+        dest: backend-review-checks.md
+  flow:
+    references:
+      - source: references/backend-plan-first-rules.md
+        dest: backend-rules.md
+      - source: references/backend-review-checks.md
+        dest: backend-review-checks.md
+skills:
+  shape:
+    description: Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary for backend work without assuming a specific language stack before finalize-plan.
+  gauge:
+    description: Inspect backend repository facts read-only and produce a grounding handoff.

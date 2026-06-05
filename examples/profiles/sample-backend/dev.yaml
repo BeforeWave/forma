@@ -1,0 +1,16 @@
+profile:
+  id: sample-dev
+  description: Sanitized general software development overlay.
+constraints:
+  default:
+    - Prefer existing repository conventions and native validation commands.
+    - Keep changes scoped to the accepted task and preserve unrelated user work.
+  gauge:
+    - Inspect source layout, test entrypoints, and dependency files without writing.
+  pour:
+    - Add or update tests when the task changes behavior.
+skills:
+  pour:
+    description: Execute one planned development task through validation and review handoff.
+  flow:
+    description: Execute remaining planned development tasks while honoring validation gates.

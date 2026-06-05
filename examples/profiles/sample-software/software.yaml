@@ -1,0 +1,84 @@
+profile:
+  id: sample-software
+  description: Sanitized software plan-first behavior overlay derived from a downstream software workflow family.
+constraints:
+  default:
+    - Treat the suite as a workflow controller, not as stack-specific coding guidance.
+    - Do not enter implementation until Goal, Scope, Approach, Validation, Plan Strategy, Impact Profile, Impact Boundary, and source-of-truth needs are settled.
+    - Use Impact Profile to classify the primary surface as frontend, backend, fullstack, or generic.
+    - Bind completion claims to validation evidence or explicit review-only rationale.
+  shape:
+    - Stay chat-only; do not read the repository, write plan files, or execute implementation commands during plan convergence.
+    - Return clarifying or blocked when decisions are incomplete; return proposal-ready only when the gate is complete and grounding needs are explicit.
+  gauge:
+    - Inspect project rules, source of truth, target surfaces, validation commands, and protected/generated paths read-only.
+    - Mark missing repository facts as unknown instead of inventing paths, contracts, designs, copy, data, or validation methods.
+  seal:
+    - Write plan.md and tasks.md only after the decision gate is complete and required grounding has been reviewed.
+    - Do not seal a plan when artifact ownership, source-of-truth priority, or validation evidence boundaries are unresolved.
+  pour:
+    - Execute only the first incomplete planned task and stop if plan assumptions, source of truth, or validation model prove wrong.
+    - Run review-ready after validation, and complete only after the reviewed task outcome is accepted.
+  flow:
+    - Use automatic execution only when decision, grounding, seal, validation, source-of-truth, and worktree safety gates all pass.
+    - Do not let showhand skip grounding, plan sealing, review evidence, or validation.
+resources:
+  shape:
+    references:
+      - source: references/software-control-model.md
+        dest: software-control-model.md
+      - source: references/software-impact-profiles.md
+        dest: software-impact-profiles.md
+      - source: references/software-artifact-evidence-boundary.md
+        dest: software-artifact-evidence-boundary.md
+      - source: references/software-feedback-and-proof.md
+        dest: software-feedback-and-proof.md
+  gauge:
+    references:
+      - source: references/software-control-model.md
+        dest: software-control-model.md
+      - source: references/software-impact-profiles.md
+        dest: software-impact-profiles.md
+  seal:
+    references:
+      - source: references/software-control-model.md
+        dest: software-control-model.md
+      - source: references/software-impact-profiles.md
+        dest: software-impact-profiles.md
+      - source: references/software-artifact-evidence-boundary.md
+        dest: software-artifact-evidence-boundary.md
+  pour:
+    references:
+      - source: references/software-control-model.md
+        dest: software-control-model.md
+      - source: references/software-impact-profiles.md
+        dest: software-impact-profiles.md
+      - source: references/software-review-checks.md
+        dest: software-review-checks.md
+      - source: references/software-feedback-and-proof.md
+        dest: software-feedback-and-proof.md
+  flow:
+    references:
+      - source: references/software-control-model.md
+        dest: software-control-model.md
+      - source: references/software-impact-profiles.md
+        dest: software-impact-profiles.md
+      - source: references/software-review-checks.md
+        dest: software-review-checks.md
+      - source: references/software-feedback-and-proof.md
+        dest: software-feedback-and-proof.md
+skills:
+  shape:
+    description: Use plan-oriented collaboration to converge a software implementation plan in chat without repository reads or coding.
+  gauge:
+    description: Produce read-only grounding for project facts, contracts, rules, paths, and validation.
+  seal:
+    description: Write plan.md and tasks.md, validate task structure, and seal the workflow.
+  pour:
+    description: Execute exactly one current task, validate it, and stop for review.
+  flow:
+    description: Run the full plan-first workflow only when all automation safety gates pass.
+decision_gate_extras:
+  - Impact Profile
+  - Impact Boundary
+  - Source-of-truth readiness

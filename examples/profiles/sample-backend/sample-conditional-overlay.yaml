@@ -1,0 +1,88 @@
+profile:
+  id: sample-conditional-overlay
+  description: Sanitized sample profile equivalent to a Layer 1 conditional overlay injection.
+bundle:
+  name: sample-conditional-overlay
+  description: Sample plan-first workflow bundle with a conditional work-type overlay.
+stages:
+  shape:
+    name: forma-shape
+    directory: forma-shape
+    display_name: Shape
+  gauge:
+    name: forma-gauge
+    directory: forma-gauge
+    display_name: Gauge
+  seal:
+    name: forma-seal
+    directory: forma-seal
+    display_name: Seal
+  pour:
+    name: forma-pour
+    directory: forma-pour
+    display_name: Pour
+  flow:
+    name: forma-flow
+    directory: forma-flow
+    display_name: Flow
+conditional_overlays:
+  decision:
+    name: Plan Type
+    must_record_in_plan: true
+    missing_during_execution: stop-for-plan-correction
+  routes:
+    - id: generic-dev
+      description: Generic development work.
+      overlays: []
+    - id: backend-non-go
+      description: Backend work outside the Go stack.
+      overlays: [backend]
+    - id: backend-go
+      description: Backend work in a Go codebase.
+      overlays: [dev, backend, go]
+  overlays:
+    dev:
+      description: General development planning and execution rules.
+      constraints:
+        shape:
+          - Confirm the requested change is a software development task before proposal-ready.
+        pour:
+          - Preserve unrelated user work and follow existing repository conventions during implementation.
+      resources:
+        default:
+          references:
+            - source: references/dev-overlay-rules.md
+              dest: dev-rules.md
+      validation_commands:
+        pour:
+          - python -m pytest tests/
+    backend:
+      description: Backend-specific planning and execution rules.
+      constraints:
+        shape:
+          - Confirm backend-visible behavior before proposal-ready.
+        pour:
+          - Preserve backend runtime compatibility during implementation.
+      resources:
+        default:
+          references:
+            - source: references/backend-overlay-rules.md
+              dest: backend-rules.md
+      validation_commands:
+        pour:
+          - pytest
+    go:
+      description: Go-specific planning and execution rules.
+      constraints:
+        shape:
+          - Identify Go module boundaries and package ownership before proposal-ready.
+        pour:
+          - Run Go formatting on edited Go files before review.
+      resources:
+        default:
+          references:
+            - source: references/go-overlay-rules.md
+              dest: go-rules.md
+      validation_commands:
+        pour:
+          - go test ./...

@@ -1,0 +1,50 @@
+profile:
+  id: forma-self-project
+  description: Forma-specific layer, artifact, documentation, and validation boundaries.
+constraints:
+  default:
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Record meaningful execution decisions in plans/issue-<id>/implement_notes.md when they affect later tasks or review.
+  shape:
+    - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
+    - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
+    - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
+  gauge:
+    - Inspect active plan/task files, README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.
+    - Confirm whether profile changes belong under profiles/forma-self, examples/profiles, or a downstream repository.
+    - Confirm current generated baselines before recommending any delete/add replacement.
+  seal:
+    - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
+    - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
+  pour:
+    - Run the narrowest relevant test first, then the shared validation gate before review-ready.
+    - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
+  flow:
+    - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
+    - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
+resources:
+  default:
+    references:
+      - source: references/forma-iteration-boundaries.md
+        dest: forma-iteration-boundaries.md
+      - source: references/forma-validation-matrix.md
+        dest: forma-validation-matrix.md
+      - source: references/forma-profile-policy.md
+        dest: forma-profile-policy.md
+skills:
+  shape:
+    description: Converge a Forma self-iteration plan, including layer impact, profile ownership, generated-output policy, and validation boundaries.
+  gauge:
+    description: Read Forma repository facts and produce grounding for a self-iteration plan.
+  seal:
+    description: Finalize a Forma self-iteration plan with tasks, validation gates, and generated-output policy.
+  pour:
+    description: Execute one Forma self-iteration task through focused validation and review.
+  flow:
+    description: Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
+decision_gate_extras:
+  - Layer impact
+  - Profile ownership
+  - Generated baseline policy
+  - Documentation update requirement

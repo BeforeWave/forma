@@ -1,0 +1,78 @@
+profile:
+  id: sample-backend-go
+  description: Top-level sanitized Go backend sample profile modeled after a backend plan-first skill family.
+includes:
+  - sample-base
+  - sample-dev
+  - sample-backend
+  - languages/go.yaml
+bundle:
+  name: sample-backend-go
+  description: Sanitized sample Go backend plan-first workflow bundle using backend-plan-first skill names.
+stages:
+  shape:
+    name: backend-plan-first-plan-issue
+    directory: backend-plan-first-plan-issue
+    display_name: Backend Plan-First Plan Issue
+    short_description: >-
+      Use only in Plan mode to clarify Goal/Scope/Approach/Validation, Plan
+      Strategy, selected grounding producer, and any applicable Artifact/Evidence
+      Boundary for backend work without assuming a specific language stack before
+      finalize-plan. Chat-only: do not inspect repo; do not write
+      plan.md/tasks.md; return clarifying/blocked when decisions remain open.
+    default_prompt: >-
+      In Plan mode only, converge Goal/Scope/Approach/Validation, Plan Strategy,
+      selected grounding producer, and any applicable Artifact/Evidence Boundary
+      for backend work without assuming a specific language stack before
+      finalize-plan. Stay chat-only, require clarifying/blocked while decisions
+      remain open, do not inspect the repo from plan-issue, and do not write
+      plan.md or tasks.md. Keep the interaction in convergence mode until the
+      user confirms the plan is ready for finalization.
+  gauge:
+    name: backend-plan-first-ground-plan
+    directory: backend-plan-first-ground-plan
+    display_name: Backend Plan-First Ground Plan
+    short_description: Produce a read-only repository grounding handoff for backend work without assuming a specific language stack.
+    default_prompt: >-
+      Explore the repository read-only after plan intent is settled and produce
+      a grounding handoff for backend work without assuming a specific language
+      stack. Keep the work read-only and produce a grounding handoff for later
+      finalization.
+  seal:
+    name: backend-plan-first-finalize-plan
+    directory: backend-plan-first-finalize-plan
+    display_name: Backend Plan-First Finalize Plan
+    short_description: Create, certify, and commit final ./plans/issue-<id>/plan.md and tasks.md from an already-settled backend plan.
+    default_prompt: >-
+      Finalize and commit plan.md and tasks.md for the current issue only after
+      goal, scope, approach, validation, plan strategy, grounding, and evidence
+      boundaries are explicitly settled. Certify that tasks cover the Goal,
+      Acceptance proves the Goal, validation covers core risks, and task/evidence
+      boundaries are executable before writing files.
+  pour:
+    name: backend-plan-first-implement-feature
+    directory: backend-plan-first-implement-feature
+    display_name: Backend Plan-First Implement Feature
+    short_description: Implement the current task for backend work without assuming a specific language stack.
+    default_prompt: >-
+      Implement the current task using the packaged workflow and report the
+      outcome. Keep each task review-gated, and after an approved completion
+      immediately continue to the next workflow task if one remains.
+  flow:
+    name: backend-plan-first-showhand
+    directory: backend-plan-first-showhand
+    display_name: Backend Plan-First Showhand
+    short_description: Sequentially implement all tasks from an already-finalized backend plan automatically.
+    default_prompt: >-
+      Execute the already-finalized issue plan sequentially using the packaged
+      workflow. Do not create, rewrite, or commit plan.md/tasks.md; if planning
+      files are missing, templated, incomplete, or uncertified, stop and hand off
+      to finalize-plan or the required grounding producer. Preflight task
+      permissions, make bounded execution decisions directly, and automatically
+      move through review-ready and complete for each task.
+constraints:
+  default:
+    - This sample demonstrates tracked profile composition without organization-specific workflow details.
+decision_gate_extras:
+  - API or stream impact
+  - Data migration or persistence impact
