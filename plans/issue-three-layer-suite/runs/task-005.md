@@ -1,0 +1,118 @@
+# Task Evidence
+
+- Task: [target-aware-create-builder] Rework Layer 3 create into a strict target-specific plan-first bundle builder
+- Completed At (UTC): 2026-06-05T09:24:24Z
+- Commit Hash: Recorded in the commit that introduces this evidence file.
+
+## Changed Files
+- AGENTS.md
+- README.md
+- STRUCTURE.md
+- examples/generated/sample-backend-go-plan-first-claude-code/.forma-manifest.json
+- examples/generated/sample-backend-go-plan-first-claude-code/flow/SKILL.md
+- examples/generated/sample-backend-go-plan-first-claude-code/flow/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-claude-code/flow/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-claude-code/flow/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-claude-code/flow/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-claude-code/gauge/SKILL.md
+- examples/generated/sample-backend-go-plan-first-claude-code/gauge/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-claude-code/gauge/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-claude-code/gauge/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-claude-code/gauge/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-claude-code/pour/SKILL.md
+- examples/generated/sample-backend-go-plan-first-claude-code/pour/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-claude-code/pour/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-claude-code/pour/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-claude-code/pour/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-claude-code/seal/SKILL.md
+- examples/generated/sample-backend-go-plan-first-claude-code/seal/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-claude-code/seal/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-claude-code/seal/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-claude-code/seal/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-claude-code/shape/SKILL.md
+- examples/generated/sample-backend-go-plan-first-claude-code/shape/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-claude-code/shape/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-claude-code/shape/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-claude-code/shape/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-codex/.forma-manifest.json
+- examples/generated/sample-backend-go-plan-first-codex/flow/SKILL.md
+- examples/generated/sample-backend-go-plan-first-codex/flow/agents/openai.yaml
+- examples/generated/sample-backend-go-plan-first-codex/flow/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-codex/flow/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-codex/flow/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-codex/flow/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-codex/gauge/SKILL.md
+- examples/generated/sample-backend-go-plan-first-codex/gauge/agents/openai.yaml
+- examples/generated/sample-backend-go-plan-first-codex/gauge/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-codex/gauge/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-codex/gauge/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-codex/gauge/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-codex/pour/SKILL.md
+- examples/generated/sample-backend-go-plan-first-codex/pour/agents/openai.yaml
+- examples/generated/sample-backend-go-plan-first-codex/pour/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-codex/pour/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-codex/pour/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-codex/pour/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-codex/seal/SKILL.md
+- examples/generated/sample-backend-go-plan-first-codex/seal/agents/openai.yaml
+- examples/generated/sample-backend-go-plan-first-codex/seal/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-codex/seal/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-codex/seal/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-codex/seal/references/task-structure.md
+- examples/generated/sample-backend-go-plan-first-codex/shape/SKILL.md
+- examples/generated/sample-backend-go-plan-first-codex/shape/agents/openai.yaml
+- examples/generated/sample-backend-go-plan-first-codex/shape/references/decision-gate.md
+- examples/generated/sample-backend-go-plan-first-codex/shape/references/output-format.md
+- examples/generated/sample-backend-go-plan-first-codex/shape/references/plan-strategy.md
+- examples/generated/sample-backend-go-plan-first-codex/shape/references/task-structure.md
+- examples/profiles/sample-backend/backend.yaml
+- examples/profiles/sample-backend/base.yaml
+- examples/profiles/sample-backend/dev.yaml
+- examples/profiles/sample-backend/languages/go.yaml
+- examples/profiles/sample-backend/languages/py.yaml
+- examples/profiles/sample-backend/sample-backend-go.yaml
+- examples/profiles/sample-backend/sample-backend-py.yaml
+- plans/issue-three-layer-suite/implement_notes.md
+- source/skill-creator/SKILL.md
+- source/skill-creator/interfaces/codex/openai.yaml
+- source/skill-creator/references/decision-gate.md
+- source/skill-creator/references/output-format.md
+- source/skill-creator/references/plan-strategy.md
+- source/skill-creator/references/task-structure.md
+- source/skill-creator/scripts/forma_verifier/__init__.py
+- source/skill-creator/scripts/forma_verifier/report.py
+- source/skill-creator/scripts/forma_verifier/rules.py
+- source/skill-creator/scripts/forma_verifier/runner.py
+- source/skill-creator/scripts/verify.py
+- src/forma/adapters/__init__.py
+- src/forma/adapters/skill.py
+- src/forma/cli.py
+- src/forma/creator/__init__.py
+- src/forma/creator/composer.py
+- src/forma/creator/emitter.py
+- src/forma/creator/manifest.py
+- src/forma/creator/profiles.py
+- tests/fixtures/invalid-suite/shape/SKILL.md
+- tests/fixtures/valid-suite/flow/SKILL.md
+- tests/fixtures/valid-suite/gauge/SKILL.md
+- tests/fixtures/valid-suite/pour/SKILL.md
+- tests/fixtures/valid-suite/seal/SKILL.md
+- tests/fixtures/valid-suite/shape/SKILL.md
+- tests/fixtures/valid-suite/shape/references/output-format.md
+- tests/test_creator.py
+- tests/test_creator_builder.py
+- tests/test_layer_1_dogfood.py
+- tests/test_verifier.py
+- uv.lock
+
+## Validation Results
+- PASS [task]: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/sample-backend-go-suite-codex
+- PASS [task]: uv run --extra dev forma create --target claude-code --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/sample-backend-go-suite-claude-code
+- PASS [task]: uv run --extra dev forma verify /tmp/sample-backend-go-suite-codex
+- PASS [task]: uv run --extra dev forma verify /tmp/sample-backend-go-suite-claude-code
+- PASS [task]: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
+- PASS [task]: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+- PASS [task]: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py
+
+## Risks / Unresolved Items
+- None recorded.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Plan-First Ground Plan"
+  short_description: "Produce a read-only repository grounding handoff for backend work without assuming a specific language stack."
+  default_prompt: "Explore the repository read-only after plan intent is settled and produce a grounding handoff for backend work without assuming a specific language stack. Keep the work read-only and produce a grounding handoff for later finalization."

@@ -1,0 +1,78 @@
+{
+  "emitted_skills": {
+    "flow": {
+      "directory": "backend-plan-first-showhand",
+      "display_name": "Backend Plan-First Showhand",
+      "name": "backend-plan-first-showhand"
+    },
+    "gauge": {
+      "directory": "backend-plan-first-ground-plan",
+      "display_name": "Backend Plan-First Ground Plan",
+      "name": "backend-plan-first-ground-plan"
+    },
+    "pour": {
+      "directory": "backend-plan-first-implement-feature",
+      "display_name": "Backend Plan-First Implement Feature",
+      "name": "backend-plan-first-implement-feature"
+    },
+    "seal": {
+      "directory": "backend-plan-first-finalize-plan",
+      "display_name": "Backend Plan-First Finalize Plan",
+      "name": "backend-plan-first-finalize-plan"
+    },
+    "shape": {
+      "directory": "backend-plan-first-plan-issue",
+      "display_name": "Backend Plan-First Plan Issue",
+      "name": "backend-plan-first-plan-issue"
+    }
+  },
+  "format": "forma-suite-manifest-v1",
+  "generated_at": "2026-06-06T06:08:55Z",
+  "generator_version": "0.1.0",
+  "methodology_source_revision": "5fb2f86",
+  "methodology_source_revision_type": "git-short-sha",
+  "methodology_tree_digest": "7493279f77000398b7298973f35245a15d1ffc11e178b8f648586376e904def2",
+  "methodology_version": "0.1.0",
+  "mode": "solo",
+  "profile": {
+    "bundle_name": "sample-backend-go",
+    "digest": "b3e0154bda20950d40c85a6955fe4a7a301e7f608de09867fa7a333bef3297fa",
+    "file_hashes": {
+      "backend.yaml": "ff29abea7a1b416e743cbb9b372d9e237a833d249b7ec98e1c71f333c1b89f71",
+      "base.yaml": "1b3ab8e5d5f7ecd1f488276176af18401997d99b875a7546188d9815909560bf",
+      "dev.yaml": "79291318ce8c112729345e2ea3889b029294e97600bf37a23900279353918d4a",
+      "languages/go.yaml": "3db36bd1558cd6c7c63af129296d83f140ac595ee92df63b7af726ff669a9a3e",
+      "sample-backend-go.yaml": "2eeecabb771f029be2d87bcc38ff026396c5cb59d44f0e54b2e9882716b38ba3"
+    },
+    "org_name": "Example Team",
+    "resolved_order": [
+      "sample-base",
+      "sample-dev",
+      "sample-backend",
+      "sample-go",
+      "sample-backend-go"
+    ],
+    "resource_digest": "b27d6073ba6e55c047f9150b9000144c7c5bbf8f89462868057dbfa4e8357ca3",
+    "resource_hashes": {
+      "flow:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
+      "flow:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
+      "pour:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
+      "pour:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
+      "seal:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
+      "seal:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
+      "shape:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
+      "shape:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69"
+    },
+    "top_level_id": "sample-backend-go",
+    "top_level_path": "sample-backend-go.yaml"
+  },
+  "skills": [
+    "shape",
+    "gauge",
+    "seal",
+    "pour",
+    "flow"
+  ],
+  "suite_kind": "plan-first",
+  "target": "codex"
+}
