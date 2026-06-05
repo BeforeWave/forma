@@ -20,7 +20,7 @@ Use-Check: verify-generated
 Depends: layer-1-and-verifier
 Constraint: Layer 3 composes directly from source/methodology/ + injection layer and must not depend on the hand-authored source/skill-creator/ bundle; injection schema rejects unknown top-level keys; committed examples/generated/sample-org-plan-first/ must match what `forma create` produces from the committed inputs
 
-- [ ] [docs-refresh] Update README.md and STRUCTURE.md to reflect the three layers as present
+- [x] [docs-refresh] Update README.md and STRUCTURE.md to reflect the three layers as present
 Accept: Task Type=step; README.md replaces the bootstrap status block with an Install / Verify / Generate walkthrough, shows the end-to-end snippet (uv run --extra dev forma verify source/skill-creator/, forma create --inject ... --output ..., forma verify <output>, forma build-creator --source source/skill-creator --output ... --target codex, and the same build command with --target claude-code), names the generated Layer 1 install paths (~/.codex/skills/forma-creator/, ~/.claude/skills/forma-creator/), and explicitly notes that Layer 2 ships inside the meta skill source and target contracts are injected into generated creator bundles; STRUCTURE.md moves source/, src/forma/, tests/, examples/ from "planned" to "present", and adds the Layer-2-inside-Layer-1 plus creator-builder organization notes
 Validate: # no-programmatic-validation: docs-only
 Depends: layer-3-creator-and-example
