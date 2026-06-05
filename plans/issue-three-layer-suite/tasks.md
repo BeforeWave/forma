@@ -12,7 +12,7 @@ Use-Check: verify-self
 Depends: skeleton-and-methodology
 Constraint: source/skill-creator/scripts/forma_verifier must use stdlib only; no cross-skill borrowing; copying a target-specific forma-creator bundle alone (no other repo files, no pip install) must remain sufficient for an agent to generate and verify that target's plan-first suite
 
-- [ ] [layer-3-creator-and-example] Implement Layer 3 creator, author the sample-org injection, and commit Layer 3's generated output as evidence
+- [x] [layer-3-creator-and-example] Implement Layer 3 creator, author the sample-org injection, and commit Layer 3's generated output as evidence
 Accept: Task Type=gate; src/forma/creator/{manifest,composer,emitter}.py implement injection schema + composition + emission with the documented .forma-manifest.json provenance fields; `forma create --inject examples/injection/sample-org --output <dir>` produces a structurally valid, methodology-conformant skill suite; examples/injection/sample-org/injection.yaml is hand-authored with org/terminology, validation overrides, and optional Decision Gate extras; the committed examples/generated/sample-org-plan-first/ is regenerated from running the creator against the committed injection and includes .forma-manifest.json; tests/test_creator.py invokes the creator pipeline against examples/injection/sample-org/, asserts the manifest fields and that the result passes forma_verifier
 Validate: python -m pytest tests/test_creator.py
 Validate: forma verify examples/generated/sample-org-plan-first/
