@@ -23,8 +23,8 @@
 - tests/test_creator.py
 - tests/test_creator_builder.py
 - tests/test_runtime_assets.py
-- examples/generated/sample-backend-go-plan-first-codex/
-- examples/generated/sample-backend-go-plan-first-claude-code/
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 - plans/issue-workflow-injection-contracts/
 
 ## Validation Results
@@ -34,10 +34,10 @@
 - PASS [final]: `uv run --extra dev forma explain profile --target codex`
 - PASS [final]: `uv run --extra dev forma explain temporary-injection --format json --target codex`
 - PASS [final]: `uv run --extra dev forma build-creator --output /tmp/forma-creator-dist-default --target codex`
-- PASS [final]: `uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/forma-create-default-methodology-codex`
+- PASS [final]: `uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml --output /tmp/forma-create-default-methodology-codex`
 - PASS [final]: `uv run --extra dev forma verify source/skill-creator/`
-- PASS [final]: `uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/`
-- PASS [final]: `uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/`
+- PASS [final]: `uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/`
+- PASS [final]: `uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/`
 - PASS [final]: `uv run --extra dev forma verify /tmp/forma-self-iteration-codex/`
 - PASS [final]: `uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator/`
 - PASS [final]: `uv run --extra dev forma verify /tmp/forma-creator-dist-default/codex/forma-creator/`

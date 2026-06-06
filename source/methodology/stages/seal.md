@@ -30,11 +30,8 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 
 - Treat `finalize-plan` as a plan-finalization skill, not a brainstorming skill.
 - When invoking `scripts/forma-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
-- If the current planning handoff includes a GitHub issue URL but the current session does not already contain confirmed issue body and key comments, run `python3 script/github_issue_context.py <issue-url-or-user-text>` from this skill package before the decision-complete gate.
-- The GitHub issue helper supports issue URLs like `https://github.com/<owner>/<repo>/issues/<number>`, loads issue body and chronological comments through `gh issue view <url> --json number,title,body,state,labels,assignees,author,createdAt,updatedAt,url,comments`, and rejects PR, repo, commit, or arbitrary links.
-- If multiple GitHub issue URLs appear, ask the user to identify the primary issue unless they explicitly confirm all issues belong to the same requirement context; only then rerun the helper with `--allow-multiple`.
-- Treat GitHub issue comments as part of the planning handoff. Later comments may supersede issue body or earlier comments; if they conflict, block finalization and ask which version is authoritative.
-- If `gh` is missing, unauthenticated, or lacks access, recommend the repository's macOS GitHub CLI setup guidance; if the user does not want to configure `gh` now, continue only after they confirm the issue body and key comments are pasted into the current session.
+- Treat source references in the planning handoff as confirmed only when their relevant contents are already present in the current session or were loaded through an explicitly injected/profile-owned source adapter.
+- Do not assume GitHub, `gh`, network access, or any other source-context tool is a base finalization capability. If the handoff depends on an unavailable source reference and no explicit adapter is present, block finalization and ask the user to provide the authoritative material or update the plan.
 {{ include: fragments/seal/decision-gate-adds.md }}
 {{ include: fragments/seal/plan-materialization-adds.md }}
 {{ include: fragments/seal/task-structure-adds.md }}

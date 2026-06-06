@@ -17,6 +17,9 @@ artifact, not a tracked Layer 3 profile.
 - If a constraint is one-off for this generation only, include it only in the
   temporary injection, mark it as non-durable in the classification table, and
   do not recommend committing it as a tracked profile.
+- Treat source-context integrations such as issue tracker readers, document
+  exporters, or other CLI/API context loaders as optional source adapters. Do
+  not make them base workflow capability through `constraints.default`.
 
 ## Classification Targets
 
@@ -37,6 +40,65 @@ Classify every extracted constraint before writing JSON.
   records a selected scenario in `plan.md`, such as docs-only,
   generated-baseline, migration, governance, backend, frontend, or cross-layer
   routes.
+- `resources`: Adapter references, scripts, or support files needed by an
+  explicitly selected source-context integration. Add these only when the
+  current generation needs that adapter.
+
+## Source Adapter Classification
+
+When the user asks a generated suite to load planning context from an external
+source, classify the behavior as an injected source adapter:
+
+- Put shape-time fetch/clarification behavior in `constraints.shape`.
+- Put finalization-time source confirmation behavior in `constraints.seal`.
+- Add only the adapter reference/script resources required by those stages.
+- Mark one-off adapters as non-durable unless the owning repository or team
+  wants this source integration every time.
+- Promote an adapter into a tracked profile only when it is repeated, reviewed,
+  and owned by that downstream repository.
+
+Do not put issue fetching, document exports, private source readers, or similar
+source adapters in `constraints.default`.
+
+## Script Resource Injection Template
+
+Use `resources.<stage>.scripts` when an adapter script should be copied into a
+generated stage skill's `scripts/` directory. Pair it with a generic or
+adapter-specific usage reference under `resources.<stage>.references`; the
+reference explains when the stage may run injected scripts, while the
+stage-specific constraint names the concrete script and source type. The
+`source` must be a file path available during generation. The `dest` is the
+script filename inside the generated skill.
+
+```json
+{
+  "resources": {
+    "shape": {
+      "references": [
+        {
+          "source": "/absolute/path/to/adapter-reference.md",
+          "dest": "adapter-reference.md"
+        }
+      ],
+      "scripts": [
+        {
+          "source": "/absolute/path/to/adapter_tool.py",
+          "dest": "adapter_tool.py"
+        }
+      ]
+    }
+  },
+  "constraints": {
+    "shape": [
+      "When this source adapter is needed, load and follow `references/adapter-reference.md`, then run `python3 scripts/adapter_tool.py ...` and use its output as planning context."
+    ]
+  }
+}
+```
+
+Use `resources.<stage>.files` only when the destination path must not live under
+`references/` or `scripts/`. Prefer `scripts` for executable helper logic and
+`references` for the stage instructions that explain when and how to run it.
 
 ## Prohibitions
 
@@ -45,6 +107,9 @@ Classify every extracted constraint before writing JSON.
 - Do not make routine `pour` or `flow` execution read broad docs, all run
   evidence, generated baselines, or an entire profile stack by default.
 - Do not use `constraints.default` as a dumping ground for every user sentence.
+- Do not treat network access, local CLI authentication, or access to a
+  specific issue tracker or document system as a base capability of every
+  generated plan-first suite.
 - Do not copy user docs verbatim into references merely to satisfy the
   injection. Add only targeted local references when the generated suite really
   needs them.

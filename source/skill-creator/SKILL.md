@@ -33,6 +33,11 @@ target contract.
     `references/temporary-injection-generation.md`; keep
     `constraints.default` minimal and put broad or expensive execution
     requirements into stage-specific constraints or `conditional_overlays`.
+   - If the user asks the generated suite to fetch planning context from an
+     external source through a helper script, treat that as a source-context
+     adapter. Add stage-specific constraints and resources only when the
+     adapter is explicitly requested; do not treat network access, local CLI
+     authentication, or any source tool as base capability.
 3. Show the installable skill names before generating. Default:
    `shape -> forma-shape`, `gauge -> forma-gauge`, `seal -> forma-seal`,
    `pour -> forma-pour`, and `flow -> forma-flow`. Ask whether the user wants
@@ -123,6 +128,37 @@ The temporary injection JSON may contain only these top-level keys:
   mechanism only; route ids, overlay ids, and business constraints must come
   from the current user injection, not from hardcoded Forma defaults.
 
+For a one-off source-context helper script, use `resources.<stage>.scripts`;
+the generated skill receives the file under `scripts/<dest>`. Pair scripts
+with a reference that explains the generic script-use boundary or
+adapter-specific invocation conditions:
+
+```json
+{
+  "resources": {
+    "shape": {
+      "references": [
+        {
+          "source": "/absolute/path/to/adapter-reference.md",
+          "dest": "adapter-reference.md"
+        }
+      ],
+      "scripts": [
+        {
+          "source": "/absolute/path/to/adapter_tool.py",
+          "dest": "adapter_tool.py"
+        }
+      ]
+    }
+  },
+  "constraints": {
+    "shape": [
+      "When this source adapter is needed, load the generated adapter reference, run the copied adapter script, and use its output as planning context."
+    ]
+  }
+}
+```
+
 Do not put `profile`, `includes`, tracked profile ids, or stage `name` /
 `directory` overrides under `stages`. Installable skill names may be customized
 only under `rename.stages`, for example:
@@ -166,6 +202,13 @@ When converting user natural language into temporary injection JSON:
 - If a constraint is one-off for this generation only, include it in the
   temporary injection, mark it non-durable in the classification table, and do
   not recommend committing it as a tracked profile.
+- Source-context helper scripts such as issue tracker readers, document
+  exporters, or private source loaders are optional injection/profile behavior.
+  Put their planning rules in `constraints.shape`, finalization confirmation in
+  `constraints.seal`, and copy only the adapter reference or script resources
+  that the user explicitly requested.
+- Do not put source-context adapter behavior in `constraints.default` or make
+  it part of every generated suite.
 
 ### Conditional Overlay Schema
 

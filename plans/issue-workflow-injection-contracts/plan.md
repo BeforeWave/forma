@@ -24,6 +24,7 @@ In scope:
 - Route daily execution rules to `pour` or `flow`.
 - Route docs, generated-baseline, migration, governance, and cross-layer rules through conditional overlays.
 - Update sample profiles, Forma self profiles, committed generated baselines, and installed Codex bundles to demonstrate the classification contract.
+- Keep source-context integrations, such as GitHub issue fetching through `gh`, out of the base methodology unless a profile or temporary injection explicitly opts into that adapter.
 
 Out of scope:
 
@@ -104,7 +105,7 @@ Command: uv run --extra dev forma build-creator --output /tmp/forma-creator-dist
 Note: build-creator uses packaged Layer 1 creator source when --source is omitted
 
 Check: default-methodology
-Command: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/forma-create-default-methodology-codex
+Command: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml --output /tmp/forma-create-default-methodology-codex
 Note: create uses packaged methodology when --methodology is omitted
 
 Check: verify-layer-1
@@ -112,11 +113,11 @@ Command: uv run --extra dev forma verify source/skill-creator/
 Note: Layer 1 / Layer 2 dogfood verification
 
 Check: verify-generated-codex
-Command: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
+Command: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
 Note: committed Codex generated baseline verification
 
 Check: verify-generated-claude-code
-Command: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+Command: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 Note: committed Claude Code generated baseline verification
 
 Check: verify-self-bundle
@@ -147,10 +148,10 @@ uv run --extra dev pytest -p no:cacheprovider tests/test_runtime_assets.py
 uv run --extra dev forma explain profile --target codex
 uv run --extra dev forma explain temporary-injection --format json --target codex
 uv run --extra dev forma build-creator --output /tmp/forma-creator-dist-default --target codex
-uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/forma-create-default-methodology-codex
+uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml --output /tmp/forma-create-default-methodology-codex
 uv run --extra dev forma verify source/skill-creator/
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 uv run --extra dev forma verify /tmp/forma-self-iteration-codex/
 uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator/
 uv run --extra dev forma verify /tmp/forma-creator-dist-default/codex/forma-creator/
@@ -163,3 +164,4 @@ git log --pretty=fuller --date=iso-strict --reverse
 
 - Layer 1 generation guidance affects how agents create future temporary injection JSON. The standard must stay explicit enough for agent behavior and narrow enough not to become a second profile schema.
 - Installed bundle verification matters because current agent behavior depends on installed skills, not only source files.
+- Source-context adapters are useful but environment-specific. They must stay optional injection/profile behavior so base plan-first bundles do not assume GitHub, network access, or `gh` authentication.

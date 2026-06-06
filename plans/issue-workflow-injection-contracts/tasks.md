@@ -13,10 +13,10 @@ Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_runtime_asset
 Validate: uv run --extra dev forma explain profile --target codex
 Validate: uv run --extra dev forma explain temporary-injection --format json --target codex
 Validate: uv run --extra dev forma build-creator --output /tmp/forma-creator-dist-default --target codex
-Validate: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go.yaml --output /tmp/forma-create-default-methodology-codex
+Validate: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml --output /tmp/forma-create-default-methodology-codex
 Validate: uv run --extra dev forma verify source/skill-creator/
-Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
-Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 Validate: uv run --extra dev forma verify /tmp/forma-self-iteration-codex/
 Validate: uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator/
 Validate: uv run --extra dev forma verify /tmp/forma-creator-dist-default/codex/forma-creator/
@@ -24,3 +24,15 @@ Validate: uv run --extra dev forma verify /tmp/forma-create-default-methodology-
 Validate: git diff --check
 Depends: layer-1-injection-classification
 Constraint: keep `constraints.default` light; put broad docs, generated-baseline, migration, governance, or cross-layer rules in conditional overlays
+
+- [x] [source-adapter-injection-boundary] Move source-context adapters out of base methodology
+Accept: Task Type=step; source-context scripts such as GitHub issue loading through `gh issue view` are no longer emitted as unconditional base `shape` / `seal` capability; base methodology keeps only generic source-of-truth handling; Layer 1 guidance classifies source readers as optional temporary injection or durable profile behavior; `forma explain temporary-injection` and generated `forma-creator` bundles expose a concrete `resources.<stage>.scripts` template; the `sample-backend-go-github-issue-tracked` profile demonstrates explicit opt-in for teams that commonly track development work through GitHub issues by adding a generic script-use reference, the concrete helper script, and stage-specific constraints
+Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
+Validate: uv run --extra dev forma build-creator --output /tmp/forma-creator-dist --target codex
+Validate: uv run --extra dev forma create --target codex --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml --output /tmp/sample-backend-go-github-issue-tracked-plan-first-codex
+Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+Validate: find examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code -path '*github_issue_context.py' -print | sort
+Validate: bash -lc '! rg -n "github_issue_context|gh issue view|GitHub issue helper" ~/.codex/skills/forma-shape ~/.codex/skills/forma-seal'
+Validate: bash -lc '! rg -n "github_issue_context|gh issue view|script-resource-adapter" examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-implement-feature examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand'
+Depends: profile-execution-classification
+Constraint: do not remove the reusable GitHub issue helper from packaged assets; only remove it from default generated skill resources and requirements

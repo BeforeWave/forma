@@ -39,14 +39,11 @@ Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Valida
 - Do not claim that you switched modes unless the host environment explicitly confirms it.
 - When loading bundled planning references, resolve them relative to the current triggered skill package only; do not borrow same-named resources from sibling skill directories.
 - Always load `references/output-format.md` and `references/plan-issue-rules.md` before deciding whether to clarify, block, propose, or hand off.
-- If the user provides a GitHub issue URL, run `python3 script/github_issue_context.py <issue-url-or-user-text>` from this skill package before deciding the context is incomplete; this helper loads planning context without repository exploration.
-- The GitHub issue helper supports issue URLs like `https://github.com/<owner>/<repo>/issues/<number>`, loads issue body and chronological comments through `gh issue view <url> --json number,title,body,state,labels,assignees,author,createdAt,updatedAt,url,comments`, and rejects PR, repo, commit, or arbitrary links.
-- If multiple GitHub issue URLs appear, ask the user to identify the primary issue unless they explicitly confirm all issues belong to the same requirement context; only then rerun the helper with `--allow-multiple`.
-- Treat GitHub issue comments as part of the planning context. Later comments may supersede issue body or earlier comments; if they conflict, ask which version is authoritative instead of guessing.
-- If `gh` is missing, unauthenticated, or lacks access, recommend the repository's macOS GitHub CLI setup guidance; if the user does not want to configure `gh` now, continue only after they confirm the issue body and key comments are pasted into the current session.
+- Treat user-provided source references as planning context only after their relevant contents are available in the current session or through an explicitly injected/profile-owned source adapter.
+- Do not assume GitHub, `gh`, network access, or any other source-context tool is a base plan-first capability. If a generated suite includes an injected/profile-owned source adapter, follow that adapter's stage-specific reference and script instructions; otherwise ask the user to paste the authoritative source material needed for planning.
 - While the user context is still incomplete, stay in clarification mode. Ask only for the missing planning information needed to converge Goal, Scope, Approach, and the validation model for tasks, shared checks, and final issue closure.
-- Before the user confirms that the context is sufficient, do not explore the repository, do not write repo files, do not execute bundled scripts other than `script/github_issue_context.py`, and do not draft `plan.md` or `tasks.md`.
-- Do not execute `forma-workflow.sh` from this skill. The GitHub issue context helper is the only bundled script that `plan-issue` may run.
+- Before the user confirms that the context is sufficient, do not explore the repository, do not write repo files, do not execute bundled scripts other than explicitly injected/profile-owned source adapters, and do not draft `plan.md` or `tasks.md`.
+- Do not execute `forma-workflow.sh` from this skill.
 {{ include: fragments/shape/decision-gate-adds.md }}
 {{ include: fragments/shape/handoff-adds.md }}
 

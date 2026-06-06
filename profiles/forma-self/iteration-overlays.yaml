@@ -108,7 +108,7 @@ conditional_overlays:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated generated baseline replacement.
       validation_commands:
         pour:
-          - uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
-          - uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+          - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+          - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
         flow:
           - uv run --extra dev pytest -p no:cacheprovider tests/

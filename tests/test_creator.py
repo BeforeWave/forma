@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from importlib.metadata import version as package_version
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
+from forma import __version__
 from forma.cli import main
 from forma.creator import create_suite, load_profile
 from forma.creator.manifest import find_methodology_dir
@@ -15,7 +17,7 @@ from forma_verifier import verify
 
 ROOT = Path(__file__).resolve().parents[1]
 METHODOLOGY = ROOT / "source" / "methodology"
-SAMPLE_PROFILE = ROOT / "examples" / "profiles" / "sample-backend" / "sample-backend-go.yaml"
+SAMPLE_PROFILE = ROOT / "examples" / "profiles" / "sample-backend" / "sample-backend-go-github-issue-tracked.yaml"
 SAMPLE_CONDITIONAL_PROFILE = (
     ROOT / "examples" / "profiles" / "sample-backend" / "sample-conditional-overlay.yaml"
 )
@@ -27,8 +29,13 @@ SAMPLE_SOFTWARE_PROFILE = (
     / "sample-software-plan-first.yaml"
 )
 FORMA_SELF_PROFILE = ROOT / "profiles" / "forma-self" / "forma-self-iteration.yaml"
-COMMITTED_CODEX_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-plan-first-codex"
-COMMITTED_CLAUDE_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-plan-first-claude-code"
+COMMITTED_CODEX_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-github-issue-tracked-plan-first-codex"
+COMMITTED_CLAUDE_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
+FORMA_GENERATOR = {
+    "name": "forma",
+    "version": __version__,
+    "repository_url": "https://github.com/BeforeWave/forma",
+}
 KINDS = ("shape", "gauge", "seal", "pour", "flow")
 SAMPLE_STAGE_DIRS = {
     "shape": "backend-plan-first-plan-issue",
@@ -53,18 +60,22 @@ FORMA_SELF_STAGE_DIRS = {
 }
 
 
+def test_forma_version_comes_from_package_metadata() -> None:
+    assert __version__ == package_version("forma")
+
+
 def test_load_profile_resolves_sample_backend_go() -> None:
     profile = load_profile(SAMPLE_PROFILE)
 
-    assert profile.profile_id == "sample-backend-go"
-    assert profile.bundle_name == "sample-backend-go"
+    assert profile.profile_id == "sample-backend-go-github-issue-tracked"
+    assert profile.bundle_name == "sample-backend-go-github-issue-tracked"
     assert profile.org_name == "Example Team"
     assert profile.resolved_order == (
         "sample-base",
         "sample-dev",
         "sample-backend",
         "sample-go",
-        "sample-backend-go",
+        "sample-backend-go-github-issue-tracked",
     )
     assert "repository" in profile.terminology
     assert "go test ./..." in profile.validation_commands["default"]
@@ -87,7 +98,19 @@ def test_load_profile_resolves_sample_backend_go() -> None:
     assert {
         resource.dest
         for resource in profile.resources["shape"]
-    } == {"references/backend-rules.md", "references/backend-review-checks.md"}
+    } == {
+        "references/backend-rules.md",
+        "references/backend-review-checks.md",
+        "references/script-resource-adapter.md",
+        "scripts/github_issue_context.py",
+    }
+    assert {
+        resource.dest
+        for resource in profile.resources["seal"]
+    } >= {
+        "references/script-resource-adapter.md",
+        "scripts/github_issue_context.py",
+    }
     local_home_prefix = "/" + "Users" + "/"
     assert all(local_home_prefix not in item for item in profile.constraints["default"])
 
@@ -559,7 +582,7 @@ def test_find_methodology_dir_accepts_explicit_path() -> None:
 
 
 def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
-    output_dir = tmp_path / "sample-backend-go-plan-first-codex"
+    output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
 
     manifest_path = create_suite(
         profile_file=SAMPLE_PROFILE,
@@ -597,8 +620,44 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
     assert 'name: "backend-plan-first-plan-issue"' in shape_text
     assert "references/backend-rules.md" in shape_text
     assert "references/backend-review-checks.md" in shape_text
+    assert "references/script-resource-adapter.md" in shape_text
+    assert "scripts/github_issue_context.py" in shape_text
     assert "Load and follow `references/proposal-decision-gate.md`" in shape_text
     assert "Mandatory Decision Gate" not in shape_text
+    assert not (
+        output_dir / SAMPLE_STAGE_DIRS["shape"] / "script" / "github_issue_context.py"
+    ).exists()
+    assert (
+        output_dir / SAMPLE_STAGE_DIRS["shape"] / "scripts" / "github_issue_context.py"
+    ).is_file()
+    assert not (
+        output_dir / SAMPLE_STAGE_DIRS["seal"] / "script" / "github_issue_context.py"
+    ).exists()
+    assert (
+        output_dir / SAMPLE_STAGE_DIRS["seal"] / "scripts" / "github_issue_context.py"
+    ).is_file()
+    assert (
+        output_dir
+        / SAMPLE_STAGE_DIRS["shape"]
+        / "references"
+        / "script-resource-adapter.md"
+    ).is_file()
+    assert (
+        output_dir
+        / SAMPLE_STAGE_DIRS["seal"]
+        / "references"
+        / "script-resource-adapter.md"
+    ).is_file()
+    adapter_text = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["shape"]
+        / "references"
+        / "script-resource-adapter.md"
+    ).read_text(encoding="utf-8")
+    assert "Script Resource Adapter" in adapter_text
+    assert "stage-local helper script" in adapter_text
+    assert "gh issue view" not in adapter_text
+    assert "GitHub issue URLs are source-of-truth refs" in shape_text
     assert "Mandatory Decision Gate" in decision_gate
     assert (
         output_dir / SAMPLE_STAGE_DIRS["seal"] / "references" / "task-structure.md"
@@ -655,13 +714,14 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
     assert manifest["suite_kind"] == "plan-first"
     assert manifest["target"] == "codex"
     assert manifest["methodology_version"] == "0.1.0"
-    assert manifest["generator_version"] == "0.1.0"
+    assert manifest["generator"] == FORMA_GENERATOR
+    assert manifest["generator_version"] == __version__
     assert manifest["methodology_source_revision_type"] == "git-short-sha"
     assert manifest["methodology_source_revision"]
     assert manifest["methodology_tree_digest"]
     generated_at = _parse_generated_at(manifest["generated_at"])
     assert generated_at <= datetime.now(timezone.utc) + timedelta(minutes=1)
-    assert manifest["profile"]["top_level_id"] == "sample-backend-go"
+    assert manifest["profile"]["top_level_id"] == "sample-backend-go-github-issue-tracked"
     assert manifest["emitted_skills"]["shape"]["name"] == "backend-plan-first-plan-issue"
     assert (
         manifest["emitted_skills"]["flow"]["directory"]
@@ -672,9 +732,9 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
         "sample-dev",
         "sample-backend",
         "sample-go",
-        "sample-backend-go",
+        "sample-backend-go-github-issue-tracked",
     ]
-    assert "sample-backend-go.yaml" in manifest["profile"]["file_hashes"]
+    assert "sample-backend-go-github-issue-tracked.yaml" in manifest["profile"]["file_hashes"]
     assert "backend.yaml" in manifest["profile"]["file_hashes"]
     assert (
         manifest["profile"]["resource_hashes"]["shape:references/backend-rules.md"]
@@ -684,7 +744,7 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
 
 
 def test_creator_pipeline_emits_valid_claude_code_suite(tmp_path: Path) -> None:
-    output_dir = tmp_path / "sample-backend-go-plan-first-claude-code"
+    output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
 
     create_suite(
         profile_file=SAMPLE_PROFILE,
@@ -895,6 +955,9 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
     assert "Profile Authoring Principles" in payload["sources"][1]["content"]
     assert "classification table" in payload["markdown"]
     assert "constraints.default" in payload["markdown"]
+    assert "Script Resource Injection Template" in payload["markdown"]
+    assert "resources.<stage>.scripts" in payload["markdown"]
+    assert "python3 scripts/adapter_tool.py" in payload["markdown"]
 
 
 def test_create_rejects_unknown_target(tmp_path: Path) -> None:
@@ -927,8 +990,8 @@ def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) ->
 
 
 def test_committed_generated_outputs_match_creator(tmp_path: Path) -> None:
-    codex = tmp_path / "sample-backend-go-plan-first-codex"
-    claude = tmp_path / "sample-backend-go-plan-first-claude-code"
+    codex = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
+    claude = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
     create_suite(
         profile_file=SAMPLE_PROFILE,
         output_dir=codex,
@@ -969,7 +1032,7 @@ def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:
 
 
 def test_creator_can_replace_known_generated_paths(tmp_path: Path) -> None:
-    output_dir = tmp_path / "sample-backend-go-plan-first-codex"
+    output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
     create_suite(
         profile_file=SAMPLE_PROFILE,
         output_dir=output_dir,

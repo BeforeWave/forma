@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_PROFILE = (
-    ROOT / "examples" / "profiles" / "sample-backend" / "sample-backend-go.yaml"
+    ROOT / "examples" / "profiles" / "sample-backend" / "sample-backend-go-github-issue-tracked.yaml"
 )
 
 

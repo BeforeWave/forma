@@ -104,14 +104,14 @@ heavy scenario-specific behavior belongs in conditional overlays.
 |---|---|
 | `examples/profiles/sample-backend/` | Sanitized profile stack showing base/dev/backend/language composition |
 | `examples/profiles/sample-software/` | Sanitized profile stack showing generic software plan-first behavior, Chinese workflow wording, Impact Profile / Impact Boundary controls, and safe showhand gates |
-| `examples/generated/sample-backend-go-plan-first-codex/` | Codex generated Mode-S suite and drift baseline |
-| `examples/generated/sample-backend-go-plan-first-claude-code/` | Claude Code generated Mode-S suite and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Mode-S suite and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Mode-S suite and drift baseline |
 
 Forma examples must stay sanitized. Real downstream profiles with
 organization-specific workflow commands, private paths, credentials, or business
 rules belong in the downstream repository that owns those constraints.
 `sample-software` is currently a profile-only example; the committed generated
-drift baselines in this issue remain the `sample-backend-go` Codex and Claude
+drift baselines in this issue remain the `sample-backend-go-github-issue-tracked` Codex and Claude
 Code suites.
 
 ## Tests

@@ -41,6 +41,29 @@ reads, full profile-stack reads, or broad governance requirements in
 `constraints.default`. Doing so makes routine `pour` and `flow` execution pay
 the cost on every task.
 
+## Source Context Adapters
+
+Source-context adapters are optional integrations that load planning material
+from a specific external source, such as an issue tracker, a document export
+tool, or a private knowledge source. They are not base Forma capability.
+
+Put durable source adapters in the owning repository's profile only when that
+repository expects the adapter to be available for repeated work. Put one-off
+source adapters in temporary injection and mark them non-durable in the
+classification table.
+
+Adapter rules belong in stage-specific constraints, usually `shape` for
+planning-context loading and `seal` for final source confirmation. Adapter
+references and scripts should be added as stage resources. Do not place source
+adapter requirements in `constraints.default`.
+
+When an adapter needs a helper script, model it as `resources.<stage>.scripts`
+plus a matching `resources.<stage>.references` file that explains the generic
+script-use boundary or adapter-specific invocation conditions. The generated
+skill will receive the script under `scripts/<dest>`, so stage constraints
+should cite that generated path and concrete source type, for example
+`python3 scripts/adapter_tool.py ...`.
+
 ## Durable Versus One-Off
 
 Promote a constraint to a tracked profile when it is expected to repeat, has a
@@ -58,6 +81,9 @@ yet been accepted as durable workflow policy.
   effective target.
 - Do not store private paths, credentials, business secrets, or
   organization-only commands in Forma's committed examples.
+- Do not assume network access, local CLI authentication, or any issue tracker
+  or document system is available unless a profile or temporary injection
+  explicitly owns that adapter.
 - Use generated baselines only when the issue makes them part of the review
   surface or drift guard.
 

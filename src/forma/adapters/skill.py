@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, List, Mapping
 
 from forma.creator.composer import KINDS, load_stage_sources
+from forma.creator.manifest import build_creator_manifest
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
@@ -33,6 +35,7 @@ def build_creator(
             source_dir=resolved_source_dir,
             target_dir=target,
             target_agent=target_agent,
+            skill_name=skill_name,
         )
     report = verify(target)
     if not report.passed:
@@ -92,6 +95,7 @@ def _emit_creator_target(
     source_dir: Path,
     target_dir: Path,
     target_agent: str,
+    skill_name: str,
 ) -> None:
     if target_dir.exists():
         shutil.rmtree(target_dir)
@@ -114,6 +118,25 @@ def _emit_creator_target(
             source_dir / "interfaces" / "codex" / "openai.yaml",
             agents_dir / "openai.yaml",
         )
+    _write_creator_manifest(source_dir, target_dir, target_agent, skill_name)
+
+
+def _write_creator_manifest(
+    source_dir: Path,
+    target_dir: Path,
+    target_agent: str,
+    skill_name: str,
+) -> None:
+    manifest = build_creator_manifest(
+        creator_source_dir=source_dir,
+        methodology_dir=_methodology_source(source_dir),
+        target_agent=target_agent,
+        skill_name=skill_name,
+    )
+    (target_dir / ".forma-manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _copy_skill_md_with_target(src: Path, dst: Path, target_agent: str) -> None:
@@ -223,6 +246,11 @@ def _interactive_constraint_contract() -> List[str]:
         "rules go under `pour` / `flow`; broad docs, generated-baseline, "
         "migration, governance, or cross-layer rules belong in "
         "`conditional_overlays`.",
+        "- Treat issue tracker readers, document exporters, private source "
+        "loaders, and similar source-context helper scripts as optional source "
+        "adapters. Inject their stage-specific constraints and resources only "
+        "when explicitly requested; do not treat them as base capability or "
+        "place them in `constraints.default`.",
         "- Output the temporary injection file path plus a short classification "
         "table with user constraint, injection target, rationale, durability, "
         "and whether it should later become a tracked Layer 3 profile.",

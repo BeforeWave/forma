@@ -27,22 +27,27 @@
     }
   },
   "format": "forma-suite-manifest-v1",
-  "generated_at": "2026-06-06T09:08:39Z",
+  "generated_at": "2026-06-06T13:01:17Z",
+  "generator": {
+    "name": "forma",
+    "repository_url": "https://github.com/BeforeWave/forma",
+    "version": "0.1.0"
+  },
   "generator_version": "0.1.0",
-  "methodology_source_revision": "4d37692",
+  "methodology_source_revision": "9a6e128",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "75f2119736c8ef24852b0fd3274be48fc3d7c90c19a03f633f14f69c3770790d",
+  "methodology_tree_digest": "3aecf8d0791d73a9bf8b8282ab888cbfecd1bbc8b4741bb9ca9c236d769de49e",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {
-    "bundle_name": "sample-backend-go",
-    "digest": "0fb865702bf8859df99425775bef4d3db829f2e65df1e80bcbc83d4461dbcb21",
+    "bundle_name": "sample-backend-go-github-issue-tracked",
+    "digest": "aebf72d2111ce00569c2f88634e06f2591ed9ec0b4be68e4a2445745fa0ca689",
     "file_hashes": {
       "backend.yaml": "ff29abea7a1b416e743cbb9b372d9e237a833d249b7ec98e1c71f333c1b89f71",
       "base.yaml": "625b1c6f0bc0b45015dfda4e83a9c970e87b45e4e132a4cd2d90c74cba9e16a2",
       "dev.yaml": "79291318ce8c112729345e2ea3889b029294e97600bf37a23900279353918d4a",
       "languages/go.yaml": "3db36bd1558cd6c7c63af129296d83f140ac595ee92df63b7af726ff669a9a3e",
-      "sample-backend-go.yaml": "2eeecabb771f029be2d87bcc38ff026396c5cb59d44f0e54b2e9882716b38ba3"
+      "sample-backend-go-github-issue-tracked.yaml": "7b3f6644ee72a5eb2796f485f2032a4aa280f019b2662f7f9df22cd070fb8a0c"
     },
     "org_name": "Example Team",
     "resolved_order": [
@@ -50,9 +55,9 @@
       "sample-dev",
       "sample-backend",
       "sample-go",
-      "sample-backend-go"
+      "sample-backend-go-github-issue-tracked"
     ],
-    "resource_digest": "b27d6073ba6e55c047f9150b9000144c7c5bbf8f89462868057dbfa4e8357ca3",
+    "resource_digest": "7759a85a48697d3c701d74cb276c06a96c1bd772b99f97034639e697b3c1baba",
     "resource_hashes": {
       "flow:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
       "flow:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
@@ -60,11 +65,15 @@
       "pour:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
       "seal:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
       "seal:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
+      "seal:references/script-resource-adapter.md": "6a3ae54167bea4658562ef9c6a22a46609362d936652ea208bb04301b085f25d",
+      "seal:scripts/github_issue_context.py": "133a9ad4f1e5ac6813a1869b15cea0d8f66a253fc87dbc07ab0a10f1d80734a7",
       "shape:references/backend-review-checks.md": "96e78a56f849617dc558a74a0cd9bcb9b736d9f6776531e22404a4112682168c",
-      "shape:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69"
+      "shape:references/backend-rules.md": "d28e08a8c76808795872ee37604807b9d9240829f548bc9fcdba3541669cfb69",
+      "shape:references/script-resource-adapter.md": "6a3ae54167bea4658562ef9c6a22a46609362d936652ea208bb04301b085f25d",
+      "shape:scripts/github_issue_context.py": "133a9ad4f1e5ac6813a1869b15cea0d8f66a253fc87dbc07ab0a10f1d80734a7"
     },
-    "top_level_id": "sample-backend-go",
-    "top_level_path": "sample-backend-go.yaml"
+    "top_level_id": "sample-backend-go-github-issue-tracked",
+    "top_level_path": "sample-backend-go-github-issue-tracked.yaml"
   },
   "skills": [
     "shape",
@@ -74,5 +83,5 @@
     "flow"
   ],
   "suite_kind": "plan-first",
-  "target": "claude-code"
+  "target": "codex"
 }

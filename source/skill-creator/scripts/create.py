@@ -23,6 +23,9 @@ from forma_verifier import verify
 
 KINDS = ("shape", "gauge", "seal", "pour", "flow")
 DEFAULT_SKILL_PREFIX = "forma"
+FORMA_GENERATOR_NAME = "forma"
+FORMA_GENERATOR_VERSION_FALLBACK = "0+unknown"
+FORMA_GENERATOR_REPOSITORY_URL = "https://github.com/BeforeWave/forma"
 STAGE_KEYS = ("default", *KINDS)
 TARGETS = ("codex", "claude-code")
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
@@ -70,7 +73,6 @@ METHODOLOGY_RESOURCES: Mapping[str, tuple[tuple[str, str, bool], ...]] = {
     "shape": (
         ("resources/shape/references/output-format.md", "references/output-format.md", False),
         ("resources/shape/references/plan-issue-rules.md", "references/plan-issue-rules.md", False),
-        ("resources/shared/script/github_issue_context.py", "script/github_issue_context.py", False),
     ),
     "gauge": (
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
@@ -81,7 +83,6 @@ METHODOLOGY_RESOURCES: Mapping[str, tuple[tuple[str, str, bool], ...]] = {
         ("resources/shared/references/plan-template.md", "references/plan-template.md", False),
         ("resources/shared/references/tasks-template.md", "references/tasks-template.md", False),
         ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
-        ("resources/shared/script/github_issue_context.py", "script/github_issue_context.py", False),
     ),
     "pour": (
         ("resources/shared/references/execution-rules.md", "references/execution-rules.md", False),
@@ -214,11 +215,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         else creator_root / "resources" / "plan-first" / "methodology"
     )
     injection = _load_injection(args.injection_json)
+    creator_manifest = _load_creator_manifest(creator_root)
     create_suite(
         methodology_dir=methodology_dir,
         output_dir=args.output.resolve(),
         target=target,
         injection=injection,
+        creator_manifest=creator_manifest,
     )
     report = verify(args.output.resolve())
     print(report.format_human())
@@ -253,6 +256,16 @@ def _detect_fixed_target(creator_root: Path) -> str:
         if f"fixed to `{target}`" in text:
             return target
     raise ValueError("cannot detect fixed creator target from references/agent-target.md")
+
+
+def _load_creator_manifest(creator_root: Path) -> dict[str, Any]:
+    manifest_path = creator_root / ".forma-manifest.json"
+    if not manifest_path.is_file():
+        return {}
+    raw = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        return {}
+    return raw
 
 
 def _load_injection(path: Path | None) -> dict[str, Any]:
@@ -352,6 +365,7 @@ def create_suite(
     output_dir: Path,
     target: str,
     injection: Mapping[str, Any],
+    creator_manifest: Mapping[str, Any] | None = None,
 ) -> None:
     if target not in TARGETS:
         raise ValueError(f"unsupported target: {target}")
@@ -403,7 +417,13 @@ def create_suite(
                 _openai_yaml(kind, description, injection, skill_names),
                 encoding="utf-8",
             )
-    _write_manifest(output_dir, target, skill_names, conditional_overlays)
+    _write_manifest(
+        output_dir,
+        target,
+        skill_names,
+        conditional_overlays,
+        creator_manifest,
+    )
 
 
 def _skill_names(injection: Mapping[str, Any]) -> dict[str, str]:
@@ -428,6 +448,7 @@ def _write_manifest(
     target: str,
     skill_names: Mapping[str, str],
     conditional_overlays: ConditionalOverlays | None,
+    creator_manifest: Mapping[str, Any] | None,
 ) -> None:
     emitted = {
         kind: {
@@ -436,18 +457,80 @@ def _write_manifest(
         }
         for kind in KINDS
     }
+    generator = _forma_generator_metadata(creator_manifest)
     manifest = {
+        "format": "forma-suite-manifest-v1",
+        "mode": "solo",
         "suite_kind": "plan-first",
         "target": target,
+        "generator": generator,
+        "generator_version": generator["version"],
         "emitted_order": list(KINDS),
         "emitted_skills": emitted,
     }
+    creator_bundle = _creator_bundle_metadata(creator_manifest)
+    if creator_bundle:
+        manifest["creator_bundle"] = creator_bundle
     if conditional_overlays is not None:
         manifest["conditional_overlays"] = _conditional_manifest(conditional_overlays)
     (output_dir / ".forma-manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _forma_generator_metadata(
+    creator_manifest: Mapping[str, Any] | None,
+) -> dict[str, str]:
+    if creator_manifest:
+        raw = creator_manifest.get("generator")
+        if isinstance(raw, dict):
+            name = raw.get("name")
+            version = raw.get("version")
+            repository_url = raw.get("repository_url")
+            if isinstance(name, str) and isinstance(version, str):
+                metadata = {"name": name, "version": version}
+                if isinstance(repository_url, str):
+                    metadata["repository_url"] = repository_url
+                return metadata
+    return {
+        "name": FORMA_GENERATOR_NAME,
+        "version": FORMA_GENERATOR_VERSION_FALLBACK,
+        "repository_url": FORMA_GENERATOR_REPOSITORY_URL,
+    }
+
+
+def _creator_bundle_metadata(
+    creator_manifest: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    if not creator_manifest:
+        return {}
+    result: dict[str, Any] = {}
+    for key in (
+        "format",
+        "bundle_kind",
+        "target",
+        "generator",
+        "generator_version",
+        "generated_at",
+    ):
+        value = creator_manifest.get(key)
+        if value is not None:
+            result[key] = value
+    creator = creator_manifest.get("creator")
+    if isinstance(creator, dict):
+        result["creator"] = {
+            key: value
+            for key in (
+                "name",
+                "directory",
+                "source_revision",
+                "source_revision_type",
+                "source_tree_digest",
+            )
+            if (value := creator.get(key)) is not None
+        }
+    return result
 
 
 def _require_methodology(methodology_dir: Path) -> None:

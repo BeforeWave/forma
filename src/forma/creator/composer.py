@@ -25,7 +25,6 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
             "references/plan-issue-rules.md",
             False,
         ),
-        ("resources/shared/script/github_issue_context.py", "script/github_issue_context.py", False),
     ),
     "gauge": (
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
@@ -36,7 +35,6 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
         ("resources/shared/references/plan-template.md", "references/plan-template.md", False),
         ("resources/shared/references/tasks-template.md", "references/tasks-template.md", False),
         ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
-        ("resources/shared/script/github_issue_context.py", "script/github_issue_context.py", False),
     ),
     "pour": (
         ("resources/shared/references/execution-rules.md", "references/execution-rules.md", False),

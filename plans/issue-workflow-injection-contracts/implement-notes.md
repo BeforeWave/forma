@@ -45,3 +45,29 @@ Deviations From Plan:
 
 Follow-ups:
 - Remote publication remains a separate explicit decision.
+
+## Task 3: source-adapter-injection-boundary
+
+Outcome:
+- Removed GitHub issue context loading from base `shape` / `seal` methodology requirements and from default copied generated-skill resources.
+- Added optional generic script-resource adapter guidance as a reusable packaged reference for explicit profile or temporary injection usage, with the GitHub issue helper kept as a concrete sample script.
+- Updated Layer 1 guidance and CLI-backed profile/temporary-injection references to classify source-context adapters as stage-specific injection/profile behavior, not `constraints.default`.
+- Added a concrete script resource injection template to the canonical references and creator instructions so both `forma explain temporary-injection` and installed `forma-creator` show agents how to copy a helper script into `scripts/`.
+- Renamed the sanitized Go backend sample to `sample-backend-go-github-issue-tracked` and made it explicitly opt into generic script-resource usage plus the GitHub issue helper for `shape` and `seal`, proving the helper is profile-owned rather than base methodology.
+- Regenerated committed backend baselines and fresh Codex creator build artifacts for verification.
+
+Decision Notes:
+- GitHub issue loading is a source-context adapter, not a baseline plan-first capability. It should be available to profiles or temporary injection, but not emitted into every base `shape` / `seal` skill.
+- The adapter usage reference must stay generic. The concrete GitHub issue helper is only a sample script/resource selected by the sample profile or temporary injection.
+
+Plan Gaps Found:
+- The previous base methodology made `gh issue view` behavior unconditional, which coupled every generated suite to GitHub CLI availability and authentication.
+
+Classifications:
+- Cross-layer methodology, Layer 1 guidance, generated-output, and installed-bundle boundary correction.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

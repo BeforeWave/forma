@@ -79,6 +79,7 @@ def build_manifest(
         "methodology_source_revision": _git_short_sha(methodology_dir),
         "methodology_source_revision_type": "git-short-sha",
         "methodology_tree_digest": methodology_tree_digest,
+        "generator": forma_generator_metadata(),
         "generator_version": __version__,
         "generated_at": _generated_at(),
         "profile": {
@@ -100,6 +101,46 @@ def build_manifest(
             profile.conditional_overlays
         )
     return manifest
+
+
+def build_creator_manifest(
+    creator_source_dir: Path,
+    methodology_dir: Path,
+    target_agent: str,
+    skill_name: str,
+) -> Dict[str, object]:
+    """Build provenance metadata for generated creator bundles."""
+    creator_hashes = _file_hashes(creator_source_dir)
+    methodology_hashes = _file_hashes(methodology_dir)
+    return {
+        "format": "forma-creator-manifest-v1",
+        "bundle_kind": "creator",
+        "target": target_agent,
+        "generator": forma_generator_metadata(),
+        "generator_version": __version__,
+        "generated_at": _generated_at(),
+        "creator": {
+            "name": skill_name,
+            "directory": skill_name,
+            "source_revision": _git_short_sha(creator_source_dir),
+            "source_revision_type": "git-short-sha",
+            "source_tree_digest": _tree_digest(creator_hashes),
+            "file_hashes": creator_hashes,
+        },
+        "methodology_version": METHODOLOGY_VERSION,
+        "methodology_source_revision": _git_short_sha(methodology_dir),
+        "methodology_source_revision_type": "git-short-sha",
+        "methodology_tree_digest": _tree_digest(methodology_hashes),
+    }
+
+
+def forma_generator_metadata() -> Dict[str, str]:
+    """Return the canonical Forma generator identity."""
+    return {
+        "name": "forma",
+        "version": __version__,
+        "repository_url": "https://github.com/BeforeWave/forma",
+    }
 
 
 def _assert_methodology_dir(path: Path) -> None:

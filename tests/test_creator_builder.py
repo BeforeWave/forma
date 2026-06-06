@@ -7,6 +7,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
+from forma import __version__
 from forma.adapters import build_creator
 from forma.cli import main
 from forma_verifier import verify
@@ -16,6 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 META_SOURCE = ROOT / "source" / "skill-creator"
 METHODOLOGY = ROOT / "source" / "methodology"
 SKILL_NAME = "forma-creator"
+FORMA_GENERATOR = {
+    "name": "forma",
+    "version": __version__,
+    "repository_url": "https://github.com/BeforeWave/forma",
+}
 
 
 def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
@@ -29,6 +35,17 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert (codex / "scripts" / "create.py").is_file()
     assert (codex / "agents" / "openai.yaml").is_file()
     assert (codex / "references" / "agent-target.md").is_file()
+    manifest = json.loads(
+        (codex / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["format"] == "forma-creator-manifest-v1"
+    assert manifest["bundle_kind"] == "creator"
+    assert manifest["target"] == "codex"
+    assert manifest["generator"] == FORMA_GENERATOR
+    assert manifest["generator_version"] == __version__
+    assert manifest["creator"]["name"] == SKILL_NAME
+    assert manifest["creator"]["directory"] == SKILL_NAME
+    assert manifest["methodology_tree_digest"]
     assert (codex / "references" / "temporary-injection-generation.md").is_file()
     assert (
         codex / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
@@ -97,8 +114,13 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "constraints.default" in temp_standard
     assert "conditional_overlays" in temp_standard
     assert "classification table" in temp_standard
+    assert "source adapter" in temp_standard
+    assert "Script Resource Injection Template" in temp_standard
+    assert "resources.<stage>.scripts" in temp_standard
     assert "Profile Authoring Principles" in profile_principles
     assert "Keep this minimal" in profile_principles
+    assert "Source Context Adapters" in profile_principles
+    assert "python3 scripts/adapter_tool.py" in profile_principles
     assert not (output_root / "claude-code").exists()
     assert verify(codex).passed
 
@@ -158,6 +180,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "temporary-injection-generation.md" in claude_target
     assert "profile-authoring-principles.md" in claude_target
     assert "classification table" in claude_target
+    assert "source-context helper scripts" in claude_target
     assert (claude / "references" / "profile-authoring-principles.md").is_file()
     assert verify(claude).passed
 
@@ -233,8 +256,117 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     assert "pytest tests/" in (generated / "forma-seal" / "SKILL.md").read_text(
         encoding="utf-8"
     )
+    assert not (generated / "forma-shape" / "script" / "github_issue_context.py").exists()
+    assert not (generated / "forma-shape" / "scripts" / "github_issue_context.py").exists()
+    assert "gh issue view" not in (
+        generated / "forma-shape" / "SKILL.md"
+    ).read_text(encoding="utf-8")
     assert (generated / "forma-shape" / "agents" / "openai.yaml").is_file()
     assert (generated / ".forma-manifest.json").is_file()
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["format"] == "forma-suite-manifest-v1"
+    assert manifest["generator"] == FORMA_GENERATOR
+    assert manifest["generator_version"] == __version__
+    assert manifest["creator_bundle"]["format"] == "forma-creator-manifest-v1"
+    assert manifest["creator_bundle"]["generator"] == FORMA_GENERATOR
+    assert manifest["creator_bundle"]["creator"]["name"] == SKILL_NAME
+    assert verify(generated).passed
+
+
+def test_installed_creator_script_supports_explicit_source_adapter_injection(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "codex")
+    injection = tmp_path / "source-adapter-injection.json"
+    generated = tmp_path / "generated"
+    adapter_ref = (
+        METHODOLOGY
+        / "resources"
+        / "shared"
+        / "references"
+        / "script-resource-adapter.md"
+    )
+    adapter_script = (
+        METHODOLOGY / "resources" / "shared" / "script" / "github_issue_context.py"
+    )
+    injection.write_text(
+        json.dumps(
+            {
+                "resources": {
+                    "shape": {
+                        "references": [
+                            {
+                                "source": str(adapter_ref),
+                                "dest": "script-resource-adapter.md",
+                            }
+                        ],
+                        "scripts": [
+                            {
+                                "source": str(adapter_script),
+                                "dest": "github_issue_context.py",
+                            }
+                        ],
+                    },
+                    "seal": {
+                        "references": [
+                            {
+                                "source": str(adapter_ref),
+                                "dest": "script-resource-adapter.md",
+                            }
+                        ],
+                        "scripts": [
+                            {
+                                "source": str(adapter_script),
+                                "dest": "github_issue_context.py",
+                            }
+                        ],
+                    },
+                },
+                "constraints": {
+                    "shape": [
+                        "When GitHub issue URLs are source-of-truth refs, load and follow `references/script-resource-adapter.md` before deciding planning context is incomplete.",
+                    ],
+                    "seal": [
+                        "When the planning handoff depends on GitHub issue refs, load and follow `references/script-resource-adapter.md` before finalization.",
+                    ],
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    shape_text = (generated / "forma-shape" / "SKILL.md").read_text(encoding="utf-8")
+    seal_text = (generated / "forma-seal" / "SKILL.md").read_text(encoding="utf-8")
+    assert "references/script-resource-adapter.md" in shape_text
+    assert "references/script-resource-adapter.md" in seal_text
+    assert (generated / "forma-shape" / "scripts" / "github_issue_context.py").is_file()
+    assert (generated / "forma-seal" / "scripts" / "github_issue_context.py").is_file()
+    adapter_text = (
+        generated / "forma-shape" / "references" / "script-resource-adapter.md"
+    ).read_text(encoding="utf-8")
+    assert "Script Resource Adapter" in adapter_text
+    assert "stage-local helper script" in adapter_text
+    assert "gh issue view" not in adapter_text
+    assert "GitHub issue URLs are source-of-truth refs" in shape_text
     assert verify(generated).passed
 
 

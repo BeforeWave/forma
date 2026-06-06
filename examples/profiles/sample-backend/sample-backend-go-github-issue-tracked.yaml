@@ -1,14 +1,14 @@
 profile:
-  id: sample-backend-go
-  description: Top-level sanitized Go backend sample profile modeled after a backend plan-first skill family.
+  id: sample-backend-go-github-issue-tracked
+  description: Top-level sanitized Go backend sample for teams that commonly track development work through GitHub issues.
 includes:
   - sample-base
   - sample-dev
   - sample-backend
   - languages/go.yaml
 bundle:
-  name: sample-backend-go
-  description: Sanitized sample Go backend plan-first workflow bundle using backend-plan-first skill names.
+  name: sample-backend-go-github-issue-tracked
+  description: Sanitized sample Go backend plan-first workflow bundle for GitHub issue tracked development.
 stages:
   shape:
     name: backend-plan-first-plan-issue
@@ -73,6 +73,25 @@ stages:
 constraints:
   default:
     - This sample demonstrates tracked profile composition without organization-specific workflow details.
+  shape:
+    - When GitHub issue URLs are source-of-truth refs, load and follow `references/script-resource-adapter.md`, then run `python3 scripts/github_issue_context.py <issue-url-or-user-text>` before deciding planning context is incomplete.
+  seal:
+    - When the planning handoff depends on GitHub issue refs, load and follow `references/script-resource-adapter.md`, then run `python3 scripts/github_issue_context.py <issue-url-or-user-text>` before finalization if issue body and key comments are not already confirmed.
+resources:
+  shape:
+    references:
+      - source: ../../../source/methodology/resources/shared/references/script-resource-adapter.md
+        dest: script-resource-adapter.md
+    scripts:
+      - source: ../../../source/methodology/resources/shared/script/github_issue_context.py
+        dest: github_issue_context.py
+  seal:
+    references:
+      - source: ../../../source/methodology/resources/shared/references/script-resource-adapter.md
+        dest: script-resource-adapter.md
+    scripts:
+      - source: ../../../source/methodology/resources/shared/script/github_issue_context.py
+        dest: github_issue_context.py
 decision_gate_extras:
   - API or stream impact
   - Data migration or persistence impact

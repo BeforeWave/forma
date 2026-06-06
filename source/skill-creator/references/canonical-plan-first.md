@@ -80,13 +80,12 @@ source files live under `resources/plan-first/methodology/resources/<stage>/`.
 Generate them into the destination paths below so each emitted skill remains
 self-contained:
 
-- `shape`: `references/output-format.md`,
-  `references/plan-issue-rules.md`, and `script/github_issue_context.py`.
+- `shape`: `references/output-format.md` and
+  `references/plan-issue-rules.md`.
 - `gauge`: `references/output-format.md`.
 - `seal`: `references/planning-rules.md`,
   `references/output-format.md`, `references/plan-template.md`,
-  `references/tasks-template.md`, `scripts/forma-workflow.sh`, and
-  `script/github_issue_context.py`.
+  `references/tasks-template.md`, and `scripts/forma-workflow.sh`.
 - `pour`: `references/execution-rules.md`,
   `references/output-format.md`, `references/implement-notes.md`,
   `references/plan-template.md`, `references/tasks-template.md`, and
@@ -96,6 +95,10 @@ self-contained:
   `scripts/forma-workflow.sh`.
 
 Make copied `scripts/forma-workflow.sh` executable.
+
+Optional source-context adapters may live in the methodology resource tree for
+reuse, but they are not fixed resources. Copy adapter references or scripts
+only when a temporary injection or tracked profile explicitly adds them.
 
 ## Generated Requirement References
 

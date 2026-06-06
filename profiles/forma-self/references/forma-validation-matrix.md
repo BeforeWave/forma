@@ -30,8 +30,8 @@ Use this for profile loading, composition, emission, manifest provenance, output
 ## Committed Generated Baselines
 
 ```bash
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 ```
 
 When the baseline should match fresh generation, run the relevant `forma create` command into a temporary directory and compare using the existing tests before committing.
