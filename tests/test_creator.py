@@ -75,7 +75,8 @@ def test_load_profile_resolves_sample_backend_go() -> None:
         resource.dest
         for resource in profile.resources["shape"]
     } == {"references/backend-rules.md", "references/backend-review-checks.md"}
-    assert all("project-specific workflow" not in item for item in profile.constraints["default"])
+    local_home_prefix = "/" + "Users" + "/"
+    assert all(local_home_prefix not in item for item in profile.constraints["default"])
 
 
 def test_load_profile_resolves_sample_software_plan_first() -> None:
@@ -326,11 +327,10 @@ def test_sample_profiles_are_sanitized() -> None:
         )
     )
 
-    assert "project-specific workflow" not in profile_text
     local_home_prefix = "/" + "Users" + "/"
     assert local_home_prefix not in profile_text
-    assert "workflow skills" not in profile_text
-    assert "sample-" not in profile_text
+    assert "--inject" not in profile_text
+    assert ".plan-first" not in profile_text
 
 
 def test_sample_conditional_overlay_profile_emits_valid_suite(tmp_path: Path) -> None:
@@ -427,8 +427,8 @@ def test_sample_software_plan_first_profile_emits_valid_suite(tmp_path: Path) ->
     assert "review-ready after validation" in pour_text
     assert "showhand skip grounding" in flow_text
     assert "$software-plan-first-showhand" in flow_agent
-    assert "sample-" not in shape_text
-    assert "sample-" not in flow_agent
+    assert ".plan-first" not in shape_text
+    assert ".plan-first" not in flow_agent
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["profile"]["top_level_id"] == "sample-software-plan-first"

@@ -80,7 +80,7 @@ METHODOLOGY_RESOURCES: Mapping[str, tuple[tuple[str, str, bool], ...]] = {
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
         ("resources/shared/references/plan-template.md", "references/plan-template.md", False),
         ("resources/shared/references/tasks-template.md", "references/tasks-template.md", False),
-        ("resources/shared/scripts/issue-workflow.sh", "scripts/issue-workflow.sh", True),
+        ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
         ("resources/shared/script/github_issue_context.py", "script/github_issue_context.py", False),
     ),
     "pour": (
@@ -89,13 +89,13 @@ METHODOLOGY_RESOURCES: Mapping[str, tuple[tuple[str, str, bool], ...]] = {
         ("resources/shared/references/implement-notes.md", "references/implement-notes.md", False),
         ("resources/shared/references/plan-template.md", "references/plan-template.md", False),
         ("resources/shared/references/tasks-template.md", "references/tasks-template.md", False),
-        ("resources/shared/scripts/issue-workflow.sh", "scripts/issue-workflow.sh", True),
+        ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
     ),
     "flow": (
         ("resources/shared/references/execution-rules.md", "references/execution-rules.md", False),
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
         ("resources/shared/references/implement-notes.md", "references/implement-notes.md", False),
-        ("resources/shared/scripts/issue-workflow.sh", "scripts/issue-workflow.sh", True),
+        ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
     ),
 }
 
@@ -560,7 +560,7 @@ def _methodology_resources(methodology_dir: Path, kind: str) -> list[Resource]:
     for source_rel, dest, executable in METHODOLOGY_RESOURCES[kind]:
         source = methodology_dir / source_rel
         content = None
-        if kind == "flow" and dest == "scripts/issue-workflow.sh":
+        if kind == "flow" and dest == "scripts/forma-workflow.sh":
             text = source.read_text(encoding="utf-8")
             marker = 'ISSUE_WORKFLOW_INIT_DISABLED="0"'
             if marker not in text:

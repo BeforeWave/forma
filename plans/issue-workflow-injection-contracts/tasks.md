@@ -1,4 +1,4 @@
-- [ ] [layer-1-injection-classification] Add the temporary injection classification contract
+- [x] [layer-1-injection-classification] Add the temporary injection classification contract
 Accept: Task Type=step; `source/skill-creator` documents the temporary injection generation standard; installed creator instructions require classifying natural-language constraints into minimal default, stage-specific, or conditional overlay targets; agents must output the temporary injection file path plus a classification table before generation
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator_builder.py
 Validate: uv run --extra dev forma build-creator --source source/skill-creator --output /tmp/forma-creator-dist --target codex

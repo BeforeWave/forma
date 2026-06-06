@@ -9,9 +9,10 @@ Use this skill to create a Mode-S Forma suite: a flat, ready-to-install set of
 five plan-first skills named `forma-shape`, `forma-gauge`, `forma-seal`,
 `forma-pour`, and `forma-flow`.
 
-Before generating any suite, load `references/canonical-plan-first.md`. If this
-installed creator includes a fixed agent-target reference, load it too and treat
-it as the fixed target contract.
+Before generating any suite, load `references/canonical-plan-first.md` and
+`references/temporary-injection-generation.md`. If this installed creator
+includes a fixed agent-target reference, load it too and treat it as the fixed
+target contract.
 
 ## Workflow
 
@@ -26,6 +27,10 @@ it as the fixed target contract.
      deciding A to use X and B to use Y, use `conditional_overlays`.
    - Unclear scenario: do not invent conditional routing. Ask first whether the
      user wants a fixed injection or a conditional overlay decision.
+   - Within either scenario, classify every natural-language constraint using
+     `references/temporary-injection-generation.md`; keep `constraints.default`
+     minimal and put broad or expensive execution requirements into
+     stage-specific constraints or `conditional_overlays`.
 3. Show the installable skill names before generating. Default:
    `shape -> forma-shape`, `gauge -> forma-gauge`, `seal -> forma-seal`,
    `pour -> forma-pour`, and `flow -> forma-flow`. Ask whether the user wants
@@ -40,6 +45,10 @@ it as the fixed target contract.
    `plan.md` / `tasks.md`, or make workflow stages optional.
 5. Convert the current conversation's one-off injection into a temporary JSON
    file. This JSON is not a profile and must not be treated as tracked source.
+   Before generation, output the temporary injection path and a short
+   classification table covering the original user constraint, injection
+   target, rationale, durability, and whether to promote it into a tracked
+   profile later.
 6. Run the bundled deterministic creator script:
 
 ```bash
@@ -120,11 +129,11 @@ only under `rename.stages`, for example:
 {
   "rename": {
     "stages": {
-      "shape": "backend-plan-first-plan-issue",
-      "gauge": "backend-plan-first-ground-plan",
-      "seal": "backend-plan-first-finalize-plan",
-      "pour": "backend-plan-first-implement-feature",
-      "flow": "backend-plan-first-showhand"
+      "shape": "renamed-shape",
+      "gauge": "renamed-gauge",
+      "seal": "renamed-seal",
+      "pour": "renamed-pour",
+      "flow": "renamed-flow"
     }
   }
 }
@@ -132,6 +141,29 @@ only under `rename.stages`, for example:
 
 If the user wants durable tracked behavior, help them create or update a Layer
 3 profile outside this installed creator.
+
+### Temporary Injection Classification
+
+When converting user natural language into temporary injection JSON:
+
+- Do not copy user docs verbatim.
+- Extract only workflow constraints, validation preferences, local references,
+  display text, final installable names, and conditional route decisions that
+  affect this generated suite.
+- Classify every constraint by the narrowest injection target:
+  - `constraints.default`: applies to all stages; keep it minimal and reserved
+    for the lightest always-true bottom lines.
+  - `constraints.shape`, `constraints.gauge`, and `constraints.seal`: planning,
+    grounding, and plan materialization rules.
+  - `constraints.pour` and `constraints.flow`: daily task execution rules.
+  - `conditional_overlays`: heavy rules for selected scenarios such as docs,
+    generated-baseline, migration, governance, or cross-layer work.
+- If a constraint would make daily `pour` or `flow` read broad docs, all runs,
+  generated outputs, or full profile stacks, do not place it in
+  `constraints.default`.
+- If a constraint is one-off for this generation only, include it in the
+  temporary injection, mark it non-durable in the classification table, and do
+  not recommend committing it as a tracked profile.
 
 ### Conditional Overlay Schema
 
@@ -211,6 +243,8 @@ Python package just to generate or verify an agent-generated suite.
 When finished, report:
 
 - generated suite path
+- temporary injection file path
+- classification table for injected constraints
 - verifier command and result
 - any intentionally injected terminology or validation-command overrides
 - unresolved items only if they block installation or use

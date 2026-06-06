@@ -32,6 +32,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/skill-creator/` | Layer 1 meta skill source (`forma-creator`) |
 | `source/skill-creator/interfaces/codex/openai.yaml` | Codex UI metadata used when building the Codex creator |
 | `source/skill-creator/references/` | Bundled Layer 1 references for creator authoring and verifier guidance |
+| `source/skill-creator/references/temporary-injection-generation.md` | Layer 1 standard for classifying natural-language constraints into temporary injection JSON |
 | `source/skill-creator/scripts/verify.py` | Agent-side verification entrypoint; no pip install required |
 | `source/skill-creator/scripts/forma_verifier/` | Layer 2 verifier package, organizationally inside Layer 1 |
 
@@ -71,10 +72,21 @@ generated skill resources.
 |---|---|
 | `profiles/forma-self/` | Project-owned profile stack for generating skills that manage Forma's own development iterations |
 | `profiles/forma-self/forma-self-iteration.yaml` | Top-level self-iteration profile with `Iteration Area` conditional routing |
+| `profiles/forma-self/base.yaml` | Lightweight always-on self-profile constraints; governance docs are stage- or overlay-scoped, not default execution requirements |
+| `profiles/forma-self/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-layer execution overlays |
 | `profiles/forma-self/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration suites |
 
 Project-owned profiles may contain Forma-specific workflow policy. They are
 separate from sanitized public examples under `examples/profiles/`.
+For self-iteration, `shape`, `gauge`, and `seal` may read root governance docs
+because they define boundaries and tasks. Routine `pour` / `flow` execution
+defaults stay narrow and only load root governance docs through docs-only,
+governance, profile, generated-baseline, or cross-layer `Iteration Area`
+overlays.
+
+Sample profiles follow the same constraint classification principle: default
+constraints stay minimal, planning and execution rules are stage-specific, and
+heavy scenario-specific behavior belongs in conditional overlays.
 
 ## Examples
 
@@ -110,4 +122,4 @@ Code suites.
 | `plans/issue-<id>/plan.md` | Goal, Scope, Approach, Validation, Plan Strategy, Constraints, Acceptance Criteria |
 | `plans/issue-<id>/tasks.md` | Structured task checklist (`Accept:` / `Validate:` / optional `Use-Check:` / `Depends:` / `Constraint:`) |
 | `plans/issue-<id>/runs/` | Per-task execution evidence |
-| `plans/issue-<id>/implement_notes.md` | Execution decision journal (optional, added when decisions matter to later tasks or review) |
+| `plans/issue-<id>/implement-notes.md` | Execution decision journal (optional, added when decisions matter to later tasks or review) |

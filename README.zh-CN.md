@@ -16,7 +16,7 @@ Forma 的核心方法论是 **plan-first**：实现前先收敛 Goal、Scope、A
 
 ## 两条作者路径
 
-- **已安装 creator 路径**：安装后的 `forma-creator` 可以在一次 agent 交互中接受用户临时约束，把这些约束注入生成的五段 skill bundle，运行 Layer 2 验证，然后安装或交付生成结果。这类临时约束不会自动成为 Forma 的 tracked source，除非用户明确把它提升为 profile 文件。
+- **已安装 creator 路径**：安装后的 `forma-creator` 可以在一次 agent 交互中接受用户临时约束，把这些约束注入生成的五段 skill bundle，运行 Layer 2 验证，然后安装或交付生成结果。这类临时约束不会自动成为 Forma 的 tracked source，除非用户明确把它提升为 profile 文件。Layer 1 同时定义 temporary injection generation standard：把自然语言约束写成临时 JSON 前，必须先分类到轻量 `constraints.default`、stage-specific 计划/执行规则，或 conditional overlay。
 - **tracked profile 路径**：`forma create --target ... --profile ...` 读取已提交的 profile 文件和 includes，生成可重复、可 review 的目标 bundle。profile 可以使用 `conditional_overlays` 表达可追踪的路线决策。
 
 Forma 仓库内的示例必须保持 sanitized。真实下游 profile 中的组织 workflow 命令、私有路径、凭证或业务规则应放在拥有这些约束的下游仓库里，不放进 Forma 示例树。
@@ -119,8 +119,22 @@ uv run --extra dev forma verify /tmp/forma-iteration-codex
 uv run --extra dev forma verify /tmp/forma-iteration-claude-code
 ```
 
-`profiles/forma-self/` 不是 public sample，而是 Forma 自己的 tracked self-iteration profile stack。它通过 `Iteration Area` 条件路由区分 docs-only、methodology/verifier、creator/profile、generated-baseline 和 cross-layer 工作，适合生成用于管理 Forma 仓库迭代的 skills。
+`profiles/forma-self/` 不是 public sample，而是 Forma 自己的 tracked self-iteration profile stack。它通过 `Iteration Area` 条件路由区分 docs-only、governance、methodology/verifier、creator/profile、generated-baseline 和 cross-layer 工作，适合生成用于管理 Forma 仓库迭代的 skills。
+
+这组 profile 的默认执行约束保持轻量：`forma-pour` 和 `forma-flow` 默认只读取 active `plans/issue-<id>/plan.md`、`tasks.md`、当前 task、相关源码和当前 task 必要的 references。`README.md`、`README.zh-CN.md`、`STRUCTURE.md`、`AGENTS.md` 仍由 shape/gauge/seal 这类规划和定界阶段默认读取；执行阶段只在 docs-only、governance、profile、generated-baseline 或 cross-layer 相关工作中按条件读取。
+
 生成出来的 skill 仍然使用原始 `forma-shape`、`forma-gauge`、`forma-seal`、`forma-pour`、`forma-flow` 名称；self-iteration 是 profile 行为，不是生成 skill 名称前缀。
+
+## Temporary Injection 标准
+
+当 agent 用已安装的 `forma-creator` 把自然语言约束转换成临时 injection JSON 时，除非用户明确要求 durable profile source，否则不能把它当作 tracked profile。creator 不能复制 README、AGENTS 或其他用户文档原文，只提取会影响生成 skill bundle 的 workflow constraints，并按最窄范围分类：
+
+- `constraints.default`：只放最轻、永远成立的底线。
+- `constraints.shape` / `constraints.gauge` / `constraints.seal`：计划、调研、写 `plan.md` / `tasks.md` 的规则。
+- `constraints.pour` / `constraints.flow`：日常 task 执行规则。
+- `conditional_overlays`：docs、generated-baseline、migration、governance、cross-layer 等重场景才启用的规则。
+
+agent 输出时必须给出 temporary injection 文件路径和简短 classification table，列出用户原始约束、注入位置、理由、是否 durable，以及是否建议之后提升为 tracked profile。会导致日常 `pour` / `flow` 默认读取广泛 root docs 或 generated baseline 的约束，不能放进 `constraints.default`。
 
 ## 安装 Layer 1 到 Agent
 

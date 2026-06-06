@@ -156,8 +156,10 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
     lines.extend(
         [
             "- Before generating a suite, load "
-            "`references/canonical-plan-first.md` and preserve the bundled "
-            "canonical plan-first semantics.",
+            "`references/canonical-plan-first.md` and "
+            "`references/temporary-injection-generation.md`; preserve the "
+            "bundled canonical plan-first semantics and "
+            "classify natural-language constraints before writing JSON.",
             "- Convert current-session natural-language injection into a "
             "temporary JSON file and run `python scripts/create.py --output "
             "<generated-suite-path> --injection-json <temporary-injection.json>`; "
@@ -199,6 +201,19 @@ def _interactive_constraint_contract() -> List[str]:
         "if no, omit `rename` and use the defaults.",
         "- Encode those constraints in a temporary injection JSON when they are "
         "compatible with the plan-first methodology and this target contract.",
+        "- Classify every natural-language constraint before writing JSON: "
+        "`constraints.default` is only for minimal always-on bottom lines; "
+        "planning rules go under `shape` / `gauge` / `seal`; daily execution "
+        "rules go under `pour` / `flow`; broad docs, generated-baseline, "
+        "migration, governance, or cross-layer rules belong in "
+        "`conditional_overlays`.",
+        "- Output the temporary injection file path plus a short classification "
+        "table with user constraint, injection target, rationale, durability, "
+        "and whether it should later become a tracked Layer 3 profile.",
+        "- Do not copy user docs verbatim, do not put governance/root-doc "
+        "reading requirements in `constraints.default`, and do not make "
+        "routine `pour` / `flow` read broad docs, all runs, generated "
+        "baselines, or full profile stacks by default.",
         "- Do not put `profile`, `includes`, tracked profile ids, or stage "
         "`name` / `directory` overrides in that temporary injection JSON. "
         "Final installable names belong only under `rename.stages`.",

@@ -29,6 +29,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert (codex / "scripts" / "create.py").is_file()
     assert (codex / "agents" / "openai.yaml").is_file()
     assert (codex / "references" / "agent-target.md").is_file()
+    assert (codex / "references" / "temporary-injection-generation.md").is_file()
     assert (
         codex / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
     ).is_file()
@@ -43,7 +44,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
         / "resources"
         / "shared"
         / "scripts"
-        / "issue-workflow.sh"
+        / "forma-workflow.sh"
     ).is_file()
     assert _is_executable(
         codex
@@ -53,7 +54,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
         / "resources"
         / "shared"
         / "scripts"
-        / "issue-workflow.sh"
+        / "forma-workflow.sh"
     )
     assert not (codex / "interfaces").exists()
     assert "fixed to `codex`" in (
@@ -77,6 +78,20 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "canonical-plan-first.md" in (
         codex / "references" / "agent-target.md"
     ).read_text(encoding="utf-8")
+    codex_target = (codex / "references" / "agent-target.md").read_text(
+        encoding="utf-8"
+    )
+    assert "temporary-injection-generation.md" in codex_target
+    assert "classification table" in codex_target
+    assert "constraints.default" in codex_target
+    assert "routine `pour` / `flow`" in codex_target
+    temp_standard = (
+        codex / "references" / "temporary-injection-generation.md"
+    ).read_text(encoding="utf-8")
+    assert "Do not copy README, AGENTS" in temp_standard
+    assert "constraints.default" in temp_standard
+    assert "conditional_overlays" in temp_standard
+    assert "classification table" in temp_standard
     assert not (output_root / "claude-code").exists()
     assert verify(codex).passed
 
@@ -91,6 +106,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert (claude / "SKILL.md").is_file()
     assert (claude / "scripts" / "create.py").is_file()
     assert (claude / "references" / "agent-target.md").is_file()
+    assert (claude / "references" / "temporary-injection-generation.md").is_file()
     assert (
         claude / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
     ).is_file()
@@ -105,7 +121,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
         / "resources"
         / "shared"
         / "scripts"
-        / "issue-workflow.sh"
+        / "forma-workflow.sh"
     )
     assert not (claude / "agents").exists()
     assert not (claude / "interfaces").exists()
@@ -117,6 +133,8 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "forma-shape/" in claude_target
     assert "rename.stages" in claude_target
     assert "one-off special constraints" in claude_target
+    assert "temporary-injection-generation.md" in claude_target
+    assert "classification table" in claude_target
     assert verify(claude).passed
 
 
@@ -130,32 +148,32 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
             {
                 "stages": {
                     "shape": {
-                        "display_name": "Backend Plan-First Shape",
-                        "short_description": "Converge Go backend plans",
-                        "default_prompt": "Use $forma-shape for Go backend planning.",
+                        "display_name": "Example Shape",
+                        "short_description": "Converge plans before materialization",
+                        "default_prompt": "Use $forma-shape for plan-first shaping.",
                     },
                     "flow": {
-                        "display_name": "Backend Plan-First Flow",
+                        "display_name": "Example Flow",
                     },
                 },
                 "skills": {
                     "shape": {
-                        "description": "Clarify Go backend work before plan finalization."
+                        "description": "Clarify work before plan finalization."
                     },
                     "flow": {
-                        "description": "Execute remaining Go backend tasks automatically."
+                        "description": "Execute remaining planned tasks automatically."
                     },
                 },
                 "constraints": {
                     "shape": [
-                        "If an API or stream contract change is confirmed or suspected, external prerequisite readiness is a mandatory planning gate before `proposal-ready`.",
+                        "If external readiness is required, settle the prerequisite before `proposal-ready`.",
                     ],
                     "flow": [
-                        "Before automated execution, verify the already-finalized plan passed the backend `finalize-plan` external prerequisite gate.",
+                        "Before automated execution, verify the already-finalized plan passed its prerequisite gates.",
                     ],
                 },
                 "validation_commands": {
-                    "seal": ["go test ./..."],
+                    "seal": ["pytest tests/"],
                 },
             },
             indent=2,
@@ -181,14 +199,14 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     assert (generated / "forma-shape" / "SKILL.md").is_file()
     assert (generated / "forma-flow" / "SKILL.md").is_file()
     assert not (generated / "shape").exists()
-    assert not (generated / "backend-plan-first-plan-issue").exists()
+    assert not (generated / "renamed-shape").exists()
     assert 'name: "forma-shape"' in (
         generated / "forma-shape" / "SKILL.md"
     ).read_text(encoding="utf-8")
-    assert "external prerequisite readiness" in (
+    assert "settle the prerequisite" in (
         generated / "forma-shape" / "SKILL.md"
     ).read_text(encoding="utf-8")
-    assert "go test ./..." in (generated / "forma-seal" / "SKILL.md").read_text(
+    assert "pytest tests/" in (generated / "forma-seal" / "SKILL.md").read_text(
         encoding="utf-8"
     )
     assert (generated / "forma-shape" / "agents" / "openai.yaml").is_file()
@@ -302,11 +320,11 @@ def test_installed_creator_script_supports_confirmed_stage_renames(
             {
                 "rename": {
                     "stages": {
-                        "shape": "backend-plan-first-plan-issue",
-                        "gauge": "backend-plan-first-ground-plan",
-                        "seal": "backend-plan-first-finalize-plan",
-                        "pour": "backend-plan-first-implement-feature",
-                        "flow": "backend-plan-first-showhand",
+                        "shape": "renamed-shape",
+                        "gauge": "renamed-gauge",
+                        "seal": "renamed-seal",
+                        "pour": "renamed-pour",
+                        "flow": "renamed-flow",
                     }
                 }
             }
@@ -329,16 +347,16 @@ def test_installed_creator_script_supports_confirmed_stage_renames(
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    assert (generated / "backend-plan-first-plan-issue" / "SKILL.md").is_file()
-    assert (generated / "backend-plan-first-showhand" / "SKILL.md").is_file()
+    assert (generated / "renamed-shape" / "SKILL.md").is_file()
+    assert (generated / "renamed-flow" / "SKILL.md").is_file()
     assert not (generated / "forma-shape").exists()
-    assert 'name: "backend-plan-first-plan-issue"' in (
-        generated / "backend-plan-first-plan-issue" / "SKILL.md"
+    assert 'name: "renamed-shape"' in (
+        generated / "renamed-shape" / "SKILL.md"
     ).read_text(encoding="utf-8")
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["emitted_skills"]["shape"]["name"] == "backend-plan-first-plan-issue"
+    assert manifest["emitted_skills"]["shape"]["name"] == "renamed-shape"
     assert verify(generated).passed
 
 
@@ -353,8 +371,8 @@ def test_installed_creator_script_rejects_profile_style_stage_renames(
             {
                 "stages": {
                     "shape": {
-                        "name": "backend-plan-first-plan-issue",
-                        "directory": "backend-plan-first-plan-issue",
+                        "name": "renamed-shape",
+                        "directory": "renamed-shape",
                     }
                 }
             }
@@ -424,8 +442,8 @@ def test_installed_creator_script_rejects_profile_keys(tmp_path: Path) -> None:
     injection.write_text(
         json.dumps(
             {
-                "profile": "backend-plan-first",
-                "includes": ["backend-go"],
+                "profile": True,
+                "includes": [],
             }
         ),
         encoding="utf-8",

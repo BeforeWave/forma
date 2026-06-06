@@ -1,7 +1,7 @@
 # Canonical Plan-First Builder Contract
 
 Forma creator output must preserve the bundled canonical plan-first semantics
-derived from the validated plan-first workflow layer.
+shipped with this creator package.
 
 ## Source Resources
 
@@ -85,24 +85,24 @@ self-contained:
 - `gauge`: `references/output-format.md`.
 - `seal`: `references/planning-rules.md`,
   `references/output-format.md`, `references/plan-template.md`,
-  `references/tasks-template.md`, `scripts/issue-workflow.sh`, and
+  `references/tasks-template.md`, `scripts/forma-workflow.sh`, and
   `script/github_issue_context.py`.
 - `pour`: `references/execution-rules.md`,
   `references/output-format.md`, `references/implement-notes.md`,
   `references/plan-template.md`, `references/tasks-template.md`, and
-  `scripts/issue-workflow.sh`.
+  `scripts/forma-workflow.sh`.
 - `flow`: `references/execution-rules.md`,
   `references/output-format.md`, `references/implement-notes.md`, and
-  `scripts/issue-workflow.sh`.
+  `scripts/forma-workflow.sh`.
 
-Make copied `scripts/issue-workflow.sh` executable.
+Make copied `scripts/forma-workflow.sh` executable.
 
 ## Generated Requirement References
 
 Emit these expanded source fragments as generated references inside the
 owning skill directory. The generated `SKILL.md` must cite each emitted file
 with a `Load and follow` requirement so expanding those citations restores the
-same effective requirement list as the validated plan-first source.
+same effective requirement list as the validated canonical methodology source.
 
 - `shape`: `fragments/shape/decision-gate-adds.md` to
   `references/proposal-decision-gate.md`, and
@@ -133,6 +133,21 @@ additional references, and final installable skill names under
 `rename.stages`. It must not replace fixed resources, remove gate rules, weaken
 review-ready/complete semantics, or borrow resources from sibling generated
 skills.
+
+Before writing the temporary JSON, load
+`references/temporary-injection-generation.md` and classify every
+natural-language constraint by its narrowest injection target. Keep
+`constraints.default` limited to light always-on bottom lines. Put planning,
+grounding, plan-materialization, execution, and automated-execution rules under
+their matching stage keys. Put heavy scenario-specific requirements, including
+root-doc reading, generated-baseline inspection, migration rules, governance
+rules, or cross-layer work, behind `conditional_overlays`.
+
+The agent must output the temporary injection file path plus a classification
+table that shows the original user constraint, structured injection target,
+rationale, durability, and whether the constraint should later be promoted into
+a tracked profile. Do not put that classification metadata into the injection
+JSON unless the JSON schema explicitly supports it.
 
 Forma has one optional conditional injection mechanism, not built-in business
 classification. If the current user asks for conditional behavior, the

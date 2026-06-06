@@ -64,7 +64,11 @@ There are two authoring paths:
   result. Those one-off constraints are not tracked by Forma unless promoted
   into a profile file. The creator supports either ordinary unconditional
   injection or optional `conditional_overlays`; Forma does not hardcode route
-  names such as language, backend, or product categories.
+  names such as language, backend, or product categories. Layer 1 defines the
+  temporary injection generation standard: natural-language constraints must
+  be classified into minimal `constraints.default`, stage-specific
+  planning/execution rules, or conditional overlays before the temporary JSON
+  is written.
 - **Tracked profile path**: `forma create --target ... --profile ...` resolves
   a committed profile file and its includes, then produces a repeatable target
   bundle. Profiles may use the same `conditional_overlays` structure when a
@@ -186,10 +190,39 @@ uv run --extra dev forma verify /tmp/forma-iteration-claude-code
 
 `profiles/forma-self/` is not a public sample. It is Forma's own tracked
 self-iteration profile stack, with conditional `Iteration Area` routes for
-docs-only, methodology/verifier, creator/profile, generated-baseline, and
-cross-layer work. It still emits the canonical `forma-shape`, `forma-gauge`,
-`forma-seal`, `forma-pour`, and `forma-flow` skill names; self-iteration is a
-profile behavior, not a generated skill-name prefix.
+docs-only, governance, methodology/verifier, creator/profile,
+generated-baseline, and cross-layer work. Its default execution constraints are
+kept intentionally light: `forma-pour` and `forma-flow` read the active
+`plans/issue-<id>/plan.md`, `tasks.md`, current task, relevant source files,
+and only the references needed for the current task. Root governance docs
+(`README.md`, `README.zh-CN.md`, `STRUCTURE.md`, and `AGENTS.md`) are loaded by
+default for planning/finalization stages and conditionally during execution
+only for docs, governance, profile, generated-baseline, or cross-layer work.
+
+The self-iteration profile still emits the canonical `forma-shape`,
+`forma-gauge`, `forma-seal`, `forma-pour`, and `forma-flow` skill names;
+self-iteration is a profile behavior, not a generated skill-name prefix.
+
+## Temporary Injection Standard
+
+When an agent uses an installed `forma-creator` from natural-language
+constraints, it creates a temporary injection JSON rather than tracked profile
+source unless the user explicitly asks for durable profile files. The creator
+must not copy README, AGENTS, or other user docs verbatim. It extracts workflow
+constraints and classifies them before generation:
+
+- `constraints.default`: only minimal always-on bottom lines.
+- `constraints.shape` / `constraints.gauge` / `constraints.seal`: planning,
+  grounding, and plan materialization rules.
+- `constraints.pour` / `constraints.flow`: daily task execution rules.
+- `conditional_overlays`: heavy route-specific rules such as docs,
+  generated-baseline, migration, governance, or cross-layer work.
+
+The agent must output the temporary injection file path plus a short
+classification table showing the user constraint, injection target, rationale,
+durability, and whether the behavior should later become a tracked profile.
+Broad root-doc or generated-baseline reads must not be placed in
+`constraints.default` for routine `pour` / `flow` execution.
 
 ## Install Layer 1 Into An Agent
 

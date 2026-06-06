@@ -331,8 +331,8 @@ check_gauge_methodology = _make_keyword_rule(
 
 check_seal_methodology = _make_keyword_rule(
     "R103", "seal",
-    ["plan.md", "tasks.md", "issue-workflow"],
-    "seal skill must cite plan.md / tasks.md outputs and issue-workflow init",
+    ["plan.md", "tasks.md", "forma-workflow"],
+    "seal skill must cite plan.md / tasks.md outputs and forma-workflow init",
 )
 
 check_pour_methodology = _make_keyword_rule(
