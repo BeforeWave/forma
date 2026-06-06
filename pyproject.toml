@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "BeforeWave" }]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+]
 dependencies = [
     "click>=8.0",
     "pyyaml>=6.0",

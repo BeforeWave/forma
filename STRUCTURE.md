@@ -6,8 +6,8 @@ This document maps the current Forma source tree and the role of each area.
 
 | Path | Role | Status |
 |---|---|---|
-| `README.md` | Human-facing project overview | present |
-| `README.zh-CN.md` | Chinese project overview and usage guide | present |
+| `README.md` | English project entrypoint and documentation index | present |
+| `README.zh-CN.md` | Chinese project entrypoint and documentation index | present |
 | `AGENTS.md` | Agent-facing repo entrypoint | present |
 | `STRUCTURE.md` | This file — top-level structure map | present |
 | `LICENSE` | MIT license text | present |
@@ -20,6 +20,7 @@ This document maps the current Forma source tree and the role of each area.
 | `src/forma/` | Developer Python package and CLI | present |
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
 | `examples/` | Sanitized composable profile examples and generated Mode-S suites | present |
+| `docs/` | Human-facing split documentation linked from the README files | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
 ## Source tree
@@ -75,6 +76,17 @@ generated skill resources.
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Mode-S skill contents |
 | `src/forma/adapters/skill.py` | Target-specific `forma-creator` builder with fixed output contracts |
 | `src/forma/creator/emitter.py` | Output writer for generated suites |
+
+## Documentation
+
+| Path | Role |
+|---|---|
+| `docs/quick-start.md` | English install, tracked-profile generation, and `forma-creator` generation walkthrough |
+| `docs/quick-start.zh-CN.md` | Chinese quick start |
+| `docs/concepts.md` | English overview of Forma outputs, differentiation, spec-tool relationship, profiles, and injection paths |
+| `docs/concepts.zh-CN.md` | Chinese concepts guide |
+| `docs/usage.md` | English command reference, repository checks, source layout, and installed CLI behavior notes |
+| `docs/usage.zh-CN.md` | Chinese usage guide |
 
 ## Profiles
 

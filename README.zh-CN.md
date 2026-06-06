@@ -1,192 +1,194 @@
 # Forma
 
-为团队和项目构建专属的 Spec Plan-First agent workflow。
+**把你的 Spec 纪律变成可复用的 Agent workflow。**
 
-Forma 是一个 Python CLI 和 creator skill source，用来把项目的 spec 与可复用工程约束
-变成可安装到 Codex 或 Claude Code 的 agent workflow。它不替代 PRD、issue 或
-OpenSpec change；这些仍然是需求层。Forma 做的是在需求 spec 之上注入项目自己的通用
-约束，并生成一个 plan-first workflow，要求 agent 在实现前证明计划满足这些约束。
+Forma 把一个项目长期形成的规划规则、证据要求、验证门槛和执行边界，生成可安装到 Codex 或 Claude Code 的 Spec Plan-First 工作流技能。
+
+它适合已经要求 Agent 按 Spec、计划、证据和验证来工作，而不是只靠一次性提示词的人和团队。
 
 英文文档：[README.md](./README.md)
 
-## 项目模型
+## 变化
 
-Forma 只构建一件事：项目专属的 Spec Plan-First agent workflow。
+AI coding 之后，项目的一等资产不再只有代码。
 
-这个 workflow 由四类输入编译出来：
+Agent 执行的 Spec、遵守的流程约束、规划时读取的证据、定稿后的计划、执行后留下的证明，都会进入项目生命周期。
 
-- **Spec source**：PRD、GitHub issue、OpenSpec change、设计文档或 task plan，定义
-  要做什么。
-- **Plan-first methodology**：`source/methodology/` 下的 canonical workflow。
-- **Project profile**：人可维护的 YAML、references 和 scripts，定义这个团队或 repo
-  期望 agent 如何规划、读证据、验证和执行。
-- **Agent target**：Codex 或 Claude Code。
+过去，团队风格主要体现在命名、架构、模块边界、测试习惯和评审标准里。现在，它也会体现在 Agent 如何工作：先读什么、怎么规划、何时停下、怎么验证、如何留证。
 
-输出是一个可安装的五段 skill suite，加上 manifest 和 verifier rules。每个 skill 都
-对应具体工程动作：
+不同团队会形成不同的 Spec-driven development 方法、规划习惯、验证预期和流程约束。它们会像过去的代码风格一样，塑造项目的长期质量。
 
-- `shape`：把需求来源变成有边界的 proposal。它澄清 goal、scope、source of truth、
-  未决决策，以及本次 work 选择了哪条项目约束路线。
-- `gauge`：只读检查 repo 和来源材料，不改代码。它收集证据，确认哪些文件、API、命令、
-  docs 或历史计划真正约束这次工作。
-- `seal`：写最终 `plan.md` 和 `tasks.md`。它检查需求覆盖、注入的项目约束、acceptance
-  criteria、task 边界和 validation path。
-- `pour`：只执行 sealed plan 里的一个 accepted task，更新 task evidence，并运行验证。
-- `flow`：只有 sealed plan 允许自动执行时，才继续执行剩余 accepted tasks。
+Forma 做的就是让这套风格成形。
 
-## 为什么需要它
+## Forma 是什么
 
-Spec 定义的是要改什么。它通常不会完整编码一个项目要求 agent 稳定遵守的工程规则。
+Forma 是生成器，不是运行时工作流本身。
 
-这些项目规则经常散落在 README、AGENTS、验证脚本、团队习惯、私有 source reader 和
-历史计划决策里。如果它们只是松散 prompt，不同 agent 会对同一个 spec 做出不同规划。
+它把项目自己的工作流规则、Plan-First 方法、目标 Agent 界面和可选的一次性生成约束组合起来，生成项目专属的 Spec Plan-First 工作流套件。
 
-Forma 把这些可复用规则显式化：
+```text
+Forma 组合：
+  项目 profile：可复用的工作流规则和约束
+  方法论：Plan-First 阶段、门槛和留证要求
+  目标界面：Codex 或 Claude Code
+  可选一次性注入：本次生成专用的临时约束
 
-- 持久项目规则放进 reviewed profile；
-- 一次性规则分类进 temporary injection；
-- 重规则通过 conditional overlays 按路线启用；
-- 只有 profile 或 injection 拥有的 source reader 才会被注入；
-- planning 和 finalization 必须证明选中的约束已经反映到 sealed plan 里。
-
-核心价值不是更好看的 prompt，而是一个稳定的 plan-first workflow：把 spec + 项目约束
-变成经过验证的执行路径。
-
-## Profile 是人维护的源
-
-Forma profile 的目标是人可维护。agent 可以帮某个 repo 起草或修改 profile，但最终
-结果应该是项目拥有的、可读、可 review 的源文件。
-
-Profile 可以定义：
-
-- 哪些需求来源是 authoritative；
-- 必须读取哪些 repository evidence；
-- 哪些 validation commands 能证明 work；
-- 哪些规则属于 planning、grounding、plan finalization、task execution 或 automatic
-  execution；
-- docs-only、governance、migration、generated-baseline、backend、frontend、
-  cross-layer 等 conditional routes；
-- 哪些 references 或 scripts 会复制进生成的 skills。
-
-Forma 通过 CLI 暴露 profile 编写原则，所以 agent 辅助写 profile 时不需要读 Forma
-源码：
-
-```bash
-uv run --extra dev forma explain profile --target codex
+生成：
+  可安装、目标界面专用的工作流技能
 ```
 
-## 注入方式
+这些生成出来的技能，再约束 Agent 如何读取 PRD、issue、spec、任务计划、brief、仓库证据和验证结果。
 
-Forma 支持多种注入方式，因为规则的持久性不同。
+它关心的不是“多写一个提示词”，而是把规则放到正确位置：默认约束、阶段约束、场景规则、资源文件、来源适配器。
 
-**Tracked profile**：团队、repo 或 workflow 的持久 workflow source。适合会重复发生、
-需要 review 和长期维护的规则。
+## Forma 生成什么
 
-**Temporary injection**：一次性 JSON。安装后的 `forma-creator` 可以把用户自然语言约束
-转成 temporary injection，用于生成一个 suite。agent 在生成前必须输出 injection path
-和 classification table。
+Forma 生成的套件，才是 Agent 实际使用的工作流。
 
-**Stage constraints**：只作用于某个生命周期阶段的规则，例如 `shape` 的 planning-only
-规则、`gauge` 的只读 grounding 规则、`pour` 的执行规则。
+安装到 Codex 或 Claude Code 后，它通常由五个协同技能组成：
 
-**Conditional overlays**：只在 `shape` 把所选场景记录进 `plan.md` 后启用的路线规则。
-适合成本高或场景专用的项目行为。
-
-**Source adapters**：用于加载需求或证据的显式 helper scripts / references，例如 issue
-tracker、文档导出器、私有知识工具或本地 source reader。它们由 profile 或 temporary
-injection 注入，不是 Forma base capability。
-
-Temporary injection 使用同样的分类原则：
-
-```bash
-uv run --extra dev forma explain temporary-injection --format json --target codex
+```text
+shape -> gauge -> seal -> pour -> flow
 ```
 
-## 命令流程
+- `shape`：把需求收敛成有边界的方案；
+- `gauge`：只读收集仓库、Spec、文档和历史证据；
+- `seal`：把计划和任务固定成可评审、可验证的执行契约；
+- `pour`：只执行一个已接受任务，并记录证明；
+- `flow`：只有计划允许时才继续推进。
 
-从 reviewed profile 生成 Codex workflow：
+这些技能不是零散提示词。它们是一条项目自己的 Agent 工作回路。
+
+不喜欢这些名字？没事。Forma 支持把生成技能改成项目自己的叫法，规则见 [使用说明：重命名生成技能](./docs/usage.zh-CN.md#重命名生成技能)。
+
+## 为什么重要
+
+Forma 让 Agent 工作变得：
+
+- **可重复**：项目规则有固定位置和生命周期，不只存在于上下文窗口；
+- **分阶段**：澄清、取证、定稿、执行、证明不会混成一团；
+- **有边界**：执行限制在已接受任务内，降低顺手扩大范围的风险；
+- **可评审**：评审者不只看到 diff，还能看到 Agent 如何从 Spec 走到实现；
+- **可迁移**：同一套工作流风格可以生成到不同 Agent 界面。
+
+## 谁适合：软件团队？以及不止于此
+
+软件团队是 Forma 最自然的起点。如果你已经把 AI coding 当作常规开发方式，并且反复遇到这些情况，你可能需要 Forma：
+
+- 同一个 Spec，不同 Agent 会读不同材料、漏不同验证；
+- 团队有明确的 Spec、规划、验证习惯，但散落在文档、提示词和历史经验里；
+- 仓库有多条工作路线，例如后端、迁移、生成基线、文档、治理、跨层改动；
+- 你希望 Agent 先形成可评审计划，而不是直接跳到实现；
+- 你想让 Codex、Claude Code 或其他 Agent 界面遵守同一套项目工作流。
+
+如果只是偶尔让 Agent 改小文件，`AGENTS.md`、普通提示词或单个技能通常已经够用。
+
+Forma 不只属于软件开发：只要你的工作也依赖“先读什么、怎么计划、谁来验收、留下什么证明”，同一套工作流模式就可能适用。哪些工作适合，见 [核心概念：不只软件开发](./docs/concepts.zh-CN.md#不只软件开发)；不同角色怎么用，见 [不同人怎么用 Forma](./docs/concepts.zh-CN.md#不同人怎么用-forma)。
+
+Forma 面向的是想把工作方式产品化、复用化、可审查化的人。
+
+## Forma 在哪里
+
+Forma 和 OpenSpec、Spec Kit、Kiro 这类 Spec 工具不在同一层。那些工具组织需求和事实；Forma 生成 Agent 读取、整理和处理这些材料时要遵守的工作流。
+
+Forma 也不是 Codex `skill-creator` 或 Claude Code Skill Creator 这类通用技能创建器。那些工具创建能力；Forma 创建项目工作流。
+
+Forma 也不替代 `AGENTS.md`。`AGENTS.md` 让 Agent 读到规则；Forma 让可复用规则进入分阶段工作流。
+
+```text
+Spec 工具组织需求和事实。
+通用技能创建器创建能力。
+AGENTS.md 给出仓库级指引。
+Forma 把你的 Spec 纪律变成可复用的 Agent workflow。
+```
+
+## 文档
+
+- [快速开始](./docs/quick-start.zh-CN.md)：安装、生成工作流、构建 `forma-creator`。
+- [核心概念](./docs/concepts.zh-CN.md)：核心概念、生态位比较、profile 和注入路径。
+- [使用说明](./docs/usage.zh-CN.md)：命令参考、仓库检查、安装后行为。
+- [STRUCTURE.md](./STRUCTURE.md)：当前源码结构和边界。
+
+## 两种入口
+
+Forma 有两种常见入口。
+
+### 让 Agent 帮你写 profile
+
+想把某个项目的长期工作流规则沉淀下来，就在项目里对 Agent 说：
+
+```text
+运行：
+  forma explain profile --target codex
+
+把命令输出当作 profile 编写标准。
+检查当前仓库，并提出一个可提交、可维护的 Forma profile 方案。
+
+请找出：
+- 权威需求来源；
+- 规划和取证要求；
+- 验证命令和证明要求；
+- 只属于特定阶段的约束；
+- 反复出现的工作路线和场景规则；
+- 应该显式声明的来源读取脚本或辅助脚本。
+
+先不要写文件。
+先展示建议的 profile 结构，解释每条约束应该放在哪里，
+并标出需要人确认的未知项。
+```
+
+这条路适合把真实存在的团队习惯沉淀成长期 profile。
+
+### 用 `forma-creator` 快速试工作流想法
+
+不想先设计完整 profile？装好目标 Agent 专用的 `forma-creator`，然后把想法直接交给 Agent：
+
+```text
+使用 forma-creator，把下面这些工作流想法生成成本仓库的 Plan-First 套件。
+
+我想试的规则：
+- 规划前先确认真正的权威来源；
+- 只读取当前范围需要的证据；
+- 每个任务都写清验收条件和验证要求；
+- 一次只执行一个已接受任务；
+- 遇到 API、数据库、生成基线或跨层改动时先停下，除非计划明确允许继续。
+
+生成前先说明这些规则会如何分类。
+生成后验证套件。
+```
+
+这条路适合快速试手感。好用的规则，再沉淀进长期 profile。
+
+## 快速试一下
+
+确认 `forma` 已经在 `PATH` 里之后，生成并验证一个工作流套件：
 
 ```bash
-uv run --extra dev forma create \
+forma --help
+forma create \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex
+forma verify /tmp/backend-plan-first-codex
 ```
 
-验证生成结果：
+构建一个目标固定的 `forma-creator`：
 
 ```bash
-uv run --extra dev forma verify /tmp/backend-plan-first-codex
+forma build-creator --target codex --output /tmp/forma-creator-dist
 ```
 
-安装到 Codex：
+安装路径、Claude Code 输出和 profile 编写细节见 [快速开始](./docs/quick-start.zh-CN.md)。
 
-```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/backend-plan-first-codex/* ~/.codex/skills/
-```
+## Forma 管理 Forma
 
-同一个 profile 也可以生成 Claude Code workflow：
+btw：Forma 自己的规划和开发，也走 Forma 生成的 workflow。支撑这条回路的 self profiles 在：
 
-```bash
-uv run --extra dev forma create \
-  --target claude-code \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-claude-code
+- [profiles/forma-self/forma-self-iteration.yaml](./profiles/forma-self/forma-self-iteration.yaml)
+- [profiles/forma-self/base.yaml](./profiles/forma-self/base.yaml)
+- [profiles/forma-self/iteration-overlays.yaml](./profiles/forma-self/iteration-overlays.yaml)
+- [profiles/forma-self/project.yaml](./profiles/forma-self/project.yaml)
 
-uv run --extra dev forma verify /tmp/backend-plan-first-claude-code
-```
+## 许可证
 
-## Creator Skill
-
-Forma 也能生成目标固定的 `forma-creator` skill。安装后的 creator 可以让 agent 把
-review 过的自然语言约束转换成 temporary injection，生成项目专属 workflow，并在汇报
-成功前验证 suite。
-
-```bash
-uv run --extra dev forma build-creator \
-  --output /tmp/forma-creator-dist \
-  --target codex
-
-uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator
-```
-
-Creator bundle 自带 methodology resources 和 verifier。下游项目不需要安装 developer
-`forma` package，就能走 agent-side verification。
-
-## 仓库事实
-
-- `source/methodology/`：用于生成 `shape`、`gauge`、`seal`、`pour`、`flow` 的
-  canonical plan-first methodology。
-- `source/skill-creator/`：Layer 1 `forma-creator` source、随包 references、standalone
-  creator script 和 verifier。
-- `src/forma/`：developer CLI、profile compiler、runtime asset resolver 和目标专用
-  emitters。
-- `profiles/forma-self/`：Forma 管理本仓库迭代用的人可维护 profile。
-- `examples/profiles/`：sanitized profile examples。
-- `examples/generated/`：已提交的 generated baselines，用于 drift checks。
-- `tests/`：verifier、profile、creator、runtime asset 和 generated-baseline tests。
-
-详细 source tree 见 [STRUCTURE.md](./STRUCTURE.md)。
-
-## 和 Spec 工具的关系
-
-Spec 工具保存需求变化。Forma 保存 agent 如何把这个 spec 变成受项目约束、证据支撑的
-plan 和 execution。
-
-- OpenSpec、PRDs、issues 管 demand。
-- Forma profiles 管项目 workflow constraints。
-- 生成出来的 Forma skills 管连接二者的 agent behavior。
-
-## 仓库验证
-
-```bash
-uv run --extra dev forma verify source/skill-creator/
-uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
-uv run --extra dev pytest -p no:cacheprovider tests/
-```
-
-## License
-
-MIT - see [LICENSE](./LICENSE).
+Apache-2.0，见 [LICENSE](./LICENSE)。
