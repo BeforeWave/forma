@@ -2,29 +2,25 @@
 
 英文版：[usage.md](./usage.md)
 
-这页是 Forma 的命令和 profile 参考。
-
-第一次跑通请先看 [快速开始](./quick-start.zh-CN.md)。
-
----
+这页是 Forma 的命令参考。第一次跑通请先看 [快速开始](./quick-start.zh-CN.md)。
 
 ## 命令
 
 ### `forma verify <path>`
 
-验证一个 Plan-First 技能套件或 `forma-creator` 套件：
+验证生成的 workflow bundle 或 `forma-creator` bundle：
 
 ```bash
 forma verify /tmp/backend-plan-first-codex
 ```
 
-安装、提交或分享生成套件前，先运行这个命令。
+安装、提交或分享生成 bundle 前，先运行这个命令。
 
----
+`forma verify` 检查结构和方法规则。它不替代 profile review 或产品判断。Bundle 结构见 [Skill Bundle](./skill-bundle.zh-CN.md)。
 
 ### `forma create`
 
-把标准方法和解析后的长期 profile 组合起来，生成目标 Agent 专用的工作流套件：
+把标准方法和解析后的 tracked profile 组合起来，生成目标环境专用 workflow bundle：
 
 ```bash
 forma create \
@@ -43,11 +39,11 @@ forma create \
 
 - `--methodology <dir>`：使用指定的方法目录，而不是打包内置的运行时资源。
 
----
+Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
 ### `forma build-creator`
 
-生成目标 Agent 专用的可安装 `forma-creator`：
+生成目标环境专用的可安装 `forma-creator`：
 
 ```bash
 forma build-creator \
@@ -64,7 +60,7 @@ forma build-creator \
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
----
+每个生成的 `forma-creator` 都固定一个目标环境。Codex creator 生成 Codex 形态的 workflow bundle。Claude Code creator 生成 Claude Code 形态的 workflow bundle。
 
 ### `forma explain`
 
@@ -75,13 +71,11 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-当另一个 Agent 需要起草 profile 或一次性注入时，用这个命令给它规则。
-
----
+当另一个 Agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。
 
 ## 安装目标
 
-Forma 生成的是目标环境专用套件。把生成出来的技能目录复制到对应位置：
+Forma 生成的是目标环境专用 bundle。把生成技能目录复制到对应位置：
 
 | 目标 | 个人安装 | 项目/团队安装 |
 |---|---|---|
@@ -94,78 +88,13 @@ Claude Code 的项目 skills 放在 `.claude/skills`。
 
 信任项目 skills 前先审查内容，因为 skills 可以包含脚本和目标环境专用工具行为。
 
----
-
-## Profile Schema
-
-长期 profile 是严格的 YAML 来源。
-
-未知顶层键或未知嵌套键会被拒绝，避免 profile 静默绕过工作流契约。
-
-允许的顶层键：
-
-| 键 | 用途 |
-|---|---|
-| `profile` | 稳定 `id` 和可选的人类说明。 |
-| `includes` | 相对路径或 profile id，会先于当前文件解析。 |
-| `bundle` | 面向评审的 bundle `name` 和 `description`。 |
-| `org` | 可选的所属组织或团队名。 |
-| `stages` | 为 `shape`、`gauge`、`seal`、`pour`、`flow` 设置安装名、目录名、展示名、提示词和 `enabled` 开关。 |
-| `resources` | 按阶段复制进生成技能的 `references`、`scripts` 或 `files`。 |
-| `skills` | 按阶段设置触发说明，不改变阶段语义。 |
-| `terminology` | 写入生成技能指引的项目词汇。 |
-| `validation_commands` | 默认或阶段专用验证命令。 |
-| `decision_gate_extras` | `shape` 必须额外收敛的决策维度。 |
-| `constraints` | 默认或阶段专用工作流约束。 |
-| `conditional_overlays` | 只有计划记录了所选路线后才启用的路线专用约束、资源和验证。 |
-
-保持 `constraints.default` 轻量。
-
-把规则放到对应阶段：
-
-| 阶段 | 适合放什么 |
-|---|---|
-| `constraints.shape` | 规划策略、需求澄清、路线、范围和未决问题 |
-| `constraints.gauge` | grounding 和证据收集 |
-| `constraints.seal` | 计划定稿、已接受任务和验证契约 |
-| `constraints.pour` | 当前任务执行和证明 |
-| `constraints.flow` | 安全继续边界 |
-
----
-
-## 生成技能质量
-
-Forma 应该生成工作流技能，而不是把一大段制度提示词复制五遍。
-
-生成套件应满足这些预期：
-
-- 每个 skill 只有一个清晰阶段职责；
-- `description` 说明什么时候使用这个 skill，但不要变成 runbook；
-- `SKILL.md` 承载该阶段的长期指令；
-- 大段稳定指引放进 `references/`；
-- 来源读取器和辅助脚本只有被 profile 或一次性注入选中时才出现；
-- 宽泛规则放进场景规则，而不是 `constraints.default`；
-- 每个可执行阶段都指向对应验证或证明路径。
-
-重命名、修改 profile、使用一次性注入或切换目标环境后，都运行：
-
-```bash
-forma verify <generated-suite-dir>
-```
-
----
-
 ## 重命名生成技能
 
-不想叫 `shape`、`gauge`、`seal`、`pour`、`flow`？可以。
-
-Forma 保留这五个阶段的语义，但允许项目把生成技能改成自己的名字。
-
-有两条路径。
+Forma 保留 `shape`、`gauge`、`seal`、`pour`、`flow` 这些语义阶段，但生成技能名可以使用项目自己的语言。
 
 ### 长期 profile 命名
 
-长期 profile 里，改 `stages.<stage>`：
+Tracked profile 里，设置 `stages.<stage>`：
 
 ```yaml
 stages:
@@ -181,11 +110,11 @@ stages:
 
 规则：
 
-- `name` 是技能 frontmatter 里的名字；
+- `name` 是 skill frontmatter 里的名字；
 - `directory` 是安装目录名；
-- `display_name` 是界面展示名；
+- `display_name` 是目标环境展示名；
 - `name` 和 `directory` 必须是 lower kebab-case；
-- 语义阶段仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`，不要把阶段键本身改掉。
+- 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
 
 ### 一次性 creator 命名
 
@@ -207,18 +136,14 @@ stages:
 
 - `rename.prefix` 会生成 `<prefix>-shape`、`<prefix>-gauge`、`<prefix>-seal`、`<prefix>-pour`、`<prefix>-flow`；
 - `rename.stages` 可以覆盖单个阶段的完整技能名；
-- 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape`、`gauge`、`seal`、`pour`、`flow`；
-- creator 的一次性注入不接受 profile 风格的 `stages.shape.name` 写法。长期命名进 profile，现场命名进 `rename`。
+- 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
+- creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，现场命名进 `rename`。
 
-改完后运行：
+改名后验证生成 bundle：
 
 ```bash
 forma verify <generated-suite-dir>
 ```
-
-验证器会检查 manifest、目录名和 `SKILL.md` frontmatter 是否一致。
-
----
 
 ## 仓库检查
 
@@ -232,30 +157,30 @@ python -m pytest -p no:cacheprovider tests/
 git diff --check
 ```
 
----
-
 ## 源码结构
 
 - `source/methodology/`：生成 `shape`、`gauge`、`seal`、`pour`、`flow` 的标准 Plan-First 方法。
-- `source/skill-creator/`：自包含的 `forma-creator` 源码，包含引用材料、创建脚本和验证器。
-- `src/forma/`：命令行工具、profile 编译器、运行时资源解析器和目标环境生成器。
+- `source/skill-creator/`：自包含的 `forma-creator` 源码，包含 references、creator script 和 verifier。
+- `src/forma/`：Python CLI、profile compiler、runtime asset resolver 和 target emitters。
 - `profiles/forma-self/`：Forma 管理本仓库时使用的 profile。
 - `examples/profiles/`：经过脱敏的 profile 示例。
 - `examples/generated/`：已提交的生成基线，用于检查漂移。
-- `tests/`：验证器、creator、运行时资源、profile 和生成基线测试。
+- `tests/`：verifier、creator、runtime asset、profile 和生成基线测试。
 
 详细源码结构见 [仓库结构](../STRUCTURE.md)。
 
----
-
 ## 安装后的命令行为
 
-打包安装后的 Forma 命令默认使用 `forma.assets` 中的运行时资源。
-
-源码路径只作为开发覆盖：
+打包安装后的 Forma 命令默认使用 `forma.assets` 中的运行时资源。源码路径只作为开发覆盖：
 
 - `forma create` 默认使用打包内置的方法，除非提供 `--methodology`。
 - `forma build-creator` 默认使用打包内置的 creator 源，除非提供 `--source`。
-- `forma explain` 从打包内置的引用材料渲染编写指南。
+- `forma explain` 从打包内置的 references 渲染编写指南。
 
 因此，通过 pip 或 pipx 安装后的命令不依赖 Forma 源码仓库。
+
+## 相关文档
+
+- [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、门禁、边界和证明。
+- [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
+- [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。

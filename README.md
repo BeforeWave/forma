@@ -2,17 +2,14 @@
 
 **A compiler for project-specific agent workflows.**
 
-Forma turns workflow profiles into portable skill bundles for Codex and Claude
-Code.
+Agents can move fast. The hard part is steering the work after the first prompt.
 
-It gives coding agents a spine: how they clarify, gather evidence, plan,
-execute, validate, and continue becomes explicit, versioned, portable, and
-verifiable.
+Forma turns the part you keep re-explaining into source: write the workflow as a
+profile, then compile it into Codex and Claude Code skills that stage the work,
+leave proof, and tell the agent when to stop.
 
-Forma is not the runtime agent. It is not a generic skill creator. It is not
-another prompt template.
-
-The profile is source. The generated skill bundle is the deployment artifact.
+Profile in. Skill bundle out. The agent still does the work; Forma gives the
+work a shape it can follow.
 
 Chinese documentation: [README.zh-CN.md](./README.zh-CN.md)
 
@@ -31,6 +28,13 @@ validation proof is recorded.
 
 Those rules often live in scattered prompts, `AGENTS.md`, custom skills, review
 habits, and team memory. Forma gives them a source format and a compiler.
+
+The bet behind Forma is simple: agents behave better when workflow rules are
+not only remembered in chat.
+
+Put the workflow in files. Give it stages. Make proof part of the loop.
+
+That is not a magic guarantee. It is a better control surface.
 
 ## Mental Model
 
@@ -75,8 +79,9 @@ shape   -> gauge          -> seal      -> pour         -> flow
 | `pour` | Execute within bounds | Implement one accepted task and record proof. |
 | `flow` | Continue safely | Resume from the sealed plan, or stop when proof is missing. |
 
-These names are defaults, not the product. Projects can rename generated skills
-while preserving the underlying stage semantics; see
+Not into the `shape` / `gauge` / `seal` / `pour` / `flow` names? Fine. They
+are defaults, not doctrine. Projects can rename generated skills while
+preserving the underlying stage semantics; see
 [Usage: Rename Generated Skills](./docs/usage.md#rename-generated-skills).
 
 ## What Forma Adds
@@ -84,16 +89,13 @@ while preserving the underlying stage semantics; see
 Spec docs, planning templates, static skills, and repository instructions can
 help an agent understand demand.
 
-Forma does something narrower and stricter: it packages the workflow contract
-itself.
+Forma adds a narrower control surface:
 
-It defines which evidence must be gathered before planning, when a plan becomes
-executable, which task is currently accepted, what counts as validation proof,
-and when continuation must stop.
+- a workflow source format: profiles;
+- a compiled artifact: skill bundles;
+- a review surface: manifests, stages, validation points, and proof.
 
-The result is not just a better plan document. It is an installable work loop
-that constrains how the agent moves from demand to evidence, from evidence to
-plan, from plan to execution, and from execution to safe continuation.
+The result is an installable work loop, not just another plan document.
 
 ## Where Forma Fits
 
@@ -109,16 +111,19 @@ disciplined order.
 
 ## When To Use It
 
-Use Forma when AI coding is already a normal development mode and your team
-needs the same planning, evidence, validation, and stop conditions to hold
-across repeated agent runs.
+Use Forma when the hard part is not a single edit, draft, or analysis, but the
+way that kind of work should happen every time.
 
-You probably do not need Forma when the problem is a few repository rules, one
-isolated reusable capability, or basic organization of requirements and spec
-facts. Use `AGENTS.md`, a single custom skill, or a spec tool for those cases.
+The first fit is AI coding: specs, repository evidence, plans, accepted tasks,
+validation, and review proof. But the pattern is broader. Forma can fit any
+repeatable agent workflow where sources, boundaries, stages, approval, and proof
+matter.
 
-For the full methodology, fit, and ecosystem discussion, read
-[Concepts](./docs/concepts.md).
+If you only need the agent to fix a typo, summarize a page, or remember a few
+repository rules, Forma is too much machinery. Use `AGENTS.md`, a direct prompt,
+a single custom skill, or a spec tool for those cases.
+
+For the full fit and mental model, read [Concepts](./docs/concepts.md).
 
 ## Try It
 
@@ -160,6 +165,9 @@ installed creator helps turn reviewed natural-language workflow ideas into
 temporary injection JSON, then generates and verifies a target-specific bundle
 before handoff.
 
+Not ready to design a full profile? Try the workflow first. Promote only the
+rules that survive real use.
+
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
 ```
@@ -174,15 +182,18 @@ forma explain temporary-injection --format json --target codex
 
 ## Documentation
 
-- [Quick Start](./docs/quick-start.md): install, generate workflow, and build `forma-creator`.
-- [Concepts](./docs/concepts.md): mental model, fit, ecosystem comparison, profiles, and injection paths.
+- [Quick Start](./docs/quick-start.md): run the first workflow bundle end to end.
+- [Concepts](./docs/concepts.md): compiler model, source/artifact/runtime layers, and core terminology.
+- [Workflow Contract](./docs/workflow-contract.md): stages, gates, evidence policy, execution boundaries, and continuation rules.
+- [Skill Bundle](./docs/skill-bundle.md): generated artifact layout, manifest, references, scripts, and stage skills.
+- [Profile Schema](./docs/profile-schema.md): durable workflow source format.
 - [Usage](./docs/usage.md): command reference, repository checks, and installed CLI behavior.
 - [STRUCTURE.md](./STRUCTURE.md): current source tree and ownership boundaries.
 
 ## Forma On Forma
 
-Forma is planned and developed through workflows generated by Forma itself. The
-self profiles behind that loop live in:
+Btw: Forma is planned and developed through workflows generated by Forma itself.
+The self profiles behind that loop live in:
 
 - [profiles/forma-self/forma-self-iteration.yaml](./profiles/forma-self/forma-self-iteration.yaml)
 - [profiles/forma-self/base.yaml](./profiles/forma-self/base.yaml)

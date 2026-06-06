@@ -83,9 +83,15 @@ generated skill resources.
 |---|---|
 | `docs/quick-start.md` | English first-run path, install locations, tracked-profile generation, and `forma-creator` generation walkthrough |
 | `docs/quick-start.zh-CN.md` | Chinese quick start |
-| `docs/concepts.md` | English methodology, fit, value, generated-skill quality, ecosystem comparison, profiles, and injection paths |
+| `docs/concepts.md` | English compiler model, layer boundaries, core terminology, fit, and documentation routing |
 | `docs/concepts.zh-CN.md` | Chinese concepts guide |
-| `docs/usage.md` | English command reference, install targets, generated-skill quality rules, repository checks, source layout, and installed CLI behavior notes |
+| `docs/workflow-contract.md` | English explanation of stages, gates, evidence policy, execution boundaries, validation proof, and continuation rules |
+| `docs/workflow-contract.zh-CN.md` | Chinese workflow contract guide |
+| `docs/skill-bundle.md` | English generated artifact layout, skill directory anatomy, manifest, install targets, and bundle quality guide |
+| `docs/skill-bundle.zh-CN.md` | Chinese skill bundle guide |
+| `docs/profile-schema.md` | English durable profile source format, examples, constraint placement, resources, validation commands, and common mistakes |
+| `docs/profile-schema.zh-CN.md` | Chinese profile schema guide |
+| `docs/usage.md` | English command reference, install targets, repository checks, source layout, and installed CLI behavior notes |
 | `docs/usage.zh-CN.md` | Chinese usage guide |
 
 ## Profiles

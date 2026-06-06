@@ -2,9 +2,11 @@
 
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
 
-This page shows the shortest path from an existing profile to a verified, installed workflow bundle.
+This page shows the shortest path from an existing profile to a verified,
+installed workflow bundle.
 
-The goal is not to design a perfect profile. The goal is to see one generated workflow change how an agent behaves.
+Do not start by designing the perfect profile. Try one small workflow first and
+see whether it changes how the agent behaves.
 
 ---
 
@@ -200,6 +202,14 @@ Use tracked profiles for stable rules. Use temporary injection for one-off rules
 
 ## What To Check After The First Run
 
+After a successful first run, you should see one or more concrete artifacts:
+
+- a bounded proposal;
+- a grounding handoff;
+- `plan.md` and `tasks.md`;
+- task proof or validation output;
+- `.forma-manifest.json` in the generated bundle.
+
 After the first workflow-guided run, check whether the agent:
 
 - clarified the request before implementation;
@@ -210,3 +220,9 @@ After the first workflow-guided run, check whether the agent:
 - stopped when the workflow required it.
 
 If those behaviors are not visible, adjust the profile or generated workflow before adding more rules.
+
+## Next Reads
+
+- [Workflow Contract](./workflow-contract.md): what the generated workflow enforces.
+- [Skill Bundle](./skill-bundle.md): what Forma writes to disk.
+- [Profile Schema](./profile-schema.md): how durable workflow source is structured.

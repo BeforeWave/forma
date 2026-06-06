@@ -4,7 +4,7 @@
 
 这页只讲怎样从现有 profile 走到一个已验证、已安装的工作流套件。
 
-目标不是设计完美 profile，而是先看一个生成工作流是否真的改变 Agent 的行为。
+不要一上来就设计完美 profile。先用一个小 workflow 试手感，看它是否真的改变 Agent 的行为。
 
 ---
 
@@ -200,6 +200,14 @@ forma explain temporary-injection --format json --target codex
 
 ## 第一次跑完后检查什么
 
+第一次成功跑通后，应该能看到一个或多个具体产物：
+
+- 有边界的方案；
+- grounding handoff；
+- `plan.md` 和 `tasks.md`；
+- 任务证明或验证输出；
+- 生成 bundle 里的 `.forma-manifest.json`。
+
 第一次用生成工作流跑任务后，检查 Agent 是否：
 
 - 先澄清请求，再进入实现；
@@ -210,3 +218,9 @@ forma explain temporary-injection --format json --target codex
 - 在工作流要求停止时停下。
 
 如果这些行为不明显，先调整 profile 或生成工作流，不要急着增加更多规则。
+
+## 继续阅读
+
+- [Workflow Contract](./workflow-contract.zh-CN.md)：生成工作流具体约束什么。
+- [Skill Bundle](./skill-bundle.zh-CN.md)：Forma 写到磁盘上的产物是什么。
+- [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源如何组织。
