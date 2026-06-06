@@ -61,6 +61,17 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
+## 安装目标
+
+Forma 生成的是目标界面专用套件。把生成出来的技能目录复制到对应位置：
+
+| 目标 | 个人安装 | 项目/团队安装 |
+|---|---|---|
+| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+
+Codex 的项目 skills 可以放在当前工作目录、父目录或仓库根目录下的 `.agents/skills`。Claude Code 的项目 skills 放在 `.claude/skills`。信任项目 skills 前先审查内容，因为 skills 可以包含脚本和目标界面专用工具权限。
+
 ## Profile Schema
 
 长期 profile 是严格的 YAML 来源。未知顶层键或未知嵌套键会被拒绝，避免 profile 静默绕过工作流契约。
@@ -81,6 +92,20 @@ forma explain temporary-injection --format json --target codex
 - `conditional_overlays`：只有计划记录了所选路线后才启用的路线专用约束、资源和验证。
 
 保持 `constraints.default` 轻量。规划规则放进 `constraints.shape`，只读取证据的规则放进 `constraints.gauge`，计划定稿规则放进 `constraints.seal`，当前任务执行规则放进 `constraints.pour`，自动继续边界放进 `constraints.flow`。
+
+## 生成技能质量
+
+Forma 应该生成工作流技能，而不是把一大段制度提示词复制五遍。生成套件应满足这些预期：
+
+- 每个 skill 只有一个清晰阶段职责；
+- `description` 说明什么时候使用这个 skill，但不要变成 runbook；
+- `SKILL.md` 承载该阶段的长期指令；
+- 大段稳定指引放进 `references/`；
+- 来源读取器和辅助脚本只有被 profile 或一次性注入选中时才出现；
+- 宽泛规则放进场景规则，而不是 `constraints.default`；
+- 每个可执行阶段都指向对应验证或证明路径。
+
+重命名、修改 profile、使用一次性注入或切换目标界面后，都运行 `forma verify <generated-suite-dir>`。
 
 ## 重命名生成技能
 

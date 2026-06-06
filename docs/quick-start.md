@@ -1,6 +1,7 @@
 # Quick Start
 
-This page shows the two standard Forma generation paths.
+This page shows the shortest path from an existing profile to a verified,
+installed workflow bundle.
 
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
 
@@ -21,6 +22,29 @@ If Forma is already installed, check that the CLI is available:
 ```bash
 forma --help
 ```
+
+## Install Locations
+
+Generated bundles can be installed for one user or checked into a project:
+
+| Target | Personal install | Project/team install |
+|---|---|---|
+| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+
+Review project or team skills before trusting them. A skill can include scripts
+and target-specific permissions.
+
+## First Successful Run
+
+Do this once before designing a large profile:
+
+1. Generate from a small sample profile.
+2. Verify the generated bundle.
+3. Install it into one target agent.
+4. Trigger one plan-first task in that agent.
+5. Inspect the plan, task contract, validation result, and run evidence.
+6. Only then adjust the profile.
 
 ## Ask An Agent To Draft A Profile
 
@@ -54,8 +78,17 @@ forma verify /tmp/backend-plan-first-codex
 Install it into Codex:
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/backend-plan-first-codex/* ~/.codex/skills/
+mkdir -p ~/.agents/skills
+cp -R /tmp/backend-plan-first-codex/* ~/.agents/skills/
+```
+
+Then start Codex in a repository and ask for a planned task using the generated
+workflow names. For the sample backend profile, a natural first test is:
+
+```text
+Use backend-plan-first-plan-issue to turn this change request into a bounded plan:
+add one narrow validation check for the current repository's docs.
+Do not implement yet.
 ```
 
 Generate a Claude Code workflow from the same profile:
@@ -68,6 +101,17 @@ forma create \
 
 forma verify /tmp/backend-plan-first-claude-code
 ```
+
+Install it into Claude Code:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /tmp/backend-plan-first-claude-code/* ~/.claude/skills/
+```
+
+In Claude Code, invoke the corresponding generated skill directly or ask a
+matching natural-language request. Project skills require trusting the workspace
+before skill-owned tool permissions can apply.
 
 ## Path 2: Generate With `forma-creator`
 
@@ -88,8 +132,8 @@ forma verify /tmp/forma-creator-dist/codex/forma-creator
 Install it into Codex:
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.codex/skills/
+mkdir -p ~/.agents/skills
+cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.agents/skills/
 ```
 
 Build a Claude Code creator:
@@ -100,6 +144,13 @@ forma build-creator \
   --output /tmp/forma-creator-dist
 
 forma verify /tmp/forma-creator-dist/claude-code/forma-creator
+```
+
+Install it into Claude Code:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
 ```
 
 Each generated `forma-creator` has a fixed target contract. A Codex creator

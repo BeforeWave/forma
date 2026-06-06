@@ -22,6 +22,89 @@ Forma 是生成器和工具链。它读取 profile、方法论和目标界面，
 
 Forma 不直接执行项目任务。Forma 生成的是 Agent 执行任务时要遵守的工作流。
 
+## Forma 生成什么
+
+Forma 生成出来的套件，才是安装到 Codex 或 Claude Code 后 Agent 实际使用的工作流。通常它有五个协同技能：
+
+| Forma 阶段 | 当前含义 | 更直白的用户叫法 |
+|---|---|---|
+| `shape` | 有边界的方案 | Plan Issue / 澄清需求 |
+| `gauge` | 只读证据 | Ground Plan / 理解现状 |
+| `seal` | 执行契约 | Finalize Plan / 锁定验收和验证 |
+| `pour` | 带证明的已接受任务 | Implement Feature / 执行一个任务 |
+| `flow` | 受控继续 | Continue Work / 只在安全时继续 |
+
+输入和输出可以这样理解：
+
+```text
+profile YAML
++ 标准方法
++ 可选一次性注入
++ 目标界面 = codex | claude-code
+        |
+        v
+Forma compiler
+        |
+        v
+五个目标界面专用技能
++ references
++ scripts
++ manifest
++ 可被 verifier 检查的结构
+```
+
+`shape` / `gauge` / `seal` / `pour` / `flow` 是 Forma 的阶段隐喻。项目可以把安装目录和展示名改成自己的语言，但阶段语义不变。
+
+## 为什么重要
+
+Forma 让 Agent 工作变得：
+
+- **可重复**：项目规则有固定位置和生命周期，不只存在于上下文窗口；
+- **分阶段**：澄清、取证、定稿、执行、证明不会混成一个提示词；
+- **有边界**：实现限制在已接受任务内，不会因为顺手而扩大范围；
+- **可评审**：reviewer 不只看到最终 diff，还能看到从 Spec 到计划再到证明的路径；
+- **可迁移**：同一套工作流风格可以生成到不同 Agent 界面。
+
+Forma 的价值不是“帮你写代码”。它不直接写业务任务。它的价值是把团队反复强调的 AI 工作纪律，变成可版本化、可安装、可验证的 workflow source。
+
+## 核心资产
+
+Forma 有用，是因为 workflow 被表示成源码，而不是记忆。
+
+**Profiles** 记录长期项目规则：权威来源、验证命令、阶段约束、场景路线和显式来源适配器。它们应该像其他项目资产一样被评审和维护。
+
+**Manifests** 让生成套件可审查。`.forma-manifest.json` 记录目标界面、方法版本或 digest、解析后的 profile stack、profile 文件 hash、生成技能和 generator 溯源。
+
+**Verification** 让输出不只是“生成出来的 Markdown”。`forma verify` 会检查 `forma-creator` bundle 和生成的 Plan-First 套件是否满足结构和方法契约。
+
+## 什么时候不要用 Forma
+
+Forma 本来就比一份仓库指令或一个自定义技能更重。如果问题只是“让 Agent 记住几条规则”，不要先上 Forma。
+
+仓库级规则够用时，用 `AGENTS.md`。只需要一个可复用能力时，用一个 Codex 或 Claude Code 技能。主要问题是组织需求和 Spec 事实时，用 OpenSpec、Spec Kit、Kiro 这类工具。
+
+当反复出问题的是 Agent 的整条工作回路时，再用 Forma：先澄清什么、必须读什么、如何把证据变成计划、什么时候允许执行、用什么验证结果、证明留在哪里。
+
+## 第一次跑通应该是什么样
+
+最有用的 demo 不是解释抽象概念，而是一条具体路径：
+
+1. 选择一个 sample profile。
+2. 生成 Codex 或 Claude Code 工作流套件。
+3. 验证生成结果。
+4. 安装到对应 Agent 的技能目录。
+5. 触发一个 Plan-First 任务。
+6. 检查它留下的计划、任务契约、验证和执行证据。
+7. 等工作流真的有用，再调整 profile。
+
+本仓库里的 sample 就是为了支撑这条路径：
+
+- `examples/profiles/sample-software/` 展示通用软件 Plan-First 工作流，包括中文协作、影响边界、grounding、验证和安全继续门禁；
+- `examples/profiles/sample-backend/` 展示 Spec / issue 驱动的后端工作流如何显式声明来源读取、规划、验证和执行边界；
+- `examples/generated/*-codex/` 和 `examples/generated/*-claude-code/` 展示同一套工作流风格如何生成成 Codex 和 Claude Code 各自可安装的技能。
+
+不要一开始就设计完美 profile。先生成一个小工作流，跑一个计划内任务，再把真正证明有用的规则沉淀进长期 profile。
+
 ## 谁适合：软件团队？以及不止于此
 
 Forma 不是给所有 Agent 使用场景准备的。
@@ -238,6 +321,21 @@ Forma 把规则放进不同工作流阶段：
 - `flow`：自动继续执行的边界。
 
 这避免所有规则都挤在一个提示词里，让 Agent 每次自己判断。
+
+## 生成技能质量
+
+一个生成技能应该只有一个清晰职责。如果某个 `SKILL.md` 变成大段制度文档，就把稳定细节移到 `references/`，把路线专用规则放到场景规则，或把能力专用指引拆成单独技能。
+
+好的生成套件通常有：
+
+- 短而明确的 skill description；
+- 按阶段分布的指令，而不是一个全局规则堆；
+- 只在需要时加载的浅层 references；
+- 只有 profile 或一次性注入明确拥有时才出现的 scripts 和来源适配器；
+- 轻量的 `constraints.default`；
+- 每个阶段都有清楚的验证路径。
+
+这就是 Forma 要区分默认约束、阶段约束、场景规则、资源文件和来源适配器的原因。生成器不应该只是把所有规则贴进所有技能。
 
 ## 场景规则
 

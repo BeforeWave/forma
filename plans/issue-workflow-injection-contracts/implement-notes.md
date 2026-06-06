@@ -71,3 +71,13 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Post-review docs organization feedback
+
+Outcome:
+- Slimmed the root README files into entrypoints focused on generated output, quick trial commands, and documentation routing.
+- Moved richer methodology, fit, stage naming, and onboarding-path material into the concepts docs.
+- Kept installation details in quick-start docs and updated Codex examples to the current `$HOME/.agents/skills` and `.agents/skills` locations.
+
+Decision Notes:
+- The README should explain what Forma generates within the first screen, then link to deeper methodology instead of carrying the full conceptual argument inline.

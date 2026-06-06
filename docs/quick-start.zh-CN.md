@@ -1,6 +1,6 @@
 # 快速开始
 
-这页只讲怎么开始用 Forma。
+这页只讲怎样从现有 profile 走到一个已验证、已安装的工作流套件。
 
 英文版：[quick-start.md](./quick-start.md)
 
@@ -20,6 +20,28 @@ forma --help
 ```bash
 forma --help
 ```
+
+## 安装位置
+
+生成的套件可以安装给当前用户，也可以放进项目：
+
+| 目标 | 个人安装 | 项目/团队安装 |
+|---|---|---|
+| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+
+信任项目或团队技能前先审查内容。技能可以包含脚本和目标界面专用权限。
+
+## 第一次跑通路径
+
+设计大型 profile 前，先跑通一次小路径：
+
+1. 从一个小 sample profile 生成套件。
+2. 验证生成结果。
+3. 安装到一个目标 Agent。
+4. 在这个 Agent 里触发一个 Plan-First 任务。
+5. 检查计划、任务契约、验证结果和执行证据。
+6. 之后再调整 profile。
 
 ## 让 Agent 帮你起草 profile
 
@@ -53,8 +75,16 @@ forma verify /tmp/backend-plan-first-codex
 安装到 Codex：
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/backend-plan-first-codex/* ~/.codex/skills/
+mkdir -p ~/.agents/skills
+cp -R /tmp/backend-plan-first-codex/* ~/.agents/skills/
+```
+
+然后在某个仓库里启动 Codex，用生成出来的 workflow 名字触发一个计划任务。对 sample backend profile，可以先试：
+
+```text
+Use backend-plan-first-plan-issue to turn this change request into a bounded plan:
+add one narrow validation check for the current repository's docs.
+Do not implement yet.
 ```
 
 同一个 profile 也可以生成 Claude Code 工作流：
@@ -67,6 +97,15 @@ forma create \
 
 forma verify /tmp/backend-plan-first-claude-code
 ```
+
+安装到 Claude Code：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /tmp/backend-plan-first-claude-code/* ~/.claude/skills/
+```
+
+在 Claude Code 里，可以直接调用对应生成技能，也可以用匹配的自然语言请求。项目级 skills 需要先信任 workspace，技能自带的工具权限才会生效。
 
 ## 路径 2：通过 `forma-creator` 生成
 
@@ -85,8 +124,8 @@ forma verify /tmp/forma-creator-dist/codex/forma-creator
 安装到 Codex：
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.codex/skills/
+mkdir -p ~/.agents/skills
+cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.agents/skills/
 ```
 
 生成 Claude Code 版创建器：
@@ -97,6 +136,13 @@ forma build-creator \
   --output /tmp/forma-creator-dist
 
 forma verify /tmp/forma-creator-dist/claude-code/forma-creator
+```
+
+安装到 Claude Code：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
 ```
 
 每个 `forma-creator` 都固定一个目标界面。Codex 版创建器生成 Codex 形态的工作流套件；Claude Code 版创建器生成 Claude Code 形态的套件。

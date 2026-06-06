@@ -10,7 +10,7 @@ This document maps the current Forma source tree and the role of each area.
 | `README.zh-CN.md` | Chinese project entrypoint and documentation index | present |
 | `AGENTS.md` | Agent-facing repo entrypoint | present |
 | `STRUCTURE.md` | This file — top-level structure map | present |
-| `LICENSE` | MIT license text | present |
+| `LICENSE` | Apache-2.0 license text | present |
 | `pyproject.toml` | Python package metadata and `forma` console entry point | present |
 | `setup.py` | Build hook copying canonical runtime assets into wheel package data | present |
 | `MANIFEST.in` | sdist inclusion rules for canonical runtime assets | present |
@@ -81,11 +81,11 @@ generated skill resources.
 
 | Path | Role |
 |---|---|
-| `docs/quick-start.md` | English install, tracked-profile generation, and `forma-creator` generation walkthrough |
+| `docs/quick-start.md` | English first-run path, install locations, tracked-profile generation, and `forma-creator` generation walkthrough |
 | `docs/quick-start.zh-CN.md` | Chinese quick start |
-| `docs/concepts.md` | English overview of Forma outputs, differentiation, spec-tool relationship, profiles, and injection paths |
+| `docs/concepts.md` | English methodology, fit, value, generated-skill quality, ecosystem comparison, profiles, and injection paths |
 | `docs/concepts.zh-CN.md` | Chinese concepts guide |
-| `docs/usage.md` | English command reference, repository checks, source layout, and installed CLI behavior notes |
+| `docs/usage.md` | English command reference, install targets, generated-skill quality rules, repository checks, source layout, and installed CLI behavior notes |
 | `docs/usage.zh-CN.md` | Chinese usage guide |
 
 ## Profiles

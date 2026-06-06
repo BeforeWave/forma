@@ -1,172 +1,119 @@
 # Forma
 
-**Turn your spec discipline into reusable agent workflows.**
+**Give your coding agents a spine.**
 
-Forma turns project-specific planning rules, evidence requirements, validation gates, and execution boundaries into installable Spec Plan-First workflow skills for Codex and Claude Code.
+Forma turns your team's engineering discipline - planning, evidence,
+boundaries, and validation - into installable plan-first workflows for Codex and
+Claude Code.
 
-It is for teams and power users who already ask agents to work from specs, plans, evidence, and validation instead of one-off prompts.
+Agents read before acting, plan before touching code, stay inside accepted
+tasks, and leave proof behind.
+
+Not another prompt. Not another spec tool. A workflow compiler for serious
+AI-assisted engineering.
+
+Forma is a generator, not the runtime workflow itself. The generated bundle is
+what Codex or Claude Code actually uses.
 
 Chinese documentation: [README.zh-CN.md](./README.zh-CN.md)
 
-## The Shift
+## Why Forma Exists
 
-After AI coding, code is no longer the only first-class project artifact.
+AI coding is powerful, but without workflow it often collapses context,
+planning, implementation, and validation into one improvised step.
 
-The spec an agent executes, the workflow it follows, the evidence it reads, the plan it seals, and the proof it leaves behind all become part of the project lifecycle.
+That is where agents drift: they read whatever context is nearby, touch files
+outside the task, expand scope by convenience, or claim validation without
+proof.
 
-Teams used to express style through code style, architecture patterns, and review habits. Now they also express style through how agents work: what to read first, how to plan, when to stop, how to validate, and how to leave proof.
+Forma turns the engineering discipline your team already cares about -
+planning, evidence, boundaries, validation, and review - into a reusable
+workflow that agents can actually follow.
 
-Different SDD methods, planning rituals, validation expectations, and workflow constraints become a new kind of team style.
+## The Workflow
 
-Forma gives that style shape.
-
-## What Forma Is
-
-Forma is a generator, not the runtime workflow itself.
-
-It composes project-owned workflow rules, plan-first methodology, target agent surfaces, and optional one-off generation constraints into project-specific Spec Plan-First workflow bundles.
+Forma generates staged agent workflows:
 
 ```text
-Forma composes:
-  project profile: reusable workflow rules and constraints
-  methodology: plan-first stages, gates, and proof requirements
-  target surface: Codex or Claude Code
-  optional temporary injection: one-off generation constraints
-
-into:
-  installable, target-specific workflow skills
+clarify -> gather evidence -> lock plan -> execute task -> continue safely
+shape   -> gauge          -> seal      -> pour         -> flow
 ```
 
-Those generated skills then guide agents as they read PRDs, issues, specs, task plans, briefs, repository evidence, and validation results.
+Each stage has a job:
 
-It is not about writing one more prompt. It is about placing rules in the right location: default constraints, stage constraints, conditional overlays, resources, and source adapters.
+| Stage | Plain English | What it does |
+|---|---|---|
+| `shape` | Clarify the request | Turn a loose request into a bounded proposal. |
+| `gauge` | Read before acting | Gather repository, spec, docs, and related evidence before planning. |
+| `seal` | Lock the plan | Convert the proposal into an accepted task contract. |
+| `pour` | Execute within bounds | Implement one accepted task without scope drift. |
+| `flow` | Continue safely | Resume from the sealed plan, or stop when proof is missing. |
+
+Not into those names? Fine. Forma lets a project rename generated skills; see
+[Usage: Rename Generated Skills](./docs/usage.md#rename-generated-skills).
 
 ## What Forma Generates
 
-The Forma-generated bundle is the workflow an agent actually uses.
-
-After installation into Codex or Claude Code, it usually consists of five coordinated skills:
-
-```text
-shape -> gauge -> seal -> pour -> flow
-```
-
-- `shape`: turn demand into a bounded proposal;
-- `gauge`: gather repo, spec, docs, and history evidence read-only;
-- `seal`: turn the plan and tasks into a reviewable, verifiable execution contract;
-- `pour`: execute one accepted task and record proof;
-- `flow`: continue only when the sealed plan allows it.
-
-These skills are not scattered prompts. They are the project's own agent work loop.
-
-Not into those names? Fine. Forma lets a project rename generated skills; see [Usage: Rename Generated Skills](./docs/usage.md#rename-generated-skills).
-
-## Why It Matters
-
-Forma makes agent work:
-
-- **repeatable**: project rules have a location and lifecycle, not just a context window;
-- **staged**: clarify, ground, seal, execute, and prove are not collapsed together;
-- **bounded**: execution stays inside accepted tasks instead of drifting with convenience;
-- **reviewable**: reviewers see how the agent moved from spec to implementation, not only the diff;
-- **portable**: the same workflow style can be generated for different agent surfaces.
-
-## Who Is It For? Software Teams, And Beyond
-
-Software teams are Forma's most natural starting point. You may need Forma if AI coding is already a normal development mode for you and these problems keep repeating:
-
-- the same spec leads different agents to read different sources and miss different validations;
-- your team has SDD, planning, and validation habits scattered across docs, prompts, and past decisions;
-- the repo has multiple work routes: backend, migration, generated-baseline, docs-only, governance, cross-layer;
-- you want agents to produce a reviewable plan before implementation;
-- you want Codex, Claude Code, or another agent surface to follow the same workflow.
-
-If you only ask agents to edit small files occasionally, `AGENTS.md`, a prompt, or one custom skill is often enough.
-
-Forma is not software-only: if the work depends on what to read, how to plan, who approves, and what proof remains, the same workflow pattern may fit. See [Concepts: Beyond Software](./docs/concepts.md#beyond-software) for the work pattern and [How Different People Use Forma](./docs/concepts.md#how-different-people-use-forma) for role-specific examples.
-
-Forma is for people who want to make their way of working reusable and reviewable.
-
-## Where Forma Sits
-
-Forma is not the same category as spec-driven tools like OpenSpec, Spec Kit, or Kiro. Those tools organize demand and facts. Forma generates the workflow agents follow when they read, organize, and act on that material.
-
-Forma is not a generic skill creator like Codex `skill-creator` or Claude Code Skill Creator. Those tools create capabilities; Forma creates project workflow.
-
-Forma does not replace `AGENTS.md`. `AGENTS.md` lets an agent read rules; Forma lets reusable rules enter staged workflow.
+Forma composes reusable profile source, the canonical plan-first methodology,
+a target agent surface, and optional one-off generation constraints:
 
 ```text
-Spec tools organize demand.
-Generic skill creators create capabilities.
-AGENTS.md gives repo-level guidance.
-Forma turns your spec discipline into reusable agent workflows.
+profile YAML
++ canonical methodology
++ target = codex | claude-code
++ optional temporary injection
+        |
+        v
+installable workflow bundle
++ five coordinated skills
++ references and scripts
++ .forma-manifest.json provenance
++ verifier-compatible structure
 ```
 
-## Documentation
+These generated skills are not scattered prompts. They are the project's agent
+work loop: clarify, ground, seal, execute, and continue with proof.
 
-- [Quick Start](./docs/quick-start.md): install, generate workflow, and build `forma-creator`.
-- [Concepts](./docs/concepts.md): core concepts, ecosystem comparison, profiles, and injection paths.
-- [Usage](./docs/usage.md): command reference, repository checks, and installed CLI behavior.
-- [STRUCTURE.md](./STRUCTURE.md): current source tree and ownership boundaries.
+## What Forma Adds
 
-## Two Ways To Start
+Spec docs, planning templates, static skills, and repository instructions can
+help an agent understand demand.
 
-### Ask an agent to draft a profile
+Forma does something narrower and stricter: it packages the workflow contract
+itself.
 
-To turn a project's durable workflow rules into source, tell an agent inside that project:
+It defines which evidence must be gathered before planning, when a plan becomes
+executable, which task is currently accepted, what counts as validation proof,
+and when continuation must stop.
 
-```text
-Run:
-  forma explain profile --target codex
+The result is not just a better plan document. It is an installable work loop
+that constrains how the agent moves from demand to evidence, from evidence to
+plan, from plan to execution, and from execution to safe continuation.
 
-Use that output as the profile authoring standard.
-Inspect this repository and propose a tracked Forma profile for it.
+## When To Use It
 
-Find:
-- authoritative demand sources;
-- planning and grounding expectations;
-- validation commands and proof requirements;
-- stage-specific constraints;
-- recurring work routes and overlays;
-- source adapters or helper scripts that should be explicit.
+Use Forma when AI coding is already a normal development mode and your team
+needs the same planning, evidence, validation, and stop conditions to hold
+across repeated agent runs.
 
-Do not write files yet.
-Show the proposed profile structure, explain each constraint placement,
-and mark unknowns that need human confirmation.
-```
+If the problem is a few repository rules, use `AGENTS.md`. If it is one reusable
+capability, use a single custom skill. If the main problem is
+organizing requirements and spec facts, use a spec tool such as OpenSpec, Spec
+Kit, or Kiro.
 
-Use this path to turn real team habits into a durable profile.
-
-### Use `forma-creator` to try workflow ideas fast
-
-Do not want to design a full profile first? Install the target-specific `forma-creator`, then throw workflow ideas at the agent:
-
-```text
-Use forma-creator to turn these workflow ideas into a Plan-First bundle for this repo.
-
-Rules I want to try:
-- identify the real source of truth before planning;
-- read only evidence needed for the chosen scope;
-- put acceptance and validation into every task;
-- execute one accepted task at a time;
-- stop before API, database, generated-baseline, or cross-layer work unless the plan explicitly says to continue.
-
-Before generating, show how you classified these rules.
-After generating, verify the bundle.
-```
-
-Use this path to test the feel quickly. Promote rules that stick into a tracked profile.
+For the full methodology, fit, and ecosystem discussion, read
+[Concepts](./docs/concepts.md).
 
 ## Try It
 
-With `forma` available on `PATH`, generate and verify a workflow bundle:
+With `forma` available on `PATH`, generate and verify a Codex workflow bundle:
 
 ```bash
-forma --help
 forma create \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex
+
 forma verify /tmp/backend-plan-first-codex
 ```
 
@@ -174,13 +121,66 @@ Build a target-fixed `forma-creator`:
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
+forma verify /tmp/forma-creator-dist/codex/forma-creator
 ```
 
-For install paths, Claude Code output, and profile authoring details, see [Quick Start](./docs/quick-start.md).
+For the complete first-run path, install locations, Claude Code output, and
+profile authoring details, see [Quick Start](./docs/quick-start.md).
+
+## Two Ways To Start
+
+**Generate from a tracked profile.** Use this for durable team or project rules
+that have been reviewed and committed as source.
+
+```bash
+forma create \
+  --target codex \
+  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
+  --output /tmp/backend-plan-first-codex
+```
+
+**Use `forma-creator`.** Use this for reviewed one-off workflow ideas. The
+installed creator helps turn reviewed natural-language workflow ideas into
+temporary injection JSON, then generates and verifies a target-specific bundle
+before handoff.
+
+```bash
+forma build-creator --target codex --output /tmp/forma-creator-dist
+```
+
+Ask Forma for profile or temporary-injection authoring guidance when an external
+agent needs rules without reading this source tree:
+
+```bash
+forma explain profile --target codex
+forma explain temporary-injection --format json --target codex
+```
+
+## Where Forma Fits
+
+Forma sits at the agent-workflow layer.
+
+- Spec tools and planning docs define what should be built.
+- `AGENTS.md` and repository docs define local context and conventions.
+- Generic skill creators package reusable capabilities.
+- Forma packages the project-specific workflow that tells the agent how to move
+  through clarification, evidence, planning, execution, validation, and safe
+  continuation.
+
+Forma does not replace those layers; it makes agents move through them in a
+disciplined order.
+
+## Documentation
+
+- [Quick Start](./docs/quick-start.md): install, generate workflow, and build `forma-creator`.
+- [Concepts](./docs/concepts.md): methodology, fit, ecosystem comparison, profiles, and injection paths.
+- [Usage](./docs/usage.md): command reference, repository checks, and installed CLI behavior.
+- [STRUCTURE.md](./STRUCTURE.md): current source tree and ownership boundaries.
 
 ## Forma On Forma
 
-Btw: Forma is planned and developed through workflows generated by Forma itself. The self profiles behind that loop live in:
+Forma is planned and developed through workflows generated by Forma itself. The
+self profiles behind that loop live in:
 
 - [profiles/forma-self/forma-self-iteration.yaml](./profiles/forma-self/forma-self-iteration.yaml)
 - [profiles/forma-self/base.yaml](./profiles/forma-self/base.yaml)

@@ -65,6 +65,22 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
+## Install Targets
+
+Forma emits target-specific bundles. Copy the generated skill directories into
+the matching target location:
+
+| Target | Personal install | Project/team install |
+|---|---|---|
+| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+
+For Codex, project skills can live under `.agents/skills` in the current
+working directory, parent directories, or repository root. For Claude Code,
+project skills live under `.claude/skills`. Review project skills before
+trusting them because skills can include scripts and target-specific tool
+permissions.
+
 ## Profile Schema
 
 Tracked profiles are strict YAML source. Unknown top-level or nested keys are
@@ -92,6 +108,23 @@ Keep `constraints.default` light. Put planning rules in `constraints.shape`,
 read-only evidence rules in `constraints.gauge`, plan materialization rules in
 `constraints.seal`, current-task execution rules in `constraints.pour`, and
 automatic continuation boundaries in `constraints.flow`.
+
+## Generated Skill Quality
+
+Forma should generate workflow skills, not one giant policy prompt copied five
+times. Keep generated suites aligned with these expectations:
+
+- each skill has one clear stage job;
+- `description` explains when to use the skill without becoming a runbook;
+- `SKILL.md` carries the standing instructions for that stage;
+- larger stable guidance lives in `references/`;
+- source readers and helper scripts appear only when selected by a profile or
+  temporary injection;
+- broad rules live in conditional overlays instead of `constraints.default`;
+- every executable stage points to the relevant validation or proof path.
+
+Run `forma verify <generated-suite-dir>` after renames, profile changes,
+temporary injection, or target changes.
 
 ## Rename Generated Skills
 
