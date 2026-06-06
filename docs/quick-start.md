@@ -1,9 +1,12 @@
 # Quick Start
 
-This page shows the shortest path from an existing profile to a verified,
-installed workflow bundle.
-
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
+
+This page shows the shortest path from an existing profile to a verified, installed workflow bundle.
+
+The goal is not to design a perfect profile. The goal is to see one generated workflow change how an agent behaves.
+
+---
 
 ## Install Forma
 
@@ -14,26 +17,28 @@ pip install -e ".[dev]"
 forma --help
 ```
 
-After installation, use the `forma` command directly. The examples below assume
-`forma` is available on `PATH`.
+The examples below assume `forma` is available on `PATH`.
 
-If Forma is already installed, check that the CLI is available:
+If Forma is already installed, check the CLI:
 
 ```bash
 forma --help
 ```
 
+---
+
 ## Install Locations
 
-Generated bundles can be installed for one user or checked into a project:
+Generated bundles can be installed for one user or checked into a project.
 
 | Target | Personal install | Project/team install |
 |---|---|---|
 | Codex | `$HOME/.agents/skills` | `.agents/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Review project or team skills before trusting them. A skill can include scripts
-and target-specific permissions.
+Review project or team skills before trusting them. Skills can include scripts and target-specific tool behavior.
+
+---
 
 ## First Successful Run
 
@@ -44,21 +49,9 @@ Do this once before designing a large profile:
 3. Install it into one target agent.
 4. Trigger one plan-first task in that agent.
 5. Inspect the plan, task contract, validation result, and run evidence.
-6. Only then adjust the profile.
+6. Adjust the profile only after the workflow proves useful.
 
-## Ask An Agent To Draft A Profile
-
-Inside a downstream project with Forma installed, tell the agent:
-
-```text
-Run:
-  forma explain profile --target codex
-
-Use that output as the profile authoring standard.
-Inspect this repository and propose a tracked Forma profile.
-Show the profile structure before writing files.
-Explain each constraint placement and mark unknowns explicitly.
-```
+---
 
 ## Path 1: Generate From A Tracked Profile
 
@@ -82,12 +75,13 @@ mkdir -p ~/.agents/skills
 cp -R /tmp/backend-plan-first-codex/* ~/.agents/skills/
 ```
 
-Then start Codex in a repository and ask for a planned task using the generated
-workflow names. For the sample backend profile, a natural first test is:
+Then start Codex in a repository and invoke one generated skill.
+
+For the sample backend profile, a natural first test is:
 
 ```text
 Use backend-plan-first-plan-issue to turn this change request into a bounded plan:
-add one narrow validation check for the current repository's docs.
+make one low-risk docs improvement in this repository.
 Do not implement yet.
 ```
 
@@ -109,15 +103,15 @@ mkdir -p ~/.claude/skills
 cp -R /tmp/backend-plan-first-claude-code/* ~/.claude/skills/
 ```
 
-In Claude Code, invoke the corresponding generated skill directly or ask a
-matching natural-language request. Project skills require trusting the workspace
-before skill-owned tool permissions can apply.
+In Claude Code, invoke the corresponding generated skill directly or use a matching natural-language request. Project skills require trusting the workspace before skill-owned tools can apply.
+
+---
 
 ## Path 2: Generate With `forma-creator`
 
-Use this path for reviewed one-off natural-language constraints. The installed
-creator classifies those constraints into temporary injection JSON, generates a
-target-specific workflow bundle, and verifies the output before handoff.
+Use this path for reviewed one-off natural-language constraints.
+
+A generated `forma-creator` helps turn those constraints into temporary injection JSON, generate a target-specific workflow bundle, and verify the output before handoff.
 
 Build a Codex creator:
 
@@ -153,11 +147,11 @@ mkdir -p ~/.claude/skills
 cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
 ```
 
-Each generated `forma-creator` has a fixed target contract. A Codex creator
-generates Codex-shaped plan-first workflow bundles. A Claude Code creator
-generates Claude Code-shaped bundles.
+Each generated `forma-creator` has a fixed target contract.
 
-After installation, you can quickly try workflow constraints inside the agent:
+A Codex creator generates Codex-shaped plan-first workflow bundles. A Claude Code creator generates Claude Code-shaped bundles.
+
+After installation, try workflow constraints inside the agent:
 
 ```text
 Use forma-creator to generate a Plan-First workflow bundle from these workflow constraints:
@@ -166,9 +160,30 @@ Use forma-creator to generate a Plan-First workflow bundle from these workflow c
 - seal must put acceptance and validation into every executable task;
 - pour must execute one accepted task at a time and record proof;
 - flow must stop on cross-layer work unless the sealed plan allows continuation.
+
 Show how these constraints are classified before generation.
 Verify the generated bundle before reporting success.
 ```
+
+---
+
+## Ask An Agent To Draft A Profile
+
+Inside a downstream project with Forma installed, tell the agent:
+
+```text
+Run:
+  forma explain profile --target codex
+
+Use that output as the profile authoring standard.
+Inspect this repository and propose a tracked Forma profile.
+Show the profile structure before writing files.
+Explain each constraint placement and mark unknowns explicitly.
+```
+
+Use this as a drafting path, not an auto-commit path. Review the profile before using it as durable source.
+
+---
 
 ## Profile And Injection Guidance
 
@@ -179,5 +194,19 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-Use tracked profiles for stable rules. Use temporary injection for one-off
-rules that should not become durable project source.
+Use tracked profiles for stable rules. Use temporary injection for one-off rules that should not become durable project source.
+
+---
+
+## What To Check After The First Run
+
+After the first workflow-guided run, check whether the agent:
+
+- clarified the request before implementation;
+- gathered relevant evidence before planning;
+- produced a bounded task plan;
+- stated validation or proof expectations;
+- avoided unrelated execution;
+- stopped when the workflow required it.
+
+If those behaviors are not visible, adjust the profile or generated workflow before adding more rules.

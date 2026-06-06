@@ -1,78 +1,83 @@
 # Forma
 
-**Give your coding agents a spine.**
+**A compiler for project-specific agent workflows.**
 
-Forma turns your team's engineering discipline - planning, evidence,
-boundaries, and validation - into installable plan-first workflows for Codex and
-Claude Code.
+Forma turns workflow profiles into portable skill bundles for Codex and Claude
+Code.
 
-Agents read before acting, plan before touching code, stay inside accepted
-tasks, and leave proof behind.
+It gives coding agents a spine: how they clarify, gather evidence, plan,
+execute, validate, and continue becomes explicit, versioned, portable, and
+verifiable.
 
-Not another prompt. Not another spec tool. A workflow compiler for serious
-AI-assisted engineering.
+Forma is not the runtime agent. It is not a generic skill creator. It is not
+another prompt template.
 
-Forma is a generator, not the runtime workflow itself. The generated bundle is
-what Codex or Claude Code actually uses.
+The profile is source. The generated skill bundle is the deployment artifact.
 
 Chinese documentation: [README.zh-CN.md](./README.zh-CN.md)
 
 ## Why Forma Exists
 
-AI coding is powerful, but without workflow it often collapses context,
-planning, implementation, and validation into one improvised step.
+AI coding changed what counts as a project artifact.
 
-That is where agents drift: they read whatever context is nearby, touch files
-outside the task, expand scope by convenience, or claim validation without
-proof.
+Code, tests, docs, issues, and review comments still matter. But once coding
+agents enter the development loop, another artifact becomes critical:
 
-Forma turns the engineering discipline your team already cares about -
-planning, evidence, boundaries, validation, and review - into a reusable
-workflow that agents can actually follow.
+> the workflow an agent follows before and while it changes code.
+
+Teams need to define what an agent must clarify, what evidence it must gather,
+when a plan becomes executable, what it may change, when it must stop, and how
+validation proof is recorded.
+
+Those rules often live in scattered prompts, `AGENTS.md`, custom skills, review
+habits, and team memory. Forma gives them a source format and a compiler.
+
+## Mental Model
+
+```text
+workflow profile  ->  Forma compiler  ->  skill bundle
+source                compiler            installable artifact
+```
+
+Forma compiles:
+
+```text
+profile YAML
++ canonical methodology
++ target adapter
++ optional temporary injection
+        |
+        v
+target-specific skill bundle
++ coordinated stage skills
++ references and scripts
++ .forma-manifest.json provenance
++ verifier-compatible structure
+```
+
+The same workflow profile can be emitted for different agent environments
+instead of being rewritten manually for each tool.
 
 ## The Workflow
 
-Forma generates staged agent workflows:
+A typical Forma-generated bundle contains five coordinated stages:
 
 ```text
 clarify -> gather evidence -> lock plan -> execute task -> continue safely
 shape   -> gauge          -> seal      -> pour         -> flow
 ```
 
-Each stage has a job:
-
 | Stage | Plain English | What it does |
 |---|---|---|
 | `shape` | Clarify the request | Turn a loose request into a bounded proposal. |
 | `gauge` | Read before acting | Gather repository, spec, docs, and related evidence before planning. |
 | `seal` | Lock the plan | Convert the proposal into an accepted task contract. |
-| `pour` | Execute within bounds | Implement one accepted task without scope drift. |
+| `pour` | Execute within bounds | Implement one accepted task and record proof. |
 | `flow` | Continue safely | Resume from the sealed plan, or stop when proof is missing. |
 
-Not into those names? Fine. Forma lets a project rename generated skills; see
+These names are defaults, not the product. Projects can rename generated skills
+while preserving the underlying stage semantics; see
 [Usage: Rename Generated Skills](./docs/usage.md#rename-generated-skills).
-
-## What Forma Generates
-
-Forma composes reusable profile source, the canonical plan-first methodology,
-a target agent surface, and optional one-off generation constraints:
-
-```text
-profile YAML
-+ canonical methodology
-+ target = codex | claude-code
-+ optional temporary injection
-        |
-        v
-installable workflow bundle
-+ five coordinated skills
-+ references and scripts
-+ .forma-manifest.json provenance
-+ verifier-compatible structure
-```
-
-These generated skills are not scattered prompts. They are the project's agent
-work loop: clarify, ground, seal, execute, and continue with proof.
 
 ## What Forma Adds
 
@@ -90,16 +95,27 @@ The result is not just a better plan document. It is an installable work loop
 that constrains how the agent moves from demand to evidence, from evidence to
 plan, from plan to execution, and from execution to safe continuation.
 
+## Where Forma Fits
+
+Forma sits at the agent-workflow layer.
+
+- Spec tools and planning docs define what should be built.
+- `AGENTS.md` and repository docs define local context and conventions.
+- Generic skill creators package reusable capabilities.
+- Forma compiles project-specific workflow rules into deployable skill bundles.
+
+Forma does not replace those layers; it makes agents move through them in a
+disciplined order.
+
 ## When To Use It
 
 Use Forma when AI coding is already a normal development mode and your team
 needs the same planning, evidence, validation, and stop conditions to hold
 across repeated agent runs.
 
-If the problem is a few repository rules, use `AGENTS.md`. If it is one reusable
-capability, use a single custom skill. If the main problem is
-organizing requirements and spec facts, use a spec tool such as OpenSpec, Spec
-Kit, or Kiro.
+You probably do not need Forma when the problem is a few repository rules, one
+isolated reusable capability, or basic organization of requirements and spec
+facts. Use `AGENTS.md`, a single custom skill, or a spec tool for those cases.
 
 For the full methodology, fit, and ecosystem discussion, read
 [Concepts](./docs/concepts.md).
@@ -156,24 +172,10 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-## Where Forma Fits
-
-Forma sits at the agent-workflow layer.
-
-- Spec tools and planning docs define what should be built.
-- `AGENTS.md` and repository docs define local context and conventions.
-- Generic skill creators package reusable capabilities.
-- Forma packages the project-specific workflow that tells the agent how to move
-  through clarification, evidence, planning, execution, validation, and safe
-  continuation.
-
-Forma does not replace those layers; it makes agents move through them in a
-disciplined order.
-
 ## Documentation
 
 - [Quick Start](./docs/quick-start.md): install, generate workflow, and build `forma-creator`.
-- [Concepts](./docs/concepts.md): methodology, fit, ecosystem comparison, profiles, and injection paths.
+- [Concepts](./docs/concepts.md): mental model, fit, ecosystem comparison, profiles, and injection paths.
 - [Usage](./docs/usage.md): command reference, repository checks, and installed CLI behavior.
 - [STRUCTURE.md](./STRUCTURE.md): current source tree and ownership boundaries.
 
