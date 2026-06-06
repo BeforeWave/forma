@@ -72,7 +72,7 @@
 - examples/profiles/sample-backend/languages/py.yaml
 - examples/profiles/sample-backend/sample-backend-go.yaml
 - examples/profiles/sample-backend/sample-backend-py.yaml
-- plans/issue-three-layer-suite/implement_notes.md
+- plans/issue-three-layer-suite/implement-notes.md
 - source/skill-creator/SKILL.md
 - source/skill-creator/interfaces/codex/openai.yaml
 - source/skill-creator/references/decision-gate.md

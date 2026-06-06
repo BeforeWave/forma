@@ -34,7 +34,7 @@ Inspect backend repository facts read-only and produce a grounding handoff.
 - Do not treat a plan draft as the authoritative requirement source. Cite the original source material and any reviewed grounding handoff separately.
 - Do not write `plan.md`, do not write `tasks.md`, and do not start implementation.
 - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
-- Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+- Keep default constraints minimal; route heavy workflow rules to stage-specific constraints or conditional overlays.
 - Prefer existing repository conventions and native validation commands.
 - Keep changes scoped to the accepted task and preserve unrelated user work.
 - Keep changes scoped to the backend behavior required by the current issue.

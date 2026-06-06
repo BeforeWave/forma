@@ -9,7 +9,7 @@ This workflow is a controller for software engineering work, not a technology-st
 3. Treat the plan files as the execution contract: once `plan.md` and `tasks.md` are sealed, implementation must not silently rewrite them. Stop and re-plan when assumptions fail.
 4. Execute tasks sequentially through review gates: each run handles only the first incomplete task, produces review-ready evidence, and completes only the reviewed task.
 5. Bind completion claims to evidence: record validation commands, review-only rationale, changed files, and evidence paths.
-6. Keep workflow state inside the generated plan-first workflow: use the bundled `scripts/issue-workflow.sh` and `plans/issue-<id>/` artifacts instead of inventing alternate state directories.
+6. Keep workflow state inside the generated plan-first workflow: use the bundled `scripts/forma-workflow.sh` and `plans/issue-<id>/` artifacts instead of inventing alternate state directories.
 
 ## Failure Modes
 

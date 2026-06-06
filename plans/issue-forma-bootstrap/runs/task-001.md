@@ -7,7 +7,7 @@
 ## Changed Files
 - AGENTS.md
 - LICENSE
-- plans/issue-forma-bootstrap/implement_notes.md
+- plans/issue-forma-bootstrap/implement-notes.md
 - README.md
 - STRUCTURE.md
 

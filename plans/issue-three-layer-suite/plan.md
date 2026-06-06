@@ -50,7 +50,7 @@ Out of scope:
 - CI workflow files.
 - Pre-commit hooks.
 - `forma init` scaffolding for new profile stacks.
-- Renaming the artifact filenames the generated suite's `seal` / `pour` skills write — confirmed: `plans/issue-<id>/plan.md`, `plans/issue-<id>/tasks.md`, `plans/issue-<id>/runs/`, `plans/issue-<id>/implement_notes.md` stay as-is. Forma-themed naming applies at the skill-kind layer only (shape/gauge/seal/pour/flow), not at the on-disk artifact-name layer.
+- Renaming the artifact filenames the generated suite's `seal` / `pour` skills write — confirmed: `plans/issue-<id>/plan.md`, `plans/issue-<id>/tasks.md`, `plans/issue-<id>/runs/`, `plans/issue-<id>/implement-notes.md` stay as-is. Forma-themed naming applies at the skill-kind layer only (shape/gauge/seal/pour/flow), not at the on-disk artifact-name layer.
 
 ## Approach
 
@@ -70,13 +70,13 @@ Out of scope:
   - committed source-of-truth: everything under `src/forma/`, `source/methodology/`, `source/skill-creator/`, `tests/`, `examples/profiles/sample-backend/`, `pyproject.toml`, `.gitignore`.
   - committed generated artifacts (review surface + drift baseline): `examples/generated/sample-backend-go-plan-first-codex/` and `examples/generated/sample-backend-go-plan-first-claude-code/`, each including `.forma-manifest.json`.
   - gitignored transient: `__pycache__/`, `.pytest_cache/`, `*.egg-info/`, `build/`, `dist/`, `.venv/`.
-- Evidence paths: `plans/issue-three-layer-suite/runs/task-*.md` written under workflow control by `scripts/issue-workflow.sh complete`.
+- Evidence paths: `plans/issue-three-layer-suite/runs/task-*.md` written under workflow control by `scripts/forma-workflow.sh complete`.
 - State policy: validation runs in the standard clean non-login non-interactive Bash shell; pytest requires `pip install -e .` to have succeeded; `forma verify` and `forma create` must not require network or external API keys.
 - Validation gates: per-task `Validate:` runs the relevant pytest subset or shared check; the Layer-1 and Layer-3 dogfood checks are issue-level shared checks; final validation runs the full pytest suite plus both dogfood `forma verify` invocations.
 - Metadata/provenance: each generated `.forma-manifest.json` must record target, top-level profile, resolved profile order, methodology git short SHA, methodology tree digest, resolved profile file hashes, generator version, and real UTC timestamp.
 - Write boundary: Layer 3 only writes under the user-supplied `--output` path; the committed `examples/generated/sample-backend-go-plan-first-codex/` and `examples/generated/sample-backend-go-plan-first-claude-code/` outputs are the formal Layer-3 writes in this issue and must match what running the creator against the committed top-level sample profile and each explicit target produces.
 - Tracking boundary: Layer 1 ad hoc constraints are not tracked after the interaction unless explicitly promoted into a profile file. Layer 3 profiles are tracked source; generated target bundles are reviewable artifacts derived from tracked profiles, methodology, and target adapter rules.
-- Repository boundary: Forma's own committed profiles are sanitized examples only. Real downstream profiles, such as an project-specific profile with true workflow commands or organization-specific constraints, must live in that downstream repository and be tracked there.
+- Repository boundary: Forma's own committed profiles are sanitized examples only. Real downstream profiles with true workflow commands or organization-specific constraints must live in the downstream repository that owns those constraints and be tracked there.
 
 ## Constraints
 

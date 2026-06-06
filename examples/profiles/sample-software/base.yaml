@@ -13,8 +13,13 @@ terminology:
 constraints:
   default:
     - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
-    - Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
     - Use Chinese for plan summaries, evidence, and review handoffs when the user is collaborating in Chinese.
+  shape:
+    - Classify natural-language constraints into default, stage-specific, or conditional overlay targets before plan finalization.
+  seal:
+    - Keep one-off generated-suite constraints out of tracked profiles unless the owner explicitly approves durable behavior.
+  pour:
+    - Do not expand routine task execution by reading broad docs or generated baselines unless the finalized plan selects that scenario.
 validation_commands:
   default:
     - python -m pytest tests/

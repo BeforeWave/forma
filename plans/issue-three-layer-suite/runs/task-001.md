@@ -6,7 +6,7 @@
 
 ## Changed Files
 - .gitignore
-- plans/issue-three-layer-suite/implement_notes.md
+- plans/issue-three-layer-suite/implement-notes.md
 - pyproject.toml
 - source/methodology/flow.md
 - source/methodology/gauge.md

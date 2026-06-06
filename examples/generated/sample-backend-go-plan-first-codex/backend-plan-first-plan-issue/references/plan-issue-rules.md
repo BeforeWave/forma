@@ -3,7 +3,7 @@
 Use these rules only for `plan-issue`, the chat-only convergence step before `finalize-plan`.
 
 - Resolve bundled `references/*` relative to the current triggered skill package. Never substitute a same-named resource from a sibling skill directory.
-- Do not execute any bundled script from this skill. `issue-workflow.sh` is not part of plan-issue operation.
+- Do not execute any bundled script from this skill. `forma-workflow.sh` is not part of plan-issue operation.
 - Do not write `plan.md`, do not write `tasks.md`, do not initialize issue state, and do not start execution work.
 
 ## Mode And Boundary

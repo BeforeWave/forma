@@ -7,7 +7,7 @@ Outcome:
 - Canonical methodology source of truth committed under `source/methodology/`: five skill-kind fragments (`shape`, `gauge`, `seal`, `pour`, `flow`) plus four shared references (`decision-gate`, `plan-strategy`, `task-structure`, `output-format`). Layer 1 (next task) hand-derives its bundled references from these; Layer 3 (later task) composes from these.
 
 Decision Notes:
-- Virtualenv: chose not to create `.venv` in the repo. Rationale: the user's host (`pyenv` 3.13.3 + pip 25.2) already provides an isolated default; creating a `.venv` adds maintenance noise without solving a real problem for v1. If issue-3 introduces CI or external contributors, a `.venv` recommendation can be added in docs without code changes. `.forma-workflow/` and `.venv/` are both in `.gitignore` to keep the option open.
+- Virtualenv: chose not to create `.venv` in the repo. Rationale: local development already had an isolated interpreter, and creating a committed `.venv` convention adds maintenance noise without solving a real problem for v1. If issue-3 introduces CI or external contributors, a `.venv` recommendation can be added in docs without code changes. `.forma-workflow/` and `.venv/` are both in `.gitignore` to keep the option open.
 - pyproject.toml package discovery uses `where = ["src", "source/skill-creator/scripts"]` exactly as the plan specifies. The `source/skill-creator/scripts/` directory does not exist yet (Layer 1 task will create it); setuptools accepts missing `where` entries as zero packages found, so the install still succeeds at the end of this task and will pick up `forma_verifier` once the next task creates it.
 - CLI subcommand stubs intentionally return success with a placeholder message rather than raising `NotImplementedError`. Rationale: the task acceptance contract requires `forma --help` to work, which means the underlying functions must be importable and callable; exiting 0 makes it easier to smoke-test the dispatcher wiring across tasks 2 and 3 without changing call sites.
 - `--methodology` option on `forma create` is included in the stub. Rationale: declaring the option now fixes the CLI surface; Layer 3 implementation in task 3 just supplies the actual auto-detect logic and consumption — no rewiring needed.
@@ -108,13 +108,13 @@ Follow-ups:
 ## Post-Task Sample Profile Additions
 
 Outcome:
-- Added `examples/profiles/sample-software/` as a sanitized composable profile stack modeled after a downstream `sample-software-plan-first*` five-skill family.
+- Added `examples/profiles/sample-software/` as a sanitized composable profile stack modeled after a downstream software workflow family.
 - The sample preserves the software plan-first behavior shape: Chinese plan collaboration, Impact Profile/Impact Boundary selection, read-only grounding, sealed `plan.md`/`tasks.md`, one-task review-gated implementation, and safe showhand execution.
 - Added creator tests that load the new profile, generate a Codex suite, assert the expected stage names/resources/manifest metadata, and verify the generated suite.
 
 Decision Notes:
-- Used `software-plan-first-*` stage names instead of preserving the downstream `sample-` prefix. Rationale: Forma committed examples must stay sanitized and must not promote downstream repository naming into a generic sample.
-- Adapted downstream workflow-state wording to Forma's current `plans/issue-<id>/` and bundled `scripts/issue-workflow.sh` model. Rationale: copying the downstream `.plan-first` state model directly into the sample would conflict with this issue's generated suite runtime.
+- Used `software-plan-first-*` stage names instead of preserving a downstream-specific prefix. Rationale: Forma committed examples must stay sanitized and must not promote downstream repository naming into a generic sample.
+- Adapted downstream workflow-state wording to Forma's current `plans/issue-<id>/` and bundled `scripts/forma-workflow.sh` model. Rationale: copying a downstream-specific state model directly into the sample would conflict with this issue's generated suite runtime.
 
 Validation:
 - `uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py`
@@ -134,7 +134,7 @@ Outcome:
 
 Validation:
 - `git diff --check README.md README.zh-CN.md STRUCTURE.md`
-- `rg -n -e "--inject|sample-|workflow skills|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md`
+- `rg -n -e "--inject|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md`
 
 ## Post-Task Self-Iteration Profile Additions
 
@@ -167,7 +167,7 @@ Outcome:
 - Forma's committed profile example was corrected to sanitized `examples/profiles/sample-backend/`, with committed drift baselines at `examples/generated/sample-backend-go-plan-first-codex/` and `examples/generated/sample-backend-go-plan-first-claude-code/`.
 
 Decision Notes:
-- Options considered for profile examples: commit realistic downstream profiles in Forma, or keep Forma examples sanitized and put real downstream profiles in the project-specific workflow repository. Selected sanitized Forma examples plus downstream-owned real profiles. Rationale: Forma is the generic builder; real downstream profiles can contain workflow commands and organization-specific constraints that should be tracked in the owning downstream repo, not in Forma's public/reference examples.
+- Options considered for profile examples: commit realistic downstream-specific profiles in Forma, or keep Forma examples sanitized and put real profiles in their owning downstream repositories. Selected sanitized Forma examples plus downstream-owned real profiles. Rationale: Forma is the generic builder; real downstream profiles can contain workflow commands and organization-specific constraints that should be tracked in the owning downstream repo, not in Forma's public/reference examples.
 - Implemented the minimal profile resolver in this task even though resolver hardening is also a follow-up task. Rationale: the current task's `--profile` CLI and deterministic target output acceptance cannot work without include resolution, merge order, and provenance recording. The next task can harden edge cases and docs without changing the architecture.
 - Kept generated skill bodies and target metadata deterministic from target + methodology + resolved profile. `generated_at` remains the only default time-varying manifest field, with `FORMA_GENERATED_AT` available for reproducible review baselines.
 
@@ -178,7 +178,7 @@ Classifications:
 - None.
 
 Deviations From Plan:
-- Replaced the earlier project-specific workflow-named profile example with sanitized `sample-backend` profiles after the user clarified that real downstream profiles must live under the project-specific workflow directory/repository.
+- Replaced the earlier downstream-named profile example with sanitized `sample-backend` profiles after the user clarified that real downstream profiles must live under their owning directory/repository.
 
 Follow-ups:
 - The docs task must remove stale `--inject` / `sample-org` README and STRUCTURE examples and describe the sanitized Forma example versus downstream real-profile boundary.

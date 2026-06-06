@@ -10,6 +10,9 @@ conditional_overlays:
     - id: docs-only
       description: Documentation-only changes.
       overlays: [docs]
+    - id: governance
+      description: Repository governance, AGENTS instructions, workflow policy, or self-management rule changes.
+      overlays: [governance]
     - id: methodology-verifier
       description: Canonical methodology or Layer 2 verifier changes.
       overlays: [methodology, verifier]
@@ -29,11 +32,26 @@ conditional_overlays:
         shape:
           - Identify affected docs and whether README.zh-CN.md must stay aligned with README.md.
         pour:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before editing Forma documentation.
           - Remove stale command examples, deprecated flags, and references to superseded profile locations.
+        flow:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated documentation edits.
       validation_commands:
         pour:
-          - rg -n -e "--inject|sample-|workflow skills|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
+          - rg -n -e "--inject|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
           - git diff --check README.md README.zh-CN.md STRUCTURE.md
+    governance:
+      description: Repository governance and self-management policy rules.
+      constraints:
+        shape:
+          - "Identify which governance surface changes: README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, profiles/forma-self, or plan-first workflow policy."
+        pour:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plan files before changing governance or self-management policy.
+        flow:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plan files before automated governance or self-management policy changes.
+      validation_commands:
+        pour:
+          - git diff --check README.md README.zh-CN.md STRUCTURE.md AGENTS.md profiles/forma-self
     methodology:
       description: Methodology source and generated skill body rules.
       constraints:
@@ -71,7 +89,10 @@ conditional_overlays:
         shape:
           - Decide whether a profile is Forma-owned under profiles/, sanitized example content under examples/profiles/, or downstream-owned outside this repository.
         pour:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before changing Forma-owned profiles or generated self-iteration behavior.
           - Verify every affected top-level profile by running forma create and forma verify for at least one target.
+        flow:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
       validation_commands:
         pour:
           - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py
@@ -81,7 +102,10 @@ conditional_overlays:
         shape:
           - State which committed generated output paths are drift baselines and why they must change.
         pour:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before replacing generated baselines that affect documented workflow behavior.
           - Regenerate committed outputs from committed profiles and stage removed old directories plus new generated directories together.
+        flow:
+          - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated generated baseline replacement.
       validation_commands:
         pour:
           - uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/

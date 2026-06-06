@@ -1,9 +1,10 @@
 """Forma CLI dispatcher.
 
-`verify` is implemented in issue-three-layer-suite task `layer-1-and-verifier`. It wires
-through `forma_verifier`, the Python package that ships organizationally
-inside Layer 1's meta skill source at
-`source/skill-creator/scripts/forma_verifier/`.
+`verify` wires through `forma_verifier`, the Python package that ships
+organizationally inside Layer 1's meta skill source at
+`source/skill-creator/scripts/forma_verifier/`. `explain` is a read-only
+stdout surface that formats canonical guidance references instead of keeping a
+second copy of profile and injection rules in CLI code.
 
 """
 
@@ -14,6 +15,7 @@ from pathlib import Path
 import click
 from forma.adapters import ADAPTER_TARGETS, build_creator
 from forma.creator import create_suite
+from forma.explain import render_guidance
 from forma_verifier import verify as verify_suite
 
 
@@ -86,9 +88,9 @@ def create(
 @click.option(
     "--source",
     "source_dir",
-    required=True,
+    required=False,
     type=click.Path(exists=True, file_okay=False, path_type=Path),
-    help="Forma creator source directory.",
+    help="Forma creator source override (default: packaged runtime assets).",
 )
 @click.option(
     "--output",
@@ -105,7 +107,7 @@ def create(
     help="Agent target to emit.",
 )
 def build_creator_command(
-    source_dir: Path,
+    source_dir: Path | None,
     output_dir: Path,
     target_agent: str,
 ) -> None:
@@ -115,6 +117,65 @@ def build_creator_command(
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"forma build-creator: wrote {output}")
+
+
+@main.group()
+def explain() -> None:
+    """Print read-only Forma authoring guidance."""
+
+
+@explain.command("profile")
+@click.option(
+    "--format",
+    "output_format",
+    default="markdown",
+    type=click.Choice(("markdown", "json")),
+    show_default=True,
+    help="Output format.",
+)
+@click.option(
+    "--target",
+    "target_agent",
+    required=False,
+    type=click.Choice(ADAPTER_TARGETS),
+    help="Optional agent target context.",
+)
+def explain_profile(output_format: str, target_agent: str | None) -> None:
+    """Explain durable profile authoring and constraint placement."""
+    try:
+        click.echo(render_guidance("profile", output_format, target_agent), nl=False)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@explain.command("temporary-injection")
+@click.option(
+    "--format",
+    "output_format",
+    default="markdown",
+    type=click.Choice(("markdown", "json")),
+    show_default=True,
+    help="Output format.",
+)
+@click.option(
+    "--target",
+    "target_agent",
+    required=False,
+    type=click.Choice(ADAPTER_TARGETS),
+    help="Optional agent target context.",
+)
+def explain_temporary_injection(
+    output_format: str,
+    target_agent: str | None,
+) -> None:
+    """Explain temporary injection classification and output rules."""
+    try:
+        click.echo(
+            render_guidance("temporary-injection", output_format, target_agent),
+            nl=False,
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
 
 
 if __name__ == "__main__":

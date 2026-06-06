@@ -69,7 +69,7 @@ Note: shared by tasks that can safely reuse this check while the wider issue is 
 ## Final Validation
 
 List one issue-level final validation command per line in the fenced `sh` block below.
-`scripts/issue-workflow.sh review-ready <issue-id>` executes this block only when preparing the last remaining task for review, and `complete` reuses the reviewed staged snapshot and cached result without rerunning it.
+`scripts/forma-workflow.sh review-ready <issue-id>` executes this block only when preparing the last remaining task for review, and `complete` reuses the reviewed staged snapshot and cached result without rerunning it.
 These commands run through the same clean non-login, non-interactive shell path as task `Validate:` lines and shared `## Validation` checks, so do not rely on user profile or rc files.
 When a command needs cleanup with a captured exit code, use portable variable names such as `exit_status`; avoid shell-reserved names such as zsh's read-only `status`.
 For documentation-only or analysis-only issues, replace executable commands with exactly one marker comment:
@@ -83,13 +83,13 @@ echo "replace me with project validation commands"
 
 Completion requirements:
 
-- `scripts/issue-workflow.sh review-ready <issue-id>` must pass the current task's `Validate:` lines, or that task must explicitly declare `Validate: # no-programmatic-validation: <reason>`.
+- `scripts/forma-workflow.sh review-ready <issue-id>` must pass the current task's `Validate:` lines, or that task must explicitly declare `Validate: # no-programmatic-validation: <reason>`.
 - Every `Use-Check:` reference must resolve to a shared check in `## Validation`, and each referenced shared check must pass during `review-ready`.
 - When preparing the last task for review, every `## Final Validation` command must pass, or the plan must explicitly declare `# no-programmatic-validation: <reason>`.
-- `scripts/issue-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot in Git for later completion.
-- `scripts/issue-workflow.sh complete <issue-id>` must reuse the same reviewed staged snapshot and review cache for the same task instead of rerunning validation.
+- `scripts/forma-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot in Git for later completion.
+- `scripts/forma-workflow.sh complete <issue-id>` must reuse the same reviewed staged snapshot and review cache for the same task instead of rerunning validation.
 - `plan.md` remains unchanged during task execution.
-- `tasks.md` is only updated by `scripts/issue-workflow.sh complete <issue-id>`.
+- `tasks.md` is only updated by `scripts/forma-workflow.sh complete <issue-id>`.
 - Evidence is recorded in `./plans/issue-<id>/runs/`.
 
 ## Risks / Notes

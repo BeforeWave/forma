@@ -2,25 +2,30 @@ profile:
   id: forma-self-project
   description: Forma-specific layer, artifact, documentation, and validation boundaries.
 constraints:
-  default:
+  shape:
     - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
     - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
-    - Record meaningful execution decisions in plans/issue-<id>/implement_notes.md when they affect later tasks or review.
-  shape:
     - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
     - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
     - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
   gauge:
-    - Inspect active plan/task files, README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
     - Confirm whether profile changes belong under profiles/forma-self, examples/profiles, or a downstream repository.
     - Confirm current generated baselines before recommending any delete/add replacement.
   seal:
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in finalized plans and tasks.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
     - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
     - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
   pour:
+    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
+    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
     - Run the narrowest relevant test first, then the shared validation gate before review-ready.
     - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
   flow:
+    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
+    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
     - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
     - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
 resources:

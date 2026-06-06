@@ -46,7 +46,7 @@ Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Valida
 - If `gh` is missing, unauthenticated, or lacks access, recommend the repository's macOS GitHub CLI setup guidance; if the user does not want to configure `gh` now, continue only after they confirm the issue body and key comments are pasted into the current session.
 - While the user context is still incomplete, stay in clarification mode. Ask only for the missing planning information needed to converge Goal, Scope, Approach, and the validation model for tasks, shared checks, and final issue closure.
 - Before the user confirms that the context is sufficient, do not explore the repository, do not write repo files, do not execute bundled scripts other than `script/github_issue_context.py`, and do not draft `plan.md` or `tasks.md`.
-- Do not execute `issue-workflow.sh` from this skill. The GitHub issue context helper is the only bundled script that `plan-issue` may run.
+- Do not execute `forma-workflow.sh` from this skill. The GitHub issue context helper is the only bundled script that `plan-issue` may run.
 {{ include: fragments/shape/decision-gate-adds.md }}
 {{ include: fragments/shape/handoff-adds.md }}
 

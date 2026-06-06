@@ -69,6 +69,19 @@ def test_load_profile_resolves_sample_backend_go() -> None:
     assert "repository" in profile.terminology
     assert "go test ./..." in profile.validation_commands["default"]
     assert any("API" in item for item in profile.constraints["shape"])
+    assert not any("README.md" in item for item in profile.constraints["default"])
+    assert not any(
+        "generated baseline" in item.lower()
+        for item in profile.constraints["default"]
+    )
+    assert any(
+        "stage-specific constraints or conditional overlays" in item
+        for item in profile.constraints["default"]
+    )
+    assert any(
+        "user-provided special constraints" in item
+        for item in profile.constraints["pour"]
+    )
     assert profile.stages["shape"].name == "backend-plan-first-plan-issue"
     assert profile.stages["flow"].directory == "backend-plan-first-showhand"
     assert {
@@ -95,6 +108,15 @@ def test_load_profile_resolves_sample_software_plan_first() -> None:
     assert "$software-plan-first-showhand" in profile.stages["flow"].default_prompt
     assert "Impact Profile" in profile.decision_gate_extras
     assert any("frontend, backend, fullstack, or generic" in item for item in profile.constraints["default"])
+    assert not any("generated baselines" in item for item in profile.constraints["default"])
+    assert any(
+        "Classify natural-language constraints" in item
+        for item in profile.constraints["shape"]
+    )
+    assert any(
+        "routine task execution" in item
+        for item in profile.constraints["pour"]
+    )
     assert {
         resource.dest
         for resource in profile.resources["shape"]
@@ -122,11 +144,22 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert profile.stages["flow"].directory == "forma-flow"
     assert "$forma-flow" in profile.stages["flow"].default_prompt
     assert "Layer impact" in profile.decision_gate_extras
+    assert not any("README.md" in item for item in profile.constraints["default"])
+    assert any("dirty worktree" in item for item in profile.constraints["default"])
+    assert any("active issue plan and tasks" in item for item in profile.constraints["default"])
+    assert any("README.md" in item for item in profile.constraints["shape"])
+    assert any(
+        "Layer 1 temporary injection" in item
+        for item in profile.constraints["shape"]
+    )
     assert any("profiles/forma-self" in item for item in profile.constraints["gauge"])
+    assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["pour"])
+    assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["flow"])
     assert profile.conditional_overlays is not None
     assert profile.conditional_overlays.decision.name == "Iteration Area"
     assert [route.id for route in profile.conditional_overlays.routes] == [
         "docs-only",
+        "governance",
         "methodology-verifier",
         "creator-profile",
         "generated-baseline",
@@ -234,7 +267,7 @@ resources:
   seal:
     scripts:
       - source: missing.sh
-        dest: issue-workflow.sh
+        dest: forma-workflow.sh
 """.lstrip(),
         encoding="utf-8",
     )
@@ -490,6 +523,10 @@ def test_forma_self_iteration_profile_emits_valid_suites(tmp_path: Path) -> None
     assert "references/forma-iteration-boundaries.md" in shape_text
     assert "Settle `Iteration Area`" in shape_text
     assert "If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint" in pour_text
+    assert "Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>" in pour_text
+    assert "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface." not in pour_text
+    assert "If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md" in pour_text
+    assert "If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md" in pour_text
     assert "$forma-flow" in flow_agent
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
@@ -505,7 +542,7 @@ def test_forma_self_iteration_profile_emits_valid_suites(tmp_path: Path) -> None
         == "forma-shape"
     )
     assert manifest["conditional_overlays"]["decision"]["name"] == "Iteration Area"
-    assert manifest["conditional_overlays"]["routes"][4]["overlays"] == [
+    assert manifest["conditional_overlays"]["routes"][5]["overlays"] == [
         "methodology",
         "verifier",
         "creator",
@@ -538,7 +575,7 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
         assert (output_dir / directory / "agents" / "openai.yaml").is_file()
     for kind in ("seal", "pour", "flow"):
         assert (
-            output_dir / SAMPLE_STAGE_DIRS[kind] / "scripts" / "issue-workflow.sh"
+            output_dir / SAMPLE_STAGE_DIRS[kind] / "scripts" / "forma-workflow.sh"
         ).is_file()
     shape_text = (
         output_dir / SAMPLE_STAGE_DIRS["shape"] / "SKILL.md"
@@ -593,13 +630,10 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
     assert not (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "workflow-rules.md"
     ).exists()
-    assert not (
-        output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "implement_notes.md"
-    ).exists()
     assert "Add or update Go tests" in pour_text
     assert "contract, compatibility, data, or operational risk" in pour_text
     assert "already-finalized plan" in flow_text
-    assert "Do not run `scripts/issue-workflow.sh init <issue-id>`" in flow_text
+    assert "Do not run `scripts/forma-workflow.sh init <issue-id>`" in flow_text
     assert "references/automated-execution.md" in flow_text
     assert "references/showhand-automation.md" not in flow_text
     assert not (
@@ -609,7 +643,7 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "tasks-template.md"
     ).exists()
     assert "showhand is execution-only for an already-finalized plan" in (
-        output_dir / SAMPLE_STAGE_DIRS["flow"] / "scripts" / "issue-workflow.sh"
+        output_dir / SAMPLE_STAGE_DIRS["flow"] / "scripts" / "forma-workflow.sh"
     ).read_text(encoding="utf-8")
 
     report = verify(output_dir)
@@ -806,6 +840,61 @@ def test_create_cli_requires_target_and_profile(tmp_path: Path) -> None:
     assert "Missing option '--profile'" in missing_profile.output
     assert missing_target.exit_code != 0
     assert "Missing option '--target'" in missing_target.output
+
+
+def test_explain_profile_outputs_canonical_guidance() -> None:
+    runner = CliRunner()
+    result = runner.invoke(main, ["explain", "profile", "--target", "codex"])
+
+    assert result.exit_code == 0
+    assert "# Forma Profile Guidance" in result.output
+    assert "Target: `codex`" in result.output
+    assert (
+        "source/skill-creator/references/profile-authoring-principles.md"
+        in result.output
+    )
+    assert (
+        "source/skill-creator/references/temporary-injection-generation.md"
+        in result.output
+    )
+    assert "`constraints.default`: Keep this minimal." in result.output
+    assert "`conditional_overlays`: Heavy route-specific rules" in result.output
+    assert "| User constraint | Injection/profile target |" in result.output
+    assert "does not maintain a second copy of the guidance" in result.output
+
+
+def test_explain_temporary_injection_json_outputs_sources() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "explain",
+            "temporary-injection",
+            "--format",
+            "json",
+            "--target",
+            "codex",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["topic"] == "temporary-injection"
+    assert payload["target"] == "codex"
+    assert [
+        source["path"]
+        for source in payload["sources"]
+    ] == [
+        "source/skill-creator/references/temporary-injection-generation.md",
+        "source/skill-creator/references/profile-authoring-principles.md",
+    ]
+    assert (
+        "Temporary Injection Generation Standard"
+        in payload["sources"][0]["content"]
+    )
+    assert "Profile Authoring Principles" in payload["sources"][1]["content"]
+    assert "classification table" in payload["markdown"]
+    assert "constraints.default" in payload["markdown"]
 
 
 def test_create_rejects_unknown_target(tmp_path: Path) -> None:

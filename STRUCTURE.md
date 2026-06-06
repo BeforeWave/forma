@@ -12,6 +12,8 @@ This document maps the current Forma source tree and the role of each area.
 | `STRUCTURE.md` | This file — top-level structure map | present |
 | `LICENSE` | MIT license text | present |
 | `pyproject.toml` | Python package metadata and `forma` console entry point | present |
+| `setup.py` | Build hook copying canonical runtime assets into wheel package data | present |
+| `MANIFEST.in` | sdist inclusion rules for canonical runtime assets | present |
 | `uv.lock` | uv dependency lockfile for local development | present |
 | `plans/issue-<id>/` | Per-issue planning and execution state | present per issue |
 | `source/` | Canonical methodology source and Layer 1 meta skill source | present |
@@ -24,7 +26,7 @@ This document maps the current Forma source tree and the role of each area.
 
 | Path | Role |
 |---|---|
-| `source/methodology/` | Canonical plan-first methodology source derived from the validated plan-first workflow layer |
+| `source/methodology/` | Canonical plan-first methodology source used to generate stage-specific workflow skills |
 | `source/methodology/stages/` | Stage body sources composed into generated `shape` / `gauge` / `seal` / `pour` / `flow` `SKILL.md` files |
 | `source/methodology/fragments/` | Source-only reusable methodology fragments expanded inline before generated `SKILL.md` output |
 | `source/methodology/resources/` | Stage-local fixed resources copied into generated suites, including output formats, workflow rules, templates, helpers, and runner scripts |
@@ -32,6 +34,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/skill-creator/` | Layer 1 meta skill source (`forma-creator`) |
 | `source/skill-creator/interfaces/codex/openai.yaml` | Codex UI metadata used when building the Codex creator |
 | `source/skill-creator/references/` | Bundled Layer 1 references for creator authoring and verifier guidance |
+| `source/skill-creator/references/profile-authoring-principles.md` | Canonical profile authoring and constraint-placement guidance used by `forma explain profile` |
 | `source/skill-creator/references/temporary-injection-generation.md` | Layer 1 standard for classifying natural-language constraints into temporary injection JSON |
 | `source/skill-creator/scripts/verify.py` | Agent-side verification entrypoint; no pip install required |
 | `source/skill-creator/scripts/forma_verifier/` | Layer 2 verifier package, organizationally inside Layer 1 |
@@ -44,6 +47,10 @@ package. The same `forma_verifier` package is also discovered by
 `source/skill-creator/` does not keep a second copy of
 `source/methodology/`. `forma build-creator` injects that methodology tree into
 the built creator bundle at `resources/plan-first/methodology/`.
+
+Wheel builds copy `source/methodology/` and `source/skill-creator/` into
+`forma.assets` package data. Installed CLI commands use those packaged assets
+first and fall back to source-checkout paths only during editable development.
 
 Generated skill suites keep references inside each skill directory. Shared
 source resources are copied into each skill that needs them using consistent
@@ -59,7 +66,10 @@ generated skill resources.
 
 | Path | Role |
 |---|---|
-| `src/forma/cli.py` | Click CLI exposing `forma verify`, `forma create`, and `forma build-creator` |
+| `src/forma/cli.py` | Click CLI exposing `forma verify`, `forma create`, `forma build-creator`, and `forma explain` |
+| `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
+| `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
+| `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
 | `src/forma/creator/manifest.py` | Methodology lookup and provenance manifest helpers |
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Mode-S skill contents |

@@ -10,7 +10,7 @@ For automated execution, update the notes during the automated task loop when a 
 
 When automated execution makes an ordinary execution decision without waiting for the user, record the viable options, the selected best option, and the rationale in `Decision Notes:` before continuing. Do not use this to invent missing requirements, bypass permission approval, or skip required workflow gates.
 
-Use `scripts/issue-workflow.sh notes-template <issue-id>` to print a current-task section skeleton when starting or updating the notes file. If `implement-notes.md` is changed, `review-ready` checks that it has a `# Implement Notes` title, a section for the current task, and an `Outcome:` field.
+Use `scripts/forma-workflow.sh notes-template <issue-id>` to print a current-task section skeleton when starting or updating the notes file. If `implement-notes.md` is changed, `review-ready` checks that it has a `# Implement Notes` title, a section for the current task, and an `Outcome:` field.
 
 Recommended issue-local path:
 

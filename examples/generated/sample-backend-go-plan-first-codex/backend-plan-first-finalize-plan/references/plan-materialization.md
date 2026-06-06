@@ -1,4 +1,4 @@
-- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/issue-workflow.sh init <issue-id>` instead of creating the files by hand.
+- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` instead of creating the files by hand.
 - Commit only `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` before leaving the planning phase.
 - Fill in `plan.md` completely before finalizing `tasks.md`.
 - Replace the `tasks.md` template with the final task checklist for the issue instead of keeping template guidance or appending below it.

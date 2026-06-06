@@ -8,7 +8,7 @@
 - AGENTS.md
 - README.md
 - STRUCTURE.md
-- plans/issue-three-layer-suite/implement_notes.md
+- plans/issue-three-layer-suite/implement-notes.md
 
 ## Validation Results
 - PASS [task]: uv run --extra dev forma --help

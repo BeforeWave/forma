@@ -82,17 +82,39 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
         encoding="utf-8"
     )
     assert "temporary-injection-generation.md" in codex_target
+    assert "profile-authoring-principles.md" in codex_target
     assert "classification table" in codex_target
     assert "constraints.default" in codex_target
     assert "routine `pour` / `flow`" in codex_target
+    assert (codex / "references" / "profile-authoring-principles.md").is_file()
     temp_standard = (
         codex / "references" / "temporary-injection-generation.md"
+    ).read_text(encoding="utf-8")
+    profile_principles = (
+        codex / "references" / "profile-authoring-principles.md"
     ).read_text(encoding="utf-8")
     assert "Do not copy README, AGENTS" in temp_standard
     assert "constraints.default" in temp_standard
     assert "conditional_overlays" in temp_standard
     assert "classification table" in temp_standard
+    assert "Profile Authoring Principles" in profile_principles
+    assert "Keep this minimal" in profile_principles
     assert not (output_root / "claude-code").exists()
+    assert verify(codex).passed
+
+
+def test_build_creator_defaults_to_runtime_asset_source(tmp_path: Path) -> None:
+    output_root = tmp_path / "creator-dist"
+
+    output = build_creator(None, output_root, "codex")
+
+    codex = output_root / "codex" / SKILL_NAME
+    assert output == codex
+    assert (codex / "SKILL.md").is_file()
+    assert (codex / "references" / "profile-authoring-principles.md").is_file()
+    assert (
+        codex / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
+    ).is_file()
     assert verify(codex).passed
 
 
@@ -134,7 +156,9 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "rename.stages" in claude_target
     assert "one-off special constraints" in claude_target
     assert "temporary-injection-generation.md" in claude_target
+    assert "profile-authoring-principles.md" in claude_target
     assert "classification table" in claude_target
+    assert (claude / "references" / "profile-authoring-principles.md").is_file()
     assert verify(claude).passed
 
 
@@ -475,8 +499,6 @@ def test_build_creator_cli(tmp_path: Path) -> None:
         main,
         [
             "build-creator",
-            "--source",
-            str(META_SOURCE),
             "--output",
             str(output_root),
             "--target",

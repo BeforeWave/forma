@@ -5,7 +5,7 @@
 - Commit Hash: Recorded in the commit that introduces this evidence file.
 
 ## Changed Files
-- plans/issue-three-layer-suite/implement_notes.md
+- plans/issue-three-layer-suite/implement-notes.md
 - src/forma/creator/profiles.py
 - tests/test_creator.py
 

@@ -17,6 +17,8 @@ Forma is a source workspace for plan-first skill-suite creation. It contains can
 - Treat `profiles/forma-self/` as Forma-owned profile source for managing this repository's own development iterations.
 - Keep `profiles/forma-self` default constraints lightweight. `forma-pour` and `forma-flow` should not require root governance docs unless the task's `Iteration Area` is docs-only, governance, profile, generated-baseline, or cross-layer.
 - Keep Layer 1 temporary injection generation standards in `source/skill-creator/`. Natural-language constraints must be classified before writing injection JSON; do not put broad root-doc or generated-baseline reads into `constraints.default`.
+- Use `forma explain profile` or `forma explain temporary-injection` when an external agent needs profile authoring guidance without inspecting Forma source files.
+- Keep pip/pipx installed CLI behavior independent of the source checkout. Runtime guidance, default methodology, and default creator source must be available through packaged `forma.assets`; source paths are overrides only.
 - Keep Forma's committed profile examples sanitized. Real downstream profiles with organization-specific workflow commands or private constraints belong in their owning repositories.
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.
 

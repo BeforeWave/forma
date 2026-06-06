@@ -6,9 +6,10 @@ import json
 import hashlib
 import os
 import subprocess
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Mapping, Sequence
+from typing import Dict, Iterator, Mapping, Sequence
 
 from forma import __version__
 from forma.creator.composer import (
@@ -18,6 +19,7 @@ from forma.creator.composer import (
     STAGE_SOURCE_DIR,
 )
 from forma.creator.profiles import ConditionalOverlays, ConditionalRoute, ProfileConfig, ResourceSpec
+from forma.runtime_assets import runtime_asset_path
 
 
 METHODOLOGY_VERSION = "0.1.0"
@@ -26,29 +28,26 @@ METHODOLOGY_VERSION = "0.1.0"
 def find_methodology_dir(methodology_dir: Path | None = None) -> Path:
     """Resolve the canonical methodology source directory.
 
-    In editable development installs, `src/forma/...` lives under the repository
-    root. Walk upward from this module and from cwd to find `source/methodology`.
-    A packaged non-editable Mode-O source layout is deferred to issue-3, so v1
-    intentionally keeps this lookup simple and explicit.
+    Packaged installs read the methodology from `forma.assets`; editable source
+    checkouts fall back to `source/methodology`.
     """
+    with methodology_dir_context(methodology_dir) as path:
+        return path
+
+
+@contextmanager
+def methodology_dir_context(
+    methodology_dir: Path | None = None,
+) -> Iterator[Path]:
+    """Yield a methodology path from an override or packaged runtime assets."""
     if methodology_dir is not None:
         path = methodology_dir.resolve()
         _assert_methodology_dir(path)
-        return path
-    candidates: List[Path] = []
-    for base in [Path(__file__).resolve(), Path.cwd().resolve()]:
-        candidates.extend(parent / "source" / "methodology" for parent in base.parents)
-    seen: set[Path] = set()
-    for candidate in candidates:
-        if candidate in seen:
-            continue
-        seen.add(candidate)
-        if candidate.is_dir():
-            _assert_methodology_dir(candidate)
-            return candidate
-    raise ValueError(
-        "could not auto-detect source/methodology; pass --methodology <path>"
-    )
+        yield path
+        return
+    with runtime_asset_path("source", "methodology") as path:
+        _assert_methodology_dir(path)
+        yield path
 
 
 def build_manifest(

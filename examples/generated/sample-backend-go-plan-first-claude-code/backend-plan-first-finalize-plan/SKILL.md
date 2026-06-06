@@ -24,11 +24,11 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 - Treat Approach as unconverged unless the current conversation explicitly settles the intended deliverable shape, the concrete surfaces to touch, and whether the work adds new assets or edits existing ones.
 - Treat Validation as unconverged unless the current conversation explicitly settles the task-local validation contract, any reusable task-safe shared checks, and the issue-level final validation or explicit review-only acceptance standard.
 - If repository exploration would still need to choose a concrete file path or target file, create-versus-edit behavior, single-versus-multi-file output, touched interface, validation mode, source precedence, or whether a specialized grounding producer should replace generic `ground-plan`, the gate has not passed yet.
-- Before the gate passes, do not read planning references, do not explore the repository, do not run `scripts/issue-workflow.sh init <issue-id>`, and do not draft `plan.md` or `tasks.md`.
+- Before the gate passes, do not read planning references, do not explore the repository, do not run `scripts/forma-workflow.sh init <issue-id>`, and do not draft `plan.md` or `tasks.md`.
 
 ## Workflow
 
-- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/issue-workflow.sh init <issue-id>` from this installed skill package.
+- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` from this installed skill package.
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
 - Finalize `tasks.md` for the issue, encoding each new task type in `Accept:` while preserving the structured task schema.
@@ -48,7 +48,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 ## Requirements
 
 - Treat `finalize-plan` as a plan-finalization skill, not a brainstorming skill.
-- When invoking `scripts/issue-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
+- When invoking `scripts/forma-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
 - If the current planning handoff includes a GitHub issue URL but the current session does not already contain confirmed issue body and key comments, run `python3 script/github_issue_context.py <issue-url-or-user-text>` from this skill package before the decision-complete gate.
 - The GitHub issue helper supports issue URLs like `https://github.com/<owner>/<repo>/issues/<number>`, loads issue body and chronological comments through `gh issue view <url> --json number,title,body,state,labels,assignees,author,createdAt,updatedAt,url,comments`, and rejects PR, repo, commit, or arbitrary links.
 - If multiple GitHub issue URLs appear, ask the user to identify the primary issue unless they explicitly confirm all issues belong to the same requirement context; only then rerun the helper with `--allow-multiple`.
@@ -58,7 +58,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 - Load and follow `references/plan-materialization.md` for plan materialization.
 - Load and follow `references/task-structure.md` for task structure.
 - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
-- Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+- Keep default constraints minimal; route heavy workflow rules to stage-specific constraints or conditional overlays.
 - Prefer existing repository conventions and native validation commands.
 - Keep changes scoped to the accepted task and preserve unrelated user work.
 - Keep changes scoped to the backend behavior required by the current issue.
@@ -68,6 +68,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 - Run the project's Go formatter on edited Go files.
 - Prefer module-local Go tests when available.
 - This sample demonstrates tracked profile composition without organization-specific workflow details.
+- Record durable profile decisions in plan tasks instead of relying on one-off generation notes.
 - Include task-local validation for behavior-changing backend work.
 - Require an approved contract or source handoff before finalizing API- or stream-changing backend work.
 - Use profile validation command when it applies: `python -m pytest tests/`

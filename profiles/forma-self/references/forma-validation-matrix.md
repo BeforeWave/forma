@@ -39,7 +39,7 @@ When the baseline should match fresh generation, run the relevant `forma create`
 ## Documentation
 
 ```bash
-rg -n -e "--inject|sample-|workflow skills|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
+rg -n -e "--inject|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
 git diff --check README.md README.zh-CN.md STRUCTURE.md
 ```
 

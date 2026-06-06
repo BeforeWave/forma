@@ -847,7 +847,7 @@ categorize_changed_file() {
     docs/*|*.md)
       printf 'docs\n'
       ;;
-    scripts/*|plan-first/*|direct/*|packaging/*|issue-workflow.sh)
+    scripts/*|plan-first/*|direct/*|packaging/*|forma-workflow.sh)
       printf 'tooling-workflow\n'
       ;;
     *)
@@ -1189,7 +1189,7 @@ Initialized plan workspace:
 Next:
 1. Use the finalize-plan skill to fill in and commit plan.md and tasks.md.
 2. Use the execution skill to implement the current task and present it for review.
-3. After user approval, use the same execution skill again to run scripts/issue-workflow.sh complete $1
+3. After user approval, use the same execution skill again to run scripts/forma-workflow.sh complete $1
 EOF
 }
 

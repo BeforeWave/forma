@@ -20,7 +20,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 
 ## Workflow
 
-- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/issue-workflow.sh init <issue-id>` from this installed skill package.
+- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` from this installed skill package.
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
 - Finalize `tasks.md` for the issue, encoding each new task type in `Accept:` while preserving the structured task schema.
@@ -29,7 +29,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 ## Adds
 
 - Treat `finalize-plan` as a plan-finalization skill, not a brainstorming skill.
-- When invoking `scripts/issue-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
+- When invoking `scripts/forma-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
 - If the current planning handoff includes a GitHub issue URL but the current session does not already contain confirmed issue body and key comments, run `python3 script/github_issue_context.py <issue-url-or-user-text>` from this skill package before the decision-complete gate.
 - The GitHub issue helper supports issue URLs like `https://github.com/<owner>/<repo>/issues/<number>`, loads issue body and chronological comments through `gh issue view <url> --json number,title,body,state,labels,assignees,author,createdAt,updatedAt,url,comments`, and rejects PR, repo, commit, or arbitrary links.
 - If multiple GitHub issue URLs appear, ask the user to identify the primary issue unless they explicitly confirm all issues belong to the same requirement context; only then rerun the helper with `--allow-multiple`.

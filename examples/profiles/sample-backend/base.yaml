@@ -12,7 +12,13 @@ terminology:
 constraints:
   default:
     - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
-    - Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+    - Keep default constraints minimal; route heavy workflow rules to stage-specific constraints or conditional overlays.
+  shape:
+    - Classify whether repeated workflow behavior belongs in a tracked profile or only in the current temporary injection.
+  seal:
+    - Record durable profile decisions in plan tasks instead of relying on one-off generation notes.
+  pour:
+    - Treat user-provided special constraints as local to the generated bundle unless they were promoted into a tracked profile.
 validation_commands:
   default:
     - python -m pytest tests/

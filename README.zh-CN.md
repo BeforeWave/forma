@@ -1,172 +1,192 @@
 # Forma
 
-用可验证的结构生成 plan-first AI skill suite。
+为团队和项目构建专属的 Spec Plan-First agent workflow。
+
+Forma 是一个 Python CLI 和 creator skill source，用来把项目的 spec 与可复用工程约束
+变成可安装到 Codex 或 Claude Code 的 agent workflow。它不替代 PRD、issue 或
+OpenSpec change；这些仍然是需求层。Forma 做的是在需求 spec 之上注入项目自己的通用
+约束，并生成一个 plan-first workflow，要求 agent 在实现前证明计划满足这些约束。
 
 英文文档：[README.md](./README.md)
 
-## 这是什么
+## 项目模型
 
-Forma 是一个 plan-first AI skill 创建工具。它把方法论、验证器和生成器分成三层：
+Forma 只构建一件事：项目专属的 Spec Plan-First agent workflow。
 
-- **Layer 1 — Instruction**：`source/skill-creator/` 是自包含的 `forma-creator` meta skill 源码，包含 `SKILL.md`、引用资料和 agent 侧可直接运行的验证脚本。
-- **Layer 2 — Verification**：验证器位于 `source/skill-creator/scripts/forma_verifier/`，使用 Python 标准库实现；开发者 CLI 的 `forma verify` 也复用同一套规则。
-- **Layer 3 — Generation**：`src/forma/creator/` 提供 `forma create`，把 `source/methodology/` 和已提交的 profile stack 组合成目标 agent 专用的 Mode-S skill suite。
+这个 workflow 由四类输入编译出来：
 
-Forma 的核心方法论是 **plan-first**：实现前先收敛 Goal、Scope、Approach、Validation 和 Plan Strategy；每个 task 都带独立的验收和验证契约；证据放在对应计划旁边。
+- **Spec source**：PRD、GitHub issue、OpenSpec change、设计文档或 task plan，定义
+  要做什么。
+- **Plan-first methodology**：`source/methodology/` 下的 canonical workflow。
+- **Project profile**：人可维护的 YAML、references 和 scripts，定义这个团队或 repo
+  期望 agent 如何规划、读证据、验证和执行。
+- **Agent target**：Codex 或 Claude Code。
 
-## 两条作者路径
+输出是一个可安装的五段 skill suite，加上 manifest 和 verifier rules。每个 skill 都
+对应具体工程动作：
 
-- **已安装 creator 路径**：安装后的 `forma-creator` 可以在一次 agent 交互中接受用户临时约束，把这些约束注入生成的五段 skill bundle，运行 Layer 2 验证，然后安装或交付生成结果。这类临时约束不会自动成为 Forma 的 tracked source，除非用户明确把它提升为 profile 文件。Layer 1 同时定义 temporary injection generation standard：把自然语言约束写成临时 JSON 前，必须先分类到轻量 `constraints.default`、stage-specific 计划/执行规则，或 conditional overlay。
-- **tracked profile 路径**：`forma create --target ... --profile ...` 读取已提交的 profile 文件和 includes，生成可重复、可 review 的目标 bundle。profile 可以使用 `conditional_overlays` 表达可追踪的路线决策。
+- `shape`：把需求来源变成有边界的 proposal。它澄清 goal、scope、source of truth、
+  未决决策，以及本次 work 选择了哪条项目约束路线。
+- `gauge`：只读检查 repo 和来源材料，不改代码。它收集证据，确认哪些文件、API、命令、
+  docs 或历史计划真正约束这次工作。
+- `seal`：写最终 `plan.md` 和 `tasks.md`。它检查需求覆盖、注入的项目约束、acceptance
+  criteria、task 边界和 validation path。
+- `pour`：只执行 sealed plan 里的一个 accepted task，更新 task evidence，并运行验证。
+- `flow`：只有 sealed plan 允许自动执行时，才继续执行剩余 accepted tasks。
 
-Forma 仓库内的示例必须保持 sanitized。真实下游 profile 中的组织 workflow 命令、私有路径、凭证或业务规则应放在拥有这些约束的下游仓库里，不放进 Forma 示例树。
+## 为什么需要它
 
-## 安装
+Spec 定义的是要改什么。它通常不会完整编码一个项目要求 agent 稳定遵守的工程规则。
 
-推荐开发路径：
+这些项目规则经常散落在 README、AGENTS、验证脚本、团队习惯、私有 source reader 和
+历史计划决策里。如果它们只是松散 prompt，不同 agent 会对同一个 spec 做出不同规划。
+
+Forma 把这些可复用规则显式化：
+
+- 持久项目规则放进 reviewed profile；
+- 一次性规则分类进 temporary injection；
+- 重规则通过 conditional overlays 按路线启用；
+- 只有 profile 或 injection 拥有的 source reader 才会被注入；
+- planning 和 finalization 必须证明选中的约束已经反映到 sealed plan 里。
+
+核心价值不是更好看的 prompt，而是一个稳定的 plan-first workflow：把 spec + 项目约束
+变成经过验证的执行路径。
+
+## Profile 是人维护的源
+
+Forma profile 的目标是人可维护。agent 可以帮某个 repo 起草或修改 profile，但最终
+结果应该是项目拥有的、可读、可 review 的源文件。
+
+Profile 可以定义：
+
+- 哪些需求来源是 authoritative；
+- 必须读取哪些 repository evidence；
+- 哪些 validation commands 能证明 work；
+- 哪些规则属于 planning、grounding、plan finalization、task execution 或 automatic
+  execution；
+- docs-only、governance、migration、generated-baseline、backend、frontend、
+  cross-layer 等 conditional routes；
+- 哪些 references 或 scripts 会复制进生成的 skills。
+
+Forma 通过 CLI 暴露 profile 编写原则，所以 agent 辅助写 profile 时不需要读 Forma
+源码：
 
 ```bash
-uv run --extra dev forma --help
+uv run --extra dev forma explain profile --target codex
 ```
 
-等价 editable install：
+## 注入方式
+
+Forma 支持多种注入方式，因为规则的持久性不同。
+
+**Tracked profile**：团队、repo 或 workflow 的持久 workflow source。适合会重复发生、
+需要 review 和长期维护的规则。
+
+**Temporary injection**：一次性 JSON。安装后的 `forma-creator` 可以把用户自然语言约束
+转成 temporary injection，用于生成一个 suite。agent 在生成前必须输出 injection path
+和 classification table。
+
+**Stage constraints**：只作用于某个生命周期阶段的规则，例如 `shape` 的 planning-only
+规则、`gauge` 的只读 grounding 规则、`pour` 的执行规则。
+
+**Conditional overlays**：只在 `shape` 把所选场景记录进 `plan.md` 后启用的路线规则。
+适合成本高或场景专用的项目行为。
+
+**Source adapters**：用于加载需求或证据的显式 helper scripts / references，例如 issue
+tracker、文档导出器、私有知识工具或本地 source reader。它们由 profile 或 temporary
+injection 注入，不是 Forma base capability。
+
+Temporary injection 使用同样的分类原则：
 
 ```bash
-pip install -e ".[dev]"
-forma --help
+uv run --extra dev forma explain temporary-injection --format json --target codex
 ```
 
-`forma` 提供三个命令：
+## 命令流程
 
-- `forma verify <path>`：对 skill bundle 或生成 suite 运行 Layer 2 验证。
-- `forma create --target <agent> --profile <file> --output <dir>`：从 canonical methodology 和 profile stack 生成目标 agent 专用 Mode-S plan-first suite。
-- `forma build-creator --source <dir> --output <dir> --target <agent>`：从 meta source 生成 Codex 或 Claude Code 专用的 `forma-creator` 安装包。
+从 reviewed profile 生成 Codex workflow：
 
-## 验证
+```bash
+uv run --extra dev forma create \
+  --target codex \
+  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
+  --output /tmp/backend-plan-first-codex
+```
 
-验证 Layer 1 meta skill source：
+验证生成结果：
+
+```bash
+uv run --extra dev forma verify /tmp/backend-plan-first-codex
+```
+
+安装到 Codex：
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R /tmp/backend-plan-first-codex/* ~/.codex/skills/
+```
+
+同一个 profile 也可以生成 Claude Code workflow：
+
+```bash
+uv run --extra dev forma create \
+  --target claude-code \
+  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
+  --output /tmp/backend-plan-first-claude-code
+
+uv run --extra dev forma verify /tmp/backend-plan-first-claude-code
+```
+
+## Creator Skill
+
+Forma 也能生成目标固定的 `forma-creator` skill。安装后的 creator 可以让 agent 把
+review 过的自然语言约束转换成 temporary injection，生成项目专属 workflow，并在汇报
+成功前验证 suite。
+
+```bash
+uv run --extra dev forma build-creator \
+  --output /tmp/forma-creator-dist \
+  --target codex
+
+uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator
+```
+
+Creator bundle 自带 methodology resources 和 verifier。下游项目不需要安装 developer
+`forma` package，就能走 agent-side verification。
+
+## 仓库事实
+
+- `source/methodology/`：用于生成 `shape`、`gauge`、`seal`、`pour`、`flow` 的
+  canonical plan-first methodology。
+- `source/skill-creator/`：Layer 1 `forma-creator` source、随包 references、standalone
+  creator script 和 verifier。
+- `src/forma/`：developer CLI、profile compiler、runtime asset resolver 和目标专用
+  emitters。
+- `profiles/forma-self/`：Forma 管理本仓库迭代用的人可维护 profile。
+- `examples/profiles/`：sanitized profile examples。
+- `examples/generated/`：已提交的 generated baselines，用于 drift checks。
+- `tests/`：verifier、profile、creator、runtime asset 和 generated-baseline tests。
+
+详细 source tree 见 [STRUCTURE.md](./STRUCTURE.md)。
+
+## 和 Spec 工具的关系
+
+Spec 工具保存需求变化。Forma 保存 agent 如何把这个 spec 变成受项目约束、证据支撑的
+plan 和 execution。
+
+- OpenSpec、PRDs、issues 管 demand。
+- Forma profiles 管项目 workflow constraints。
+- 生成出来的 Forma skills 管连接二者的 agent behavior。
+
+## 仓库验证
 
 ```bash
 uv run --extra dev forma verify source/skill-creator/
-```
-
-验证已提交的 backend 示例输出：
-
-```bash
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-codex/
-uv run --extra dev forma verify examples/generated/sample-backend-go-plan-first-claude-code/
-```
-
-运行测试：
-
-```bash
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 uv run --extra dev pytest -p no:cacheprovider tests/
 ```
 
-## 生成示例
-
-生成 sanitized Go backend suite：
-
-```bash
-uv run --extra dev forma create \
-  --target codex \
-  --profile examples/profiles/sample-backend/sample-backend-go.yaml \
-  --output /tmp/sample-backend-go-plan-first-codex
-uv run --extra dev forma create \
-  --target claude-code \
-  --profile examples/profiles/sample-backend/sample-backend-go.yaml \
-  --output /tmp/sample-backend-go-plan-first-claude-code
-uv run --extra dev forma verify /tmp/sample-backend-go-plan-first-codex
-uv run --extra dev forma verify /tmp/sample-backend-go-plan-first-claude-code
-```
-
-这组命令对应的 committed drift baseline 位于：
-
-- `examples/generated/sample-backend-go-plan-first-codex/`
-- `examples/generated/sample-backend-go-plan-first-claude-code/`
-
-生成 sanitized generic software suite：
-
-```bash
-uv run --extra dev forma create \
-  --target codex \
-  --profile examples/profiles/sample-software/sample-software-plan-first.yaml \
-  --output /tmp/sample-software-plan-first-codex
-uv run --extra dev forma create \
-  --target claude-code \
-  --profile examples/profiles/sample-software/sample-software-plan-first.yaml \
-  --output /tmp/sample-software-plan-first-claude-code
-uv run --extra dev forma verify /tmp/sample-software-plan-first-codex
-uv run --extra dev forma verify /tmp/sample-software-plan-first-claude-code
-```
-
-`examples/profiles/sample-software/` 当前是 profile-only 示例，用来展示中文协作语气、Impact Profile / Impact Boundary、只读 grounding、sealed plan、review-gated implementation 和 safe showhand gate。本 issue 没有为它提交 generated drift baseline。
-
-## 管理 Forma 自身迭代
-
-Forma 也维护项目自用的 profile，用于管理这个仓库自己的开发迭代：
-
-```bash
-uv run --extra dev forma create \
-  --target codex \
-  --profile profiles/forma-self/forma-self-iteration.yaml \
-  --output /tmp/forma-iteration-codex
-uv run --extra dev forma create \
-  --target claude-code \
-  --profile profiles/forma-self/forma-self-iteration.yaml \
-  --output /tmp/forma-iteration-claude-code
-uv run --extra dev forma verify /tmp/forma-iteration-codex
-uv run --extra dev forma verify /tmp/forma-iteration-claude-code
-```
-
-`profiles/forma-self/` 不是 public sample，而是 Forma 自己的 tracked self-iteration profile stack。它通过 `Iteration Area` 条件路由区分 docs-only、governance、methodology/verifier、creator/profile、generated-baseline 和 cross-layer 工作，适合生成用于管理 Forma 仓库迭代的 skills。
-
-这组 profile 的默认执行约束保持轻量：`forma-pour` 和 `forma-flow` 默认只读取 active `plans/issue-<id>/plan.md`、`tasks.md`、当前 task、相关源码和当前 task 必要的 references。`README.md`、`README.zh-CN.md`、`STRUCTURE.md`、`AGENTS.md` 仍由 shape/gauge/seal 这类规划和定界阶段默认读取；执行阶段只在 docs-only、governance、profile、generated-baseline 或 cross-layer 相关工作中按条件读取。
-
-生成出来的 skill 仍然使用原始 `forma-shape`、`forma-gauge`、`forma-seal`、`forma-pour`、`forma-flow` 名称；self-iteration 是 profile 行为，不是生成 skill 名称前缀。
-
-## Temporary Injection 标准
-
-当 agent 用已安装的 `forma-creator` 把自然语言约束转换成临时 injection JSON 时，除非用户明确要求 durable profile source，否则不能把它当作 tracked profile。creator 不能复制 README、AGENTS 或其他用户文档原文，只提取会影响生成 skill bundle 的 workflow constraints，并按最窄范围分类：
-
-- `constraints.default`：只放最轻、永远成立的底线。
-- `constraints.shape` / `constraints.gauge` / `constraints.seal`：计划、调研、写 `plan.md` / `tasks.md` 的规则。
-- `constraints.pour` / `constraints.flow`：日常 task 执行规则。
-- `conditional_overlays`：docs、generated-baseline、migration、governance、cross-layer 等重场景才启用的规则。
-
-agent 输出时必须给出 temporary injection 文件路径和简短 classification table，列出用户原始约束、注入位置、理由、是否 durable，以及是否建议之后提升为 tracked profile。会导致日常 `pour` / `flow` 默认读取广泛 root docs 或 generated baseline 的约束，不能放进 `constraints.default`。
-
-## 安装 Layer 1 到 Agent
-
-从 meta source 生成目标专用 `forma-creator` 安装包：
-
-```bash
-uv run --extra dev forma build-creator \
-  --source source/skill-creator \
-  --output /tmp/forma-creator-dist \
-  --target codex
-uv run --extra dev forma build-creator \
-  --source source/skill-creator \
-  --output /tmp/forma-creator-dist \
-  --target claude-code
-```
-
-安装到目标 agent skill root：
-
-```bash
-mkdir -p ~/.codex/skills ~/.claude/skills
-cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.codex/skills/
-cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
-```
-
-安装后的 creator 使用 `references/agent-target.md` 作为硬输出契约，使用 `resources/plan-first/methodology/` 作为固定 plan-first 来源。它应在汇报成功前运行：
-
-```bash
-forma-creator/scripts/verify.py <generated-suite>
-```
-
-agent 侧验证路径不需要额外 `pip install`。
-
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT - see [LICENSE](./LICENSE).

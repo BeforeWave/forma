@@ -4,10 +4,10 @@ Use these rules for plan-first task execution skills.
 
 - Resolve bundled `scripts/*` and `references/*` relative to the current triggered skill package. Never substitute a same-named resource from a sibling skill directory, even if the contents are identical.
 - Read `plan.md` first, then `tasks.md`.
-- Use `scripts/issue-workflow.sh next <issue-id>` to get the current task text.
-- Use `scripts/issue-workflow.sh` from the current triggered skill package only; do not substitute a same-named script from another installed skill directory.
-- Treat the output of `scripts/issue-workflow.sh next <issue-id>` as the source of truth for the current task.
-- `scripts/issue-workflow.sh` auto-detects legacy and structured task files. Legacy checklist lines still work for backward compatibility, but new tasks must use the structured task contract.
+- Use `scripts/forma-workflow.sh next <issue-id>` to get the current task text.
+- Use `scripts/forma-workflow.sh` from the current triggered skill package only; do not substitute a same-named script from another installed skill directory.
+- Treat the output of `scripts/forma-workflow.sh next <issue-id>` as the source of truth for the current task.
+- `scripts/forma-workflow.sh` auto-detects legacy and structured task files. Legacy checklist lines still work for backward compatibility, but new tasks must use the structured task contract.
 - Use `tasks.md` only for surrounding context; do not choose a different task by re-parsing the checklist yourself.
 - Do not modify `plan.md`.
 - Do not reorder tasks or mark tasks complete manually.
@@ -23,21 +23,21 @@ Use these rules for plan-first task execution skills.
 - For `Task Type=gate`, require a decision-critical boundary in the task text, such as protecting later selection, closure, artifact acceptance, promotion, or destructive write decisions; otherwise record the issue as follow-up instead of implementing generic cleanup.
 - For `Task Type=promote`, require explicit allowed write surfaces and prerequisite evidence in the task before writing source-of-truth, long-lived assets, production-like config, or other hard-to-revert surfaces.
 - Record meaningful execution decisions, plan gaps, classifications, deviations, and intentional follow-ups in `plans/issue-<id>/implement-notes.md`; this notes file is an execution decision journal, not a command log.
-- Use `scripts/issue-workflow.sh notes-template <issue-id>` when you need a current-task `implement-notes.md` section skeleton; if `implement-notes.md` is changed, `review-ready` checks its title, current task section, and `Outcome:` field.
-- For non-showhand execution skills, first implement the current task, run `scripts/issue-workflow.sh review-ready <issue-id>`, and present the review-ready result for user review.
+- Use `scripts/forma-workflow.sh notes-template <issue-id>` when you need a current-task `implement-notes.md` section skeleton; if `implement-notes.md` is changed, `review-ready` checks its title, current task section, and `Outcome:` field.
+- For non-showhand execution skills, first implement the current task, run `scripts/forma-workflow.sh review-ready <issue-id>`, and present the review-ready result for user review.
 - For structured tasks, `review-ready` requires the current task's `Validate:` lines, any referenced `Use-Check:` shared checks, and when applicable `## Final Validation`; documentation-only work still needs the explicit `# no-programmatic-validation: <reason>` marker.
 - Validation commands run in a clean non-login, non-interactive Bash process that ignores user profile and rc files and inherits only workflow-owned environment variables.
 - For behavior-changing tasks, put the proving tests in the current task's `Validate:` lines, shared `Use-Check:` references, or `## Final Validation` instead of treating validation as a single issue-wide gate on every task.
-- `scripts/issue-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot in the Git index; if review feedback changes the task, rerun `review-ready` to refresh that snapshot before completion.
-- For non-showhand execution skills, do not use `scripts/issue-workflow.sh complete <issue-id>` until the user explicitly approves the current task for completion.
-- For non-showhand execution skills, after user approval, run `scripts/issue-workflow.sh complete <issue-id>`.
-- `scripts/issue-workflow.sh review-ready <issue-id>` must validate dependencies before review readiness; if a task depends on unfinished task ids, it must stay open.
-- `scripts/issue-workflow.sh complete <issue-id>` must see the same staged snapshot that `review-ready` prepared and must fail if there are unstaged post-review edits.
-- For non-showhand execution skills, after `scripts/issue-workflow.sh complete <issue-id>` succeeds, immediately run `scripts/issue-workflow.sh next <issue-id>`.
+- `scripts/forma-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot in the Git index; if review feedback changes the task, rerun `review-ready` to refresh that snapshot before completion.
+- For non-showhand execution skills, do not use `scripts/forma-workflow.sh complete <issue-id>` until the user explicitly approves the current task for completion.
+- For non-showhand execution skills, after user approval, run `scripts/forma-workflow.sh complete <issue-id>`.
+- `scripts/forma-workflow.sh review-ready <issue-id>` must validate dependencies before review readiness; if a task depends on unfinished task ids, it must stay open.
+- `scripts/forma-workflow.sh complete <issue-id>` must see the same staged snapshot that `review-ready` prepared and must fail if there are unstaged post-review edits.
+- For non-showhand execution skills, after `scripts/forma-workflow.sh complete <issue-id>` succeeds, immediately run `scripts/forma-workflow.sh next <issue-id>`.
 - If `next` returns another unchecked task, treat it as the current task and start executing it in the same invocation instead of waiting for a new user request.
 - If `next` reports no unchecked tasks remain, stop and report the completed issue state.
-- Do not generate evidence, mark the task complete, or create the task commit outside `scripts/issue-workflow.sh complete <issue-id>`.
+- Do not generate evidence, mark the task complete, or create the task commit outside `scripts/forma-workflow.sh complete <issue-id>`.
 - Completion is determined by repository state and review-ready validation results, not by self-report.
-- `scripts/issue-workflow.sh review-ready <issue-id>` may write transient review cache state under `.forma-workflow/`.
-- `scripts/issue-workflow.sh complete <issue-id>` records task evidence under `./plans/issue-<id>/runs/`.
+- `scripts/forma-workflow.sh review-ready <issue-id>` may write transient review cache state under `.forma-workflow/`.
+- `scripts/forma-workflow.sh complete <issue-id>` records task evidence under `./plans/issue-<id>/runs/`.
 - If validation fails, the task remains unchecked and no commit is created.

@@ -230,7 +230,7 @@ def test_bundled_script_references_must_exist(tmp_path: Path) -> None:
             """
 ## Workflow
 
-Run `scripts/issue-workflow.sh init 1` before writing plan.md and tasks.md.
+Run `scripts/forma-workflow.sh init 1` before writing plan.md and tasks.md.
 """,
         ),
     )

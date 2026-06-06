@@ -10,7 +10,7 @@ from typing import Iterable, Mapping, Set
 from forma.creator.composer import ComposedSkill, KINDS, compose_suite
 from forma.creator.manifest import (
     build_manifest,
-    find_methodology_dir,
+    methodology_dir_context,
 )
 from forma.creator.profiles import ProfileConfig, ResourceSpec, load_profile
 from forma_verifier import verify
@@ -26,21 +26,21 @@ def create_suite(
 ) -> Path:
     """Create a Mode-S suite on disk and return the manifest path."""
     _assert_target(target_agent)
-    resolved_methodology_dir = find_methodology_dir(methodology_dir)
-    profile = load_profile(profile_file)
-    suite = compose_suite(resolved_methodology_dir, profile)
-    manifest = build_manifest(
-        methodology_dir=resolved_methodology_dir,
-        profile=profile,
-        target_agent=target_agent,
-    )
-    emit_suite(
-        output_dir=output_dir,
-        skills=suite.skills,
-        manifest=manifest,
-        profile=profile,
-        target_agent=target_agent,
-    )
+    with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
+        profile = load_profile(profile_file)
+        suite = compose_suite(resolved_methodology_dir, profile)
+        manifest = build_manifest(
+            methodology_dir=resolved_methodology_dir,
+            profile=profile,
+            target_agent=target_agent,
+        )
+        emit_suite(
+            output_dir=output_dir,
+            skills=suite.skills,
+            manifest=manifest,
+            profile=profile,
+            target_agent=target_agent,
+        )
     report = verify(output_dir)
     if not report.passed:
         raise ValueError(report.format_human())

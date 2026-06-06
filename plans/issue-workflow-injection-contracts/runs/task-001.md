@@ -8,6 +8,7 @@
 
 - source/skill-creator/SKILL.md
 - source/skill-creator/references/canonical-plan-first.md
+- source/skill-creator/references/profile-authoring-principles.md
 - source/skill-creator/references/temporary-injection-generation.md
 - src/forma/adapters/skill.py
 - tests/test_creator_builder.py
@@ -20,7 +21,7 @@
 ## Validation Results
 
 - PASS [task]: `uv run --extra dev pytest -p no:cacheprovider tests/test_creator_builder.py`
-- PASS [task]: `uv run --extra dev forma build-creator --source source/skill-creator --output /tmp/forma-creator-dist --target codex`
+- PASS [task]: `uv run --extra dev forma build-creator --output /tmp/forma-creator-dist --target codex`
 - PASS [task]: `uv run --extra dev forma verify /tmp/forma-creator-dist/codex/forma-creator/`
 
 ## Risks / Unresolved Items

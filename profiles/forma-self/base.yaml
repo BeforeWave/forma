@@ -14,10 +14,18 @@ terminology:
 constraints:
   default:
     - Treat this profile stack as Forma-owned project source, not a sanitized public example.
-    - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface.
     - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
-    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
     - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
+    - Keep changes scoped to the active issue plan and tasks.
+  shape:
+    - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plans/issue-<id>/ files when converging Forma governance, scope, validation, or boundary decisions.
+    - For Layer 1 temporary injection work, classify natural-language constraints into minimal default, stage-specific execution, or conditional overlay targets before writing examples or tasks.
+    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
+  gauge:
+    - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plan/task files, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.
+  seal:
+    - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plans/issue-<id>/ files before writing final tasks that affect Forma governance, profile ownership, generated baselines, or documentation policy.
+    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
 validation_commands:
   default:
     - uv run --extra dev pytest -p no:cacheprovider tests/

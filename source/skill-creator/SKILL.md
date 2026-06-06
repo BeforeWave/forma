@@ -9,7 +9,8 @@ Use this skill to create a Mode-S Forma suite: a flat, ready-to-install set of
 five plan-first skills named `forma-shape`, `forma-gauge`, `forma-seal`,
 `forma-pour`, and `forma-flow`.
 
-Before generating any suite, load `references/canonical-plan-first.md` and
+Before generating any suite, load `references/canonical-plan-first.md`,
+`references/profile-authoring-principles.md`, and
 `references/temporary-injection-generation.md`. If this installed creator
 includes a fixed agent-target reference, load it too and treat it as the fixed
 target contract.
@@ -28,9 +29,10 @@ target contract.
    - Unclear scenario: do not invent conditional routing. Ask first whether the
      user wants a fixed injection or a conditional overlay decision.
    - Within either scenario, classify every natural-language constraint using
-     `references/temporary-injection-generation.md`; keep `constraints.default`
-     minimal and put broad or expensive execution requirements into
-     stage-specific constraints or `conditional_overlays`.
+    `references/profile-authoring-principles.md` and
+    `references/temporary-injection-generation.md`; keep
+    `constraints.default` minimal and put broad or expensive execution
+    requirements into stage-specific constraints or `conditional_overlays`.
 3. Show the installable skill names before generating. Default:
    `shape -> forma-shape`, `gauge -> forma-gauge`, `seal -> forma-seal`,
    `pour -> forma-pour`, and `flow -> forma-flow`. Ask whether the user wants

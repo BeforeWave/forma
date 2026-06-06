@@ -27,19 +27,19 @@
     }
   },
   "format": "forma-suite-manifest-v1",
-  "generated_at": "2026-06-06T06:08:55Z",
+  "generated_at": "2026-06-06T09:08:39Z",
   "generator_version": "0.1.0",
-  "methodology_source_revision": "5fb2f86",
+  "methodology_source_revision": "4d37692",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "7493279f77000398b7298973f35245a15d1ffc11e178b8f648586376e904def2",
+  "methodology_tree_digest": "75f2119736c8ef24852b0fd3274be48fc3d7c90c19a03f633f14f69c3770790d",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {
     "bundle_name": "sample-backend-go",
-    "digest": "b3e0154bda20950d40c85a6955fe4a7a301e7f608de09867fa7a333bef3297fa",
+    "digest": "0fb865702bf8859df99425775bef4d3db829f2e65df1e80bcbc83d4461dbcb21",
     "file_hashes": {
       "backend.yaml": "ff29abea7a1b416e743cbb9b372d9e237a833d249b7ec98e1c71f333c1b89f71",
-      "base.yaml": "1b3ab8e5d5f7ecd1f488276176af18401997d99b875a7546188d9815909560bf",
+      "base.yaml": "625b1c6f0bc0b45015dfda4e83a9c970e87b45e4e132a4cd2d90c74cba9e16a2",
       "dev.yaml": "79291318ce8c112729345e2ea3889b029294e97600bf37a23900279353918d4a",
       "languages/go.yaml": "3db36bd1558cd6c7c63af129296d83f140ac595ee92df63b7af726ff669a9a3e",
       "sample-backend-go.yaml": "2eeecabb771f029be2d87bcc38ff026396c5cb59d44f0e54b2e9882716b38ba3"

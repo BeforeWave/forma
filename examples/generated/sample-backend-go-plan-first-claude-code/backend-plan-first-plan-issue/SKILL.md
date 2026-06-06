@@ -57,11 +57,11 @@ Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Valida
 - If `gh` is missing, unauthenticated, or lacks access, recommend the repository's macOS GitHub CLI setup guidance; if the user does not want to configure `gh` now, continue only after they confirm the issue body and key comments are pasted into the current session.
 - While the user context is still incomplete, stay in clarification mode. Ask only for the missing planning information needed to converge Goal, Scope, Approach, and the validation model for tasks, shared checks, and final issue closure.
 - Before the user confirms that the context is sufficient, do not explore the repository, do not write repo files, do not execute bundled scripts other than `script/github_issue_context.py`, and do not draft `plan.md` or `tasks.md`.
-- Do not execute `issue-workflow.sh` from this skill. The GitHub issue context helper is the only bundled script that `plan-issue` may run.
+- Do not execute `forma-workflow.sh` from this skill. The GitHub issue context helper is the only bundled script that `plan-issue` may run.
 - Load and follow `references/proposal-decision-gate.md` for the proposal decision gate.
 - Load and follow `references/grounding-handoff.md` for grounding handoff selection.
 - Keep generated guidance generic and avoid organization-specific paths, credentials, or workflow commands.
-- Treat user-provided special constraints as local to the generated bundle unless promoted into a tracked profile.
+- Keep default constraints minimal; route heavy workflow rules to stage-specific constraints or conditional overlays.
 - Prefer existing repository conventions and native validation commands.
 - Keep changes scoped to the accepted task and preserve unrelated user work.
 - Keep changes scoped to the backend behavior required by the current issue.
@@ -71,6 +71,7 @@ Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Valida
 - Run the project's Go formatter on edited Go files.
 - Prefer module-local Go tests when available.
 - This sample demonstrates tracked profile composition without organization-specific workflow details.
+- Classify whether repeated workflow behavior belongs in a tracked profile or only in the current temporary injection.
 - Settle whether the request changes public API behavior, service behavior, stream payloads, persistence, or data flow.
 - Distinguish API or stream contract-visible changes from internal logic, storage, queue, or computation changes before proposal-ready.
 - Settle profile decision-gate dimension before proposal-ready: API or stream impact

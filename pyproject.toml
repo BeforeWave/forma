@@ -26,5 +26,8 @@ forma = "forma.cli:main"
 [tool.setuptools.packages.find]
 where = ["src", "source/skill-creator/scripts"]
 
+[tool.setuptools.package-data]
+"forma.assets" = ["**/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

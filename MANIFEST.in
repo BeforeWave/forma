@@ -1,0 +1,5 @@
+graft source/methodology
+graft source/skill-creator
+prune source/skill-creator/scripts/__pycache__
+prune source/skill-creator/scripts/forma_verifier/__pycache__
+global-exclude *.py[cod]

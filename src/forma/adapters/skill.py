@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import shutil
+from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Mapping
+from typing import Iterator, List, Mapping
 
 from forma.creator.composer import KINDS, load_stage_sources
+from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
@@ -17,26 +19,39 @@ CREATOR_SKILL_PREFIX = "forma"
 
 
 def build_creator(
-    source_dir: Path,
+    source_dir: Path | None,
     output_dir: Path,
     target_agent: str,
 ) -> Path:
     """Emit target-fixed `forma-creator` bundles from the creator meta source."""
-    source_dir = source_dir.resolve()
-    output_dir = output_dir.resolve()
-    _assert_creator_source(source_dir)
     _assert_target(target_agent)
-    skill_name = _skill_name(source_dir)
-    target = output_dir / target_agent / skill_name
-    _emit_creator_target(
-        source_dir=source_dir,
-        target_dir=target,
-        target_agent=target_agent,
-    )
+    output_dir = output_dir.resolve()
+    with creator_source_context(source_dir) as resolved_source_dir:
+        skill_name = _skill_name(resolved_source_dir)
+        target = output_dir / target_agent / skill_name
+        _emit_creator_target(
+            source_dir=resolved_source_dir,
+            target_dir=target,
+            target_agent=target_agent,
+        )
     report = verify(target)
     if not report.passed:
         raise ValueError(report.format_human())
     return target
+
+
+@contextmanager
+def creator_source_context(source_dir: Path | None = None) -> Iterator[Path]:
+    """Yield a creator source path from an override or packaged runtime assets."""
+    if source_dir is not None:
+        path = source_dir.resolve()
+        _assert_creator_source(path)
+        yield path
+        return
+    with runtime_asset_path("source") as source_root:
+        path = source_root / "skill-creator"
+        _assert_creator_source(path)
+        yield path
 
 
 def _assert_target(target_agent: str) -> None:
@@ -157,6 +172,7 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
         [
             "- Before generating a suite, load "
             "`references/canonical-plan-first.md` and "
+            "`references/profile-authoring-principles.md` and "
             "`references/temporary-injection-generation.md`; preserve the "
             "bundled canonical plan-first semantics and "
             "classify natural-language constraints before writing JSON.",
