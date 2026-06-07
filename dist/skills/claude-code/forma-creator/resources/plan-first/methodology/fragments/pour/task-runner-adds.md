@@ -1,0 +1,24 @@
+- When invoking `scripts/forma-workflow.sh`, resolve it relative to the current triggered skill package only; do not switch to a same-named script in a sibling skill directory, even if the contents match.
+- Treat the output of `scripts/forma-workflow.sh next <issue-id>` and the current task block's `Accept:` / `Validate:` / `Use-Check:` / `Depends:` / `Constraint:` lines as the source of truth for the current task.
+- Infer missing `Plan Strategy` as `step-execution` and missing `Task Type` as `step`; do not require legacy plans to be rewritten before execution.
+- Treat the current task's `Accept:` as the delivery target and `Validate:` / `Use-Check:` as proof obligations, not as replacement goals.
+- Do not broaden the task to add diagnostics, expand output schemas, clean up adjacent tooling, or refactor nearby code unless that work is necessary for the current `Accept:` or prevents unsafe formal/destructive writes or decision-critical mistakes.
+- For `Task Type=loop-batch`, prioritize metric/artifact movement and report that outcome before validation details; never allow empty selection or failed filtering to fall back to an unintended full run.
+- For `Task Type=gate`, require a decision-critical boundary in the task text, such as protecting later selection, closure, artifact acceptance, promotion, or destructive write decisions; otherwise record the issue as follow-up instead of implementing generic cleanup.
+- For `Task Type=promote`, require explicit allowed write surfaces and prerequisite evidence in the task before writing source-of-truth, long-lived assets, production-like config, or other hard-to-revert surfaces.
+- Record meaningful execution decisions, plan gaps, classifications, deviations, and intentional follow-ups in `plans/issue-<id>/implement-notes.md` using `references/implement-notes.md`; do not use notes as a command log.
+- Use `scripts/forma-workflow.sh notes-template <issue-id>` when you need a current-task `implement-notes.md` section skeleton, and keep only meaningful notes before review.
+- Use `tasks.md` only to confirm surrounding context; do not pick a different task by parsing the checklist yourself.
+- Do not modify `plan.md` or mark tasks complete yourself.
+- Work one workflow task at a time, but after an approved completion you may continue directly to the next unchecked task in the same invocation.
+- You may decompose execution internally, but do not reinterpret one planned task as multiple plan tasks unless `plan.md` / `tasks.md` explicitly define that boundary.
+- For behavior-changing tasks, do not treat the task as complete unless the changed behavior is covered by the current task's validation contract or the plan explicitly declares `# no-programmatic-validation: <reason>`.
+- After implementing the current task, run `scripts/forma-workflow.sh review-ready <issue-id>` and stop to present the result for user review.
+- `scripts/forma-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot; if review feedback changes the task, rerun `review-ready` before completion.
+- In review-ready success output, keep the summary focused on the current task result against `Accept:`, changed files, validation status, and whether user approval is needed before completion. For `loop-batch`, report metric/artifact change first; for `gate`, name the protected decision boundary; for `promote`, name the write surfaces. Omit empty sections such as `Evidence Path`, `Risks`, or `Next Step`.
+- Do not call `scripts/forma-workflow.sh complete <issue-id>` until the user explicitly approves the current task for completion.
+- After user approval, run `scripts/forma-workflow.sh complete <issue-id>`.
+- After `scripts/forma-workflow.sh complete <issue-id>` succeeds, immediately run `scripts/forma-workflow.sh next <issue-id>`.
+- If `next` returns another unchecked task, start executing that task in the same invocation instead of waiting for the user to ask again.
+- If `next` reports no unchecked tasks remain, stop and report the completed issue state.
+- Do not edit `tasks.md`, create evidence, or create the task commit outside `scripts/forma-workflow.sh complete <issue-id>`.

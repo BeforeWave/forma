@@ -1,0 +1,5 @@
+- Plan Strategy is complete only if the plan is classified as `step-execution`, `loop-exploration`, or `hybrid`; old context without an explicit strategy defaults to `step-execution`, but new proposals should state the chosen strategy explicitly.
+- Use `Plan Strategy: step-execution` when the path and deliverables are fixed enough to execute by ordered tasks.
+- Use `Plan Strategy: loop-exploration` when the goal is fixed but progress depends on bounded batches, produced artifacts, metrics, stop/skip/retry rules, and feedback from prior runs.
+- Use `Plan Strategy: hybrid` when the issue has a loop-exploration objective plus deterministic setup, gate, or promote tasks.
+- For `loop-exploration` or `hybrid`, clarify baseline metric, target metric or convergence threshold, batch selection, batch size, artifact path/type, stop/skip/retry rules, no-full-rerun guard, formal/destructive write boundary, and final validation before `proposal-ready`.

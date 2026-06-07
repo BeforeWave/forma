@@ -1,0 +1,11 @@
+- In `## Validation`, write shared task-safe checks as `Check:` / `Command:` blocks and use `Note:` only when it clarifies reuse.
+- In `## Final Validation`, keep one shell command per line inside the fenced `sh` block.
+- When the last task already has a narrower task-local proof, avoid repeating the same command in both that task's `Validate:` lines and `## Final Validation`; keep `## Final Validation` focused on issue-level closure checks whenever possible.
+- For generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans, encode required proof as an explicit `Task Type=gate` or final validation unless the settled Artifact/Evidence Boundary says it is post-commit/manual.
+- For documentation-only or analysis-only tasks, use the explicit `# no-programmatic-validation: <reason>` marker only when the current conversation explicitly settles that review-based acceptance is sufficient, and mirror that marker in any review-only task's `Validate:` line.
+- Use project-native validation commands instead of forcing a particular toolchain.
+- Split tasks only when there is a real execution boundary.
+- If the issue is simple, prefer a single task.
+- New tasks must use the structured task contract: task id in the checklist header, exactly one `Accept:`, one or more `Validate:`, and optional `Use-Check:` / `Depends:` / `Constraint:` lines.
+- For new tasks, encode task type in the existing schema, preferably at the start of `Accept:` as `Task Type=<type>; ...`; existing tasks without a task type default to `step`.
+- Supported task types are `step` for fixed deliverables, `loop-batch` for bounded metric/artifact batches, `gate` for decision-critical guards, and `promote` for writing validated candidates into source-of-truth or other hard-to-revert surfaces.

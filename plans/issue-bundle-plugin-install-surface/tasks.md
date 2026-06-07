@@ -46,7 +46,7 @@ Validate: uv run --extra dev forma verify source/skill-creator/
 Depends: plan-lock-sharpness-contract
 Constraint: creator output must report install instructions or paths only; do not add creator-side install actions.
 
-- [ ] [dist-release-surface] Make `dist/` committable and generate the settled release artifacts
+- [x] [dist-release-surface] Make `dist/` committable and generate the settled release artifacts
 Accept: Task Type=step; `.gitignore` no longer ignores top-level `dist/`, and committed release outputs exist at `dist/skills/codex/forma-creator`, `dist/skills/claude-code/forma-creator`, `dist/skill-bundles/codex/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`, `dist/skill-bundles/claude-code/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`, and `dist/plugins/codex/forma`
 Validate: uv run --extra dev forma verify dist/skills/codex/forma-creator
 Validate: uv run --extra dev forma verify dist/skills/claude-code/forma-creator

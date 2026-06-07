@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forma Lock"
+  short_description: "Lock the execution plan and task contract."
+  default_prompt: "Use $forma-lock to lock the execution plan and task contract."

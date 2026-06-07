@@ -102,3 +102,25 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 6: dist-release-surface
+
+Outcome:
+- Made top-level `dist/` committable and generated the release artifact set for Codex/Claude Code creator skills, Codex/Claude Code default workflow bundles, and the Codex plugin.
+
+Decision Notes:
+- Generated `dist/skill-bundles/codex` and `dist/skill-bundles/claude-code` only through explicit `forma create-bundle --output ...` commands.
+- Generated `dist/plugins/codex/forma` only through `forma create-plugin --target codex --output ...`; the plugin output has `.codex-plugin/plugin.json`, root `.forma-manifest.json`, and nested `skills/`, with no sibling `skill-bundles/` output.
+- Verified all five release roots with `forma verify` before handing the task to workflow completion.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

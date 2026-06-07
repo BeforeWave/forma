@@ -1,0 +1,27 @@
+{
+  "description": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
+  "id": "forma",
+  "name": "Forma",
+  "skills": [
+    {
+      "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
+      "id": "forma-plan"
+    },
+    {
+      "description": "Inspect code, docs, issues, and evidence before deciding.",
+      "id": "forma-ground"
+    },
+    {
+      "description": "Lock the execution plan and task contract.",
+      "id": "forma-lock"
+    },
+    {
+      "description": "Execute one accepted task and leave verifiable evidence.",
+      "id": "forma-execute"
+    },
+    {
+      "description": "Continue remaining tasks, but stop when evidence is insufficient.",
+      "id": "forma-showhand"
+    }
+  ]
+}
