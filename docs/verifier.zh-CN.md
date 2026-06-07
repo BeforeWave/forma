@@ -2,9 +2,9 @@
 
 英文版：[verifier.md](./verifier.md)
 
-`forma verify` 用来检查生成的 workflow bundle 和 `forma-creator` bundle。
+`forma verify` 用来检查生成的工作流 bundle 和 `forma-creator` bundle。
 
-它是 Forma 不只是“prompt generator”的关键边界：生成产物必须结构有效、符合 target 契约，并保留预期的方法形状。
+它是让 Forma 不只是“prompt generator”的工程边界：生成产物必须结构有效、符合 target 契约，并保留预期的 Plan-First 阶段结构。
 
 ## 什么时候运行
 
@@ -15,7 +15,7 @@
 - 修改 profile 后；
 - 使用 temporary injection 后；
 - 重命名生成技能后；
-- 修改 methodology、target adapter 或 verifier rules 后；
+- 修改方法、target adapter 或 verifier 规则后；
 - 分享 `forma-creator` bundle 前。
 
 ```bash
@@ -35,12 +35,12 @@ forma verify source/skill-creator/
 - emitted skill name、目录和 manifest 是否一致；
 - body 是否有必需章节；
 - 引用的 `references/*.md` 是否存在于同一个 skill 内；
-- scripts/resources 是否没有借用 sibling skill 目录；
+- scripts/resources 是否没有跨到相邻 skill 目录取资源；
 - plan-first stage 是否存在且身份正确；
-- target metadata 规则，例如 Codex bundle 是否有 Codex metadata，Claude Code bundle 是否没有 Codex-only metadata；
+- target metadata 规则，例如 Codex bundle 是否按需带有 Codex metadata，Claude Code bundle 是否没有 Codex-only metadata；
 - `shape`、`gauge`、`seal`、`pour` 等阶段是否保留核心方法要求。
 
-具体规则在 bundled `forma_verifier` package 中，后续会随 Forma 演进。
+具体规则在随包提供的 `forma_verifier` package 中，后续会随 Forma 演进。
 
 ## 不检查什么
 
@@ -49,11 +49,11 @@ forma verify source/skill-creator/
 它不证明：
 
 - profile 是正确的产品决策；
-- 生成 workflow 对某个组织已经完整；
+- 生成的工作流已经覆盖某个组织的全部需求；
 - 每个验证命令都充分；
-- 外部 source adapter 已认证或可访问；
+- 外部 source adapter 已完成认证或当前可访问；
 - Agent 永远会正确执行；
-- 生成 examples 代表一次真实成功项目运行；
+- 生成示例代表一次真实成功的项目运行；
 - temporary injection 应该提升成长期 profile。
 
 人工评审仍然必要。
@@ -62,26 +62,40 @@ forma verify source/skill-creator/
 
 | 失败 | 常见原因 |
 |---|---|
-| 缺 frontmatter key | 生成或手写的 `SKILL.md` 不是 target 可读结构。 |
+| 缺 frontmatter key | 生成或手写的 `SKILL.md` 不是目标 Agent 可读结构。 |
 | name/directory 不一致 | 重命名 skill 后，manifest、目录和 frontmatter 没有同步。 |
 | reference 路径断裂 | skill 指向了没有被复制进来的 `references/*.md`。 |
-| 跨 skill 借资源 | 生成 skill 访问 sibling skill 的 `references/` 或 `scripts/`。 |
+| 跨 skill 借资源 | 生成 skill 访问相邻 skill 的 `references/` 或 `scripts/`。 |
 | target metadata 不匹配 | Claude Code bundle 里出现 Codex-only metadata，或 Codex 输出缺少必需 metadata。 |
-| 方法规则失败 | 某阶段丢失核心 plan-first 行为，例如只读 grounding 或 review-gated execution。 |
+| 方法规则失败 | 某阶段丢失核心 plan-first 行为，例如只读 grounding 或需要评审门禁的执行。 |
 
 ## Manifest 和 Drift
 
-Manifest 记录 compiler 实际生成了什么：target、mode、emitted skill names/directories、profile order、hash、methodology provenance 和 generator metadata。
+Manifest 记录 compiler 的实际输出：target、mode、输出的 skill 名称和目录、profile 顺序、hash、方法来源和 generator metadata。
 
-验证会使用 manifest 理解 bundle。Drift check 则比较已提交生成基线和当前 compiler 应该生成的结果。
+验证会使用 manifest 理解 bundle。漂移检查会比较已提交生成基线和当前 compiler 应该生成的结果。
 
 Manifest 是溯源。验证是一致性检查。二者都不能替代对 profile 意图的评审。
 
+## CI 用法
+
+CI 可以用 `forma verify` 保持生成 bundle 结构有效，并发现已提交生成基线是否漂移：
+
+```bash
+forma verify source/skill-creator/
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
+python -m pytest -p no:cacheprovider tests/test_docs_links.py
+git diff --check
+```
+
+这些检查覆盖结构、target metadata、本地 Markdown 链接、空白问题和生成 bundle 的一致性。它们不能替代对 profile 意图、temporary injection 规则或 Agent 真实运行行为的评审。
+
 ## Bundled Verifier
 
-Layer 2 verifier 代码组织在 `source/skill-creator/` 内部，所以构建出来的 `forma-creator` 可以在不安装 developer CLI 的情况下验证生成 suites。
+Layer 2 verifier 代码组织在 `source/skill-creator/` 内部，所以构建出来的 `forma-creator` 可以在不安装开发者 CLI 的情况下验证生成套件。
 
-同一个 verifier package 也被 developer `forma verify` 命令使用。
+同一个 verifier package 也被开发者 `forma verify` 命令使用。
 
 ## 相关文档
 

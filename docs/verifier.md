@@ -89,6 +89,23 @@ committed generated baselines against what the current compiler should emit.
 The manifest is provenance. Verification is conformance. Neither replaces
 review of the profile's intent.
 
+## CI Usage
+
+CI can use `forma verify` to keep generated bundles structurally valid and to
+catch drift in committed baselines:
+
+```bash
+forma verify source/skill-creator/
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
+python -m pytest -p no:cacheprovider tests/test_docs_links.py
+git diff --check
+```
+
+These checks cover structure, target metadata, local Markdown links, whitespace,
+and generated-bundle conformance. They do not replace review of profile intent,
+temporary injection policy, or runtime agent behavior.
+
 ## Bundled Verifier
 
 Layer 2 verifier code lives organizationally inside `source/skill-creator/` so

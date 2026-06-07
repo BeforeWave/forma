@@ -64,7 +64,7 @@ Forma workflow 应该让这个请求按 contract 推进：
 |---|---|
 | `shape` | 判断这是否改变 public API 行为、持久化或兼容性预期。 |
 | `gauge` | 读取当前 routes、API docs、tests，以及相关历史 plan 或 issue 证据。 |
-| `seal` | 写出带验证的已接受任务，例如 API tests、兼容性检查或 contract review。 |
+| `seal` | 写出带验证的已接受任务，例如 API tests、兼容性检查或契约评审。 |
 | `pour` | 执行一个已接受任务，并运行该任务要求的证明。 |
 | `flow` | 只有 sealed plan 允许时继续；如果出现新的 API contract 决策，就停下。 |
 
@@ -115,7 +115,7 @@ Workflow contract 应说明 Agent 在行动前必须使用哪些证据。
 - 当前改动需要新的决策边界；
 - 验证失败或无法运行；
 - 计划没有允许当前路线自动继续；
-- 用户中断或要求 review。
+- 用户中断或要求评审。
 
 ## Profile 如何影响 Contract
 

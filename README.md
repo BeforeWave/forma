@@ -2,18 +2,21 @@
 
 **A compiler for project-specific agent workflows.**
 
-Agents can move fast. The hard part is steering the work after the first prompt.
+Profile in. Skill bundle out. Plan-First by default.
 
-Forma turns the part you keep re-explaining into source: write the workflow as a
-profile, then compile it into Codex and Claude Code skills that stage the work,
-leave proof, and tell the agent when to stop.
+Forma compiles project-specific workflow profiles into skill bundles for agent
+coding surfaces such as Codex and Claude Code.
 
-Profile in. Skill bundle out. The agent still does the work; Forma gives the
-work a shape it can follow.
+It ships with a Plan-First engineering methodology: clarify the demand, gather
+evidence, seal a plan, execute one task at a time, and continue only within
+explicit boundaries.
 
 Chinese documentation: [README.zh-CN.md](./README.zh-CN.md)
 
 ## Why Forma Exists
+
+Agents can move fast. The hard part is steering the work after the first
+prompt.
 
 AI coding changed what counts as a project artifact.
 
@@ -99,7 +102,8 @@ The result is an installable work loop, not just another plan document.
 
 ## Where Forma Fits
 
-Forma sits at the agent-workflow layer.
+Forma is not another prompt template and not another spec tool. It sits at the
+agent-workflow layer.
 
 - Spec tools and planning docs define what should be built.
 - `AGENTS.md` and repository docs define local context and conventions.
@@ -144,6 +148,9 @@ Build a target-fixed `forma-creator`:
 forma build-creator --target codex --output /tmp/forma-creator-dist
 forma verify /tmp/forma-creator-dist/codex/forma-creator
 ```
+
+Committed generated examples are drift baselines, not proof of runtime agent
+behavior.
 
 For the complete first-run path, install locations, Claude Code output, and
 profile authoring details, see [Quick Start](./docs/quick-start.md).

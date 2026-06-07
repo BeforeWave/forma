@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "forma"
 version = "0.1.0"
-description = "Build plan-first AI skill suites with a verified shape"
+description = "Compile project-specific agent workflows into verified skill bundles."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

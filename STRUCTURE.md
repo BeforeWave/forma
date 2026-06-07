@@ -93,7 +93,7 @@ generated skill resources.
 | `docs/profile-schema.zh-CN.md` | Chinese profile schema guide |
 | `docs/forma-creator.md` | English agent-side creator path, temporary injection lifecycle, classification, promotion, and verification boundaries |
 | `docs/forma-creator.zh-CN.md` | Chinese forma-creator guide |
-| `docs/verifier.md` | English verifier checks, non-goals, common failures, manifest/drift relationship, and bundled verifier boundary |
+| `docs/verifier.md` | English verifier checks, non-goals, common failures, manifest/drift relationship, CI usage, and bundled verifier boundary |
 | `docs/verifier.zh-CN.md` | Chinese verifier guide |
 | `docs/targets.md` | English Codex and Claude Code target values, install locations, target-specific metadata, and trust guidance |
 | `docs/targets.zh-CN.md` | Chinese targets guide |

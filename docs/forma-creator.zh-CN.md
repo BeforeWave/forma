@@ -4,14 +4,14 @@
 
 `forma-creator` 是 Forma 的 Agent 侧生成入口。
 
-当你想先试一个 workflow 想法，但还不想写长期 profile YAML 时，用它。它会帮助 Agent 把已经评审过的自然语言工作流约束整理成 temporary injection JSON，生成 target 专用的 skill bundle，并在交付前验证。
+当你想先试一个工作流想法，但还不想写长期 profile YAML 时，用它。它会帮助 Agent 把已经评审过的自然语言工作流约束整理成 temporary injection JSON，生成 target 专用的 skill bundle，并在交付前验证。
 
 ## 和 `forma create` 的区别
 
 | 路径 | 适合 | 输入 | 输出 |
 |---|---|---|---|
 | `forma create` | 长期团队或项目工作流规则。 | 已评审的 tracked profile YAML。 | 从已提交源码可重复生成的 bundle。 |
-| `forma-creator` | 一次性或试验性 workflow 想法。 | 已评审自然语言约束，先分类成 temporary injection JSON。 | 面向固定 target 的一次性生成 bundle。 |
+| `forma-creator` | 一次性或试验性工作流想法。 | 已评审自然语言约束，先分类成 temporary injection JSON。 | 面向固定 target 的一次性生成 bundle。 |
 
 `forma create` 是确定性的 profile 路径。
 
@@ -42,7 +42,7 @@ Temporary injection 只属于一次生成出来的 bundle。
 6. 用户试用这个 workflow。
 7. 只有反复有用的规则才提升到 tracked profile。
 
-Temporary injection 不是 profile。除非用户明确把它提升到 profile，否则不要把它当成已评审的团队政策。
+Temporary injection 不是 profile。除非用户明确把它提升到 profile，否则不要把它当成已评审的团队规则。
 
 ## 约束分类
 
@@ -57,7 +57,7 @@ Creator 应该把约束放到最窄的正确位置：
 | `constraints.pour` | 当前任务执行和证明。 |
 | `constraints.flow` | 安全继续和停止条件。 |
 | `conditional_overlays` | docs-only、migration、generated-baseline、governance、backend、cross-layer 等重场景规则。 |
-| `resources` | workflow 明确选中的 references、scripts 或支持文件。 |
+| `resources` | 工作流明确选中的 references、scripts 或支持文件。 |
 
 不要把 README、AGENTS、issue 原文或治理文档整段复制进 temporary injection。应该提取工作流规则，并放到对应位置。
 
@@ -72,7 +72,7 @@ Source adapter 不是 Forma 基础能力。只有 profile 或 temporary injectio
 当一条 temporary injection 规则满足下面条件时，才提升到 tracked profile：
 
 - 多次运行都会用到；
-- 已由拥有该项目或团队的人评审；
+- 已由该项目或团队的负责人评审；
 - 可以作为长期源码分享；
 - 能明确放进阶段约束、resource、validation command 或 conditional overlay。
 
@@ -80,7 +80,7 @@ Source adapter 不是 Forma 基础能力。只有 profile 或 temporary injectio
 
 ## 验证
 
-`forma-creator` 应该在报告成功前运行验证。验证会检查生成 bundle 的结构和方法规则，但不证明注入的政策本身是正确的产品决策。
+`forma-creator` 应该在报告成功前运行验证。验证会检查生成 bundle 的结构和方法规则，但不证明注入规则本身是正确的产品决策。
 
 边界见 [Verifier](./verifier.zh-CN.md)。
 

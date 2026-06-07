@@ -2,26 +2,27 @@
 
 **面向项目专属 Agent 工作流的编译器。**
 
-Agent 可以跑得很快。难的是第一句 prompt 之后，怎么让工作不跑偏。
+输入 profile，输出 skill bundle。默认方法是 Plan-First。
 
-Forma 把你每次都要重新解释的那部分沉淀成源码：先把工作流写进 profile，
-再编译成 Codex / Claude Code skills，让 Agent 按阶段推进、留下证明，并知道什么时候该停。
+Forma 把项目专属 workflow profile 编译成 skill bundle；这些 bundle 可安装到 Codex、Claude Code 这类 Agent 编码环境。
 
-输入 profile，输出 skill bundle。Agent 仍然负责执行；Forma 负责把工作变成一条它能遵守的路径。
+它内置 Plan-First 工程方法：先澄清需求，再收集证据，锁定计划，一次执行一个任务，并且只在明确边界内继续。
 
 英文文档：[README.md](./README.md)
 
 ## 为什么需要 Forma
 
+Agent 可以跑得很快。难的是第一句 prompt 之后，怎么让工作不跑偏。
+
 AI coding 改变了项目里什么东西算作重要资产。
 
-代码、测试、文档、issue 和 review comment 仍然重要。但当 coding agent 进入开发流程后，另一个资产变得关键：
+代码、测试、文档、issue 和评审意见仍然重要。但当编码 Agent 进入开发流程后，另一个资产变得关键：
 
 > Agent 在改代码之前和改代码过程中遵守的工作流。
 
 团队需要定义：Agent 必须澄清什么、必须收集哪些证据、计划什么时候变成可执行契约、可以改什么、什么时候必须停下，以及验证证明如何记录。
 
-这些规则常常散落在提示词、`AGENTS.md`、自定义技能、review 习惯和团队记忆里。Forma 给它们一个源码格式和一个编译器。
+这些规则常常散落在提示词、`AGENTS.md`、自定义技能、评审习惯和团队记忆里。Forma 给它们一个源码格式和一个编译器。
 
 Forma 背后的判断很简单：工作流规则如果只存在于对话里，Agent 很容易忘。
 
@@ -88,7 +89,7 @@ Forma 增加的是更窄的控制面：
 
 ## Forma 属于哪一层
 
-Forma 位于 Agent 工作流这一层。
+Forma 不是又一个提示词模板，也不是又一个 Spec 工具。它位于 Agent 工作流这一层。
 
 - Spec 工具和规划文档定义应该做什么。
 - `AGENTS.md` 和仓库文档定义本地上下文和约定。
@@ -126,6 +127,8 @@ forma verify /tmp/backend-plan-first-codex
 forma build-creator --target codex --output /tmp/forma-creator-dist
 forma verify /tmp/forma-creator-dist/codex/forma-creator
 ```
+
+已提交的生成示例只是漂移检查基线，不是 Agent 真实运行效果的证明。
 
 完整首次跑通路径、安装位置、Claude Code 输出和 profile 编写细节见 [快速开始](./docs/quick-start.zh-CN.md)。
 
