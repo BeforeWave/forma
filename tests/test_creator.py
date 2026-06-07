@@ -12,6 +12,7 @@ from forma import __version__
 from forma.cli import main
 from forma.creator import build_bundle, load_profile
 from forma.creator.manifest import find_methodology_dir
+from forma.plugins import build_codex_plugin
 from forma_verifier import verify
 
 
@@ -761,6 +762,59 @@ def test_creator_pipeline_emits_valid_claude_code_bundle(tmp_path: Path) -> None
     assert report.passed, report.format_human()
     manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
     assert manifest["target"] == "claude-code"
+
+
+def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
+    profile = ROOT / "profiles" / "default" / "forma-plan-first.yaml"
+    bundle_dir = tmp_path / "bundle"
+    plugin_dir = tmp_path / "plugin"
+
+    build_bundle(
+        profile_file=profile,
+        output_dir=bundle_dir,
+        target_agent="codex",
+        methodology_dir=METHODOLOGY,
+    )
+    plugin_json = build_codex_plugin(
+        profile_file=profile,
+        output_dir=plugin_dir,
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert (bundle_dir / "forma-plan" / "SKILL.md").is_file()
+    assert (bundle_dir / "forma-ground" / "SKILL.md").is_file()
+    assert (bundle_dir / "forma-lock" / "SKILL.md").is_file()
+    assert (bundle_dir / "forma-execute" / "SKILL.md").is_file()
+    assert (bundle_dir / "forma-showhand" / "SKILL.md").is_file()
+    assert verify(bundle_dir).passed
+    assert verify(plugin_dir).passed
+
+    plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
+    assert plugin["id"] == "forma"
+    assert plugin["name"] == "Forma"
+    assert "Plan-First" in plugin["description"]
+    assert plugin["skills"] == [
+        {
+            "id": "forma-plan",
+            "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
+        },
+        {
+            "id": "forma-ground",
+            "description": "Inspect code, docs, issues, and evidence before deciding.",
+        },
+        {
+            "id": "forma-lock",
+            "description": "Lock the execution plan and task contract.",
+        },
+        {
+            "id": "forma-execute",
+            "description": "Execute one accepted task and leave verifiable evidence.",
+        },
+        {
+            "id": "forma-showhand",
+            "description": "Continue remaining tasks, but stop when evidence is insufficient.",
+        },
+    ]
 
 
 def test_creator_honors_custom_stage_names_and_enabled_matrix(tmp_path: Path) -> None:

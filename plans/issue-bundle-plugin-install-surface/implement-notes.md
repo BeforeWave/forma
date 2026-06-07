@@ -40,3 +40,23 @@ Deviations From Plan:
 
 Follow-ups:
 - Task 3 should review the default profile descriptions and plugin metadata for final product wording.
+
+## Task 3: default-workflow-profile
+
+Outcome:
+- Confirmed the default no-injection profile emits `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`, and tightened Codex plugin metadata coverage.
+
+Decision Notes:
+- Because the profile source already had to land in task 2, this task focused on product-facing plugin metadata and tests that bind the plugin id, name, Plan-First positioning, and skill descriptions.
+
+Plan Gaps Found:
+- None beyond the task-order gap recorded in task 2.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

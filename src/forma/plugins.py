@@ -15,7 +15,7 @@ from forma_verifier import verify
 CODEX_PLUGIN_ID = "forma"
 CODEX_PLUGIN_NAME = "Forma"
 CODEX_PLUGIN_DESCRIPTION = (
-    "Plan-First workflow skills for grounding, locking, and executing agent tasks."
+    "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
 
 

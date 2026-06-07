@@ -15,7 +15,7 @@ Validate: repo=$PWD; tmp_dir=$(mktemp -d); uv run --extra dev forma create-plugi
 Depends: bundle-terminology-contract
 Constraint: do not add URL download behavior to `install`; do not make `create-plugin` write `dist/skill-bundles/{codex,claude-code}`.
 
-- [ ] [default-workflow-profile] Add the generic no-injection workflow profile and Codex plugin metadata
+- [x] [default-workflow-profile] Add the generic no-injection workflow profile and Codex plugin metadata
 Accept: Task Type=step; the default profile emits `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand` with the settled descriptions, and the Codex plugin metadata is id `forma`, name `Forma`, and plan-first positioned
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
 Validate: tmp_dir=$(mktemp -d); uv run --extra dev forma create-bundle --target codex --output "$tmp_dir/bundle"; test -d "$tmp_dir/bundle/forma-plan"; test -d "$tmp_dir/bundle/forma-showhand"; uv run --extra dev forma verify "$tmp_dir/bundle"; rm -rf "$tmp_dir"
