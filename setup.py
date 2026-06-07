@@ -24,6 +24,11 @@ class build_py(_build_py):
                 target,
                 ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
             )
+        default_profile = root / "profiles" / "default"
+        target = Path(self.build_lib) / "forma" / "assets" / "profiles" / "default"
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(default_profile, target)
 
 
 setup(cmdclass={"build_py": build_py})

@@ -5,7 +5,7 @@ Validate: uv run --extra dev forma verify source/skill-creator/
 Depends: none
 Constraint: remove `forma create` and old suite names instead of keeping aliases or fallback manifest parsing.
 
-- [ ] [cli-create-plugin-install] Implement `create-bundle`, Codex-only `create-plugin`, and local `install` CLI behavior
+- [x] [cli-create-plugin-install] Implement `create-bundle`, Codex-only `create-plugin`, and local `install` CLI behavior
 Accept: Task Type=step; `create-bundle` requires an explicit output path, `create-plugin --target codex` emits exactly one plugin layout, unsupported plugin targets fail clearly, `install` verifies local paths before writing with `--replace` overwrite protection, and CLI regressions are covered in new or updated tests including `tests/test_cli.py`
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py tests/test_cli.py
 Validate: tmp_dir=$(mktemp -d); uv run --extra dev forma create-plugin --target codex --output "$tmp_dir/plugin"; test -f "$tmp_dir/plugin/.codex-plugin/plugin.json"; test -d "$tmp_dir/plugin/skills/forma-plan"; test ! -d "$tmp_dir/plugin/skill-bundles"; rm -rf "$tmp_dir"

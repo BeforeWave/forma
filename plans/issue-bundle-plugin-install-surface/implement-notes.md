@@ -19,3 +19,24 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 2: cli-create-plugin-install
+
+Outcome:
+- Added default-profile-backed `create-bundle`, Codex-only `create-plugin`, and verified local `install` support for single skills, skill bundles, and Codex plugins.
+
+Decision Notes:
+- The task validation invokes `create-bundle` without `--profile`, so the generic no-injection default profile was introduced in this task instead of waiting for `default-workflow-profile`; task 3 can still refine positioning and generated metadata around that tracked profile.
+- Install classification checks Codex plugin roots before bundle roots so a plugin with nested `skills/` installs as `.codex/plugins/<plugin-id>` rather than expanding into `.codex/skills`.
+
+Plan Gaps Found:
+- The task order placed default profile creation after CLI validation that already required the default profile.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- Added `profiles/default/forma-plan-first.yaml` during task 2 to satisfy the current task's validation contract.
+
+Follow-ups:
+- Task 3 should review the default profile descriptions and plugin metadata for final product wording.

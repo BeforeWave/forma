@@ -885,21 +885,33 @@ conditional_overlays:
     assert verify(output_dir).passed
 
 
-def test_create_bundle_cli_requires_target_and_profile(tmp_path: Path) -> None:
+def test_create_bundle_cli_requires_target_and_removes_old_create_command(
+    tmp_path: Path,
+) -> None:
     runner = CliRunner()
-    missing_profile = runner.invoke(
+    default_profile = runner.invoke(
         main,
-        ["create-bundle", "--target", "codex", "--output", str(tmp_path / "out")],
+        [
+            "create-bundle",
+            "--target",
+            "codex",
+            "--output",
+            str(tmp_path / "out"),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
     )
     missing_target = runner.invoke(
         main,
         ["create-bundle", "--profile", str(SAMPLE_PROFILE), "--output", str(tmp_path / "out")],
     )
+    old_create = runner.invoke(main, ["create", "--help"])
 
-    assert missing_profile.exit_code != 0
-    assert "Missing option '--profile'" in missing_profile.output
+    assert default_profile.exit_code == 0, default_profile.output
     assert missing_target.exit_code != 0
     assert "Missing option '--target'" in missing_target.output
+    assert old_create.exit_code != 0
+    assert "No such command 'create'" in old_create.output
 
 
 def test_explain_profile_outputs_canonical_guidance() -> None:

@@ -1,0 +1,50 @@
+profile:
+  id: forma-plan-first-default
+  description: Generic no-injection Forma Plan-First workflow.
+bundle:
+  name: forma
+  description: Generic Plan-First workflow bundle for agents.
+org:
+  name: Forma
+stages:
+  shape:
+    name: forma-plan
+    directory: forma-plan
+    display_name: Forma Plan
+    short_description: Clarify goals, constraints, boundaries, and acceptance criteria.
+    default_prompt: Use $forma-plan to clarify goals, constraints, boundaries, and acceptance criteria before implementation.
+  gauge:
+    name: forma-ground
+    directory: forma-ground
+    display_name: Forma Ground
+    short_description: Inspect code, docs, issues, and evidence before deciding.
+    default_prompt: Use $forma-ground to inspect code, docs, issues, and evidence before deciding.
+  seal:
+    name: forma-lock
+    directory: forma-lock
+    display_name: Forma Lock
+    short_description: Lock the execution plan and task contract.
+    default_prompt: Use $forma-lock to lock the execution plan and task contract.
+  pour:
+    name: forma-execute
+    directory: forma-execute
+    display_name: Forma Execute
+    short_description: Execute one accepted task and leave verifiable evidence.
+    default_prompt: Use $forma-execute to execute one accepted task and leave verifiable evidence.
+  flow:
+    name: forma-showhand
+    directory: forma-showhand
+    display_name: Forma Showhand
+    short_description: Continue remaining tasks, but stop when evidence is insufficient.
+    default_prompt: Use $forma-showhand to continue remaining tasks, but stop when evidence is insufficient.
+skills:
+  shape:
+    description: Clarify goals, constraints, boundaries, and acceptance criteria.
+  gauge:
+    description: Inspect code, docs, issues, and evidence before deciding.
+  seal:
+    description: Lock the execution plan and task contract.
+  pour:
+    description: Execute one accepted task and leave verifiable evidence.
+  flow:
+    description: Continue remaining tasks, but stop when evidence is insufficient.
