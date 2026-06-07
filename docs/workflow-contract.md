@@ -151,4 +151,5 @@ current generated bundle.
 - [Concepts](./concepts.md): compiler model and core terminology.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
 - [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Examples](./examples.md): illustrative end-to-end walkthrough.
 - [Usage](./usage.md): command reference.

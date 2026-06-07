@@ -10,6 +10,25 @@ They fail because the shape of the work is implicit.
 
 Forma is the place for the "how this work should happen" part.
 
+## The Shift
+
+After AI coding becomes part of everyday work, code is no longer the only
+project artifact that matters.
+
+The spec an agent follows, the evidence it reads, the plan it seals, the task
+boundary it accepts, and the proof it leaves behind all become part of the
+project lifecycle. If those artifacts are vague, scattered, or only remembered
+inside a chat, the agent's work style changes from run to run.
+
+Teams already express engineering style through architecture, code patterns,
+test habits, and review standards. With agents in the loop, teams also express
+style through how work is delegated: what the agent must clarify, what it must
+read, when it may act, when it must stop, and how it proves the result.
+
+Forma treats that agent-working style as source. It gives workflow rules a
+place to live, turns them into staged skills, and makes the resulting work loop
+reviewable instead of improvised.
+
 ## Compiler Model
 
 Forma is a compiler for project-specific agent workflows.
@@ -20,7 +39,7 @@ source                compiler            installable artifact
 ```
 
 The profile is source. The generated skill bundle is the deployment artifact.
-Codex and Claude Code are target surfaces.
+Codex and Claude Code are targets.
 
 Forma does not execute project tasks directly. It generates the workflow an
 agent follows while executing tasks.
@@ -47,7 +66,7 @@ durable team policy unless it is promoted into a reviewed profile.
 | Profile | Durable workflow source reviewed like project source. |
 | Temporary injection | One-off generation input for scoped rules that should not become durable policy by accident. |
 | Skill bundle | Target-specific compiled artifact containing stage skills, references, scripts, and a manifest. |
-| Target surface | The runtime agent environment, currently Codex or Claude Code. |
+| Target | The agent environment that loads generated skills, currently Codex or Claude Code. |
 
 See [Workflow Contract](./workflow-contract.md), [Profile Schema](./profile-schema.md),
 and [Skill Bundle](./skill-bundle.md) for the detailed pages.
@@ -85,7 +104,7 @@ verifiable workflow source. It helps make agent work:
 - staged: clarification, evidence, planning, execution, and proof are not collapsed into one prompt;
 - bounded: implementation stays inside accepted tasks;
 - reviewable: reviewers can inspect the path from demand to evidence, plan, execution, and proof;
-- portable: the same workflow can be emitted for supported target surfaces.
+- portable: the same workflow can be emitted for supported targets.
 
 ## Fit
 
@@ -115,7 +134,7 @@ Do not begin by designing a perfect profile. Try one small workflow first.
 1. Choose a small sample profile.
 2. Generate a Codex or Claude Code skill bundle.
 3. Verify the generated bundle.
-4. Install it into one target surface.
+4. Install it into one target.
 5. Trigger one plan-first task.
 6. Inspect the plan, task contract, validation result, and run evidence.
 7. Promote only useful rules into durable profile source.
@@ -127,4 +146,8 @@ See [Quick Start](./quick-start.md) for the concrete path.
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, evidence, and proof.
 - [Skill Bundle](./skill-bundle.md): generated artifact layout and manifest.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
+- [Forma Creator](./forma-creator.md): one-off workflow generation.
+- [Verifier](./verifier.md): what verification checks and cannot prove.
+- [Targets](./targets.md): target install and metadata behavior.
+- [Examples](./examples.md): end-to-end workflow walkthrough.
 - [Usage](./usage.md): command reference and install locations.

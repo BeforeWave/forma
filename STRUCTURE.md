@@ -91,7 +91,15 @@ generated skill resources.
 | `docs/skill-bundle.zh-CN.md` | Chinese skill bundle guide |
 | `docs/profile-schema.md` | English durable profile source format, examples, constraint placement, resources, validation commands, and common mistakes |
 | `docs/profile-schema.zh-CN.md` | Chinese profile schema guide |
-| `docs/usage.md` | English command reference, install targets, repository checks, source layout, and installed CLI behavior notes |
+| `docs/forma-creator.md` | English agent-side creator path, temporary injection lifecycle, classification, promotion, and verification boundaries |
+| `docs/forma-creator.zh-CN.md` | Chinese forma-creator guide |
+| `docs/verifier.md` | English verifier checks, non-goals, common failures, manifest/drift relationship, and bundled verifier boundary |
+| `docs/verifier.zh-CN.md` | Chinese verifier guide |
+| `docs/targets.md` | English Codex and Claude Code target values, install locations, target-specific metadata, and trust guidance |
+| `docs/targets.zh-CN.md` | Chinese targets guide |
+| `docs/examples.md` | English illustrative end-to-end workflow walkthrough using committed sample sources |
+| `docs/examples.zh-CN.md` | Chinese examples guide |
+| `docs/usage.md` | English command reference, repository checks, source layout, and installed CLI behavior notes |
 | `docs/usage.zh-CN.md` | Chinese usage guide |
 
 ## Profiles
@@ -140,6 +148,7 @@ Code suites.
 | `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained Layer 1 meta source |
 | `tests/test_creator_builder.py` | Codex/Claude Code creator builder coverage |
 | `tests/test_creator.py` | Layer 3 integration, profile resolver hardening, generated-output drift, and verifier dogfood |
+| `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |
 | `tests/fixtures/valid-suite/` | Minimal valid plan-first suite fixture |
 | `tests/fixtures/invalid-suite/` | Minimal invalid suite fixture with targeted rule failures |
 

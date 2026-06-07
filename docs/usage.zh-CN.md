@@ -16,11 +16,11 @@ forma verify /tmp/backend-plan-first-codex
 
 安装、提交或分享生成 bundle 前，先运行这个命令。
 
-`forma verify` 检查结构和方法规则。它不替代 profile review 或产品判断。Bundle 结构见 [Skill Bundle](./skill-bundle.zh-CN.md)。
+`forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
 ### `forma create`
 
-把标准方法和解析后的 tracked profile 组合起来，生成目标环境专用 workflow bundle：
+把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 workflow bundle：
 
 ```bash
 forma create \
@@ -43,7 +43,7 @@ Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
 ### `forma build-creator`
 
-生成目标环境专用的可安装 `forma-creator`：
+生成 target 专用的可安装 `forma-creator`：
 
 ```bash
 forma build-creator \
@@ -60,7 +60,7 @@ forma build-creator \
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
-每个生成的 `forma-creator` 都固定一个目标环境。Codex creator 生成 Codex 形态的 workflow bundle。Claude Code creator 生成 Claude Code 形态的 workflow bundle。
+每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 workflow bundle。Claude Code creator 生成 Claude Code 形态的 workflow bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
 
 ### `forma explain`
 
@@ -75,18 +75,14 @@ forma explain temporary-injection --format json --target codex
 
 ## 安装目标
 
-Forma 生成的是目标环境专用 bundle。把生成技能目录复制到对应位置：
+Forma 生成的是 target 专用 bundle。把生成技能目录复制到对应位置：
 
 | 目标 | 个人安装 | 项目/团队安装 |
 |---|---|---|
 | Codex | `$HOME/.agents/skills` | `.agents/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex 的项目 skills 可以放在当前工作目录、父目录或仓库根目录下的 `.agents/skills`。
-
-Claude Code 的项目 skills 放在 `.claude/skills`。
-
-信任项目 skills 前先审查内容，因为 skills 可以包含脚本和目标环境专用工具行为。
+target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 
 ## 重命名生成技能
 
@@ -112,7 +108,7 @@ stages:
 
 - `name` 是 skill frontmatter 里的名字；
 - `directory` 是安装目录名；
-- `display_name` 是目标环境展示名；
+- `display_name` 是 target 里的展示名；
 - `name` 和 `directory` 必须是 lower kebab-case；
 - 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
 
@@ -184,3 +180,6 @@ git diff --check
 - [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、门禁、边界和证明。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
+- [Forma Creator](./forma-creator.zh-CN.md)：Agent 侧一次性生成。
+- [Verifier](./verifier.zh-CN.md)：验证检查和限制。
+- [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。

@@ -23,7 +23,7 @@ Forma compiler
 target-specific skill bundle
 ```
 
-The same workflow profile can be emitted for multiple target surfaces without
+The same workflow profile can be emitted for multiple targets without
 rewriting the workflow rules by hand.
 
 ## Bundle Layout
@@ -112,7 +112,7 @@ metadata.
 
 It records information such as:
 
-- target surface;
+- target;
 - suite kind and mode;
 - generated skill names and directories;
 - methodology version or digest;
@@ -148,8 +148,8 @@ rules into stage constraints, references, resources, or conditional overlays.
 | Codex | `$HOME/.agents/skills` | `.agents/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Review project or team bundles before trusting them. Skills can include scripts
-and target-specific tool behavior.
+See [Targets](./targets.md) for discovery rules, target metadata, and trust
+guidance.
 
 ## Verification
 
@@ -161,10 +161,12 @@ forma verify <generated-suite-dir>
 
 Verification checks structure and methodology rules. It does not prove the
 profile is a good product decision or that generated policy is semantically
-complete. Human review still matters.
+complete. See [Verifier](./verifier.md). Human review still matters.
 
 ## Related Docs
 
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, and proof.
 - [Profile Schema](./profile-schema.md): source format that produces bundles.
+- [Targets](./targets.md): install locations and target behavior.
+- [Verifier](./verifier.md): verification checks and limits.
 - [Usage](./usage.md): command reference and install commands.

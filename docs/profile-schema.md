@@ -204,4 +204,6 @@ Do not copy large source documents into injection just to preserve context.
 
 - [Workflow Contract](./workflow-contract.md): what the profile specializes.
 - [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Forma Creator](./forma-creator.md): temporary injection before durable profile promotion.
+- [Examples](./examples.md): sample profile walkthrough.
 - [Usage](./usage.md): command reference.

@@ -18,8 +18,8 @@ forma verify /tmp/backend-plan-first-codex
 Use it before installing, committing, or sharing generated bundles.
 
 `forma verify` checks structure and methodology rules. It does not replace
-profile review or product judgment. See [Skill Bundle](./skill-bundle.md) for
-bundle structure.
+profile review or product judgment. See [Verifier](./verifier.md) for the
+verification boundary.
 
 ### `forma create`
 
@@ -66,7 +66,8 @@ Optional development override:
 
 Each generated `forma-creator` has a fixed target contract. A Codex creator
 generates Codex-shaped workflow bundles. A Claude Code creator generates Claude
-Code-shaped workflow bundles.
+Code-shaped workflow bundles. See [Forma Creator](./forma-creator.md) for the
+agent-side generation path.
 
 ### `forma explain`
 
@@ -91,13 +92,8 @@ matching target location:
 | Codex | `$HOME/.agents/skills` | `.agents/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-For Codex, project skills can live under `.agents/skills` in the current working
-directory, parent directories, or repository root.
-
-For Claude Code, project skills live under `.claude/skills`.
-
-Review project skills before trusting them because skills can include scripts
-and target-specific tool behavior.
+For target-specific discovery, metadata, and trust details, see
+[Targets](./targets.md).
 
 ## Rename Generated Skills
 
@@ -200,3 +196,6 @@ checkout.
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, and proof.
 - [Skill Bundle](./skill-bundle.md): generated artifact layout and manifest.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
+- [Forma Creator](./forma-creator.md): agent-side one-off generation.
+- [Verifier](./verifier.md): verification checks and limits.
+- [Targets](./targets.md): target install and metadata behavior.

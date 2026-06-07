@@ -2,18 +2,18 @@
 
 英文版：[workflow-contract.md](./workflow-contract.md)
 
-Workflow contract 定义 Agent 如何从需求走到证据、从证据走到计划、从计划走到执行、再从执行走到继续。
+Workflow contract 定义 Agent 如何从需求走到证据、从证据走到计划、从计划走到执行，再从执行走到继续。
 
-Forma 把这份 contract 编译成目标环境专用技能。输出不是一个更好的 prompt，而是一条带阶段、门禁、边界和证明要求的工作回路。
+Forma 把这份 contract 编译成 target 专用技能。输出不是一个更好的 prompt，而是一条带阶段、门禁、边界和证明要求的工作回路。
 
 ## 实际作用
 
-Forma 不保证 Agent 行为完美。它提供的是更好的工作流控制面。
+Forma 不保证 Agent 行为完美。它提供的是更清晰的工作流控制点。
 
-| 只有提示词的工作流 | Forma 的工作流控制面 |
+| 只有提示词的工作流 | Forma 的工作流控制点 |
 |---|---|
 | 规则需要在每次对话里重新解释。 | 长期规则进入 profiles。 |
-| 规划、取证和执行容易混在一起。 | 阶段拆开澄清、grounding、seal、执行和继续。 |
+| 规划、取证和执行容易混在一起。 | 阶段会拆开澄清、取证、定稿、执行和继续。 |
 | 验证可能到最后才想起来。 | 证明要求写进任务契约。 |
 | 是否继续取决于 Agent 当下判断。 | `flow` 有明确停止条件。 |
 
@@ -30,10 +30,10 @@ demand -> proposal -> evidence -> plan -> task -> proof -> continuation
 
 | 阶段 | 职责 | 交接物 |
 |---|---|---|
-| `shape` | 澄清需求，并收敛成有边界的方案。 | 已收敛的决策门，或明确的 blocked / clarifying 状态。 |
+| `shape` | 澄清需求，并收敛成有边界的方案。 | 已收敛的决策门，或明确的阻塞 / 澄清状态。 |
 | `gauge` | 只读收集仓库、Spec、文档和历史证据。 | 包含事实、风险和未知项的 grounding handoff。 |
 | `seal` | 把已收敛方案和证据变成执行契约。 | `plans/issue-<id>/plan.md` 和 `tasks.md`。 |
-| `pour` | 执行一个已接受任务，并记录证明。 | review-ready 的任务结果和验证证据。 |
+| `pour` | 执行一个已接受任务，并记录证明。 | 可评审的任务结果和验证证据。 |
 | `flow` | 只有 sealed plan 允许时，才继续执行已接受任务。 | 已完成任务，或明确停止原因。 |
 
 阶段名是默认值。Profile 可以重命名生成技能，但 contract 阶段语义不变。
@@ -47,8 +47,8 @@ Contract 有价值，是因为每个阶段的权限不同。
 | `shape` | 澄清 goal、scope、approach、validation、plan strategy 和边界。 | 检查仓库、写计划文件或实现。 |
 | `gauge` | 读取文件、检查仓库状态、产出 grounding。 | 写文件、运行会修改状态的命令、决定最终执行任务。 |
 | `seal` | 在决策已经收敛后写入已接受计划和任务契约。 | 编造缺失范围、跳过 grounding、扩大验收条件。 |
-| `pour` | 实现当前已接受任务，并运行对应验证。 | 执行未接受任务、重写计划、绕过 review gate 继续。 |
-| `flow` | 在允许继续时，从 sealed task list 恢复执行。 | 绕过缺失计划、缺失证明、权限不清或 blocked route。 |
+| `pour` | 实现当前已接受任务，并运行对应验证。 | 执行未接受任务、重写计划、绕过评审门禁继续。 |
+| `flow` | 在允许继续时，从 sealed task list 恢复执行。 | 绕过缺失计划、缺失证明、权限不清或已阻塞路线。 |
 
 ## 小例子
 
@@ -58,7 +58,7 @@ Contract 有价值，是因为每个阶段的权限不同。
 Update the billing API behavior.
 ```
 
-Forma workflow 应该让这个请求按 contract 走：
+Forma workflow 应该让这个请求按 contract 推进：
 
 | 阶段 | 发生什么 |
 |---|---|
@@ -137,4 +137,5 @@ Profile 适合添加：
 - [核心概念](./concepts.zh-CN.md)：编译器模型和核心术语。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构。
+- [Examples](./examples.zh-CN.md)：说明性端到端示例。
 - [使用说明](./usage.zh-CN.md)：命令参考。

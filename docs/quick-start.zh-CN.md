@@ -2,7 +2,7 @@
 
 英文版：[quick-start.md](./quick-start.md)
 
-这页只讲怎样从现有 profile 走到一个已验证、已安装的工作流套件。
+这页只讲一件事：怎样从现有 profile 生成、验证并安装一套工作流。
 
 不要一上来就设计完美 profile。先用一个小 workflow 试手感，看它是否真的改变 Agent 的行为。
 
@@ -36,7 +36,7 @@ forma --help
 | Codex | `$HOME/.agents/skills` | `.agents/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-信任项目或团队技能前先审查内容。技能可以包含脚本和目标环境专用工具行为。
+信任项目或团队技能前先审查内容。技能可以包含脚本，也可能带有 target 专用的工具行为。
 
 ---
 
@@ -147,7 +147,7 @@ mkdir -p ~/.claude/skills
 cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
 ```
 
-每个 `forma-creator` 都固定一个目标环境。
+每个 `forma-creator` 都固定一个 target。
 
 Codex 版 creator 生成 Codex 形态的 Plan-First 工作流套件。Claude Code 版 creator 生成 Claude Code 形态的套件。
 
@@ -181,7 +181,7 @@ Codex 版 creator 生成 Codex 形态的 Plan-First 工作流套件。Claude Cod
 解释每条约束为什么放在那里，并明确标出未知项。
 ```
 
-这是起草路径，不是自动提交路径。把 profile 当作长期来源前，需要人工评审。
+这是起草路径，不是自动提交路径。把 profile 当作长期源码前，需要人工评审。
 
 ---
 
@@ -194,7 +194,7 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-稳定规则放进长期 profile。一次性、不应成为项目长期来源的规则，通过一次性注入进入生成过程。
+稳定规则放进长期 profile。一次性、不应成为项目长期规则的内容，通过一次性注入进入生成过程。
 
 ---
 
@@ -224,3 +224,7 @@ forma explain temporary-injection --format json --target codex
 - [Workflow Contract](./workflow-contract.zh-CN.md)：生成工作流具体约束什么。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：Forma 写到磁盘上的产物是什么。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源如何组织。
+- [Forma Creator](./forma-creator.zh-CN.md)：一次性生成如何工作。
+- [Verifier](./verifier.zh-CN.md)：`forma verify` 检查什么。
+- [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。
+- [Examples](./examples.zh-CN.md)：端到端运行应该看见什么。

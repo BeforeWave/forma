@@ -226,3 +226,7 @@ If those behaviors are not visible, adjust the profile or generated workflow bef
 - [Workflow Contract](./workflow-contract.md): what the generated workflow enforces.
 - [Skill Bundle](./skill-bundle.md): what Forma writes to disk.
 - [Profile Schema](./profile-schema.md): how durable workflow source is structured.
+- [Forma Creator](./forma-creator.md): how one-off generation works.
+- [Verifier](./verifier.md): what `forma verify` checks.
+- [Targets](./targets.md): target install and metadata behavior.
+- [Examples](./examples.md): what an end-to-end run should expose.
