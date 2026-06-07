@@ -200,9 +200,10 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
             "bundled canonical plan-first semantics and "
             "classify natural-language constraints before writing JSON.",
             "- Convert current-session natural-language injection into a "
-            "temporary JSON file and run `python scripts/create.py --output "
-            "<generated-bundle-path> --injection-json <temporary-injection.json>`; "
-            "do not use Layer 3 profiles from this installed creator.",
+            "temporary JSON file and run `python scripts/create.py --artifact "
+            "bundle --output <generated-bundle-path> --injection-json "
+            "<temporary-injection.json>` for workflow-bundle output; do not "
+            "use Layer 3 profiles from this installed creator.",
             "- Copy fixed generated-skill resources from "
             "`resources/plan-first/methodology/resources/shared/` and any "
             "stage-local resource directory into each generated skill "
@@ -261,9 +262,11 @@ def _interactive_constraint_contract() -> List[str]:
         "- Do not put `profile`, `includes`, tracked profile ids, or stage "
         "`name` / `directory` overrides in that temporary injection JSON. "
         "Final installable names belong only under `rename.stages`.",
-        "- Run `python scripts/create.py --output <generated-bundle-path> "
-        "--injection-json <temporary-injection.json>` before installing, "
-        "handing off, or reporting success.",
+        "- Run `python scripts/create.py --artifact bundle --output "
+        "<generated-bundle-path> --injection-json <temporary-injection.json>` "
+        "before handing off or reporting success.",
+        "- Do not install generated artifacts from this creator. Report the "
+        "output path and install hint only.",
         "- Do not represent one-off constraints as tracked source. If the user "
         "wants durable tracking, help them promote the constraints into a "
         "Layer 3 profile in the owning repository.",
@@ -275,6 +278,12 @@ def _codex_output_contract() -> List[str]:
         "- Generate a Codex-ready workflow bundle root containing `forma-shape/`, "
         "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
+        "- If the user asks for Codex plugin output, run `python "
+        "scripts/create.py --artifact plugin --output <generated-plugin-path> "
+        "--injection-json <temporary-injection.json>`.",
+        "- Codex plugin output must contain `.codex-plugin/plugin.json`, "
+        "root `.forma-manifest.json`, and `skills/<skill-name>/` child skill "
+        "directories; it must not emit sibling `skill-bundles/` output.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
@@ -297,6 +306,8 @@ def _claude_output_contract() -> List[str]:
         "- Generate a Claude Code-ready workflow bundle root containing `forma-shape/`, "
         "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
+        "- Codex plugin output is unsupported by this Claude Code creator; "
+        "present workflow-bundle generation only.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",

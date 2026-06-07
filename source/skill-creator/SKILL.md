@@ -5,9 +5,11 @@ description: Create or update self-contained Forma workflow bundles. Use when Co
 
 # Forma Creator
 
-Use this skill to create a Forma workflow bundle: a flat, ready-to-install set of
-five plan-first skills named `forma-shape`, `forma-gauge`, `forma-seal`,
-`forma-pour`, and `forma-flow`.
+Use this skill to create Forma Plan-First workflow artifacts. By default it
+creates a workflow bundle: a flat, ready-to-install set of five plan-first
+skills named `forma-shape`, `forma-gauge`, `forma-seal`, `forma-pour`, and
+`forma-flow`. If this installed creator includes a fixed target reference, that
+reference is the hard contract for any additional artifact type.
 
 Before generating any bundle, load `references/canonical-plan-first.md`,
 `references/profile-authoring-principles.md`, and
@@ -56,18 +58,23 @@ target contract.
    classification table covering the original user constraint, injection
    target, rationale, durability, and whether to promote it into a tracked
    profile later.
-6. Run the bundled deterministic creator script:
+6. Run the bundled deterministic creator script for workflow-bundle output:
 
 ```bash
-python scripts/create.py --output <generated-bundle-path> --injection-json <temporary-injection.json>
+python scripts/create.py --artifact bundle --output <generated-bundle-path> --injection-json <temporary-injection.json>
 ```
 
-By default, the script creates exactly `forma-shape/`, `forma-gauge/`,
-`forma-seal/`, `forma-pour/`, and `forma-flow/`. If the user supplied
+   If the installed creator's generated agent-target reference explicitly
+   permits another artifact type, follow that target-specific command instead.
+   Do not infer target-specific artifacts from this generic skill body.
+
+The script creates exactly `forma-shape/`, `forma-gauge/`, `forma-seal/`,
+`forma-pour/`, and `forma-flow/` for bundle output. If the user supplied
 `rename.stages`, the script creates those final installable skill directories
-instead. It copies bundled methodology resources, applies the temporary
-injection, writes `.forma-manifest.json`, and runs the bundled verifier. Only
-report success after it exits cleanly.
+instead. The script copies bundled methodology resources, applies the temporary
+injection, writes metadata, and runs the bundled verifier. Only report success
+after it exits cleanly. Do not install generated artifacts from this creator;
+report the output path and install hint only.
 
 ## Stage Rules
 

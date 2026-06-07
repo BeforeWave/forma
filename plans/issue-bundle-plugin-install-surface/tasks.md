@@ -39,7 +39,7 @@ Validate: tmp_dir=$(mktemp -d); uv run --extra dev forma create-bundle --target 
 Depends: default-workflow-profile
 Constraint: keep the guidance concrete and gate-oriented; do not add generic planning philosophy or marketing copy.
 
-- [ ] [creator-target-contracts] Update generated `forma-creator` behavior for bundle and plugin generation boundaries
+- [x] [creator-target-contracts] Update generated `forma-creator` behavior for bundle and plugin generation boundaries
 Accept: Task Type=step; Codex-targeted creator can generate and verify workflow bundles and Codex plugins, Claude Code-targeted creator only presents workflow-bundle generation, and neither creator installs generated artifacts
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_layer_1_dogfood.py tests/test_creator_builder.py
 Validate: uv run --extra dev forma verify source/skill-creator/

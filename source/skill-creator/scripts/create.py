@@ -28,6 +28,12 @@ FORMA_GENERATOR_VERSION_FALLBACK = "0+unknown"
 FORMA_GENERATOR_REPOSITORY_URL = "https://github.com/BeforeWave/forma"
 STAGE_KEYS = ("default", *KINDS)
 TARGETS = ("codex", "claude-code")
+ARTIFACTS = ("bundle", "plugin")
+CODEX_PLUGIN_ID = "forma"
+CODEX_PLUGIN_NAME = "Forma"
+CODEX_PLUGIN_DESCRIPTION = (
+    "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
+)
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 REQUIRED_STAGE_SECTIONS = (
     "Description",
@@ -216,18 +222,45 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     injection = _load_injection(args.injection_json)
     creator_manifest = _load_creator_manifest(creator_root)
-    build_bundle(
-        methodology_dir=methodology_dir,
-        output_dir=args.output.resolve(),
-        target=target,
-        injection=injection,
-        creator_manifest=creator_manifest,
-    )
-    report = verify(args.output.resolve())
+    if args.artifact == "plugin":
+        if target != "codex":
+            print(
+                "error: plugin artifact is only supported for codex-targeted creators",
+                file=sys.stderr,
+            )
+            return 2
+        build_plugin(
+            methodology_dir=methodology_dir,
+            output_dir=args.output.resolve(),
+            injection=injection,
+            creator_manifest=creator_manifest,
+        )
+    else:
+        build_bundle(
+            methodology_dir=methodology_dir,
+            output_dir=args.output.resolve(),
+            target=target,
+            injection=injection,
+            creator_manifest=creator_manifest,
+        )
+    output_dir = args.output.resolve()
+    report = verify(output_dir)
     print(report.format_human())
     if not report.passed:
         return 1
-    print(f"forma creator build-bundle: wrote {args.output}")
+    if args.artifact == "plugin":
+        print(f"forma creator build-plugin: wrote {args.output}")
+        print(f"plugin manifest: {output_dir / '.codex-plugin' / 'plugin.json'}")
+        print(
+            "install hint: use `forma install --target codex --scope "
+            f"<user|project> {output_dir}` or give this plugin path to the agent"
+        )
+    else:
+        print(f"forma creator build-bundle: wrote {args.output}")
+        print(
+            "install hint: use `forma install --target "
+            f"{target} --scope <user|project> {output_dir}` or give this bundle path to the agent"
+        )
     return 0
 
 
@@ -236,6 +269,12 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
         description="Create a target-fixed Forma Plan-First workflow bundle from one-off injection JSON."
     )
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--artifact",
+        choices=ARTIFACTS,
+        default="bundle",
+        help="Artifact to write. `bundle` is the default; `plugin` is Codex-only.",
+    )
     parser.add_argument(
         "--injection-json",
         type=Path,
@@ -426,6 +465,49 @@ def build_bundle(
     )
 
 
+def build_plugin(
+    methodology_dir: Path,
+    output_dir: Path,
+    injection: Mapping[str, Any],
+    creator_manifest: Mapping[str, Any] | None = None,
+) -> None:
+    """Build a Codex plugin artifact from the target-fixed creator source."""
+    methodology_dir = methodology_dir.resolve()
+    _require_methodology(methodology_dir)
+    output_dir = output_dir.resolve()
+    skill_names = _skill_names(injection)
+    _prepare_plugin_output_dir(output_dir)
+    skills_dir = output_dir / "skills"
+    build_bundle(
+        methodology_dir=methodology_dir,
+        output_dir=skills_dir,
+        target="codex",
+        injection=injection,
+        creator_manifest=creator_manifest,
+    )
+    nested_manifest = skills_dir / ".forma-manifest.json"
+    manifest = json.loads(nested_manifest.read_text(encoding="utf-8"))
+    nested_manifest.unlink()
+    (output_dir / ".forma-manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    plugin_dir = output_dir / ".codex-plugin"
+    plugin_dir.mkdir(parents=True, exist_ok=True)
+    (plugin_dir / "plugin.json").write_text(
+        json.dumps(
+            _plugin_manifest(
+                skill_names=skill_names,
+                descriptions=_skill_descriptions(methodology_dir, injection),
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _skill_names(injection: Mapping[str, Any]) -> dict[str, str]:
     rename = injection.get("rename", {})
     prefix = DEFAULT_SKILL_PREFIX
@@ -440,6 +522,34 @@ def _skill_names(injection: Mapping[str, Any]) -> dict[str, str]:
     return {
         kind: str(overrides.get(kind) or f"{prefix}-{kind}").strip()
         for kind in KINDS
+    }
+
+
+def _skill_descriptions(
+    methodology_dir: Path,
+    injection: Mapping[str, Any],
+) -> dict[str, str]:
+    return {
+        kind: _stage_description(kind, _load_stage_source(kind, methodology_dir), injection)
+        for kind in KINDS
+    }
+
+
+def _plugin_manifest(
+    skill_names: Mapping[str, str],
+    descriptions: Mapping[str, str],
+) -> dict[str, object]:
+    return {
+        "id": CODEX_PLUGIN_ID,
+        "name": CODEX_PLUGIN_NAME,
+        "description": CODEX_PLUGIN_DESCRIPTION,
+        "skills": [
+            {
+                "id": skill_names[kind],
+                "description": descriptions.get(kind, ""),
+            }
+            for kind in KINDS
+        ],
     }
 
 
@@ -1293,6 +1403,23 @@ def _prepare_output_dir(output_dir: Path, skill_names: Mapping[str, str]) -> Non
         path = output_dir / skill_names[kind]
         if path.exists():
             shutil.rmtree(path)
+
+
+def _prepare_plugin_output_dir(output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    allowed = {".codex-plugin", ".forma-manifest.json", "skills"}
+    unexpected = [path.name for path in output_dir.iterdir() if path.name not in allowed]
+    if unexpected:
+        raise ValueError(
+            "plugin output directory contains non-Forma files: "
+            f"{', '.join(sorted(unexpected))}; choose an empty directory"
+        )
+    for child in (output_dir / ".codex-plugin", output_dir / "skills"):
+        if child.exists():
+            shutil.rmtree(child)
+    manifest_path = output_dir / ".forma-manifest.json"
+    if manifest_path.exists():
+        manifest_path.unlink()
 
 
 def _validate_stage_mapping(value: Any, name: str, path: Path) -> None:

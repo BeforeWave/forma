@@ -80,3 +80,25 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 5: creator-target-contracts
+
+Outcome:
+- Updated installed `forma-creator` behavior so bundle output is explicit, Codex-targeted creators can also emit verified Codex plugin artifacts, and Claude Code-targeted creators reject plugin artifact requests.
+
+Decision Notes:
+- Plugin generation was implemented inside the standalone Layer 1 creator script rather than importing Layer 3 plugin helpers, so an installed creator remains usable without a Forma source checkout.
+- The generic creator `SKILL.md` no longer contains the Codex plugin command. Codex plugin generation is advertised only through the generated Codex `references/agent-target.md`; Claude Code target references present workflow-bundle output only.
+- Generated creator output prints install hints and artifact paths, but does not copy files into user or project install roots.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

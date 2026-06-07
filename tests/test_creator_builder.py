@@ -103,6 +103,10 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "classification table" in codex_target
     assert "constraints.default" in codex_target
     assert "routine `pour` / `flow`" in codex_target
+    assert "--artifact bundle" in codex_target
+    assert "--artifact plugin" in codex_target
+    assert ".codex-plugin/plugin.json" in codex_target
+    assert "Do not install generated artifacts from this creator" in codex_target
     assert (codex / "references" / "profile-authoring-principles.md").is_file()
     temp_standard = (
         codex / "references" / "temporary-injection-generation.md"
@@ -181,6 +185,13 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "profile-authoring-principles.md" in claude_target
     assert "classification table" in claude_target
     assert "source-context helper scripts" in claude_target
+    assert "--artifact bundle" in claude_target
+    assert "--artifact plugin" not in claude_target
+    assert "Codex plugin output is unsupported" in claude_target
+    assert "Do not install generated artifacts from this creator" in claude_target
+    assert "--artifact plugin" not in (claude / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
     assert (claude / "references" / "profile-authoring-principles.md").is_file()
     assert verify(claude).passed
 
@@ -274,6 +285,138 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     assert manifest["creator_bundle"]["generator"] == FORMA_GENERATOR
     assert manifest["creator_bundle"]["creator"]["name"] == SKILL_NAME
     assert verify(generated).passed
+
+
+def test_installed_codex_creator_script_can_emit_plugin_artifact(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "codex")
+    injection = tmp_path / "plugin-injection.json"
+    generated = tmp_path / "generated-plugin"
+    injection.write_text(
+        json.dumps(
+            {
+                "rename": {
+                    "stages": {
+                        "shape": "forma-plan",
+                        "gauge": "forma-ground",
+                        "seal": "forma-lock",
+                        "pour": "forma-execute",
+                        "flow": "forma-showhand",
+                    }
+                },
+                "skills": {
+                    "shape": {
+                        "description": "Clarify goals, constraints, boundaries, and acceptance criteria."
+                    },
+                    "gauge": {
+                        "description": "Inspect code, docs, issues, and evidence before deciding."
+                    },
+                    "seal": {
+                        "description": "Lock the execution plan and task contract."
+                    },
+                    "pour": {
+                        "description": "Execute one accepted task and leave verifiable evidence."
+                    },
+                    "flow": {
+                        "description": "Continue remaining tasks, but stop when evidence is insufficient."
+                    },
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "forma creator build-plugin" in result.stdout
+    assert "install hint:" in result.stdout
+    assert (generated / ".codex-plugin" / "plugin.json").is_file()
+    assert (generated / ".forma-manifest.json").is_file()
+    assert (generated / "skills" / "forma-plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "forma-showhand" / "SKILL.md").is_file()
+    assert (generated / "skills" / "forma-plan" / "agents" / "openai.yaml").is_file()
+    assert not (generated / "skills" / ".forma-manifest.json").exists()
+    assert not (generated / "skill-bundles").exists()
+    assert not (generated / "forma-plan").exists()
+    plugin = json.loads(
+        (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["id"] == "forma"
+    assert plugin["name"] == "Forma"
+    assert plugin["skills"] == [
+        {
+            "id": "forma-plan",
+            "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
+        },
+        {
+            "id": "forma-ground",
+            "description": "Inspect code, docs, issues, and evidence before deciding.",
+        },
+        {
+            "id": "forma-lock",
+            "description": "Lock the execution plan and task contract.",
+        },
+        {
+            "id": "forma-execute",
+            "description": "Execute one accepted task and leave verifiable evidence.",
+        },
+        {
+            "id": "forma-showhand",
+            "description": "Continue remaining tasks, but stop when evidence is insufficient.",
+        },
+    ]
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "codex"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "forma-plan"
+    assert verify(generated).passed
+
+
+def test_installed_claude_creator_script_rejects_plugin_artifact(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "claude-code")
+    generated = tmp_path / "generated-plugin"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(generated),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "plugin artifact is only supported for codex-targeted creators" in (
+        result.stderr
+    )
+    assert not generated.exists()
 
 
 def test_installed_creator_script_supports_explicit_source_adapter_injection(
