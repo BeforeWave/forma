@@ -10,7 +10,7 @@ from click.testing import CliRunner
 
 from forma import __version__
 from forma.cli import main
-from forma.creator import create_suite, load_profile
+from forma.creator import build_bundle, load_profile
 from forma.creator.manifest import find_methodology_dir
 from forma_verifier import verify
 
@@ -389,10 +389,10 @@ def test_sample_profiles_are_sanitized() -> None:
     assert ".plan-first" not in profile_text
 
 
-def test_sample_conditional_overlay_profile_emits_valid_suite(tmp_path: Path) -> None:
+def test_sample_conditional_overlay_profile_emits_valid_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-conditional-overlay-codex"
 
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_CONDITIONAL_PROFILE,
         output_dir=output_dir,
         target_agent="codex",
@@ -451,10 +451,10 @@ def test_sample_conditional_overlay_profile_emits_valid_suite(tmp_path: Path) ->
     assert report.passed, report.format_human()
 
 
-def test_sample_software_plan_first_profile_emits_valid_suite(tmp_path: Path) -> None:
+def test_sample_software_plan_first_profile_emits_valid_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-software-plan-first-codex"
 
-    manifest_path = create_suite(
+    manifest_path = build_bundle(
         profile_file=SAMPLE_SOFTWARE_PROFILE,
         output_dir=output_dir,
         target_agent="codex",
@@ -509,17 +509,17 @@ def test_sample_software_plan_first_profile_emits_valid_suite(tmp_path: Path) ->
     assert report.passed, report.format_human()
 
 
-def test_forma_self_iteration_profile_emits_valid_suites(tmp_path: Path) -> None:
+def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> None:
     codex_dir = tmp_path / "forma-iteration-codex"
     claude_dir = tmp_path / "forma-iteration-claude-code"
 
-    codex_manifest_path = create_suite(
+    codex_manifest_path = build_bundle(
         profile_file=FORMA_SELF_PROFILE,
         output_dir=codex_dir,
         target_agent="codex",
         methodology_dir=METHODOLOGY,
     )
-    create_suite(
+    build_bundle(
         profile_file=FORMA_SELF_PROFILE,
         output_dir=claude_dir,
         target_agent="claude-code",
@@ -581,10 +581,10 @@ def test_find_methodology_dir_accepts_explicit_path() -> None:
     assert find_methodology_dir(METHODOLOGY) == METHODOLOGY.resolve()
 
 
-def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
+def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
 
-    manifest_path = create_suite(
+    manifest_path = build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=output_dir,
         target_agent="codex",
@@ -709,9 +709,9 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
     assert report.passed, report.format_human()
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert manifest["format"] == "forma-suite-manifest-v1"
+    assert manifest["format"] == "forma-bundle-manifest-v1"
     assert manifest["mode"] == "solo"
-    assert manifest["suite_kind"] == "plan-first"
+    assert manifest["bundle_kind"] == "plan-first-workflow"
     assert manifest["target"] == "codex"
     assert manifest["methodology_version"] == "0.1.0"
     assert manifest["generator"] == FORMA_GENERATOR
@@ -743,10 +743,10 @@ def test_creator_pipeline_emits_valid_codex_suite(tmp_path: Path) -> None:
     assert manifest["skills"] == list(KINDS)
 
 
-def test_creator_pipeline_emits_valid_claude_code_suite(tmp_path: Path) -> None:
+def test_creator_pipeline_emits_valid_claude_code_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
 
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=output_dir,
         target_agent="claude-code",
@@ -787,7 +787,7 @@ stages:
     )
     output_dir = tmp_path / "custom-output"
 
-    create_suite(
+    build_bundle(
         profile_file=profile_file,
         output_dir=output_dir,
         target_agent="codex",
@@ -849,7 +849,7 @@ conditional_overlays:
 
     profile = load_profile(profile_file)
     assert profile.conditional_overlays is not None
-    create_suite(
+    build_bundle(
         profile_file=profile_file,
         output_dir=output_dir,
         target_agent="codex",
@@ -885,15 +885,15 @@ conditional_overlays:
     assert verify(output_dir).passed
 
 
-def test_create_cli_requires_target_and_profile(tmp_path: Path) -> None:
+def test_create_bundle_cli_requires_target_and_profile(tmp_path: Path) -> None:
     runner = CliRunner()
     missing_profile = runner.invoke(
         main,
-        ["create", "--target", "codex", "--output", str(tmp_path / "out")],
+        ["create-bundle", "--target", "codex", "--output", str(tmp_path / "out")],
     )
     missing_target = runner.invoke(
         main,
-        ["create", "--profile", str(SAMPLE_PROFILE), "--output", str(tmp_path / "out")],
+        ["create-bundle", "--profile", str(SAMPLE_PROFILE), "--output", str(tmp_path / "out")],
     )
 
     assert missing_profile.exit_code != 0
@@ -962,7 +962,7 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
 
 def test_create_rejects_unknown_target(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="unsupported target"):
-        create_suite(
+        build_bundle(
             profile_file=SAMPLE_PROFILE,
             output_dir=tmp_path / "out",
             target_agent="unknown",
@@ -973,13 +973,13 @@ def test_create_rejects_unknown_target(tmp_path: Path) -> None:
 def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) -> None:
     first = tmp_path / "first"
     second = tmp_path / "second"
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=first,
         target_agent="codex",
         methodology_dir=METHODOLOGY,
     )
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=second,
         target_agent="codex",
@@ -992,13 +992,13 @@ def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) ->
 def test_committed_generated_outputs_match_creator(tmp_path: Path) -> None:
     codex = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
     claude = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=codex,
         target_agent="codex",
         methodology_dir=METHODOLOGY,
     )
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=claude,
         target_agent="claude-code",
@@ -1023,7 +1023,7 @@ def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:
     (output_dir / "notes.txt").write_text("keep me\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="non-Forma files: notes.txt"):
-        create_suite(
+        build_bundle(
             profile_file=SAMPLE_PROFILE,
             output_dir=output_dir,
             target_agent="codex",
@@ -1033,7 +1033,7 @@ def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:
 
 def test_creator_can_replace_known_generated_paths(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=output_dir,
         target_agent="codex",
@@ -1042,7 +1042,7 @@ def test_creator_can_replace_known_generated_paths(tmp_path: Path) -> None:
     stale_file = output_dir / SAMPLE_STAGE_DIRS["shape"] / "stale.txt"
     stale_file.write_text("stale\n", encoding="utf-8")
 
-    create_suite(
+    build_bundle(
         profile_file=SAMPLE_PROFILE,
         output_dir=output_dir,
         target_agent="codex",

@@ -10,18 +10,18 @@ from forma_verifier import verify
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VALID_SUITE = ROOT / "tests" / "fixtures" / "valid-suite"
-INVALID_SUITE = ROOT / "tests" / "fixtures" / "invalid-suite"
+VALID_BUNDLE = ROOT / "tests" / "fixtures" / "valid-bundle"
+INVALID_BUNDLE = ROOT / "tests" / "fixtures" / "invalid-bundle"
 
 
-def copy_valid_suite(tmp_path: Path) -> Path:
-    dst = tmp_path / "suite"
-    shutil.copytree(VALID_SUITE, dst)
+def copy_valid_bundle(tmp_path: Path) -> Path:
+    dst = tmp_path / "bundle"
+    shutil.copytree(VALID_BUNDLE, dst)
     return dst
 
 
-def overwrite_skill(suite: Path, kind: str, text: str) -> None:
-    (suite / kind / "SKILL.md").write_text(text.strip() + "\n", encoding="utf-8")
+def overwrite_skill(bundle: Path, kind: str, text: str) -> None:
+    (bundle / kind / "SKILL.md").write_text(text.strip() + "\n", encoding="utf-8")
 
 
 def skill_text(name: str, description: str, body: str) -> str:
@@ -41,17 +41,17 @@ def assert_has_error(report, rule_id: str) -> None:
 
 
 def test_valid_fixture_passes() -> None:
-    report = verify(VALID_SUITE)
+    report = verify(VALID_BUNDLE)
 
     assert report.passed, report.format_human()
-    assert report.suite_kind == "plan-first-suite"
+    assert report.bundle_kind == "plan-first-bundle"
 
 
 def test_forma_prefixed_stage_names_pass(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     for kind in ("shape", "gauge", "seal", "pour", "flow"):
-        old_dir = suite / kind
-        new_dir = suite / f"forma-{kind}"
+        old_dir = bundle / kind
+        new_dir = bundle / f"forma-{kind}"
         shutil.move(str(old_dir), str(new_dir))
         skill_md = new_dir / "SKILL.md"
         skill_md.write_text(
@@ -63,14 +63,14 @@ def test_forma_prefixed_stage_names_pass(tmp_path: Path) -> None:
             encoding="utf-8",
         )
 
-    report = verify(suite)
+    report = verify(bundle)
 
     assert report.passed, report.format_human()
-    assert report.suite_kind == "plan-first-suite"
+    assert report.bundle_kind == "plan-first-bundle"
 
 
 def test_invalid_fixture_fails() -> None:
-    report = verify(INVALID_SUITE)
+    report = verify(INVALID_BUNDLE)
 
     assert not report.passed
     assert_has_error(report, "R001")
@@ -81,9 +81,9 @@ def test_invalid_fixture_fails() -> None:
 
 
 def test_missing_frontmatter_rule(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         """
 # Shape
@@ -94,13 +94,13 @@ No frontmatter.
 """,
     )
 
-    assert_has_error(verify(suite), "R001")
+    assert_has_error(verify(bundle), "R001")
 
 
 def test_frontmatter_rejects_extra_keys(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         """
 ---
@@ -118,15 +118,15 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
 """,
     )
 
-    report = verify(suite)
+    report = verify(bundle)
     assert_has_error(report, "R001")
     assert "unsupported keys" in report.format_human()
 
 
 def test_name_kebab_case_rule(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "Bad Shape",
@@ -139,13 +139,13 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
         ),
     )
 
-    assert_has_error(verify(suite), "R002")
+    assert_has_error(verify(bundle), "R002")
 
 
 def test_plan_first_name_must_match_parent_kind(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "org-shape",
@@ -158,13 +158,13 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
         ),
     )
 
-    assert_has_error(verify(suite), "R002a")
+    assert_has_error(verify(bundle), "R002a")
 
 
 def test_body_requires_h2_section(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "shape",
@@ -176,13 +176,13 @@ Decision Gate Goal Scope Approach Validation Plan Strategy chat-only.
         ),
     )
 
-    assert_has_error(verify(suite), "R003")
+    assert_has_error(verify(bundle), "R003")
 
 
 def test_referenced_files_must_exist(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "shape",
@@ -196,13 +196,13 @@ See `references/missing.md`.
         ),
     )
 
-    assert_has_error(verify(suite), "R004")
+    assert_has_error(verify(bundle), "R004")
 
 
 def test_cross_skill_borrowing_is_forbidden(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "shape",
@@ -216,13 +216,13 @@ Do not load `../other-skill/scripts/tool.py`.
         ),
     )
 
-    assert_has_error(verify(suite), "R005")
+    assert_has_error(verify(bundle), "R005")
 
 
 def test_bundled_script_references_must_exist(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         "seal",
         skill_text(
             "seal",
@@ -235,17 +235,17 @@ Run `scripts/forma-workflow.sh init 1` before writing plan.md and tasks.md.
         ),
     )
 
-    assert_has_error(verify(suite), "R006")
+    assert_has_error(verify(bundle), "R006")
 
 
 def test_manifest_emitted_skill_mapping_supports_custom_names(tmp_path: Path) -> None:
-    suite = tmp_path / "suite"
-    skill_dir = suite / "custom-plan-issue"
+    bundle = tmp_path / "bundle"
+    skill_dir = bundle / "custom-plan-issue"
     skill_dir.mkdir(parents=True)
-    (suite / ".forma-manifest.json").write_text(
+    (bundle / ".forma-manifest.json").write_text(
         json.dumps(
             {
-                "suite_kind": "plan-first",
+                "bundle_kind": "plan-first-workflow",
                 "target": "claude-code",
                 "emitted_skills": {
                     "shape": {
@@ -270,16 +270,16 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
         encoding="utf-8",
     )
 
-    report = verify(suite)
+    report = verify(bundle)
     assert report.passed, report.format_human()
 
 
 def test_conditional_manifest_rejects_missing_overlay_route(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
-    (suite / ".forma-manifest.json").write_text(
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
         json.dumps(
             {
-                "suite_kind": "plan-first",
+                "bundle_kind": "plan-first-workflow",
                 "conditional_overlays": {
                     "decision": {
                         "name": "Plan Type",
@@ -300,7 +300,7 @@ def test_conditional_manifest_rejects_missing_overlay_route(tmp_path: Path) -> N
         encoding="utf-8",
     )
 
-    report = verify(suite)
+    report = verify(bundle)
 
     assert_has_error(report, "R301")
     assert "references missing overlay" in report.format_human()
@@ -309,15 +309,15 @@ def test_conditional_manifest_rejects_missing_overlay_route(tmp_path: Path) -> N
 def test_conditional_references_cannot_leak_to_unconditional_sections(
     tmp_path: Path,
 ) -> None:
-    suite = copy_valid_suite(tmp_path)
-    (suite / "shape" / "references" / "backend-rules.md").write_text(
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / "shape" / "references" / "backend-rules.md").write_text(
         "Backend rules.\n",
         encoding="utf-8",
     )
-    (suite / ".forma-manifest.json").write_text(
+    (bundle / ".forma-manifest.json").write_text(
         json.dumps(
             {
-                "suite_kind": "plan-first",
+                "bundle_kind": "plan-first-workflow",
                 "conditional_overlays": {
                     "decision": {
                         "name": "Plan Type",
@@ -348,7 +348,7 @@ def test_conditional_references_cannot_leak_to_unconditional_sections(
         encoding="utf-8",
     )
     overwrite_skill(
-        suite,
+        bundle,
         "shape",
         skill_text(
             "shape",
@@ -373,29 +373,29 @@ Use the recorded `Plan Type` before loading overlay references.
         ),
     )
 
-    report = verify(suite)
+    report = verify(bundle)
 
     assert_has_error(report, "R301")
     assert "leaks into an unconditional read section" in report.format_human()
 
 
 def test_codex_target_requires_openai_metadata(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
-    (suite / ".forma-manifest.json").write_text(
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
         json.dumps({"target": "codex"}),
         encoding="utf-8",
     )
 
-    assert_has_error(verify(suite), "R201")
+    assert_has_error(verify(bundle), "R201")
 
 
 def test_claude_code_target_rejects_codex_metadata(tmp_path: Path) -> None:
-    suite = copy_valid_suite(tmp_path)
-    (suite / ".forma-manifest.json").write_text(
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
         json.dumps({"target": "claude-code"}),
         encoding="utf-8",
     )
-    agents_dir = suite / "shape" / "agents"
+    agents_dir = bundle / "shape" / "agents"
     agents_dir.mkdir()
     (agents_dir / "openai.yaml").write_text(
         """
@@ -409,7 +409,7 @@ policy:
         encoding="utf-8",
     )
 
-    assert_has_error(verify(suite), "R202")
+    assert_has_error(verify(bundle), "R202")
 
 
 @pytest.mark.parametrize(
@@ -454,11 +454,11 @@ Executes one task with a user review step.
     ],
 )
 def test_methodology_marker_rules(tmp_path: Path, kind: str, body: str, rule_id: str) -> None:
-    suite = copy_valid_suite(tmp_path)
+    bundle = copy_valid_bundle(tmp_path)
     overwrite_skill(
-        suite,
+        bundle,
         kind,
         skill_text(kind, f"Invalid {kind}.", body),
     )
 
-    assert_has_error(verify(suite), rule_id)
+    assert_has_error(verify(bundle), rule_id)

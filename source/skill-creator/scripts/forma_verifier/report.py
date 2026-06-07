@@ -16,8 +16,8 @@ class RuleResult:
 
 @dataclass
 class Report:
-    suite_path: str
-    suite_kind: str  # "plan-first-suite" | "creator-skill" | "unknown"
+    bundle_path: str
+    bundle_kind: str  # "plan-first-bundle" | "creator-skill" | "unknown"
     results: List[RuleResult] = field(default_factory=list)
 
     @property
@@ -34,8 +34,8 @@ class Report:
 
     def format_human(self) -> str:
         lines = [
-            f"forma verify: {self.suite_path}",
-            f"  bundle kind: {self.suite_kind}",
+            f"forma verify: {self.bundle_path}",
+            f"  bundle kind: {self.bundle_kind}",
             f"  errors     : {len(self.errors)}",
             f"  warnings   : {len(self.warnings)}",
         ]

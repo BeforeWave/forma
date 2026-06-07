@@ -1,4 +1,5 @@
 {
+  "bundle_kind": "plan-first-workflow",
   "emitted_skills": {
     "flow": {
       "directory": "backend-plan-first-showhand",
@@ -26,15 +27,15 @@
       "name": "backend-plan-first-plan-issue"
     }
   },
-  "format": "forma-suite-manifest-v1",
-  "generated_at": "2026-06-07T03:12:49Z",
+  "format": "forma-bundle-manifest-v1",
+  "generated_at": "2026-06-07T13:13:07Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.0"
   },
   "generator_version": "0.1.0",
-  "methodology_source_revision": "95b33cc",
+  "methodology_source_revision": "c45264c",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "40d339ea8fd548694dbc67c57895522e97f9cecc248054ac54b8b3eee7d6ed19",
   "methodology_version": "0.1.0",
@@ -82,6 +83,5 @@
     "pour",
     "flow"
   ],
-  "suite_kind": "plan-first",
   "target": "claude-code"
 }

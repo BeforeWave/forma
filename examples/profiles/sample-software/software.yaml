@@ -3,7 +3,7 @@ profile:
   description: Sanitized software plan-first behavior overlay derived from a downstream software workflow family.
 constraints:
   default:
-    - Treat the suite as a workflow controller, not as stack-specific coding guidance.
+    - Treat the bundle as a workflow controller, not as stack-specific coding guidance.
     - Do not enter implementation until Goal, Scope, Approach, Validation, Plan Strategy, Impact Profile, Impact Boundary, and source-of-truth needs are settled.
     - Use Impact Profile to classify the primary surface as frontend, backend, fullstack, or generic.
     - Bind completion claims to validation evidence or explicit review-only rationale.

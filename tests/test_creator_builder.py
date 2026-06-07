@@ -266,7 +266,8 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["format"] == "forma-suite-manifest-v1"
+    assert manifest["format"] == "forma-bundle-manifest-v1"
+    assert manifest["bundle_kind"] == "plan-first-workflow"
     assert manifest["generator"] == FORMA_GENERATOR
     assert manifest["generator_version"] == __version__
     assert manifest["creator_bundle"]["format"] == "forma-creator-manifest-v1"

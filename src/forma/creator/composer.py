@@ -148,11 +148,11 @@ class ComposedSkill:
 
 
 @dataclass(frozen=True)
-class ComposedSuite:
+class ComposedBundle:
     skills: Mapping[str, ComposedSkill]
 
 
-def compose_suite(methodology_dir: Path, profile: ProfileConfig) -> ComposedSuite:
+def compose_bundle(methodology_dir: Path, profile: ProfileConfig) -> ComposedBundle:
     """Return generated plan-first skill contents without writing files."""
     methodology_dir = methodology_dir.resolve()
     _require_methodology_files(methodology_dir)
@@ -187,7 +187,7 @@ def compose_suite(methodology_dir: Path, profile: ProfileConfig) -> ComposedSuit
             ),
             resources=resources,
         )
-    return ComposedSuite(skills=skills)
+    return ComposedBundle(skills=skills)
 
 
 def _require_methodology_files(methodology_dir: Path) -> None:

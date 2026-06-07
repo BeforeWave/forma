@@ -216,7 +216,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     injection = _load_injection(args.injection_json)
     creator_manifest = _load_creator_manifest(creator_root)
-    create_suite(
+    build_bundle(
         methodology_dir=methodology_dir,
         output_dir=args.output.resolve(),
         target=target,
@@ -227,7 +227,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(report.format_human())
     if not report.passed:
         return 1
-    print(f"forma creator create: wrote {args.output}")
+    print(f"forma creator build-bundle: wrote {args.output}")
     return 0
 
 
@@ -360,7 +360,7 @@ def _validate_skill_names(skill_names: Mapping[str, str]) -> None:
         seen.add(name)
 
 
-def create_suite(
+def build_bundle(
     methodology_dir: Path,
     output_dir: Path,
     target: str,
@@ -459,9 +459,9 @@ def _write_manifest(
     }
     generator = _forma_generator_metadata(creator_manifest)
     manifest = {
-        "format": "forma-suite-manifest-v1",
+        "format": "forma-bundle-manifest-v1",
         "mode": "solo",
-        "suite_kind": "plan-first",
+        "bundle_kind": "plan-first-workflow",
         "target": target,
         "generator": generator,
         "generator_version": generator["version"],

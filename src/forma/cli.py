@@ -14,9 +14,9 @@ from pathlib import Path
 
 import click
 from forma.adapters import ADAPTER_TARGETS, build_creator
-from forma.creator import create_suite
+from forma.creator import build_bundle
 from forma.explain import render_guidance
-from forma_verifier import verify as verify_suite
+from forma_verifier import verify as verify_bundle
 
 
 @click.group()
@@ -29,13 +29,13 @@ def main() -> None:
 @click.argument("path", type=click.Path(exists=True, path_type=Path))
 def verify(path: Path) -> None:
     """Verify a generated Forma workflow bundle at PATH."""
-    report = verify_suite(path)
+    report = verify_bundle(path)
     click.echo(report.format_human())
     if not report.passed:
         raise click.ClickException("verification failed")
 
 
-@main.command()
+@main.command("create-bundle")
 @click.option(
     "--profile",
     "profile_file",
@@ -64,7 +64,7 @@ def verify(path: Path) -> None:
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Methodology source path override (default: auto-detect).",
 )
-def create(
+def create_bundle_command(
     profile_file: Path,
     target_agent: str,
     output_dir: Path,
@@ -72,7 +72,7 @@ def create(
 ) -> None:
     """Compile a resolved profile into a target-specific workflow bundle."""
     try:
-        manifest = create_suite(
+        manifest = build_bundle(
             profile_file=profile_file,
             target_agent=target_agent,
             output_dir=output_dir,
@@ -80,7 +80,7 @@ def create(
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma create: wrote {output_dir}")
+    click.echo(f"forma create-bundle: wrote {output_dir}")
     click.echo(f"manifest: {manifest}")
 
 

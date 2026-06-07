@@ -67,7 +67,7 @@ generated skill resources.
 
 | Path | Role |
 |---|---|
-| `src/forma/cli.py` | Click CLI exposing `forma verify`, `forma create`, `forma build-creator`, and `forma explain` |
+| `src/forma/cli.py` | Click CLI exposing `forma verify`, `forma create-bundle`, `forma build-creator`, and `forma explain` |
 | `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
 | `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
 | `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
@@ -149,8 +149,8 @@ Code bundles.
 | `tests/test_creator_builder.py` | Codex/Claude Code creator builder coverage |
 | `tests/test_creator.py` | Layer 3 integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |
-| `tests/fixtures/valid-suite/` | Minimal valid plan-first bundle fixture |
-| `tests/fixtures/invalid-suite/` | Minimal invalid bundle fixture with targeted rule failures |
+| `tests/fixtures/valid-bundle/` | Minimal valid plan-first bundle fixture |
+| `tests/fixtures/invalid-bundle/` | Minimal invalid bundle fixture with targeted rule failures |
 
 ## Planning state per issue
 

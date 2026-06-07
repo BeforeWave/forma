@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 from typing import Iterable, Mapping, Set
 
-from forma.creator.composer import ComposedSkill, KINDS, compose_suite
+from forma.creator.composer import ComposedSkill, KINDS, compose_bundle
 from forma.creator.manifest import (
     build_manifest,
     methodology_dir_context,
@@ -18,7 +18,7 @@ from forma_verifier import verify
 TARGETS = ("codex", "claude-code")
 
 
-def create_suite(
+def build_bundle(
     profile_file: Path,
     output_dir: Path,
     target_agent: str,
@@ -28,15 +28,15 @@ def create_suite(
     _assert_target(target_agent)
     with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
         profile = load_profile(profile_file)
-        suite = compose_suite(resolved_methodology_dir, profile)
+        bundle = compose_bundle(resolved_methodology_dir, profile)
         manifest = build_manifest(
             methodology_dir=resolved_methodology_dir,
             profile=profile,
             target_agent=target_agent,
         )
-        emit_suite(
+        emit_bundle(
             output_dir=output_dir,
-            skills=suite.skills,
+            skills=bundle.skills,
             manifest=manifest,
             profile=profile,
             target_agent=target_agent,
@@ -47,7 +47,7 @@ def create_suite(
     return output_dir / ".forma-manifest.json"
 
 
-def emit_suite(
+def emit_bundle(
     output_dir: Path,
     skills: Mapping[str, ComposedSkill],
     manifest: Mapping[str, object],

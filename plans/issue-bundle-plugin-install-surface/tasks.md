@@ -1,4 +1,4 @@
-- [ ] [bundle-terminology-contract] Rename suite/create contracts to bundle contracts across Layer 3, Layer 1, Layer 2, manifests, and tests
+- [x] [bundle-terminology-contract] Rename suite/create contracts to bundle contracts across Layer 3, Layer 1, Layer 2, manifests, and tests
 Accept: Task Type=step; public API names, manifest fields, verifier reports, test fixtures, and source creator output use bundle terminology with no old suite compatibility path
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py tests/test_verifier.py tests/test_layer_1_dogfood.py
 Validate: uv run --extra dev forma verify source/skill-creator/

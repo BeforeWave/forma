@@ -12,7 +12,7 @@ from forma_verifier.rules import (
     ALL_RULES,
     PLAN_FIRST_KINDS,
     SkillFile,
-    SuiteContext,
+    BundleContext,
     plan_first_kind_from_name,
     parse_frontmatter,
 )
@@ -41,28 +41,28 @@ def discover_skills(root: Path) -> List[SkillFile]:
     return skills
 
 
-def classify_suite(root: Path, skills: List[SkillFile], manifest: Dict[str, object]) -> str:
-    """Classify the suite: plan-first-suite, creator-skill, or unknown.
+def classify_bundle(root: Path, skills: List[SkillFile], manifest: Dict[str, object]) -> str:
+    """Classify the bundle: plan-first-bundle, creator-skill, or unknown.
 
     A manifest with emitted skills is authoritative and supports custom
     installable names. Without a manifest, if any skill's parent directory
     matches a plan-first kind (shape/gauge/seal/pour/flow) or the default
     installable Forma stage names (forma-shape/forma-gauge/forma-seal/
-    forma-pour/forma-flow), the suite is a plan-first-suite. Otherwise a
+    forma-pour/forma-flow), the bundle is a plan-first-bundle. Otherwise a
     single SKILL.md is treated as a creator-skill; anything else is unknown.
     """
-    if manifest.get("suite_kind") == "plan-first" or isinstance(
+    if manifest.get("bundle_kind") == "plan-first-workflow" or isinstance(
         manifest.get("emitted_skills"), dict
     ):
-        return "plan-first-suite"
+        return "plan-first-bundle"
     for s in skills:
         if plan_first_kind_from_name(s.parent_dir_name) is not None:
-            return "plan-first-suite"
+            return "plan-first-bundle"
     # Also: if root itself is a plan-first kind directory and contains SKILL.md.
     if plan_first_kind_from_name(root.name) is not None and any(
         s.parent_dir_name == root.name for s in skills
     ):
-        return "plan-first-suite"
+        return "plan-first-bundle"
     if len(skills) == 1:
         return "creator-skill"
     return "unknown"
@@ -86,27 +86,27 @@ def verify(path: Union[str, Path]) -> Report:
     """Verify a workflow bundle at `path`. Returns a Report (errors + warnings)."""
     root = Path(path).resolve()
     if not root.exists():
-        report = Report(suite_path=str(root), suite_kind="unknown")
+        report = Report(bundle_path=str(root), bundle_kind="unknown")
         report.results.append(RuleResult(
             "R000", "", "error", f"path does not exist: {root}"
         ))
         return report
     skills = discover_skills(root)
     if not skills:
-        report = Report(suite_path=str(root), suite_kind="unknown")
+        report = Report(bundle_path=str(root), bundle_kind="unknown")
         report.results.append(RuleResult(
             "R000", "", "error", "no SKILL.md files found in path"
         ))
         return report
     manifest = load_manifest(root)
-    suite_kind = classify_suite(root, skills, manifest)
-    ctx = SuiteContext(
+    bundle_kind = classify_bundle(root, skills, manifest)
+    ctx = BundleContext(
         root=root,
         skills=skills,
-        suite_kind=suite_kind,
+        bundle_kind=bundle_kind,
         manifest=manifest,
     )
-    report = Report(suite_path=str(root), suite_kind=suite_kind)
+    report = Report(bundle_path=str(root), bundle_kind=bundle_kind)
     for skill in skills:
         for rule in ALL_RULES:
             report.results.extend(rule(skill, ctx))

@@ -71,9 +71,9 @@ def build_manifest(
         if stage.enabled
     }
     manifest: Dict[str, object] = {
-        "format": "forma-suite-manifest-v1",
+        "format": "forma-bundle-manifest-v1",
         "mode": "solo",
-        "suite_kind": "plan-first",
+        "bundle_kind": "plan-first-workflow",
         "target": target_agent,
         "methodology_version": METHODOLOGY_VERSION,
         "methodology_source_revision": _git_short_sha(methodology_dir),

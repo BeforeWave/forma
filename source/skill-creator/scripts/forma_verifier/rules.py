@@ -1,6 +1,6 @@
 """Verifier rules — structural + methodology, stdlib-only.
 
-Each rule is a function taking (SkillFile, SuiteContext) and returning a list of
+Each rule is a function taking (SkillFile, BundleContext) and returning a list of
 RuleResult. The runner walks all SKILL.md files and applies every rule from
 ALL_RULES in order.
 """
@@ -73,22 +73,22 @@ def parse_frontmatter(text: str) -> Tuple[Dict[str, object], str]:
     return (fm, body)
 
 
-# ----- Skill / suite data model -----
+# ----- Skill / bundle data model -----
 
 @dataclass
 class SkillFile:
     path: Path
-    relative_path: str  # relative to suite root, posix-style
+    relative_path: str  # relative to bundle root, posix-style
     parent_dir_name: str
     frontmatter: Dict[str, object]
     body: str
 
 
 @dataclass
-class SuiteContext:
+class BundleContext:
     root: Path
     skills: List[SkillFile]
-    suite_kind: str  # "plan-first-suite" | "creator-skill" | "unknown"
+    bundle_kind: str  # "plan-first-bundle" | "creator-skill" | "unknown"
     manifest: Mapping[str, object]
 
 
@@ -105,7 +105,7 @@ def plan_first_kind_from_name(value: object) -> Optional[str]:
     return None
 
 
-def skill_kind(skill: SkillFile, ctx: SuiteContext | None = None) -> Optional[str]:
+def skill_kind(skill: SkillFile, ctx: BundleContext | None = None) -> Optional[str]:
     """Identify which plan-first kind this skill represents, if any.
 
     Detection order: frontmatter name suffix, then parent directory name.
@@ -147,7 +147,7 @@ CROSS_SKILL_RE = re.compile(r"\.\./[A-Za-z0-9._-]+/(scripts|references)")
 
 # ----- Structural rules (apply to all bundles) -----
 
-def check_frontmatter_valid(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_frontmatter_valid(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     results: List[RuleResult] = []
     if not skill.frontmatter:
         results.append(RuleResult(
@@ -170,7 +170,7 @@ def check_frontmatter_valid(skill: SkillFile, ctx: SuiteContext) -> List[RuleRes
     return results
 
 
-def check_name_kebab_case(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_name_kebab_case(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     name = skill.frontmatter.get("name", "")
     if not isinstance(name, str) or not name:
         return []  # R001 will have caught this already
@@ -182,9 +182,9 @@ def check_name_kebab_case(skill: SkillFile, ctx: SuiteContext) -> List[RuleResul
     return []
 
 
-def check_name_kind_match(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_name_kind_match(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     """For Plan-First bundle skills, name must equal the parent skill directory."""
-    if ctx.suite_kind != "plan-first-suite":
+    if ctx.bundle_kind != "plan-first-bundle":
         return []
     emitted = ctx.manifest.get("emitted_skills")
     if isinstance(emitted, dict):
@@ -216,7 +216,7 @@ def check_name_kind_match(skill: SkillFile, ctx: SuiteContext) -> List[RuleResul
     return []
 
 
-def check_body_has_sections(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_body_has_sections(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     if not SECTION_H2_RE.search(skill.body):
         return [RuleResult(
             "R003", skill.relative_path, "error",
@@ -225,7 +225,7 @@ def check_body_has_sections(skill: SkillFile, ctx: SuiteContext) -> List[RuleRes
     return []
 
 
-def check_references_resolve(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_references_resolve(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     results: List[RuleResult] = []
     seen: set = set()
     for match in REFERENCE_INLINE_RE.finditer(skill.body):
@@ -242,7 +242,7 @@ def check_references_resolve(skill: SkillFile, ctx: SuiteContext) -> List[RuleRe
     return results
 
 
-def check_bundled_paths_resolve(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_bundled_paths_resolve(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     results: List[RuleResult] = []
     seen: set = set()
     for match in BUNDLED_PATH_RE.finditer(skill.body):
@@ -259,7 +259,7 @@ def check_bundled_paths_resolve(skill: SkillFile, ctx: SuiteContext) -> List[Rul
     return results
 
 
-def check_no_cross_skill_borrowing(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
+def check_no_cross_skill_borrowing(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     if CROSS_SKILL_RE.search(skill.body):
         return [RuleResult(
             "R005", skill.relative_path, "error",
@@ -276,9 +276,9 @@ def _make_keyword_rule(
     target_kind: str,
     required_keywords: List[object],
     title: str,
-) -> Callable[[SkillFile, SuiteContext], List[RuleResult]]:
-    def check(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
-        if ctx.suite_kind != "plan-first-suite":
+) -> Callable[[SkillFile, BundleContext], List[RuleResult]]:
+    def check(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
+        if ctx.bundle_kind != "plan-first-bundle":
             return []
         if skill_kind(skill, ctx) != target_kind:
             return []
@@ -344,8 +344,8 @@ check_pour_methodology = _make_keyword_rule(
 
 # ----- Conditional overlay rules (mechanism-only; business routes are opaque) -----
 
-def check_conditional_overlays(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
-    if ctx.suite_kind != "plan-first-suite":
+def check_conditional_overlays(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
+    if ctx.bundle_kind != "plan-first-bundle":
         return []
     raw = ctx.manifest.get("conditional_overlays")
     if raw is None:
@@ -411,7 +411,7 @@ def check_conditional_overlays(skill: SkillFile, ctx: SuiteContext) -> List[Rule
     return results
 
 
-def _is_first_skill(skill: SkillFile, ctx: SuiteContext) -> bool:
+def _is_first_skill(skill: SkillFile, ctx: BundleContext) -> bool:
     first = min((item.relative_path for item in ctx.skills), default="")
     return skill.relative_path == first
 
@@ -576,8 +576,8 @@ def _h2_sections(body: str) -> Dict[str, str]:
 
 # ----- Target rules (apply when .forma-manifest.json records a target) -----
 
-def check_target_metadata(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
-    if ctx.suite_kind != "plan-first-suite":
+def check_target_metadata(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
+    if ctx.bundle_kind != "plan-first-bundle":
         return []
     kind = skill_kind(skill, ctx)
     if kind is None:
@@ -634,7 +634,7 @@ def _check_claude_code_metadata(skill: SkillFile) -> List[RuleResult]:
 
 # ----- Rule registry -----
 
-ALL_RULES: List[Callable[[SkillFile, SuiteContext], List[RuleResult]]] = [
+ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
     check_frontmatter_valid,
     check_name_kebab_case,
     check_name_kind_match,
