@@ -28,8 +28,11 @@ Use these rules for plan-finalization skills in projects that follow the plan-fi
 - `finalize-plan` must commit the current issue's `plan.md` and `tasks.md` before execution begins.
 - The planning commit must contain only the current issue's planning files, not implementation changes.
 - Keep `plan.md` concise and decision-complete.
+- `plan.md` must preserve the execution contract in Scope, Approach, Constraints, Acceptance Criteria, Validation, and task entries instead of leaving concrete paths, target support, artifact state, compatibility policy, mutation boundaries, or non-goals only in chat history.
 - For generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans, `plan.md` must preserve the settled Artifact/Evidence Boundary either as its own section or as explicit Scope, Approach, Constraints, Acceptance Criteria, Validation, and task entries.
 - For behavior-changing work, capture test expectations in acceptance criteria and validation instead of creating separate "implement" and "then test" tasks unless test work is itself the standalone deliverable.
+- For behavior-changing work, each task `Accept:` line must state the concrete success behavior, and each `Validate:` line must prove a primary success path, required failure path, or explicit non-goal.
+- A task is not execution-ready if its `Validate:` line could pass while the main promised behavior is absent.
 - In `plan.md`, use `## Validation` for shared task-safe checks written as `Check:` / `Command:` blocks.
 - In `plan.md`, use `## Final Validation` for fenced `sh` commands that only run when the last task is completed.
 - When writing copyable shell cleanup commands, avoid shell-reserved variable names such as zsh's read-only `status`; prefer portable names such as `exit_status`.

@@ -20,6 +20,26 @@ Deviations From Plan:
 Follow-ups:
 - None.
 
+## Task 4: plan-lock-sharpness-contract
+
+Outcome:
+- Added execution-contract completeness gates to `forma-plan` methodology and fail-closed finalization rules to `forma-lock`, then refreshed committed generated examples that embed those canonical references.
+
+Decision Notes:
+- The task's generated-surface validation depends on the default profile from task 2/3; the same canonical methodology changes also affect existing committed sample generated outputs, so those baselines were regenerated to keep drift tests meaningful.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.
+
 ## Task 2: cli-create-plugin-install
 
 Outcome:

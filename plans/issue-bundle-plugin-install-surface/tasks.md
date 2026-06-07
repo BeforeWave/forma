@@ -22,7 +22,7 @@ Validate: tmp_dir=$(mktemp -d); uv run --extra dev forma create-bundle --target 
 Depends: cli-create-plugin-install
 Constraint: put product-owned default profile source at `profiles/default/forma-plan-first.yaml`, not `examples/profiles/`; keep downstream-specific constraints out of the profile.
 
-- [ ] [plan-lock-sharpness-contract] Encode sharp planning gates into the default `forma-plan` and `forma-lock` workflow
+- [x] [plan-lock-sharpness-contract] Encode sharp planning gates into the default `forma-plan` and `forma-lock` workflow
 Accept: Task Type=step; `source/methodology/resources/shape/references/plan-issue-rules.md` adds `## Execution Contract Completeness`, `source/methodology/fragments/seal/entry-gate.md` adds concrete fail-closed handoff rules, `source/methodology/resources/shared/references/planning-rules.md` adds execution-ready task validation rules, and generated `forma-plan` / `forma-lock` surfaces preserve those rules
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_layer_1_dogfood.py
 Validate: rg -n "## Execution Contract Completeness" source/methodology/resources/shape/references/plan-issue-rules.md
