@@ -8,7 +8,7 @@
 
 ### `forma verify <path>`
 
-验证生成的 workflow bundle 或 `forma-creator` bundle：
+验证生成的 skill bundle 或 `forma-creator` bundle：
 
 ```bash
 forma verify /tmp/backend-plan-first-codex
@@ -20,7 +20,7 @@ forma verify /tmp/backend-plan-first-codex
 
 ### `forma create-bundle`
 
-把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 workflow bundle：
+把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 skill bundle：
 
 ```bash
 forma create-bundle --target codex --output /tmp/forma-codex-bundle
@@ -33,7 +33,7 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 
 可选输入：
 
-- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出无注入的通用 Plan-First workflow，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
+- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出无注入的通用 Plan-First skills，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
 开发时可选覆盖：
 
@@ -81,7 +81,7 @@ forma build-creator \
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
-每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 workflow bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 workflow bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
 
 ### `forma install`
 
@@ -118,9 +118,9 @@ forma explain temporary-injection --format json --target codex
 
 ## 安装目标
 
-Forma 生成 target 专用 bundle 和 Codex plugin。`forma install` 会把 verified 本地产物写到对应位置：
+Forma 生成 target 专用 skill bundle。Codex plugin 是同一套 skills 的 Codex 安装形态。`forma install` 会把 verified 本地产物写到对应位置：
 
-| 目标 | 个人安装 | 项目/团队安装 |
+| 目标 | 个人安装 | 项目安装 |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
@@ -158,24 +158,22 @@ stages:
 
 ### 一次性 creator 命名
 
-通过 `forma-creator` 现场生成时，用一次性注入里的 `rename`：
+通过 `forma-creator` 现场生成时，不是让用户给 Agent 一个 JSON 文件。用户应该用自然语言告诉 Agent 命名意图；creator 再分类这条要求，并在内部写 temporary injection。
 
-```json
-{
-  "rename": {
-    "prefix": "backend-plan-first",
-    "stages": {
-      "shape": "backend-plan-first-plan-issue",
-      "flow": "backend-plan-first-showhand"
-    }
-  }
-}
+示例话术：
+
+```text
+使用 forma-creator 生成这套 workflow，技能名前缀用 `backend-plan-first`。
+planning skill 命名为 `backend-plan-first-plan-issue`，showhand skill 命名为
+`backend-plan-first-showhand`。其他技能名从前缀推导。
+生成前先展示拟定的名字，然后验证生成 bundle。
 ```
 
 规则：
 
-- `rename.prefix` 会生成 `<prefix>-shape`、`<prefix>-gauge`、`<prefix>-seal`、`<prefix>-pour`、`<prefix>-flow`；
-- `rename.stages` 可以覆盖单个阶段的完整技能名；
+- creator 生成的 injection 应使用 `rename.prefix` 生成 `<prefix>-plan`、`<prefix>-ground`、`<prefix>-lock`、`<prefix>-execute`、`<prefix>-showhand`；
+- creator 生成的 injection 只在覆盖单个阶段完整技能名时使用 `rename.stages`；
+- 内部 injection map 使用内部阶段键 `shape`、`gauge`、`seal`、`pour`、`flow`，不要用 `forma-plan` 或 `forma-showhand` 这类对外 skill id 当键；
 - 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
 - creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，现场命名进 `rename`。
 
@@ -199,11 +197,11 @@ git diff --check
 
 ## 源码结构
 
-- `source/methodology/`：生成 `shape`、`gauge`、`seal`、`pour`、`flow` 的标准 Plan-First 方法。
+- `source/methodology/`：生成默认 Plan-First 工作流技能的标准方法。
 - `source/skill-creator/`：自包含的 `forma-creator` 源码，包含 references、creator script 和 verifier。
 - `src/forma/`：Python CLI、profile compiler、runtime asset resolver 和 target emitters。
 - `profiles/forma-self/`：Forma 管理本仓库时使用的 profile。
-- `examples/profiles/`：经过脱敏的 profile 示例。
+- `examples/profiles/`：profile 示例。
 - `examples/generated/`：已提交的生成基线，用于检查漂移。
 - `tests/`：verifier、creator、runtime asset、profile 和生成基线测试。
 

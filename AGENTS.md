@@ -20,7 +20,7 @@ Forma is a source workspace for Plan-First skill-bundle and Codex plugin creatio
 - Keep Layer 1 temporary injection generation standards in `source/skill-creator/`. Natural-language constraints must be classified before writing injection JSON; do not put broad root-doc or generated-baseline reads into `constraints.default`.
 - Use `forma explain profile` or `forma explain temporary-injection` when an external agent needs profile authoring guidance without inspecting Forma source files.
 - Keep pip/pipx installed CLI behavior independent of the source checkout. Runtime guidance, default methodology, and default creator source must be available through packaged `forma.assets`; source paths are overrides only.
-- Keep Forma's committed profile examples sanitized. Real downstream profiles with organization-specific workflow commands or private constraints belong in their owning repositories.
+- Keep Forma's committed profile examples generic. Real downstream profiles with organization-specific workflow commands or private constraints belong in their owning repositories.
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.
 - Use `forma create-bundle --target codex|claude-code --output <dir>` for local skill-bundle output.
 - Use `forma create-plugin --target codex --output <dir>` for Codex plugin output. Claude Code plugin output is not supported.

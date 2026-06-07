@@ -22,7 +22,20 @@ from forma_verifier import verify
 
 
 KINDS = ("shape", "gauge", "seal", "pour", "flow")
-DEFAULT_SKILL_PREFIX = "forma"
+DEFAULT_SKILL_NAMES: Mapping[str, str] = {
+    "shape": "forma-plan",
+    "gauge": "forma-ground",
+    "seal": "forma-lock",
+    "pour": "forma-execute",
+    "flow": "forma-showhand",
+}
+DEFAULT_PREFIX_SUFFIXES: Mapping[str, str] = {
+    "shape": "plan",
+    "gauge": "ground",
+    "seal": "lock",
+    "pour": "execute",
+    "flow": "showhand",
+}
 FORMA_GENERATOR_NAME = "forma"
 FORMA_GENERATOR_VERSION_FALLBACK = "0+unknown"
 FORMA_GENERATOR_REPOSITORY_URL = "https://github.com/BeforeWave/forma"
@@ -510,7 +523,7 @@ def build_plugin(
 
 def _skill_names(injection: Mapping[str, Any]) -> dict[str, str]:
     rename = injection.get("rename", {})
-    prefix = DEFAULT_SKILL_PREFIX
+    prefix: str | None = None
     overrides: Mapping[str, Any] = {}
     if isinstance(rename, dict):
         raw_prefix = rename.get("prefix")
@@ -519,10 +532,15 @@ def _skill_names(injection: Mapping[str, Any]) -> dict[str, str]:
         raw_overrides = rename.get("stages", {})
         if isinstance(raw_overrides, dict):
             overrides = raw_overrides
-    return {
-        kind: str(overrides.get(kind) or f"{prefix}-{kind}").strip()
-        for kind in KINDS
-    }
+    names: dict[str, str] = {}
+    for kind in KINDS:
+        if overrides.get(kind):
+            names[kind] = str(overrides[kind]).strip()
+        elif prefix:
+            names[kind] = f"{prefix}-{DEFAULT_PREFIX_SUFFIXES[kind]}"
+        else:
+            names[kind] = DEFAULT_SKILL_NAMES[kind]
+    return names
 
 
 def _skill_descriptions(

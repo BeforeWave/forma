@@ -9,7 +9,7 @@ This page is the command reference for Forma. For a first run, start with
 
 ### `forma verify <path>`
 
-Verifies a generated workflow bundle or a `forma-creator` bundle:
+Verifies a generated skill bundle or a `forma-creator` bundle:
 
 ```bash
 forma verify /tmp/backend-plan-first-codex
@@ -24,7 +24,7 @@ verification boundary.
 ### `forma create-bundle`
 
 Composes the canonical methodology and a resolved tracked profile into a
-target-specific workflow bundle:
+target-specific skill bundle:
 
 ```bash
 forma create-bundle --target codex --output /tmp/forma-codex-bundle
@@ -38,7 +38,7 @@ Required options:
 Optional inputs:
 
 - `--profile <file>`: top-level tracked profile. If omitted, Forma emits the
-  generic no-injection Plan-First workflow with `forma-plan`,
+  generic no-injection Plan-First skills with `forma-plan`,
   `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`.
 
 Optional development override:
@@ -49,7 +49,7 @@ Profile format is documented in [Profile Schema](./profile-schema.md).
 
 ### `forma create-plugin`
 
-Builds a local plugin artifact from a profile. Currently plugin output is
+Builds a local plugin output from a profile. Currently plugin output is
 Codex-only:
 
 ```bash
@@ -94,9 +94,9 @@ Optional development override:
 - `--source <dir>`: use a source `forma-creator` directory instead of packaged runtime assets.
 
 Each generated `forma-creator` has a fixed target contract. A Codex creator
-generates Codex-shaped workflow bundles and can emit Codex plugin artifacts
-when the fixed target contract allows it. A Claude Code creator generates
-Claude Code-shaped workflow bundles only. See [Forma Creator](./forma-creator.md)
+generates Codex-shaped skill bundles and can emit Codex plugin outputs when
+the fixed target contract allows it. A Claude Code creator generates Claude
+Code-shaped skill bundles only. See [Forma Creator](./forma-creator.md)
 for the agent-side generation path.
 
 ### `forma install`
@@ -111,7 +111,7 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 
 Required arguments and options:
 
-- `PATH`: local artifact path; URL download is intentionally not part of this
+- `PATH`: local output path; URL download is intentionally not part of this
   command.
 - `--target codex|claude-code`
 - `--scope user|project`
@@ -119,7 +119,7 @@ Required arguments and options:
 Overwrite behavior:
 
 - Without `--replace`, existing destination directories are rejected.
-- With `--replace`, Forma replaces only the destination artifacts selected by
+- With `--replace`, Forma replaces only the destination outputs selected by
   the verified source.
 - Claude Code plugin install attempts fail clearly.
 
@@ -138,10 +138,11 @@ injection.
 
 ## Install Targets
 
-Forma emits target-specific bundles and Codex plugins. `forma install` writes
-verified local artifacts into the matching target location:
+Forma emits target-specific skill bundles. A Codex plugin is the Codex install
+shape for the same skills. `forma install` writes verified local outputs into
+the matching target location:
 
-| Target | Personal install | Project/team install |
+| Target | Personal install | Project install |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
@@ -181,25 +182,24 @@ Rules:
 
 ### One-off creator names
 
-For agent-side generation through `forma-creator`, use `rename` in the one-off
-injection:
+For agent-side generation through `forma-creator`, do not hand the agent a JSON
+file. Tell the agent the naming intent in natural language. The creator should
+classify that request and write the temporary injection internally.
 
-```json
-{
-  "rename": {
-    "prefix": "backend-plan-first",
-    "stages": {
-      "shape": "backend-plan-first-plan-issue",
-      "flow": "backend-plan-first-showhand"
-    }
-  }
-}
+Example prompt:
+
+```text
+Use forma-creator to generate this workflow with the prefix `backend-plan-first`.
+Name the planning skill `backend-plan-first-plan-issue` and the showhand skill
+`backend-plan-first-showhand`. Derive the other skill names from the prefix.
+Show the proposed names before generation, then verify the generated bundle.
 ```
 
 Rules:
 
-- `rename.prefix` produces `<prefix>-shape`, `<prefix>-gauge`, `<prefix>-seal`, `<prefix>-pour`, and `<prefix>-flow`.
-- `rename.stages` overrides individual stage names.
+- The creator-generated injection should use `rename.prefix` to produce `<prefix>-plan`, `<prefix>-ground`, `<prefix>-lock`, `<prefix>-execute`, and `<prefix>-showhand`.
+- The creator-generated injection should use `rename.stages` only when overriding individual stage names.
+- Internal injection maps use internal stage keys (`shape`, `gauge`, `seal`, `pour`, `flow`), not public skill ids such as `forma-plan` or `forma-showhand`.
 - Names must be unique kebab-case strings and must not be bare stage names like `shape` or `flow`.
 - Creator injections do not accept profile-style `stages.shape.name`. Durable names belong in profiles; one-off names belong in `rename`.
 
@@ -224,11 +224,11 @@ git diff --check
 
 ## Source Layout
 
-- `source/methodology/`: canonical plan-first methodology used to emit `shape`, `gauge`, `seal`, `pour`, and `flow`.
+- `source/methodology/`: canonical plan-first methodology used to emit the default workflow skills.
 - `source/skill-creator/`: self-contained `forma-creator` source with bundled references, creator script, and verifier.
 - `src/forma/`: Python CLI, profile compiler, runtime asset resolver, and target emitters.
 - `profiles/forma-self/`: Forma-owned profile stack for this repository.
-- `examples/profiles/`: sanitized profile examples.
+- `examples/profiles/`: profile examples.
 - `examples/generated/`: committed generated baselines for drift checks.
 - `tests/`: verifier, creator, runtime asset, profile, and generated-baseline tests.
 
@@ -240,7 +240,7 @@ Packaged Forma commands use `forma.assets` runtime assets by default. Source
 paths are development overrides only:
 
 - `forma create-bundle` and `forma create-plugin` use packaged methodology unless `--methodology` is provided.
-- `forma install` only installs verified local artifacts; it does not download URLs.
+- `forma install` only installs verified local outputs; it does not download URLs.
 - `forma build-creator` uses packaged creator source unless `--source` is provided.
 - `forma explain` renders canonical guidance from packaged references.
 
@@ -250,7 +250,7 @@ checkout.
 ## Related Docs
 
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, and proof.
-- [Skill Bundle](./skill-bundle.md): generated artifact layout and manifest.
+- [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
 - [Forma Creator](./forma-creator.md): agent-side one-off generation.
 - [Verifier](./verifier.md): verification checks and limits.

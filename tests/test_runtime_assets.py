@@ -33,6 +33,8 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
         "source/skill-creator/references/profile-authoring-principles.md"
         in profile.stdout
     )
+    assert "Stage Key Boundary" in profile.stdout
+    assert "Generated public skill ids" in profile.stdout
 
     injection = _run_installed(
         ["explain", "temporary-injection", "--format", "json", "--target", "codex"],
@@ -43,6 +45,7 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     assert payload["topic"] == "temporary-injection"
     assert payload["target"] == "codex"
     assert "constraints.default" in payload["markdown"]
+    assert "Stage Key Boundary" in payload["markdown"]
 
     generated = tmp_path / "generated"
     _run_installed(

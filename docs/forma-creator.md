@@ -2,24 +2,24 @@
 
 Chinese version: [forma-creator.zh-CN.md](./forma-creator.zh-CN.md)
 
-`forma-creator` is Forma's agent-side generation entrypoint.
+`forma-creator` is Forma's agent-side harness generation entrypoint.
 
-Use it when you want to try a workflow idea without first writing a durable
-profile YAML file. It helps an agent turn reviewed natural-language workflow
-constraints into temporary injection JSON, generate a target-specific artifact,
-and verify that artifact before handoff.
+Use it when a concrete project needs a workflow harness before you are ready to
+write durable profile YAML. It helps an agent turn reviewed natural-language
+project concerns into temporary injection JSON, generate a target-specific
+workflow bundle or Codex plugin, and verify the output before handoff.
 
 ## How It Differs From `forma create-bundle`
 
 | Path | Best for | Input | Output |
 |---|---|---|---|
-| `forma create-bundle` | Durable team or project workflow rules. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
-| `forma-creator` | One-off or experimental workflow ideas. | Reviewed natural-language constraints classified into temporary injection JSON. | One verified artifact for the fixed target. |
+| `forma create-bundle` | Durable project workflow rules. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
+| `forma-creator` | Shape a project-specific harness in the moment. | Reviewed natural-language concerns classified into temporary injection JSON. | Verified workflow output for the fixed target. |
 
 `forma create-bundle` is the deterministic profile path.
 
-`forma-creator` is the try-it-now path. It is useful before a team knows which
-rules deserve to become durable profile source.
+`forma-creator` is the try-it-now path. It is useful before a project knows
+which rules deserve to become durable profile source.
 
 ## Fixed Target Contract
 
@@ -30,28 +30,28 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
 ```
 
-A Codex creator generates Codex-shaped workflow bundles and can also generate a
-Codex plugin artifact when the user asks for plugin output. A Claude Code
-creator generates Claude Code-shaped workflow bundles only. Do not use a
+A Codex creator generates Codex-shaped skill bundles and can also generate a
+Codex plugin output when the user asks for plugin output. A Claude Code
+creator generates Claude Code-shaped skill bundles only. Do not use a
 creator built for one target to generate a bundle for another target.
 
 The creator reports output paths and install hints only. It does not install
-the generated artifact into user or project skill roots.
+the generated output into user or project skill roots.
 
 ## Temporary Injection Lifecycle
 
-Temporary injection is local to one generated artifact.
+Temporary injection is local to one generated output.
 
 The normal lifecycle is:
 
-1. The user describes workflow constraints.
+1. The user describes project-specific workflow concerns.
 2. The agent classifies each constraint before writing JSON.
 3. The creator writes a temporary injection JSON file.
-4. The creator generates the bundle or Codex plugin artifact allowed by its
+4. The creator generates the skill bundle or Codex plugin output allowed by its
    fixed target contract.
 5. The creator runs the bundled verifier.
-6. The user or receiving agent installs the verified artifact and tries the
-   workflow.
+6. The user or receiving agent installs the verified output and tries the
+   generated skills.
 7. Only useful repeated rules are promoted into a tracked profile.
 
 Temporary injection is not a profile. It should not be treated as reviewed team
@@ -60,6 +60,9 @@ policy unless the user explicitly promotes it into profile source.
 ## Classification Rules
 
 The creator should classify constraints by the narrowest correct target:
+
+Temporary injection maps always use internal stage keys (`shape`, `gauge`,
+`seal`, `pour`, `flow`), not generated public skill ids such as `forma-plan`.
 
 | Target | Use for |
 |---|---|
@@ -73,7 +76,8 @@ The creator should classify constraints by the narrowest correct target:
 | `resources` | Explicit references, scripts, or support files selected by the workflow. |
 
 Do not copy README, AGENTS, issue text, or governance docs wholesale into
-temporary injection. Extract workflow rules and place them where they belong.
+temporary injection. Extract project-specific constraints and place them where
+they belong.
 
 ## Source Adapters
 
@@ -89,7 +93,7 @@ temporary injection explicitly selects them.
 Promote temporary injection into a tracked profile when the rule is:
 
 - repeated across runs;
-- reviewed by the owning team or project;
+- reviewed by the owning project;
 - safe to share as durable source;
 - specific enough to place in a stage constraint, resource, validation command,
   or conditional overlay.
@@ -100,8 +104,8 @@ temporary local paths.
 ## Verification
 
 `forma-creator` should run verification before reporting success. Verification
-checks generated artifact structure and methodology rules, but it does not
-prove that the injected policy is a good product decision.
+checks generated output structure and methodology rules, but it does not prove
+that the injected policy is a good project decision.
 
 See [Verifier](./verifier.md) for the boundary.
 

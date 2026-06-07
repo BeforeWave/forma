@@ -46,10 +46,11 @@ def classify_bundle(root: Path, skills: List[SkillFile], manifest: Dict[str, obj
 
     A manifest with emitted skills is authoritative and supports custom
     installable names. Without a manifest, if any skill's parent directory
-    matches a plan-first kind (shape/gauge/seal/pour/flow) or the default
-    installable Forma stage names (forma-shape/forma-gauge/forma-seal/
-    forma-pour/forma-flow), the bundle is a plan-first-bundle. Otherwise a
-    single SKILL.md is treated as a creator-skill; anything else is unknown.
+    matches a plan-first kind (shape/gauge/seal/pour/flow), the current
+    default installable Forma stage names (forma-plan/forma-ground/
+    forma-lock/forma-execute/forma-showhand), or legacy installable names, the
+    bundle is a plan-first-bundle. Otherwise a single SKILL.md is treated as a
+    creator-skill; anything else is unknown.
     """
     if manifest.get("bundle_kind") == "plan-first-workflow" or isinstance(
         manifest.get("emitted_skills"), dict

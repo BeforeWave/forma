@@ -2,9 +2,9 @@
 
 英文版：[profile-schema.md](./profile-schema.md)
 
-Profile 是长期工作流源码。
+Profile 是 Layer 0 源码：项目长期原则和边界。
 
-Profile 描述 Forma 如何把标准方法适配到某个项目、团队、路线、语言或命名约定。它是严格 YAML：未知顶层键或未知嵌套键会被拒绝，避免错误静默改变 workflow contract。
+Profile 描述 Forma 如何把标准 Plan-First 方法适配到某个项目、路线、语言或 target 命名约定。它是严格 YAML：未知顶层键或未知嵌套键会被拒绝，避免错误静默改变生成出来的 workflow contract。
 
 ## 最小 Profile
 
@@ -14,7 +14,7 @@ profile:
   description: Minimal docs workflow profile.
 bundle:
   name: sample-docs-workflow
-  description: Documentation workflow bundle.
+  description: Documentation Plan-First skills.
 constraints:
   default:
     - Keep default rules minimal.
@@ -39,7 +39,7 @@ examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml
 | `profile` | 稳定 profile `id` 和可选的人类说明。 |
 | `includes` | 相对路径或 profile id，会先于当前文件解析。 |
 | `bundle` | 面向评审的 bundle `name` 和 `description`。 |
-| `org` | 可选的所属组织或团队名。 |
+| `org` | 可选的所属组织或项目名。 |
 | `stages` | 为各阶段设置安装名、目录名、展示名、提示词和 `enabled` 开关。 |
 | `resources` | 按阶段复制进生成技能的 `references`、`scripts` 或 `files`。 |
 | `skills` | 按阶段设置触发说明，不改变阶段语义。 |
@@ -51,7 +51,7 @@ examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml
 
 ## Includes
 
-用 `includes` 从通用到具体组合 profile：
+用 `includes` 从通用到具体组合项目原则：
 
 ```yaml
 profile:
@@ -65,7 +65,7 @@ includes:
 
 被 include 的 profiles 会先于当前 profile 解析。后面的 profile 可以按 Forma 的合并规则细化前面的字段。
 
-Includes 适合组织默认规则、开发规则、后端规则、语言规则等稳定层。不要用 includes 隐藏一次性用户指令；这种情况应该用 temporary injection。
+Includes 适合项目默认规则、开发规则、后端规则、语言规则等稳定层。不要用 includes 隐藏一次性用户指令；这种情况应该用 temporary injection。
 
 ## 阶段命名和目标展示
 
@@ -146,7 +146,7 @@ validation_commands:
     - go test ./...
 ```
 
-Validation commands 是工作流指引，不会替代 sealed plan 中的任务专用验证。
+Validation commands 是工作流指引，不会替代已锁定计划中的任务专用验证。
 
 ## Conditional Overlays
 
@@ -167,7 +167,7 @@ docs-only、migration、generated-baseline、governance、backend、cross-layer 
 
 ## Temporary Injection 和 Profile
 
-长期、稳定、需要作为源码评审的规则，用 tracked profile。
+长期、稳定、需要作为项目源码评审的规则，用 tracked profile。
 
 这些规则适合 temporary injection：
 

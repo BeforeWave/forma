@@ -2,59 +2,58 @@
 
 Chinese version: [workflow-contract.zh-CN.md](./workflow-contract.zh-CN.md)
 
-A workflow contract defines how an agent is allowed to move from demand to
-evidence, from evidence to plan, from plan to execution, and from execution to
-continuation.
+A workflow contract is the runtime shape of a generated Forma workflow. It
+defines how an agent moves from a concrete development goal to evidence, plan,
+ordered tasks, proof, and review.
 
-Forma compiles that contract into target-specific skills. The output is not a
-better prompt. It is a staged work loop with gates, boundaries, and proof
-requirements.
+Forma compiles project principles into target-specific skills. When those
+skills run, the contract becomes the harness around the agent's work.
 
 ## Practical Effect
 
 Forma does not guarantee perfect agent behavior. It gives the workflow a better
 control surface.
 
-| Prompt-only workflow | Forma workflow surface |
+| Prompt-only workflow | Forma runtime harness |
 |---|---|
 | Rules are re-explained in each conversation. | Durable rules live in profiles. |
 | Planning, grounding, and execution can blur together. | Stages separate clarification, grounding, sealing, execution, and continuation. |
 | Validation can be remembered late. | Proof expectations are written into task contracts. |
-| Continuation depends on the agent's judgment in the moment. | `flow` has explicit stop conditions. |
+| Continuation depends on the agent's judgment in the moment. | `forma-showhand` automates accepted tasks under the locked plan. |
 
 ## Contract Flow
 
-The default Forma methodology uses five stages:
+The default Forma methodology uses five public skills:
 
 ```text
-demand -> proposal -> evidence -> plan -> task -> proof -> continuation
-          shape       gauge      seal    pour    pour     flow
+goal -> proposal -> evidence -> execution contract -> ordered task -> proof
+        plan        ground     lock                 execute        review
 ```
 
 Each stage has one job:
 
-| Stage | Job | Handoff |
+| Public skill | Job | Handoff |
 |---|---|---|
-| `shape` | Clarify the demand and bound the proposal. | A settled decision gate or explicit blocked/clarifying state. |
-| `gauge` | Gather repository, spec, document, and history evidence read-only. | A grounding handoff with facts, risks, and unknowns. |
-| `seal` | Turn the settled proposal and evidence into an execution contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
-| `pour` | Execute one accepted task and record proof. | Review-ready task result with validation evidence. |
-| `flow` | Continue through accepted tasks only while the sealed plan allows it. | Completed tasks or a stop condition. |
+| `forma-plan` | Clarify the demand and bound the proposal. | A settled decision gate or explicit blocked/clarifying state. |
+| `forma-ground` | Gather repository, spec, document, and history evidence read-only. | A grounding handoff with facts, risks, and unknowns. |
+| `forma-lock` | Turn the settled proposal and evidence into an execution contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
+| `forma-execute` | Execute one accepted task and record proof. | Review-ready task result with validation evidence. |
+| `forma-showhand` | Candy skill for continuous `forma-execute` after review is done and the plan is fixed. | Completed accepted tasks, or the first blocker that prevents safe continuation. |
 
-The stage names are defaults. Profiles can rename generated skills, but the
-contract stages remain the same.
+The public skill names are defaults. Profiles can rename generated skills while
+keeping the workflow semantics intact.
 
 ## Stage Permissions
 
 The contract matters because each stage has different permissions.
 
-| Stage | Allowed | Not allowed |
+| Public skill | Allowed | Not allowed |
 |---|---|---|
-| `shape` | Clarify goal, scope, approach, validation, plan strategy, and boundaries. | Inspect the repository, write plan files, or implement. |
-| `gauge` | Read files, inspect repository state, and produce grounding. | Write files, run mutating commands, or decide final execution tasks. |
-| `seal` | Write the accepted plan and task contract after required decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
-| `pour` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue without review gates. |
-| `flow` | Resume the sealed task list when continuation is allowed. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
+| `forma-plan` | Clarify goal, scope, approach, validation, plan strategy, and boundaries. | Inspect the repository, write plan files, or implement. |
+| `forma-ground` | Read files, inspect repository state, and produce grounding. | Write files, run mutating commands, or decide final execution tasks. |
+| `forma-lock` | Write the accepted plan and task contract after required decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
+| `forma-execute` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue without review gates. |
+| `forma-showhand` | Resume the locked task list and keep applying `forma-execute` task by task. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
 
 ## Small Example
 
@@ -66,13 +65,13 @@ Update the billing API behavior.
 
 A Forma workflow should make that request move through the contract:
 
-| Stage | What happens |
+| Public skill | What happens |
 |---|---|
-| `shape` | Decide whether this changes public API behavior, persistence, or compatibility expectations. |
-| `gauge` | Read the current routes, API docs, tests, and relevant prior plan or issue evidence. |
-| `seal` | Write accepted tasks with validation, such as API tests, compatibility checks, or contract review. |
-| `pour` | Implement one accepted task and run the proof required by that task. |
-| `flow` | Continue only if the sealed plan allows it; stop if a new API contract decision appears. |
+| `forma-plan` | Decide whether this changes public API behavior, persistence, or compatibility expectations. |
+| `forma-ground` | Read the current routes, API docs, tests, and relevant prior plan or issue evidence. |
+| `forma-lock` | Write accepted tasks with validation, such as API tests, compatibility checks, or contract review. |
+| `forma-execute` | Implement one accepted task and run the proof required by that task. |
+| `forma-showhand` | After review is done and the plan is fixed, continue accepted tasks until proof, validation, permission, or prerequisite state blocks progress. |
 
 ## Evidence Policy
 
@@ -86,8 +85,9 @@ Common evidence rules include:
 - validation commands and proof requirements;
 - explicit unknowns when required evidence is missing.
 
-Evidence rules belong in the stage that needs them. For example, source reading
-usually belongs in `gauge`; final task validation belongs in `seal` and `pour`.
+Evidence rules belong in the skill that needs them. For example, source reading
+usually belongs in `forma-ground`; final task validation belongs in
+`forma-lock` and `forma-execute`.
 
 ## Execution Boundaries
 
@@ -109,25 +109,27 @@ conditional overlays.
 
 Validation is not only a command list. It is the proof path for the task.
 
-`seal` should turn validation expectations into the task contract. `pour` should
-run the narrowest relevant checks first, then any shared gate required by the
-plan. `flow` should continue only while accepted tasks and proof requirements
-are still clear.
+`forma-lock` should turn validation expectations into the task contract.
+`forma-execute` should run the narrowest relevant checks first, then any shared
+gate required by the plan. `forma-showhand` repeats that accepted-task execution
+loop without asking for review after every task.
 
 If proof is missing, stale, or outside the accepted task, the contract should
 make the agent stop or ask for correction.
 
-## Continuation Rules
+## Showhand
 
-`flow` is not "keep going no matter what." It is controlled continuation.
+`forma-showhand` is the candy skill for continuous `forma-execute`. Use it when
+the plan has been reviewed, the approach is fixed, and you want the agent to
+keep driving through the accepted task list.
 
-Continuation should stop when:
+It still stops when the next step cannot be executed under the existing harness:
 
 - `plan.md` or `tasks.md` is missing, incomplete, or stale;
 - the next task is not accepted;
 - the current change needs a new decision boundary;
 - validation fails or cannot run;
-- the plan did not allow automatic continuation for this route;
+- required prerequisites or permissions are unavailable;
 - the user interrupts or asks to review.
 
 ## How Profiles Shape The Contract
@@ -150,6 +152,6 @@ current generated bundle.
 
 - [Concepts](./concepts.md): compiler model and core terminology.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
-- [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Skill Bundle](./skill-bundle.md): generated output layout.
 - [Examples](./examples.md): illustrative end-to-end walkthrough.
 - [Usage](./usage.md): command reference.

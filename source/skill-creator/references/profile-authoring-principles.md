@@ -14,6 +14,16 @@ decide whether a one-off request should remain a temporary injection.
   repository that owns those workflow constraints. Keep Forma examples
   sanitized.
 
+## Stage Key Boundary
+
+Profiles and temporary injection use internal stage keys as schema keys:
+`shape`, `gauge`, `seal`, `pour`, and `flow`.
+
+Generated public skill ids such as `forma-plan`, `forma-ground`, `forma-lock`,
+`forma-execute`, and `forma-showhand` are output names and trigger names. Use
+them as `stages.<stage>.name`, `stages.<stage>.directory`, or `rename.stages`
+values, not as profile or injection map keys.
+
 ## Constraint Placement
 
 - `constraints.default`: Keep this minimal. It applies to every

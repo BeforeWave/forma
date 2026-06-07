@@ -2,65 +2,82 @@
 
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
 
-This page shows the shortest path from an existing profile to a verified,
-installed workflow bundle.
-
-Do not start by designing the perfect profile. Try one small workflow first and
-see whether it changes how the agent behaves.
-
----
+This page gets you from zero to a running Forma workflow. Start with the default
+Codex plugin, then shape the harness only after you have seen one real run.
 
 ## Install Forma
 
-For editable local installation from the repository checkout:
+Install the CLI:
 
 ```bash
-pip install -e ".[dev]"
+pipx install git+https://github.com/BeforeWave/forma.git
 forma --help
 ```
 
 The examples below assume `forma` is available on `PATH`.
 
-If Forma is already installed, check the CLI:
+## First Run: Default Codex Plugin
+
+Generate and install the default Plan-First plugin:
 
 ```bash
-forma --help
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
 
----
+Then ask Codex to start with planning:
 
-## Install Locations
+```text
+Use forma-plan to plan this issue first.
+```
 
-Generated bundles can be installed for one user or checked into a project.
+A useful first run should not jump from goal to patch. It should clarify the
+goal, gather evidence, lock an execution contract, then execute tasks with
+proof.
 
-| Target | Personal install | Project/team install |
-|---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
-| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+## What To Inspect
 
-Review project or team skills before trusting them. Skills can include scripts and target-specific tool behavior.
+After a workflow-guided run, look for reviewable output:
 
----
+- `plans/issue-<id>/plan.md`: clarified goal, scope, approach, validation,
+  strategy, and output and proof boundary.
+- `plans/issue-<id>/tasks.md`: ordered accepted tasks with delivery targets,
+  proof obligations, dependencies, and constraints.
+- `plans/issue-<id>/runs/`: execution proof when the workflow records it.
 
-## First Successful Run
+In this repository, real Forma plans live under [`../plans/`](../plans/).
 
-Do this once before designing a large profile:
+## Shape The Harness With `forma-creator`
 
-1. Generate from a small sample profile.
-2. Verify the generated bundle.
-3. Install it into one target agent.
-4. Trigger one plan-first task in that agent.
-5. Inspect the plan, task contract, validation result, and run evidence.
-6. Adjust the profile only after the workflow proves useful.
+Use `forma-creator` when you want an agent to turn project-specific concerns
+into a one-off workflow before writing durable profile YAML.
 
----
+Build and install a Codex creator:
 
-## Path 1: Generate From A Tracked Profile
+```bash
+forma build-creator --target codex --output /tmp/forma-creator
+forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
+```
 
-Use this path for durable team or project rules that live in a reviewed profile.
+Then talk to Codex like a collaborator:
 
-Generate a Codex workflow:
+```text
+Use forma-creator to customize a workflow for this repo. First look at the
+repository structure and common validation paths. I care about generated
+outputs coming from source, lightweight checks for docs-only changes, nearby
+tests before code changes, and surfacing uncertain calls for me to decide.
+```
+
+The creator should classify those concerns, generate a target-specific workflow
+bundle or Codex plugin allowed by its fixed target contract, and verify the
+output before handoff.
+
+## Generate From A Tracked Profile
+
+Use a tracked profile when project principles are durable enough to review as
+source.
+
+Generate Codex skills:
 
 ```bash
 forma create-bundle \
@@ -71,23 +88,13 @@ forma create-bundle \
 forma verify /tmp/backend-plan-first-codex
 ```
 
-Install it into Codex:
+Install them into Codex:
 
 ```bash
 forma install --target codex --scope user /tmp/backend-plan-first-codex
 ```
 
-Then start Codex in a repository and invoke one generated skill.
-
-For the sample backend profile, a natural first test is:
-
-```text
-Use backend-plan-first-plan-issue to turn this change request into a bounded plan:
-make one low-risk docs improvement in this repository.
-Do not implement yet.
-```
-
-Generate a Claude Code workflow from the same profile:
+The same profile can target Claude Code:
 
 ```bash
 forma create-bundle \
@@ -96,102 +103,21 @@ forma create-bundle \
   --output /tmp/backend-plan-first-claude-code
 
 forma verify /tmp/backend-plan-first-claude-code
-```
-
-Install it into Claude Code:
-
-```bash
 forma install --target claude-code --scope user /tmp/backend-plan-first-claude-code
 ```
 
-In Claude Code, invoke the corresponding generated skill directly or use a matching natural-language request. Project skills require trusting the workspace before skill-owned tools can apply.
+## Install Locations
 
----
+Generated workflows can be installed for one user or into a project:
 
-## Path 2: Generate With `forma-creator`
+| Target | Personal install | Project install |
+|---|---|---|
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
+| Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 
-Use this path for reviewed one-off natural-language constraints.
-
-A generated `forma-creator` helps turn those constraints into temporary injection JSON, generate a target-specific workflow bundle, and verify the output before handoff.
-
-Build a Codex creator:
-
-```bash
-forma build-creator \
-  --target codex \
-  --output /tmp/forma-creator-dist
-
-forma verify /tmp/forma-creator-dist/codex/forma-creator
-```
-
-Install it into Codex:
-
-```bash
-forma install --target codex --scope user /tmp/forma-creator-dist/codex/forma-creator
-```
-
-Build a Claude Code creator:
-
-```bash
-forma build-creator \
-  --target claude-code \
-  --output /tmp/forma-creator-dist
-
-forma verify /tmp/forma-creator-dist/claude-code/forma-creator
-```
-
-Install it into Claude Code:
-
-```bash
-forma install --target claude-code --scope user /tmp/forma-creator-dist/claude-code/forma-creator
-```
-
-Each generated `forma-creator` has a fixed target contract.
-
-A Codex creator generates Codex-shaped plan-first workflow bundles and can
-emit Codex plugin artifacts when its fixed target contract says so. A Claude
-Code creator generates Claude Code-shaped bundles only.
-
-After installation, try workflow constraints inside the agent:
-
-```text
-Use forma-creator to generate a Plan-First workflow bundle from these workflow constraints:
-- shape must identify source of truth and unresolved decisions;
-- gauge must read only evidence needed for the selected scope;
-- seal must put acceptance and validation into every executable task;
-- pour must execute one accepted task at a time and record proof;
-- flow must stop on cross-layer work unless the sealed plan allows continuation.
-
-Show how these constraints are classified before generation.
-Verify the generated bundle before reporting success.
-```
-
----
-
-## Path 3: Generate A Codex Plugin
-
-Use this path when the receiving Codex environment should install one plugin
-that exposes the five default Plan-First skills.
-
-```bash
-forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma verify /tmp/forma-codex-plugin
-forma install --target codex --scope user /tmp/forma-codex-plugin
-```
-
-The installed plugin exposes `forma-plan`, `forma-ground`, `forma-lock`,
-`forma-execute`, and `forma-showhand`. Claude Code plugin output is out of
-scope; use a Claude Code skill bundle instead.
-
-Agent handoff:
-
-```text
-Install the local Forma Codex plugin at /tmp/forma-codex-plugin.
-Verify it before installation.
-Then use forma-plan to clarify the first task and forma-showhand only after a plan is locked.
-```
-
----
+Review project skills before trusting them. Generated skills can include
+scripts and target-specific tool behavior.
 
 ## Ask An Agent To Draft A Profile
 
@@ -207,50 +133,16 @@ Show the profile structure before writing files.
 Explain each constraint placement and mark unknowns explicitly.
 ```
 
-Use this as a drafting path, not an auto-commit path. Review the profile before using it as durable source.
-
----
-
-## Profile And Injection Guidance
-
-Ask Forma for agent-readable authoring guidance:
-
-```bash
-forma explain profile --target codex
-forma explain temporary-injection --format json --target codex
-```
-
-Use tracked profiles for stable rules. Use temporary injection for one-off rules that should not become durable project source.
-
----
-
-## What To Check After The First Run
-
-After a successful first run, you should see one or more concrete artifacts:
-
-- a bounded proposal;
-- a grounding handoff;
-- `plan.md` and `tasks.md`;
-- task proof or validation output;
-- `.forma-manifest.json` in the generated bundle.
-
-After the first workflow-guided run, check whether the agent:
-
-- clarified the request before implementation;
-- gathered relevant evidence before planning;
-- produced a bounded task plan;
-- stated validation or proof expectations;
-- avoided unrelated execution;
-- stopped when the workflow required it.
-
-If those behaviors are not visible, adjust the profile or generated workflow before adding more rules.
+Use this as a drafting path, not an auto-commit path. Review the profile before
+using it as durable source.
 
 ## Next Reads
 
+- [Concepts](./concepts.md): the profile, workflow, and runtime harness model.
 - [Workflow Contract](./workflow-contract.md): what the generated workflow enforces.
 - [Skill Bundle](./skill-bundle.md): what Forma writes to disk.
 - [Profile Schema](./profile-schema.md): how durable workflow source is structured.
 - [Forma Creator](./forma-creator.md): how one-off generation works.
 - [Verifier](./verifier.md): what `forma verify` checks.
 - [Targets](./targets.md): target install and metadata behavior.
-- [Examples](./examples.md): what an end-to-end run should expose.
+- [Usage](./usage.md): command reference and install locations.

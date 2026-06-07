@@ -147,3 +147,34 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Post-delivery consolidation: public names, creator boundary, and README onboarding
+
+Feedback:
+- Post-delivery review found public naming drift, unclear creator stage-key boundaries, and README onboarding copy that mixed quick-start commands with release-artifact installation details.
+
+Outcome:
+- Updated installed `forma-creator` defaults and `rename.prefix` behavior so generated public skill ids use plan/ground/lock/execute/showhand names by default.
+- Preserved internal methodology/profile/injection stage keys `shape`, `gauge`, `seal`, `pour`, and `flow`; documented that public skill ids are output names, trigger names, or `rename.stages` values, not schema keys.
+- Regenerated Codex and Claude Code `forma-creator` dist artifacts and added tests so the public defaults and stage-key boundary stay covered.
+- Removed user-facing internal stage-key tables and examples from high-level docs while keeping the schema-key boundary in creator/profile/injection authoring guidance.
+- Reworked README quick onboarding around installing the CLI, generating the default Codex Plan-First plugin, installing it, and optionally using `forma-creator` for project-specific workflow habits.
+- Moved Claude Code details, explicit verification, install locations, artifact paths, and profile authoring details out of README quick start and into Usage.
+- Sharpened README positioning around Forma as a compiler for project-specific Plan-First skills and the generated runtime harness that leaves reviewable `plan.md`, `tasks.md`, and run evidence.
+- Included the pending docs cleanup from the working tree before the squash: Quick Start now leads with the default Codex plugin first run, Usage describes one-off creator naming in natural language, and related docs use output/runtime-harness wording consistently.
+
+Boundary:
+- Did not rename internal methodology/profile stage keys or `profiles/forma-self/` self-iteration skills.
+- Did not change CLI behavior, workflow schema, or generated release artifacts during README/docs follow-up edits.
+- Kept verifier recognition compatible with legacy installable names, but public creator and docs no longer list legacy names as the default surface.
+
+Validation:
+- `uv run --extra dev pytest -p no:cacheprovider tests/test_creator_builder.py`
+- `uv run --extra dev forma verify source/skill-creator/`
+- `uv run --extra dev forma verify dist/skills/codex/forma-creator`
+- `uv run --extra dev forma verify dist/skills/claude-code/forma-creator`
+- `uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_layer_1_dogfood.py tests/test_docs_links.py`
+- `uv run --extra dev pytest -p no:cacheprovider`
+- `uv run --extra dev python dist/skills/codex/forma-creator/scripts/create.py --output /private/tmp/forma-creator-default-smoke-20260607-1417`
+- `uv run --extra dev forma verify /private/tmp/forma-creator-default-smoke-20260607-1417`
+- `git diff --check`

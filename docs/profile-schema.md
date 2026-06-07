@@ -2,12 +2,12 @@
 
 Chinese version: [profile-schema.zh-CN.md](./profile-schema.zh-CN.md)
 
-A profile is durable workflow source.
+A profile is Layer 0 source: durable project principles and boundaries.
 
-Profiles describe how Forma should specialize the canonical methodology for a
-project, team, route, language, or target naming convention. They are strict YAML
-files: unknown top-level or nested keys are rejected so mistakes do not silently
-change the workflow contract.
+Profiles describe how Forma should specialize the canonical Plan-First
+methodology for a project, route, language, or target naming convention. They
+are strict YAML files: unknown top-level or nested keys are rejected so mistakes
+do not silently change the generated workflow contract.
 
 ## Minimal Profile
 
@@ -17,7 +17,7 @@ profile:
   description: Minimal docs workflow profile.
 bundle:
   name: sample-docs-workflow
-  description: Documentation workflow bundle.
+  description: Documentation Plan-First skills.
 constraints:
   default:
     - Keep default rules minimal.
@@ -55,7 +55,7 @@ layers, then renames the generated stage skills for a backend issue workflow.
 
 ## Includes
 
-Use `includes` to compose profiles from general to specific:
+Use `includes` to compose project principles from general to specific:
 
 ```yaml
 profile:
@@ -70,9 +70,9 @@ includes:
 Included profiles are resolved before the local profile. Later profiles can
 refine earlier fields according to the merge rules implemented by Forma.
 
-Use includes for stable layers such as organization defaults, development
-policy, backend policy, and language policy. Do not use includes to hide
-one-off user instructions; use temporary injection for that.
+Use includes for stable layers such as project defaults, development policy,
+backend policy, and language policy. Do not use includes to hide one-off user
+instructions; use temporary injection for that.
 
 ## Stage Names And Target Display
 
@@ -157,7 +157,7 @@ validation_commands:
 ```
 
 Validation commands are guidance for the workflow. They do not remove the need
-for task-specific validation in sealed plans.
+for task-specific validation in locked plans.
 
 ## Conditional Overlays
 
@@ -179,7 +179,8 @@ generated-baseline, governance, backend, or cross-layer constraints.
 
 ## Temporary Injection Vs Profile
 
-Use a tracked profile when a rule is durable and should be reviewed as source.
+Use a tracked profile when a rule is durable and should be reviewed as project
+source.
 
 Use temporary injection when a rule is:
 
@@ -203,7 +204,7 @@ Do not copy large source documents into injection just to preserve context.
 ## Related Docs
 
 - [Workflow Contract](./workflow-contract.md): what the profile specializes.
-- [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Skill Bundle](./skill-bundle.md): generated output layout.
 - [Forma Creator](./forma-creator.md): temporary injection before durable profile promotion.
 - [Examples](./examples.md): sample profile walkthrough.
 - [Usage](./usage.md): command reference.

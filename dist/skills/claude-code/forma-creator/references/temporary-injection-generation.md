@@ -4,6 +4,21 @@ Use this standard when converting user natural language into a temporary
 injection JSON for `scripts/create.py`. The injection is a one-off generated
 artifact, not a tracked Layer 3 profile.
 
+## Stage Key Boundary
+
+Temporary injection JSON must address stages only by internal stage keys:
+`shape`, `gauge`, `seal`, `pour`, and `flow`.
+
+Do not use generated public skill ids such as `forma-plan`, `forma-ground`,
+`forma-lock`, `forma-execute`, or `forma-showhand` as JSON keys. Public skill ids
+are installable output names and user-facing trigger names; they are not the
+schema keys for `stages`, `skills`, `constraints`, `validation_commands`,
+`resources`, `conditional_overlays`, or `rename.stages`.
+
+When renaming output skills, keep the internal key on the left side and put the
+final generated skill name on the right side, for example
+`"shape": "acme-plan"` and `"flow": "acme-showhand"`.
+
 ## Extraction Rules
 
 - Do not copy README, AGENTS, governance docs, issue text, or other user docs

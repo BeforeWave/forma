@@ -2,12 +2,12 @@
 
 Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 
-`forma verify` checks generated workflow bundles, `forma-creator` bundles, and
-Codex plugin artifacts.
+`forma verify` checks generated skill bundles, `forma-creator` bundles, and
+Codex plugin outputs.
 
 It is the engineering boundary that keeps Forma from being only a prompt
-generator: generated artifacts must have a valid structure, match the target
-contract, and preserve the expected methodology shape.
+generator: generated outputs must have a valid structure, match the target
+contract, and preserve the expected Plan-First harness shape.
 
 ## When To Run It
 
@@ -55,8 +55,8 @@ Verification is not semantic review.
 
 It does not prove:
 
-- the profile is a good product decision;
-- the generated workflow is complete for a specific organization;
+- the profile is a good project decision;
+- the generated workflow is complete for a specific project;
 - every validation command is sufficient;
 - external source adapters are authenticated or reachable;
 - the agent will always behave correctly;
@@ -109,7 +109,7 @@ temporary injection policy, or runtime agent behavior.
 
 ## Bundled Verifier
 
-Layer 2 verifier code lives organizationally inside `source/skill-creator/` so
+Bundled verifier code lives organizationally inside `source/skill-creator/` so
 a built `forma-creator` can verify generated bundles without requiring the user
 to install the developer CLI.
 
@@ -117,6 +117,6 @@ The same verifier package is also used by the developer `forma verify` command.
 
 ## Related Docs
 
-- [Skill Bundle](./skill-bundle.md): generated artifact layout and manifest.
+- [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
 - [Forma Creator](./forma-creator.md): creator path and bundled verification.
 - [Usage](./usage.md): command reference.

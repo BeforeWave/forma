@@ -2,13 +2,13 @@
 
 英文版：[targets.md](./targets.md)
 
-Forma 生成的是 target 专用 skill bundle 和 Codex plugin artifact。这里的 target 指加载这套技能的 Agent 环境，例如 Codex 或 Claude Code。
+Forma 生成的是 target 专用 skill bundle。Codex plugin 是同一套 skills 的 Codex 安装形态。这里的 target 指加载这套技能的 Agent 环境，例如 Codex 或 Claude Code。
 
 同一份 workflow profile 可以生成到不同 target，但生成产物必须匹配实际加载它的 Agent。
 
 ## 支持的 Target
 
-| 产物 | CLI target | 个人安装 | 项目/团队安装 |
+| 产物 | CLI target | 个人安装 | 项目安装 |
 |---|---|---|---|
 | Codex skills | `codex` | `$HOME/.codex/skills` | `.codex/skills` |
 | Codex plugins | `codex` | `$HOME/.codex/plugins` | `.codex/plugins` |
@@ -65,7 +65,7 @@ Target adapter 会影响生成的 metadata 和安装行为，但不应该改变 
 
 ## 信任前先审查
 
-生成的 bundle 可以包含 scripts。信任项目或团队 bundle 前先审查，尤其当 target 支持工具权限或动态上下文注入时。
+生成的 bundle 可以包含 scripts。信任项目 bundle 前先审查，尤其当 target 支持工具权限或动态上下文注入时。
 
 ## 相关文档
 

@@ -2,14 +2,15 @@
 
 Chinese version: [targets.zh-CN.md](./targets.zh-CN.md)
 
-Forma emits target-specific skill bundles and Codex plugin artifacts.
+Forma emits target-specific skill bundles. A Codex plugin is a Codex install
+shape for the same skills.
 
 The workflow source can be the same, but the emitted bundle must match the
 target that will load it.
 
 ## Supported Targets
 
-| Artifact | CLI target | Personal install | Project/team install |
+| Output | CLI target | Personal install | Project install |
 |---|---|---|---|
 | Codex skills | `codex` | `$HOME/.codex/skills` | `.codex/skills` |
 | Codex plugins | `codex` | `$HOME/.codex/plugins` | `.codex/plugins` |
@@ -76,17 +77,17 @@ workflows.
 
 If a workflow should be distributed more broadly, package or distribution
 mechanisms may become target-specific. Keep Forma profiles as the workflow
-source, and generate the target artifact needed for the destination.
+source, and generate the target output needed for the destination.
 
 ## Review Before Trust
 
-Generated bundles can include scripts. Review project or team bundles before
+Generated bundles can include scripts. Review project bundles before
 trusting them, especially when a target allows tool permissions or dynamic
 context injection.
 
 ## Related Docs
 
 - [Quick Start](./quick-start.md): first-run install commands.
-- [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Skill Bundle](./skill-bundle.md): generated output layout.
 - [Verifier](./verifier.md): target metadata checks.
 - [Usage](./usage.md): command reference.

@@ -17,7 +17,13 @@ from forma_verifier.rules import parse_frontmatter
 
 ADAPTER_TARGETS = ("codex", "claude-code")
 CREATOR_COMMON_ENTRIES = ("SKILL.md", "references", "scripts")
-CREATOR_SKILL_PREFIX = "forma"
+CREATOR_SKILL_NAMES = {
+    "shape": "forma-plan",
+    "gauge": "forma-ground",
+    "seal": "forma-lock",
+    "pour": "forma-execute",
+    "flow": "forma-showhand",
+}
 
 
 def build_creator(
@@ -234,8 +240,9 @@ def _interactive_constraint_contract() -> List[str]:
         "- The user may provide one-off special constraints for the generated "
         "five-skill bundle during this interaction.",
         "- Before writing the temporary JSON, show the default installable skill "
-        "names: `shape -> forma-shape`, `gauge -> forma-gauge`, "
-        "`seal -> forma-seal`, `pour -> forma-pour`, and `flow -> forma-flow`.",
+        "names: `shape -> forma-plan`, `gauge -> forma-ground`, "
+        "`seal -> forma-lock`, `pour -> forma-execute`, and "
+        "`flow -> forma-showhand`.",
         "- Ask whether the user wants to rename any final installable skill "
         "names. If yes, encode exact kebab-case names under `rename.stages`; "
         "if no, omit `rename` and use the defaults.",
@@ -275,8 +282,9 @@ def _interactive_constraint_contract() -> List[str]:
 
 def _codex_output_contract() -> List[str]:
     lines = [
-        "- Generate a Codex-ready workflow bundle root containing `forma-shape/`, "
-        "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
+        "- Generate a Codex-ready workflow bundle root containing `forma-plan/`, "
+        "`forma-ground/`, `forma-lock/`, `forma-execute/`, and "
+        "`forma-showhand/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
         "- If the user asks for Codex plugin output, run `python "
         "scripts/create.py --artifact plugin --output <generated-plugin-path> "
@@ -287,6 +295,8 @@ def _codex_output_contract() -> List[str]:
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
+        "- Do not use generated public skill ids such as `forma-plan` or "
+        "`forma-showhand` as temporary injection JSON keys.",
         "- Every generated skill directory must include `SKILL.md` with "
         "frontmatter containing only `name` and `description`.",
         "- Every generated skill directory must include `agents/openai.yaml` "
@@ -303,14 +313,17 @@ def _codex_output_contract() -> List[str]:
 
 def _claude_output_contract() -> List[str]:
     lines = [
-        "- Generate a Claude Code-ready workflow bundle root containing `forma-shape/`, "
-        "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
+        "- Generate a Claude Code-ready workflow bundle root containing "
+        "`forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, "
+        "and `forma-showhand/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
         "- Codex plugin output is unsupported by this Claude Code creator; "
         "present workflow-bundle generation only.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
+        "- Do not use generated public skill ids such as `forma-plan` or "
+        "`forma-showhand` as temporary injection JSON keys.",
         "- Every generated skill directory must include `SKILL.md` with "
         "frontmatter containing only `name` and `description`.",
         "- Keep bundled references inside each generated skill's own "
@@ -332,7 +345,7 @@ def _target_label(target_agent: str) -> str:
 
 
 def _creator_skill_name(kind: str) -> str:
-    return f"{CREATOR_SKILL_PREFIX}-{kind}"
+    return CREATOR_SKILL_NAMES[kind]
 
 
 def _copy_entry(src: Path, dst: Path) -> None:

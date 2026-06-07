@@ -2,14 +2,14 @@
 
 英文版：[skill-bundle.md](./skill-bundle.md)
 
-Skill bundle 是 Forma 编译出来的可安装产物。
+Skill bundle 是 Forma 编译出来的 workflow 安装产物。
 
-Profile 是源码。Forma compiler 会解析 profile、标准方法和 target adapter，然后生成可以安装到 Codex 或 Claude Code 的 bundle。
+Profile 是源码。Forma compiler 会解析 profile、标准方法和 target adapter，然后生成可以安装到 Codex 或 Claude Code 的 skills。安装后，这些 skills 就成为具体开发目标上的 runtime harness。
 
-## 从源码到产物
+## 从 Profile 到 Workflow 产物
 
 ```text
-workflow profile
+profile
 + methodology
 + target adapter
 + optional temporary injection
@@ -18,38 +18,38 @@ workflow profile
 Forma compiler
         |
         v
-target-specific skill bundle
+target-specific workflow skill bundle
 ```
 
 同一个 workflow profile 可以生成到多个 target，而不需要为每个工具手写一套规则。
 
 ## Bundle 结构
 
-一个生成的 Plan-First bundle 通常包含五个阶段技能目录和一个 manifest：
+一个生成的 Plan-First bundle 通常包含四个核心 workflow skill、`forma-showhand` candy skill，以及一个 manifest：
 
 ```text
 <bundle>/
-  <shape-skill>/
+  forma-plan/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml        # 仅 Codex target 需要时出现
-  <gauge-skill>/
+  forma-ground/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <seal-skill>/
+  forma-lock/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <pour-skill>/
+  forma-execute/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <flow-skill>/
+  forma-showhand/
     SKILL.md
     references/
     scripts/
@@ -57,7 +57,7 @@ target-specific skill bundle
   .forma-manifest.json
 ```
 
-目录名可以被 profile 或一次性注入重命名。Manifest 会记录每个语义阶段对应哪个目录。
+目录名可以被 profile 或一次性注入重命名。Manifest 会记录每个生成技能对应哪个目录。
 
 不是每个 skill 都一定有每个子目录。只有当 methodology、profile 或一次性注入为某个阶段选择了 references 或 scripts，它们才会出现。
 
@@ -73,7 +73,7 @@ examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
   .forma-manifest.json
 ```
 
-这些名字来自 sample profile。它们仍然会在 manifest 中映射回 `shape`、`gauge`、`seal`、`pour`、`flow` 这些语义阶段。
+这些名字来自 sample profile。Manifest 会记录最终输出的技能名和目录。
 
 ## Skill 目录
 
@@ -112,7 +112,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 ## 生成技能质量
 
-生成 bundle 应该像工作流，而不是复制出来的一堆规则文本。
+生成 bundle 应该像 runtime harness，而不是复制出来的一堆规则文本。
 
 好的 bundle 通常具备：
 
@@ -129,7 +129,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 ## 安装位置
 
-| 目标 | 个人安装 | 项目/团队安装 |
+| 目标 | 个人安装 | 项目安装 |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
@@ -144,7 +144,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 forma verify <generated-bundle-dir>
 ```
 
-验证检查结构和方法规则。它不证明 profile 是正确的产品决策，也不证明生成策略在语义上完整。见 [Verifier](./verifier.zh-CN.md)。人工评审仍然必要。
+验证检查结构和方法规则。它不证明 profile 是正确的项目决策，也不证明生成的 harness 在语义上完整。见 [Verifier](./verifier.zh-CN.md)。人工评审仍然必要。
 
 ## 相关文档
 

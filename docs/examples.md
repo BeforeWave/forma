@@ -2,7 +2,8 @@
 
 Chinese version: [examples.zh-CN.md](./examples.zh-CN.md)
 
-This page shows what an end-to-end Forma workflow is meant to look like.
+This page shows what a Forma runtime harness should make visible during an
+end-to-end development goal.
 
 The walkthrough is illustrative. It is not a transcript of a live agent run.
 Use [Quick Start](./quick-start.md) to generate and run the real sample bundle.
@@ -42,18 +43,18 @@ Install the generated stage skills into the matching target location. See
 Update the issue-tracked backend behavior described by issue 123.
 ```
 
-A Forma-generated workflow should move the request through the contract instead
-of jumping straight to implementation.
+A Forma-generated workflow should move the request through the runtime harness
+instead of jumping straight to implementation.
 
-## Stage Walkthrough
+## Skill Walkthrough
 
-| Stage | Expected movement |
+| Skill | Expected movement |
 |---|---|
-| `shape` | Clarify goal, scope, approach, validation, plan strategy, and whether the issue source adapter should be used. |
-| `gauge` | Inspect only the repository and source material needed for the accepted scope. Separate facts, risks, unknowns, and recommendations. |
-| `seal` | Write `plans/issue-<id>/plan.md` and `tasks.md` with accepted tasks, validation, and continuation boundaries. |
-| `pour` | Execute one accepted task, run its validation, and record proof for review. |
-| `flow` | Continue only if the sealed plan allows it and proof remains clear; otherwise stop. |
+| `forma-plan` | Clarify goal, scope, approach, validation, plan strategy, and whether the issue source adapter should be used. |
+| `forma-ground` | Inspect only the repository and source material needed for the accepted scope. Separate facts, risks, unknowns, and recommendations. |
+| `forma-lock` | Write `plans/issue-<id>/plan.md` and `tasks.md` with accepted tasks, validation, and continuation boundaries. |
+| `forma-execute` | Execute one accepted task, run its validation, and record proof for review. |
+| `forma-showhand` | After review is done and the plan is fixed, continue accepted tasks with continuous `forma-execute`. |
 
 ## What To Inspect
 
@@ -64,7 +65,7 @@ After a real run, inspect:
 - executable tasks under `plans/issue-<id>/tasks.md`;
 - run evidence under `plans/issue-<id>/runs/` when the workflow records it;
 - validation commands and results;
-- any stop condition if `flow` refused to continue.
+- any blocker if `forma-showhand` could not continue.
 
 ## What Good Looks Like
 
@@ -75,22 +76,22 @@ A good run should make these things visible:
 - what scope was accepted;
 - which task was executed;
 - what validation proved the result;
-- why continuation was allowed or blocked.
+- why continuous execution was allowed or blocked.
 
 ## Common Bad Patterns
 
-- `pour` starts implementation before `seal` writes accepted tasks.
-- `gauge` writes files or makes final task decisions.
+- `forma-execute` starts implementation before `forma-lock` writes accepted tasks.
+- `forma-ground` writes files or makes final task decisions.
 - Every skill repeats every rule instead of using stage constraints and
   references.
-- `flow` continues when validation failed or the plan lacks continuation
-  permission.
+- `forma-showhand` continues when validation failed, proof is missing, or the
+  next accepted task cannot be executed under the current plan.
 - The generated bundle verifies structurally, but the profile was never
-  reviewed by the owning team.
+  reviewed by the owning project.
 
 ## Related Docs
 
 - [Workflow Contract](./workflow-contract.md): stage gates and proof.
-- [Skill Bundle](./skill-bundle.md): generated artifact layout.
+- [Skill Bundle](./skill-bundle.md): generated output layout.
 - [Profile Schema](./profile-schema.md): source format for the sample profile.
 - [Verifier](./verifier.md): verification boundary.

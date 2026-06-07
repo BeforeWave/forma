@@ -983,6 +983,8 @@ def test_explain_profile_outputs_canonical_guidance() -> None:
         "source/skill-creator/references/temporary-injection-generation.md"
         in result.output
     )
+    assert "Stage Key Boundary" in result.output
+    assert "Generated public skill ids" in result.output
     assert "`constraints.default`: Keep this minimal." in result.output
     assert "`conditional_overlays`: Heavy route-specific rules" in result.output
     assert "| User constraint | Injection/profile target |" in result.output
@@ -1018,7 +1020,9 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
         "Temporary Injection Generation Standard"
         in payload["sources"][0]["content"]
     )
+    assert "Stage Key Boundary" in payload["sources"][0]["content"]
     assert "Profile Authoring Principles" in payload["sources"][1]["content"]
+    assert "Generated public skill ids" in payload["sources"][1]["content"]
     assert "classification table" in payload["markdown"]
     assert "constraints.default" in payload["markdown"]
     assert "Script Resource Injection Template" in payload["markdown"]

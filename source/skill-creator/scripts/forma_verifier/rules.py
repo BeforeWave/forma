@@ -94,11 +94,20 @@ class BundleContext:
 
 PLAN_FIRST_KINDS = ["shape", "gauge", "seal", "pour", "flow"]
 FORMA_STAGE_PREFIX = "forma"
+FORMA_PUBLIC_STAGE_NAMES = {
+    "forma-plan": "shape",
+    "forma-ground": "gauge",
+    "forma-lock": "seal",
+    "forma-execute": "pour",
+    "forma-showhand": "flow",
+}
 
 
 def plan_first_kind_from_name(value: object) -> Optional[str]:
     if not isinstance(value, str):
         return None
+    if value in FORMA_PUBLIC_STAGE_NAMES:
+        return FORMA_PUBLIC_STAGE_NAMES[value]
     for kind in PLAN_FIRST_KINDS:
         if value == kind or value == f"{FORMA_STAGE_PREFIX}-{kind}":
             return kind

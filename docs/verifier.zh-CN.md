@@ -2,9 +2,9 @@
 
 英文版：[verifier.md](./verifier.md)
 
-`forma verify` 用来检查生成的工作流 bundle、`forma-creator` bundle 和 Codex plugin artifact。
+`forma verify` 用来检查生成的工作流 bundle、`forma-creator` bundle 和 Codex plugin 产物。
 
-它是让 Forma 不只是“prompt generator”的工程边界：生成产物必须结构有效、符合 target 契约，并保留预期的 Plan-First 阶段结构。
+它是让 Forma 不只是“prompt generator”的工程边界：生成产物必须结构有效、符合 target 契约，并保留预期的 Plan-First harness 形状。
 
 ## 什么时候运行
 
@@ -48,8 +48,8 @@ forma verify source/skill-creator/
 
 它不证明：
 
-- profile 是正确的产品决策；
-- 生成的工作流已经覆盖某个组织的全部需求；
+- profile 是正确的项目决策；
+- 生成的 workflow 已经覆盖某个项目的全部需求；
 - 每个验证命令都充分；
 - 外部 source adapter 已完成认证或当前可访问；
 - Agent 永远会正确执行；
@@ -93,7 +93,7 @@ git diff --check
 
 ## Bundled Verifier
 
-Layer 2 verifier 代码组织在 `source/skill-creator/` 内部，所以构建出来的 `forma-creator` 可以在不安装开发者 CLI 的情况下验证生成套件。
+Bundled verifier 代码组织在 `source/skill-creator/` 内部，所以构建出来的 `forma-creator` 可以在不安装开发者 CLI 的情况下验证生成产物。
 
 同一个 verifier package 也被开发者 `forma verify` 命令使用。
 

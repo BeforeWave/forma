@@ -7,8 +7,8 @@ description: Create or update self-contained Forma Plan-First workflow artifacts
 
 Use this skill to create Forma Plan-First workflow artifacts. By default it
 creates a workflow bundle: a flat, ready-to-install set of five plan-first
-skills named `forma-shape`, `forma-gauge`, `forma-seal`, `forma-pour`, and
-`forma-flow`. If this installed creator includes a fixed target reference, that
+skills named `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
+`forma-showhand`. If this installed creator includes a fixed target reference, that
 reference is the hard contract for any additional artifact type.
 
 Before generating any bundle, load `references/canonical-plan-first.md`,
@@ -41,8 +41,8 @@ target contract.
      adapter is explicitly requested; do not treat network access, local CLI
      authentication, or any source tool as base capability.
 3. Show the installable skill names before generating. Default:
-   `shape -> forma-shape`, `gauge -> forma-gauge`, `seal -> forma-seal`,
-   `pour -> forma-pour`, and `flow -> forma-flow`. Ask whether the user wants
+   `shape -> forma-plan`, `gauge -> forma-ground`, `seal -> forma-lock`,
+   `pour -> forma-execute`, and `flow -> forma-showhand`. Ask whether the user wants
    to rename any of those installable skill names. If they do, encode the
    final names under `rename.stages` in the temporary JSON. If they do not, use
    the defaults.
@@ -68,8 +68,8 @@ python scripts/create.py --artifact bundle --output <generated-bundle-path> --in
    permits another artifact type, follow that target-specific command instead.
    Do not infer target-specific artifacts from this generic skill body.
 
-The script creates exactly `forma-shape/`, `forma-gauge/`, `forma-seal/`,
-`forma-pour/`, and `forma-flow/` for bundle output. If the user supplied
+The script creates exactly `forma-plan/`, `forma-ground/`, `forma-lock/`,
+`forma-execute/`, and `forma-showhand/` for bundle output. If the user supplied
 `rename.stages`, the script creates those final installable skill directories
 instead. The script copies bundled methodology resources, applies the temporary
 injection, writes metadata, and runs the bundled verifier. Only report success
@@ -79,17 +79,17 @@ report the output path and install hint only.
 ## Stage Rules
 
 Every generated bundle uses the same five stages. The temporary injection JSON
-uses these stage keys, while installable skill directories and frontmatter names
-use the matching `forma-` prefix:
+uses these internal stage keys, while installable skill directories and
+frontmatter names use the public default names:
 
-- `shape` / `forma-shape` is chat-only convergence. It settles Goal, Scope, Approach,
+- `shape` / `forma-plan` is chat-only convergence. It settles Goal, Scope, Approach,
   Validation, and Plan Strategy before `proposal-ready`.
-- `gauge` / `forma-gauge` is read-only repository inspection. It produces a grounding handoff
+- `gauge` / `forma-ground` is read-only repository inspection. It produces a grounding handoff
   for `seal` and does not write files.
-- `seal` / `forma-seal` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/` using
+- `seal` / `forma-lock` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/` using
   the project issue-workflow init step.
-- `pour` / `forma-pour` executes one task at a time through `review-ready` and `complete`.
-- `flow` / `forma-flow` executes all remaining tasks automatically after the plan is sealed,
+- `pour` / `forma-execute` executes one task at a time through `review-ready` and `complete`.
+- `flow` / `forma-showhand` executes all remaining tasks automatically after the plan is sealed,
   while still honoring validation, safety, and permission gates.
 
 ## Bundled Resources
@@ -110,19 +110,34 @@ creator bundle by `forma build-creator`.
   `resources/plan-first/methodology/resources/flow/`.
 
 One-off business injection may add local references and constraints, but must
-not replace the canonical runner, rename the flat `forma-shape` /
-`forma-gauge` / `forma-seal` / `forma-pour` / `forma-flow` directories, or
-borrow resources from sibling skill directories.
+not replace the canonical runner or change internal stage keys, and must not
+manually rename generated directories outside `rename.stages` or borrow
+resources from sibling skill directories.
 If injected constraints duplicate bullets already emitted through generated
 requirement references, keep one effective copy.
 
 ## Injection JSON
 
+Temporary injection JSON always uses internal stage keys as addressing keys:
+`shape`, `gauge`, `seal`, `pour`, and `flow`.
+
+Do not use public skill ids such as `forma-plan`, `forma-ground`, `forma-lock`,
+`forma-execute`, or `forma-showhand` as keys under `stages`, `skills`,
+`constraints`, `validation_commands`, `resources`, `conditional_overlays`, or
+`rename.stages`.
+
+Public skill ids are generated output names and user-facing trigger names.
+Internal stage keys are the stable addressing layer for profile and injection
+rules. To change generated skill names, map internal keys to final output names
+under `rename.stages`.
+
 The temporary injection JSON may contain only these top-level keys:
 
 - `rename`: optional final installable skill names. Use `rename.stages` to map
   any of `shape`, `gauge`, `seal`, `pour`, or `flow` to a confirmed kebab-case
-  skill name. Omit it to use the default `forma-*` names.
+  skill name. Omit it to use the default public names. Use `rename.prefix` only
+  when the desired generated names are `<prefix>-plan`, `<prefix>-ground`,
+  `<prefix>-lock`, `<prefix>-execute`, and `<prefix>-showhand`.
 - `stages`: optional `display_name`, `short_description`, and `default_prompt`
   per stage.
 - `skills`: optional `description` per stage.

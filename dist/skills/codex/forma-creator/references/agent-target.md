@@ -2,21 +2,22 @@
 
 This `forma-creator` bundle is fixed to `codex`. Its generated plan-first output must contain exactly five skill directories. Defaults are:
 
-- `forma-shape/` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary before plan finalization.
-- `forma-gauge/` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
-- `forma-seal/` - Materialize an already-settled plan into plan.md and tasks.md without reopening planning decisions.
-- `forma-pour/` - Execute the current workflow task through review-ready, wait for user approval, then complete and continue if another task remains.
-- `forma-flow/` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation, evidence, and safety gates.
+- `forma-plan/` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary before plan finalization.
+- `forma-ground/` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
+- `forma-lock/` - Materialize an already-settled plan into plan.md and tasks.md without reopening planning decisions.
+- `forma-execute/` - Execute the current workflow task through review-ready, wait for user approval, then complete and continue if another task remains.
+- `forma-showhand/` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation, evidence, and safety gates.
 
 ## Output Contract
 
 - Before generating a bundle, load `references/canonical-plan-first.md` and `references/profile-authoring-principles.md` and `references/temporary-injection-generation.md`; preserve the bundled canonical plan-first semantics and classify natural-language constraints before writing JSON.
 - Convert current-session natural-language injection into a temporary JSON file and run `python scripts/create.py --artifact bundle --output <generated-bundle-path> --injection-json <temporary-injection.json>` for workflow-bundle output; do not use Layer 3 profiles from this installed creator.
 - Copy fixed generated-skill resources from `resources/plan-first/methodology/resources/shared/` and any stage-local resource directory into each generated skill directory according to `references/canonical-plan-first.md`.
-- Generate a Codex-ready workflow bundle root containing `forma-shape/`, `forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by default, or the exact `rename.stages` names confirmed by the user.
+- Generate a Codex-ready workflow bundle root containing `forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, and `forma-showhand/` by default, or the exact `rename.stages` names confirmed by the user.
 - If the user asks for Codex plugin output, run `python scripts/create.py --artifact plugin --output <generated-plugin-path> --injection-json <temporary-injection.json>`.
 - Codex plugin output must contain `.codex-plugin/plugin.json`, root `.forma-manifest.json`, and `skills/<skill-name>/` child skill directories; it must not emit sibling `skill-bundles/` output.
 - Keep temporary injection JSON stage keys as `shape`, `gauge`, `seal`, `pour`, and `flow`; do not expose those bare stage keys as installable skill directory names.
+- Do not use generated public skill ids such as `forma-plan` or `forma-showhand` as temporary injection JSON keys.
 - Every generated skill directory must include `SKILL.md` with frontmatter containing only `name` and `description`.
 - Every generated skill directory must include `agents/openai.yaml` with `interface.display_name`, `interface.short_description`, and `interface.default_prompt`.
 - Keep bundled references inside each generated skill's own `references/` directory.
@@ -26,7 +27,7 @@ This `forma-creator` bundle is fixed to `codex`. Its generated plan-first output
 ## Interactive Constraint Handling
 
 - The user may provide one-off special constraints for the generated five-skill bundle during this interaction.
-- Before writing the temporary JSON, show the default installable skill names: `shape -> forma-shape`, `gauge -> forma-gauge`, `seal -> forma-seal`, `pour -> forma-pour`, and `flow -> forma-flow`.
+- Before writing the temporary JSON, show the default installable skill names: `shape -> forma-plan`, `gauge -> forma-ground`, `seal -> forma-lock`, `pour -> forma-execute`, and `flow -> forma-showhand`.
 - Ask whether the user wants to rename any final installable skill names. If yes, encode exact kebab-case names under `rename.stages`; if no, omit `rename` and use the defaults.
 - Encode those constraints in a temporary injection JSON when they are compatible with the plan-first methodology and this target contract.
 - Classify every natural-language constraint before writing JSON: `constraints.default` is only for minimal always-on bottom lines; planning rules go under `shape` / `gauge` / `seal`; daily execution rules go under `pour` / `flow`; broad docs, generated-baseline, migration, governance, or cross-layer rules belong in `conditional_overlays`.

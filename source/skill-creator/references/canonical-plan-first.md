@@ -40,11 +40,14 @@ under `source/skill-creator/`.
 ## Stage Mapping
 
 Installed `forma-creator` output uses stable stage keys internally. By
-default, it emits installable skill directories and frontmatter names with the
-`forma-` prefix: `forma-shape`, `forma-gauge`, `forma-seal`, `forma-pour`, and
-`forma-flow`. During creation, the user may choose final installable skill names
-through the temporary JSON field `rename.stages`; those names replace the
-defaults without changing the internal stage keys or methodology mapping.
+default, it emits installable skill directories and frontmatter names with
+public Plan-First names: `forma-plan`, `forma-ground`, `forma-lock`,
+`forma-execute`, and `forma-showhand`. If the user supplies `rename.prefix`,
+the prefix form is `<prefix>-plan`, `<prefix>-ground`, `<prefix>-lock`,
+`<prefix>-execute`, and `<prefix>-showhand`. During creation, the user may
+choose final installable skill names through the temporary JSON field
+`rename.stages`; those names replace the defaults without changing the
+internal stage keys or methodology mapping.
 
 - `shape` maps to plan-issue: Plan-mode, chat-only convergence before plan files
   exist.

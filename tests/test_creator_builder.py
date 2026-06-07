@@ -80,7 +80,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "agents/openai.yaml" in (
         codex / "references" / "agent-target.md"
     ).read_text(encoding="utf-8")
-    assert "forma-shape/" in (
+    assert "forma-plan/" in (
         codex / "references" / "agent-target.md"
     ).read_text(encoding="utf-8")
     assert "rename.stages" in (
@@ -98,6 +98,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     codex_target = (codex / "references" / "agent-target.md").read_text(
         encoding="utf-8"
     )
+    assert "forma-shape/" not in codex_target
     assert "temporary-injection-generation.md" in codex_target
     assert "profile-authoring-principles.md" in codex_target
     assert "classification table" in codex_target
@@ -178,7 +179,8 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     )
     assert "fixed to `claude-code`" in claude_target
     assert "Do not emit Codex `agents/openai.yaml`" in claude_target
-    assert "forma-shape/" in claude_target
+    assert "forma-plan/" in claude_target
+    assert "forma-shape/" not in claude_target
     assert "rename.stages" in claude_target
     assert "one-off special constraints" in claude_target
     assert "temporary-injection-generation.md" in claude_target
@@ -208,7 +210,7 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
                     "shape": {
                         "display_name": "Example Shape",
                         "short_description": "Converge plans before materialization",
-                        "default_prompt": "Use $forma-shape for plan-first shaping.",
+                        "default_prompt": "Use $forma-plan for plan-first shaping.",
                     },
                     "flow": {
                         "display_name": "Example Flow",
@@ -254,25 +256,26 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    assert (generated / "forma-shape" / "SKILL.md").is_file()
-    assert (generated / "forma-flow" / "SKILL.md").is_file()
+    assert (generated / "forma-plan" / "SKILL.md").is_file()
+    assert (generated / "forma-showhand" / "SKILL.md").is_file()
     assert not (generated / "shape").exists()
     assert not (generated / "renamed-shape").exists()
-    assert 'name: "forma-shape"' in (
-        generated / "forma-shape" / "SKILL.md"
+    assert not (generated / "forma-shape").exists()
+    assert 'name: "forma-plan"' in (
+        generated / "forma-plan" / "SKILL.md"
     ).read_text(encoding="utf-8")
     assert "settle the prerequisite" in (
-        generated / "forma-shape" / "SKILL.md"
+        generated / "forma-plan" / "SKILL.md"
     ).read_text(encoding="utf-8")
-    assert "pytest tests/" in (generated / "forma-seal" / "SKILL.md").read_text(
+    assert "pytest tests/" in (generated / "forma-lock" / "SKILL.md").read_text(
         encoding="utf-8"
     )
-    assert not (generated / "forma-shape" / "script" / "github_issue_context.py").exists()
-    assert not (generated / "forma-shape" / "scripts" / "github_issue_context.py").exists()
+    assert not (generated / "forma-plan" / "script" / "github_issue_context.py").exists()
+    assert not (generated / "forma-plan" / "scripts" / "github_issue_context.py").exists()
     assert "gh issue view" not in (
-        generated / "forma-shape" / "SKILL.md"
+        generated / "forma-plan" / "SKILL.md"
     ).read_text(encoding="utf-8")
-    assert (generated / "forma-shape" / "agents" / "openai.yaml").is_file()
+    assert (generated / "forma-plan" / "agents" / "openai.yaml").is_file()
     assert (generated / ".forma-manifest.json").is_file()
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
@@ -498,14 +501,14 @@ def test_installed_creator_script_supports_explicit_source_adapter_injection(
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    shape_text = (generated / "forma-shape" / "SKILL.md").read_text(encoding="utf-8")
-    seal_text = (generated / "forma-seal" / "SKILL.md").read_text(encoding="utf-8")
+    shape_text = (generated / "forma-plan" / "SKILL.md").read_text(encoding="utf-8")
+    seal_text = (generated / "forma-lock" / "SKILL.md").read_text(encoding="utf-8")
     assert "references/script-resource-adapter.md" in shape_text
     assert "references/script-resource-adapter.md" in seal_text
-    assert (generated / "forma-shape" / "scripts" / "github_issue_context.py").is_file()
-    assert (generated / "forma-seal" / "scripts" / "github_issue_context.py").is_file()
+    assert (generated / "forma-plan" / "scripts" / "github_issue_context.py").is_file()
+    assert (generated / "forma-lock" / "scripts" / "github_issue_context.py").is_file()
     adapter_text = (
-        generated / "forma-shape" / "references" / "script-resource-adapter.md"
+        generated / "forma-plan" / "references" / "script-resource-adapter.md"
     ).read_text(encoding="utf-8")
     assert "Script Resource Adapter" in adapter_text
     assert "stage-local helper script" in adapter_text
@@ -590,9 +593,9 @@ def test_installed_creator_script_supports_conditional_overlays(tmp_path: Path) 
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    shape_text = (generated / "forma-shape" / "SKILL.md").read_text(encoding="utf-8")
-    pour_text = (generated / "forma-pour" / "SKILL.md").read_text(encoding="utf-8")
-    assert (generated / "forma-shape" / "references" / "backend-rules.md").is_file()
+    shape_text = (generated / "forma-plan" / "SKILL.md").read_text(encoding="utf-8")
+    pour_text = (generated / "forma-execute" / "SKILL.md").read_text(encoding="utf-8")
+    assert (generated / "forma-plan" / "references" / "backend-rules.md").is_file()
     assert "## Conditional References" in shape_text
     assert "references/backend-rules.md" not in shape_text.split(
         "## Conditional References",
@@ -649,7 +652,7 @@ def test_installed_creator_script_supports_confirmed_stage_renames(
     assert result.returncode == 0, result.stderr + result.stdout
     assert (generated / "renamed-shape" / "SKILL.md").is_file()
     assert (generated / "renamed-flow" / "SKILL.md").is_file()
-    assert not (generated / "forma-shape").exists()
+    assert not (generated / "forma-plan").exists()
     assert 'name: "renamed-shape"' in (
         generated / "renamed-shape" / "SKILL.md"
     ).read_text(encoding="utf-8")
@@ -657,6 +660,46 @@ def test_installed_creator_script_supports_confirmed_stage_renames(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
     assert manifest["emitted_skills"]["shape"]["name"] == "renamed-shape"
+    assert verify(generated).passed
+
+
+def test_installed_creator_script_prefix_uses_public_stage_names(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "codex")
+    injection = tmp_path / "prefix-injection.json"
+    generated = tmp_path / "generated"
+    injection.write_text(
+        json.dumps({"rename": {"prefix": "acme-plan-first"}}),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (generated / "acme-plan-first-plan" / "SKILL.md").is_file()
+    assert (generated / "acme-plan-first-ground" / "SKILL.md").is_file()
+    assert (generated / "acme-plan-first-lock" / "SKILL.md").is_file()
+    assert (generated / "acme-plan-first-execute" / "SKILL.md").is_file()
+    assert (generated / "acme-plan-first-showhand" / "SKILL.md").is_file()
+    assert not (generated / "acme-plan-first-shape").exists()
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["emitted_skills"]["shape"]["name"] == "acme-plan-first-plan"
     assert verify(generated).passed
 
 

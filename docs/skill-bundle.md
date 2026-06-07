@@ -2,16 +2,17 @@
 
 Chinese version: [skill-bundle.zh-CN.md](./skill-bundle.zh-CN.md)
 
-A skill bundle is Forma's compiled artifact.
+A skill bundle is Forma's compiled workflow output.
 
 The profile is source. The Forma compiler resolves that source with the
-canonical methodology and target adapter, then emits a bundle that can be
-installed into Codex or Claude Code.
+canonical methodology and target adapter, then emits installable skills for
+Codex or Claude Code. Once installed, those skills become the runtime harness
+around concrete development goals.
 
-## Source To Artifact
+## Profile To Workflow Output
 
 ```text
-workflow profile
+profile
 + methodology
 + target adapter
 + optional temporary injection
@@ -20,7 +21,7 @@ workflow profile
 Forma compiler
         |
         v
-target-specific skill bundle
+target-specific workflow skill bundle
 ```
 
 The same workflow profile can be emitted for multiple targets without
@@ -28,32 +29,32 @@ rewriting the workflow rules by hand.
 
 ## Bundle Layout
 
-A generated plan-first bundle normally contains five stage skill directories and
-one manifest:
+A generated Plan-First bundle normally contains four core workflow skill
+directories, the `forma-showhand` candy skill, and one manifest:
 
 ```text
 <bundle>/
-  <shape-skill>/
+  forma-plan/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml        # Codex target only, when required
-  <gauge-skill>/
+  forma-ground/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <seal-skill>/
+  forma-lock/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <pour-skill>/
+  forma-execute/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  <flow-skill>/
+  forma-showhand/
     SKILL.md
     references/
     scripts/
@@ -61,8 +62,8 @@ one manifest:
   .forma-manifest.json
 ```
 
-Directory names may be renamed by a profile or temporary injection. The manifest
-records which directory implements each semantic stage.
+Directory names may be renamed by a profile or temporary injection. The
+manifest records the final emitted skill names and directories.
 
 Not every skill has every subdirectory. `references/` and `scripts/` appear only
 when methodology, profile, or temporary injection selects them for that stage.
@@ -79,8 +80,8 @@ examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
   .forma-manifest.json
 ```
 
-Those names come from the sample profile. They still map back to the semantic
-stages `shape`, `gauge`, `seal`, `pour`, and `flow` in the manifest.
+Those names come from the sample profile. The manifest records the final
+emitted skill names and directories.
 
 ## Skill Directory
 
@@ -125,7 +126,7 @@ for which target, and with which emitted skills?
 
 ## Generated Skill Quality
 
-A generated bundle should feel like a workflow, not a pile of copied policy.
+A generated bundle should feel like a runtime harness, not a pile of copied policy.
 
 Good bundles usually have:
 
@@ -143,7 +144,7 @@ rules into stage constraints, references, resources, or conditional overlays.
 
 ## Install Locations
 
-| Target | Personal install | Project/team install |
+| Target | Personal install | Project install |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
@@ -160,8 +161,9 @@ forma verify <generated-bundle-dir>
 ```
 
 Verification checks structure and methodology rules. It does not prove the
-profile is a good product decision or that generated policy is semantically
-complete. See [Verifier](./verifier.md). Human review still matters.
+profile is a good project decision or that the generated harness is
+semantically complete. See [Verifier](./verifier.md). Human review still
+matters.
 
 ## Related Docs
 
