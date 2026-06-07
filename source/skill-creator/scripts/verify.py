@@ -1,4 +1,4 @@
-"""Entry script the agent invokes after scaffolding a plan-first skill suite.
+"""Entry script the agent invokes after scaffolding a Plan-First workflow bundle.
 
 Stdlib-only. Wraps `forma_verifier`, which lives organizationally inside the
 Layer 1 meta source at `scripts/forma_verifier/`, so every adapted
@@ -7,7 +7,7 @@ agent to use it.
 
 Usage::
 
-    python scripts/verify.py <path-to-suite>
+    python scripts/verify.py <path-to-bundle>
 """
 
 from __future__ import annotations

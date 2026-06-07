@@ -151,7 +151,7 @@ Rules:
 After renaming, verify the generated bundle:
 
 ```bash
-forma verify <generated-suite-dir>
+forma verify <generated-bundle-dir>
 ```
 
 ## Repository Checks

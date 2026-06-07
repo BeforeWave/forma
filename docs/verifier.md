@@ -109,7 +109,7 @@ temporary injection policy, or runtime agent behavior.
 ## Bundled Verifier
 
 Layer 2 verifier code lives organizationally inside `source/skill-creator/` so
-a built `forma-creator` can verify generated suites without requiring the user
+a built `forma-creator` can verify generated bundles without requiring the user
 to install the developer CLI.
 
 The same verifier package is also used by the developer `forma verify` command.

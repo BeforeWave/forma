@@ -35,7 +35,7 @@ class Report:
     def format_human(self) -> str:
         lines = [
             f"forma verify: {self.suite_path}",
-            f"  suite kind : {self.suite_kind}",
+            f"  bundle kind: {self.suite_kind}",
             f"  errors     : {len(self.errors)}",
             f"  warnings   : {len(self.warnings)}",
         ]

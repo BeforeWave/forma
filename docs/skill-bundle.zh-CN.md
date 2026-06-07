@@ -101,7 +101,7 @@ Target metadata 只在对应 target 需要时输出。Codex bundle 可能包含 
 它记录的信息包括：
 
 - target；
-- suite kind 和 mode；
+- bundle kind（`suite_kind`）和 mode；
 - 生成技能名和目录；
 - 方法版本或 digest；
 - 解析后的 profile 顺序；
@@ -141,7 +141,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 运行：
 
 ```bash
-forma verify <generated-suite-dir>
+forma verify <generated-bundle-dir>
 ```
 
 验证检查结构和方法规则。它不证明 profile 是正确的产品决策，也不证明生成策略在语义上完整。见 [Verifier](./verifier.zh-CN.md)。人工评审仍然必要。

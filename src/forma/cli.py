@@ -22,13 +22,13 @@ from forma_verifier import verify as verify_suite
 @click.group()
 @click.version_option()
 def main() -> None:
-    """Forma — build plan-first AI skill suites with a verified shape."""
+    """Forma — compile project-specific agent workflows into skill bundles."""
 
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True, path_type=Path))
 def verify(path: Path) -> None:
-    """Verify a plan-first skill suite at PATH."""
+    """Verify a generated Forma workflow bundle at PATH."""
     report = verify_suite(path)
     click.echo(report.format_human())
     if not report.passed:
@@ -55,7 +55,7 @@ def verify(path: Path) -> None:
     "output_dir",
     required=True,
     type=click.Path(file_okay=False, path_type=Path),
-    help="Output directory for the generated suite.",
+    help="Output directory for the generated workflow bundle.",
 )
 @click.option(
     "--methodology",
@@ -70,7 +70,7 @@ def create(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compose methodology + resolved profile into a target-specific suite."""
+    """Compile a resolved profile into a target-specific workflow bundle."""
     try:
         manifest = create_suite(
             profile_file=profile_file,
@@ -111,7 +111,7 @@ def build_creator_command(
     output_dir: Path,
     target_agent: str,
 ) -> None:
-    """Generate target-specific installable Forma creator skills."""
+    """Build target-specific installable Forma creator bundles."""
     try:
         output = build_creator(source_dir, output_dir, target_agent)
     except ValueError as exc:

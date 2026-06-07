@@ -145,7 +145,7 @@ BUNDLED_PATH_RE = re.compile(
 CROSS_SKILL_RE = re.compile(r"\.\./[A-Za-z0-9._-]+/(scripts|references)")
 
 
-# ----- Structural rules (apply to all suites) -----
+# ----- Structural rules (apply to all bundles) -----
 
 def check_frontmatter_valid(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
     results: List[RuleResult] = []
@@ -183,7 +183,7 @@ def check_name_kebab_case(skill: SkillFile, ctx: SuiteContext) -> List[RuleResul
 
 
 def check_name_kind_match(skill: SkillFile, ctx: SuiteContext) -> List[RuleResult]:
-    """For plan-first suite skills, name must equal the parent skill directory."""
+    """For Plan-First bundle skills, name must equal the parent skill directory."""
     if ctx.suite_kind != "plan-first-suite":
         return []
     emitted = ctx.manifest.get("emitted_skills")
@@ -269,7 +269,7 @@ def check_no_cross_skill_borrowing(skill: SkillFile, ctx: SuiteContext) -> List[
     return []
 
 
-# ----- Methodology rules (apply only to plan-first suite skills) -----
+# ----- Methodology rules (apply only to Plan-First bundle skills) -----
 
 def _make_keyword_rule(
     rule_id: str,
@@ -391,7 +391,7 @@ def check_conditional_overlays(skill: SkillFile, ctx: SuiteContext) -> List[Rule
     if "Conditional References" not in sections:
         results.append(RuleResult(
             "R301", skill.relative_path, "error",
-            "conditional overlay suite skills must include `## Conditional References`"
+            "conditional overlay bundle skills must include `## Conditional References`"
         ))
     unconditional_text = "\n".join(
         sections.get(title, "")

@@ -138,7 +138,7 @@ stages:
 改名后验证生成 bundle：
 
 ```bash
-forma verify <generated-suite-dir>
+forma verify <generated-bundle-dir>
 ```
 
 ## 仓库检查

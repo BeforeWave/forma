@@ -30,7 +30,7 @@ emission. Keep concise stage workflow guidance in `SKILL.md`; emit long
 canonical requirement blocks as generated stage-local references under the
 same skill's `references/` directory, then cite them from `SKILL.md` with
 explicit `Load and follow` requirements. Fragment source files are not copied
-as-is into generated suites.
+as-is into generated bundles.
 
 In Forma source form, these files are maintained only under sibling
 `source/methodology/` and copied into this creator bundle by

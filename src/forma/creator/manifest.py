@@ -55,7 +55,7 @@ def build_manifest(
     profile: ProfileConfig,
     target_agent: str,
 ) -> Dict[str, object]:
-    """Build provenance metadata for generated suites."""
+    """Build provenance metadata for generated workflow bundles."""
     methodology_hashes = _file_hashes(methodology_dir)
     profile_hashes = _file_hashes_for_paths(profile.profile_root, profile.resolved_paths)
     methodology_tree_digest = _tree_digest(methodology_hashes)

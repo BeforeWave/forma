@@ -113,7 +113,7 @@ metadata.
 It records information such as:
 
 - target;
-- suite kind and mode;
+- bundle kind (`suite_kind`) and mode;
 - generated skill names and directories;
 - methodology version or digest;
 - resolved profile order;
@@ -156,7 +156,7 @@ guidance.
 Run:
 
 ```bash
-forma verify <generated-suite-dir>
+forma verify <generated-bundle-dir>
 ```
 
 Verification checks structure and methodology rules. It does not prove the

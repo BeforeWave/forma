@@ -1,4 +1,4 @@
-"""Forma — build plan-first AI skill suites with a verified shape."""
+"""Forma — compile project-specific agent workflows into skill bundles."""
 
 from importlib.metadata import PackageNotFoundError, version
 

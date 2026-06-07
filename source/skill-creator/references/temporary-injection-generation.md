@@ -13,7 +13,7 @@ artifact, not a tracked Layer 3 profile.
   that affect the generated five-skill bundle.
 - Keep source-specific examples concise and sanitized. Do not include private
   paths, credentials, business secrets, or organization-only commands unless
-  the current user explicitly wants those values in this one generated suite.
+  the current user explicitly wants those values in this one generated bundle.
 - If a constraint is one-off for this generation only, include it only in the
   temporary injection, mark it as non-durable in the classification table, and
   do not recommend committing it as a tracked profile.
@@ -46,7 +46,7 @@ Classify every extracted constraint before writing JSON.
 
 ## Source Adapter Classification
 
-When the user asks a generated suite to load planning context from an external
+When the user asks a generated bundle to load planning context from an external
 source, classify the behavior as an injected source adapter:
 
 - Put shape-time fetch/clarification behavior in `constraints.shape`.
@@ -109,9 +109,9 @@ Use `resources.<stage>.files` only when the destination path must not live under
 - Do not use `constraints.default` as a dumping ground for every user sentence.
 - Do not treat network access, local CLI authentication, or access to a
   specific issue tracker or document system as a base capability of every
-  generated plan-first suite.
+  generated Plan-First bundle.
 - Do not copy user docs verbatim into references merely to satisfy the
-  injection. Add only targeted local references when the generated suite really
+  injection. Add only targeted local references when the generated bundle really
   needs them.
 - Do not recommend promoting one-off generation-only constraints into a tracked
   profile.

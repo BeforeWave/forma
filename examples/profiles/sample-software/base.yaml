@@ -17,7 +17,7 @@ constraints:
   shape:
     - Classify natural-language constraints into default, stage-specific, or conditional overlay targets before plan finalization.
   seal:
-    - Keep one-off generated-suite constraints out of tracked profiles unless the owner explicitly approves durable behavior.
+    - Keep one-off generated-bundle constraints out of tracked profiles unless the owner explicitly approves durable behavior.
   pour:
     - Do not expand routine task execution by reading broad docs or generated baselines unless the finalized plan selects that scenario.
 validation_commands:

@@ -1,4 +1,4 @@
-"""Verifier runner — discovers SKILL.md files, classifies the suite, and applies rules."""
+"""Verifier runner: discover SKILL.md files, classify the bundle, and apply rules."""
 
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def load_manifest(root: Path) -> Dict[str, object]:
 
 
 def verify(path: Union[str, Path]) -> Report:
-    """Verify a skill suite at `path`. Returns a Report (errors + warnings)."""
+    """Verify a workflow bundle at `path`. Returns a Report (errors + warnings)."""
     root = Path(path).resolve()
     if not root.exists():
         report = Report(suite_path=str(root), suite_kind="unknown")

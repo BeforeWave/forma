@@ -19,7 +19,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/` | Canonical methodology source and Layer 1 meta skill source | present |
 | `src/forma/` | Developer Python package and CLI | present |
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
-| `examples/` | Sanitized composable profile examples and generated Mode-S suites | present |
+| `examples/` | Sanitized composable profile examples and generated Mode-S workflow bundles | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
@@ -30,7 +30,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/methodology/` | Canonical plan-first methodology source used to generate stage-specific workflow skills |
 | `source/methodology/stages/` | Stage body sources composed into generated `shape` / `gauge` / `seal` / `pour` / `flow` `SKILL.md` files |
 | `source/methodology/fragments/` | Source-only reusable methodology fragments expanded inline before generated `SKILL.md` output |
-| `source/methodology/resources/` | Stage-local fixed resources copied into generated suites, including output formats, workflow rules, templates, helpers, and runner scripts |
+| `source/methodology/resources/` | Stage-local fixed resources copied into generated workflow bundles, including output formats, workflow rules, templates, helpers, and runner scripts |
 | `source/methodology/resources/shared/` | Single source for identical fixed resources copied into multiple generated skills |
 | `source/skill-creator/` | Layer 1 meta skill source (`forma-creator`) |
 | `source/skill-creator/interfaces/codex/openai.yaml` | Codex UI metadata used when building the Codex creator |
@@ -41,7 +41,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/skill-creator/scripts/forma_verifier/` | Layer 2 verifier package, organizationally inside Layer 1 |
 
 Layer 2 lives organizationally inside Layer 1 so an installed creator skill can
-verify generated suites without depending on a separately installed developer
+verify generated workflow bundles without depending on a separately installed developer
 package. The same `forma_verifier` package is also discovered by
 `pyproject.toml` for the developer CLI and tests.
 
@@ -53,7 +53,7 @@ Wheel builds copy `source/methodology/` and `source/skill-creator/` into
 `forma.assets` package data. Installed CLI commands use those packaged assets
 first and fall back to source-checkout paths only during editable development.
 
-Generated skill suites keep references inside each skill directory. Shared
+Generated workflow bundles keep references inside each skill directory. Shared
 source resources are copied into each skill that needs them using consistent
 destination names such as `references/output-format.md` and
 stage-specific `references/planning-rules.md` or
@@ -75,7 +75,7 @@ generated skill resources.
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Mode-S skill contents |
 | `src/forma/adapters/skill.py` | Target-specific `forma-creator` builder with fixed output contracts |
-| `src/forma/creator/emitter.py` | Output writer for generated suites |
+| `src/forma/creator/emitter.py` | Output writer for generated workflow bundles |
 
 ## Documentation
 
@@ -110,7 +110,7 @@ generated skill resources.
 | `profiles/forma-self/forma-self-iteration.yaml` | Top-level self-iteration profile with `Iteration Area` conditional routing |
 | `profiles/forma-self/base.yaml` | Lightweight always-on self-profile constraints; governance docs are stage- or overlay-scoped, not default execution requirements |
 | `profiles/forma-self/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-layer execution overlays |
-| `profiles/forma-self/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration suites |
+| `profiles/forma-self/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration bundles |
 
 Project-owned profiles may contain Forma-specific workflow policy. They are
 separate from sanitized public examples under `examples/profiles/`.
@@ -130,15 +130,15 @@ heavy scenario-specific behavior belongs in conditional overlays.
 |---|---|
 | `examples/profiles/sample-backend/` | Sanitized profile stack showing base/dev/backend/language composition |
 | `examples/profiles/sample-software/` | Sanitized profile stack showing generic software plan-first behavior, Chinese workflow wording, Impact Profile / Impact Boundary controls, and safe showhand gates |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Mode-S suite and drift baseline |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Mode-S suite and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Mode-S workflow bundle and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Mode-S workflow bundle and drift baseline |
 
 Forma examples must stay sanitized. Real downstream profiles with
 organization-specific workflow commands, private paths, credentials, or business
 rules belong in the downstream repository that owns those constraints.
 `sample-software` is currently a profile-only example; the committed generated
 drift baselines in this issue remain the `sample-backend-go-github-issue-tracked` Codex and Claude
-Code suites.
+Code bundles.
 
 ## Tests
 
@@ -149,8 +149,8 @@ Code suites.
 | `tests/test_creator_builder.py` | Codex/Claude Code creator builder coverage |
 | `tests/test_creator.py` | Layer 3 integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |
-| `tests/fixtures/valid-suite/` | Minimal valid plan-first suite fixture |
-| `tests/fixtures/invalid-suite/` | Minimal invalid suite fixture with targeted rule failures |
+| `tests/fixtures/valid-suite/` | Minimal valid plan-first bundle fixture |
+| `tests/fixtures/invalid-suite/` | Minimal invalid bundle fixture with targeted rule failures |
 
 ## Planning state per issue
 

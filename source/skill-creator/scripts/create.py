@@ -4,7 +4,7 @@
 This script is bundled inside the installed `forma-creator` skill. It does not
 load Layer 3 profiles. Agents convert the current conversation's one-off
 natural-language injection into a temporary JSON file, then this script renders
-the fixed target suite from bundled methodology resources and verifies it.
+the fixed target workflow bundle from bundled methodology resources and verifies it.
 """
 
 from __future__ import annotations
@@ -233,7 +233,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a target-fixed Forma plan-first suite from one-off injection JSON."
+        description="Create a target-fixed Forma Plan-First workflow bundle from one-off injection JSON."
     )
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument(

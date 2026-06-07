@@ -193,7 +193,7 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
     lines.extend(["", "## Output Contract", ""])
     lines.extend(
         [
-            "- Before generating a suite, load "
+            "- Before generating a bundle, load "
             "`references/canonical-plan-first.md` and "
             "`references/profile-authoring-principles.md` and "
             "`references/temporary-injection-generation.md`; preserve the "
@@ -201,7 +201,7 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
             "classify natural-language constraints before writing JSON.",
             "- Convert current-session natural-language injection into a "
             "temporary JSON file and run `python scripts/create.py --output "
-            "<generated-suite-path> --injection-json <temporary-injection.json>`; "
+            "<generated-bundle-path> --injection-json <temporary-injection.json>`; "
             "do not use Layer 3 profiles from this installed creator.",
             "- Copy fixed generated-skill resources from "
             "`resources/plan-first/methodology/resources/shared/` and any "
@@ -261,7 +261,7 @@ def _interactive_constraint_contract() -> List[str]:
         "- Do not put `profile`, `includes`, tracked profile ids, or stage "
         "`name` / `directory` overrides in that temporary injection JSON. "
         "Final installable names belong only under `rename.stages`.",
-        "- Run `python scripts/create.py --output <generated-suite-path> "
+        "- Run `python scripts/create.py --output <generated-bundle-path> "
         "--injection-json <temporary-injection.json>` before installing, "
         "handing off, or reporting success.",
         "- Do not represent one-off constraints as tracked source. If the user "
@@ -272,7 +272,7 @@ def _interactive_constraint_contract() -> List[str]:
 
 def _codex_output_contract() -> List[str]:
     lines = [
-        "- Generate a Codex-ready suite root containing `forma-shape/`, "
+        "- Generate a Codex-ready workflow bundle root containing `forma-shape/`, "
         "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
@@ -294,7 +294,7 @@ def _codex_output_contract() -> List[str]:
 
 def _claude_output_contract() -> List[str]:
     lines = [
-        "- Generate a Claude Code-ready suite root containing `forma-shape/`, "
+        "- Generate a Claude Code-ready workflow bundle root containing `forma-shape/`, "
         "`forma-gauge/`, `forma-seal/`, `forma-pour/`, and `forma-flow/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "

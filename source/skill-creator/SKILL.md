@@ -1,15 +1,15 @@
 ---
 name: forma-creator
-description: Create or update self-contained Forma plan-first skill suites. Use when Codex needs to generate an installable flat suite of forma-shape, forma-gauge, forma-seal, forma-pour, and forma-flow SKILL.md folders, adapt the plan-first methodology to an organization, or verify a generated suite with the bundled Forma verifier before reporting success.
+description: Create or update self-contained Forma workflow bundles. Use when Codex needs to generate an installable flat bundle of forma-shape, forma-gauge, forma-seal, forma-pour, and forma-flow SKILL.md folders, adapt the Plan-First methodology to an organization, or verify a generated bundle with the bundled Forma verifier before reporting success.
 ---
 
 # Forma Creator
 
-Use this skill to create a Mode-S Forma suite: a flat, ready-to-install set of
+Use this skill to create a Forma workflow bundle: a flat, ready-to-install set of
 five plan-first skills named `forma-shape`, `forma-gauge`, `forma-seal`,
 `forma-pour`, and `forma-flow`.
 
-Before generating any suite, load `references/canonical-plan-first.md`,
+Before generating any bundle, load `references/canonical-plan-first.md`,
 `references/profile-authoring-principles.md`, and
 `references/temporary-injection-generation.md`. If this installed creator
 includes a fixed agent-target reference, load it too and treat it as the fixed
@@ -33,7 +33,7 @@ target contract.
     `references/temporary-injection-generation.md`; keep
     `constraints.default` minimal and put broad or expensive execution
     requirements into stage-specific constraints or `conditional_overlays`.
-   - If the user asks the generated suite to fetch planning context from an
+   - If the user asks the generated bundle to fetch planning context from an
      external source through a helper script, treat that as a source-context
      adapter. Add stage-specific constraints and resources only when the
      adapter is explicitly requested; do not treat network access, local CLI
@@ -59,7 +59,7 @@ target contract.
 6. Run the bundled deterministic creator script:
 
 ```bash
-python scripts/create.py --output <generated-suite-path> --injection-json <temporary-injection.json>
+python scripts/create.py --output <generated-bundle-path> --injection-json <temporary-injection.json>
 ```
 
 By default, the script creates exactly `forma-shape/`, `forma-gauge/`,
@@ -71,7 +71,7 @@ report success after it exits cleanly.
 
 ## Stage Rules
 
-Every generated suite uses the same five stages. The temporary injection JSON
+Every generated bundle uses the same five stages. The temporary injection JSON
 uses these stage keys, while installable skill directories and frontmatter names
 use the matching `forma-` prefix:
 
@@ -87,7 +87,7 @@ use the matching `forma-` prefix:
 
 ## Bundled Resources
 
-Generated suites must keep the canonical resources stage-local. These paths
+Generated bundles must keep the canonical resources stage-local. These paths
 exist inside a built or installed `forma-creator` bundle. In Forma source, the
 same files are maintained only under `source/methodology/` and copied into the
 creator bundle by `forma build-creator`.
@@ -187,7 +187,7 @@ When converting user natural language into temporary injection JSON:
 - Do not copy user docs verbatim.
 - Extract only workflow constraints, validation preferences, local references,
   display text, final installable names, and conditional route decisions that
-  affect this generated suite.
+  affect this generated bundle.
 - Classify every constraint by the narrowest injection target:
   - `constraints.default`: applies to all stages; keep it minimal and reserved
     for the lightest always-true bottom lines.
@@ -208,7 +208,7 @@ When converting user natural language into temporary injection JSON:
   `constraints.seal`, and copy only the adapter reference or script resources
   that the user explicitly requested.
 - Do not put source-context adapter behavior in `constraints.default` or make
-  it part of every generated suite.
+  it part of every generated bundle.
 
 ### Conditional Overlay Schema
 
@@ -281,13 +281,13 @@ skill. It checks:
 
 Use `scripts/create.py` for generation; it calls `scripts/verify.py` before
 returning success. Do not require the user to install the developer `forma`
-Python package just to generate or verify an agent-generated suite.
+Python package just to generate or verify an agent-generated bundle.
 
 ## Output
 
 When finished, report:
 
-- generated suite path
+- generated bundle path
 - temporary injection file path
 - classification table for injected constraints
 - verifier command and result

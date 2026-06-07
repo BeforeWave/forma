@@ -1,4 +1,4 @@
-"""Emit generated Mode-S skill suites to disk."""
+"""Emit generated Mode-S workflow bundles to disk."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def create_suite(
     target_agent: str,
     methodology_dir: Path | None = None,
 ) -> Path:
-    """Create a Mode-S suite on disk and return the manifest path."""
+    """Create a Mode-S workflow bundle on disk and return the manifest path."""
     _assert_target(target_agent)
     with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
         profile = load_profile(profile_file)
@@ -54,7 +54,7 @@ def emit_suite(
     profile: ProfileConfig,
     target_agent: str,
 ) -> None:
-    """Write a generated suite, replacing only known Forma output paths."""
+    """Write a generated workflow bundle, replacing only known Forma output paths."""
     _assert_target(target_agent)
     output_dir = output_dir.resolve()
     enabled_kinds = [kind for kind in KINDS if profile.stages[kind].enabled]
