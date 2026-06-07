@@ -9,6 +9,7 @@ This document maps the current Forma source tree and the role of each area.
 | `README.md` | English project entrypoint and documentation index | present |
 | `README.zh-CN.md` | Chinese project entrypoint and documentation index | present |
 | `AGENTS.md` | Agent-facing repo entrypoint | present |
+| `CLAUDE.md` | Claude Code-facing pointer back to `AGENTS.md` | present |
 | `STRUCTURE.md` | This file — top-level structure map | present |
 | `LICENSE` | Apache-2.0 license text | present |
 | `pyproject.toml` | Python package metadata and `forma` console entry point | present |
@@ -21,6 +22,7 @@ This document maps the current Forma source tree and the role of each area.
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
 | `examples/` | Sanitized composable profile examples and generated Mode-S workflow bundles | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
+| `dist/` | Committed release artifacts for creator skills, skill bundles, and the Codex plugin | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
 ## Source tree
@@ -67,10 +69,12 @@ generated skill resources.
 
 | Path | Role |
 |---|---|
-| `src/forma/cli.py` | Click CLI exposing `forma verify`, `forma create-bundle`, `forma build-creator`, and `forma explain` |
+| `src/forma/cli.py` | Click CLI exposing `verify`, `create-bundle`, `create-plugin`, `install`, `build-creator`, and `explain` |
 | `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
 | `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
 | `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
+| `src/forma/install.py` | Verified local artifact installer for single skills, skill bundles, and Codex plugins |
+| `src/forma/plugins.py` | Codex plugin artifact builder |
 | `src/forma/creator/manifest.py` | Methodology lookup and provenance manifest helpers |
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Mode-S skill contents |
@@ -101,6 +105,16 @@ generated skill resources.
 | `docs/examples.zh-CN.md` | Chinese examples guide |
 | `docs/usage.md` | English command reference, repository checks, source layout, and installed CLI behavior notes |
 | `docs/usage.zh-CN.md` | Chinese usage guide |
+
+## Release artifacts
+
+| Path | Role |
+|---|---|
+| `dist/skills/codex/forma-creator` | Codex-targeted creator skill |
+| `dist/skills/claude-code/forma-creator` | Claude Code-targeted creator skill |
+| `dist/skill-bundles/codex/` | Default Codex Plan-First skill bundle with `forma-plan` through `forma-showhand` |
+| `dist/skill-bundles/claude-code/` | Default Claude Code Plan-First skill bundle with `forma-plan` through `forma-showhand` |
+| `dist/plugins/codex/forma` | Codex plugin artifact exposing the default Plan-First skills |
 
 ## Profiles
 

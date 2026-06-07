@@ -113,7 +113,7 @@ metadata.
 It records information such as:
 
 - target;
-- bundle kind (`suite_kind`) and mode;
+- bundle kind (`bundle_kind`) and mode;
 - generated skill names and directories;
 - methodology version or digest;
 - resolved profile order;
@@ -145,7 +145,7 @@ rules into stage constraints, references, resources, or conditional overlays.
 
 | Target | Personal install | Project/team install |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 See [Targets](./targets.md) for discovery rules, target metadata, and trust

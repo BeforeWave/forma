@@ -131,26 +131,36 @@ For the full fit and mental model, read [Concepts](./docs/concepts.md).
 
 ## Try It
 
-With `forma` available on `PATH`, generate and verify a Codex workflow bundle:
+With `forma` available on `PATH`, generate, verify, and install a Codex
+workflow bundle:
 
 ```bash
-forma create \
-  --target codex \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-codex
-
-forma verify /tmp/backend-plan-first-codex
+forma create-bundle --target codex --output /tmp/forma-codex-bundle
+forma verify /tmp/forma-codex-bundle
+forma install --target codex --scope project /tmp/forma-codex-bundle
 ```
 
-Build a target-fixed `forma-creator`:
+Or generate a Codex plugin:
 
 ```bash
-forma build-creator --target codex --output /tmp/forma-creator-dist
-forma verify /tmp/forma-creator-dist/codex/forma-creator
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma verify /tmp/forma-codex-plugin
+forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
 
-Committed generated examples are drift baselines, not proof of runtime agent
-behavior.
+Quick agent prompts for release artifacts:
+
+- Codex plugin: "Install the Forma Codex plugin from `<artifact-url-or-path>`,
+  verify it, then use `forma-plan` for the first planning pass."
+- Skill bundle: "Install the Forma skill bundle from `<artifact-url-or-path>`
+  for Codex or Claude Code, verify it, then use `forma-plan` and
+  `forma-showhand` when the plan is ready."
+- Creator skill: "Install the target-specific `forma-creator` skill from
+  `<artifact-url-or-path>`, then use it to generate and verify a one-off
+  Plan-First workflow bundle."
+
+Committed generated examples and `dist/` artifacts are install surfaces and
+drift baselines, not proof of runtime agent behavior.
 
 For the complete first-run path, install locations, Claude Code output, and
 profile authoring details, see [Quick Start](./docs/quick-start.md).
@@ -161,7 +171,7 @@ profile authoring details, see [Quick Start](./docs/quick-start.md).
 that have been reviewed and committed as source.
 
 ```bash
-forma create \
+forma create-bundle \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex

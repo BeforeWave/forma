@@ -124,3 +124,26 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 7: docs-agent-discovery
+
+Outcome:
+- Updated README quick-try paths, command reference docs, target/install docs, `AGENTS.md`, new `CLAUDE.md`, discovery metadata, and generated creator release artifacts for the bundle/plugin/install surface.
+
+Decision Notes:
+- Homepage quick-try copy now gives agent handoff wording for Codex plugin, skill bundle, and creator skill artifacts while keeping `forma install` scoped to verified local paths.
+- `AGENTS.md` is target-neutral and names the committed `dist/` release surface; `CLAUDE.md` points Claude Code agents back to `AGENTS.md` and records that Claude Code plugin output is unsupported.
+- The `source/skill-creator` description and Codex UI metadata were updated, so `dist/skills/codex/forma-creator` and `dist/skills/claude-code/forma-creator` were regenerated in this task.
+- Full validation caught one remaining removed-command test path in `tests/test_runtime_assets.py`; it now uses `create-bundle` with no compatibility alias.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

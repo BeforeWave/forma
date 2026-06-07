@@ -101,7 +101,7 @@ Target metadata 只在对应 target 需要时输出。Codex bundle 可能包含 
 它记录的信息包括：
 
 - target；
-- bundle kind（`suite_kind`）和 mode；
+- bundle kind（`bundle_kind`）和 mode；
 - 生成技能名和目录；
 - 方法版本或 digest；
 - 解析后的 profile 顺序；
@@ -131,7 +131,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 | 目标 | 个人安装 | 项目/团队安装 |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 发现规则、target metadata 和信任边界见 [Targets](./targets.zh-CN.md)。

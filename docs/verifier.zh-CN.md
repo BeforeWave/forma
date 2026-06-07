@@ -2,7 +2,7 @@
 
 英文版：[verifier.md](./verifier.md)
 
-`forma verify` 用来检查生成的工作流 bundle 和 `forma-creator` bundle。
+`forma verify` 用来检查生成的工作流 bundle、`forma-creator` bundle 和 Codex plugin artifact。
 
 它是让 Forma 不只是“prompt generator”的工程边界：生成产物必须结构有效、符合 target 契约，并保留预期的 Plan-First 阶段结构。
 
@@ -10,7 +10,7 @@
 
 这些时候运行验证：
 
-- 安装生成 bundle 前；
+- 安装生成 bundle 或 Codex plugin 前；
 - 提交生成基线前；
 - 修改 profile 后；
 - 使用 temporary injection 后；

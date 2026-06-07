@@ -56,7 +56,7 @@ Validate: uv run --extra dev forma verify dist/plugins/codex/forma
 Depends: creator-target-contracts
 Constraint: generate `dist/skill-bundles/{codex,claude-code}/*` through explicit `create-bundle --output dist/skill-bundles/<target>`, not as a side effect of `create-plugin`.
 
-- [ ] [docs-agent-discovery] Update README, docs, AGENTS.md, CLAUDE.md, and discovery copy for the new release surface
+- [x] [docs-agent-discovery] Update README, docs, AGENTS.md, CLAUDE.md, and discovery copy for the new release surface
 Accept: Task Type=step; docs include quick-try agent wording for Codex plugin, skill bundle, and creator skill artifacts; usage docs cover `create-bundle`, `create-plugin`, `install`, `build-creator`, and `verify`; AGENTS.md is target-neutral and CLAUDE.md points Claude Code users back to it
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_docs_links.py
 Validate: rg -n -e "create-bundle|create-plugin|forma install|forma-plan|forma-showhand|Codex plugin|Claude Code" README.md README.zh-CN.md docs AGENTS.md CLAUDE.md pyproject.toml source/skill-creator/interfaces/codex/openai.yaml

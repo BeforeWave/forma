@@ -2,7 +2,8 @@
 
 Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 
-`forma verify` checks generated workflow bundles and `forma-creator` bundles.
+`forma verify` checks generated workflow bundles, `forma-creator` bundles, and
+Codex plugin artifacts.
 
 It is the engineering boundary that keeps Forma from being only a prompt
 generator: generated artifacts must have a valid structure, match the target
@@ -12,7 +13,7 @@ contract, and preserve the expected methodology shape.
 
 Run verification:
 
-- before installing a generated bundle;
+- before installing a generated bundle or Codex plugin;
 - before committing a generated baseline;
 - after changing a profile;
 - after temporary injection;

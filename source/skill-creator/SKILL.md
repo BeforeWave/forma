@@ -1,6 +1,6 @@
 ---
 name: forma-creator
-description: Create or update self-contained Forma workflow bundles. Use when Codex needs to generate an installable flat bundle of forma-shape, forma-gauge, forma-seal, forma-pour, and forma-flow SKILL.md folders, adapt the Plan-First methodology to an organization, or verify a generated bundle with the bundled Forma verifier before reporting success.
+description: Create or update self-contained Forma Plan-First workflow artifacts. Use when an agent needs to generate an installable workflow bundle, generate a Codex plugin when the fixed target contract allows it, adapt Plan-First methodology with temporary injection, or verify generated artifacts with the bundled Forma verifier before reporting success.
 ---
 
 # Forma Creator

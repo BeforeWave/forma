@@ -4,16 +4,16 @@
 
 `forma-creator` 是 Forma 的 Agent 侧生成入口。
 
-当你想先试一个工作流想法，但还不想写长期 profile YAML 时，用它。它会帮助 Agent 把已经评审过的自然语言工作流约束整理成 temporary injection JSON，生成 target 专用的 skill bundle，并在交付前验证。
+当你想先试一个工作流想法，但还不想写长期 profile YAML 时，用它。它会帮助 Agent 把已经评审过的自然语言工作流约束整理成 temporary injection JSON，生成 target 专用产物，并在交付前验证。
 
-## 和 `forma create` 的区别
+## 和 `forma create-bundle` 的区别
 
 | 路径 | 适合 | 输入 | 输出 |
 |---|---|---|---|
-| `forma create` | 长期团队或项目工作流规则。 | 已评审的 tracked profile YAML。 | 从已提交源码可重复生成的 bundle。 |
-| `forma-creator` | 一次性或试验性工作流想法。 | 已评审自然语言约束，先分类成 temporary injection JSON。 | 面向固定 target 的一次性生成 bundle。 |
+| `forma create-bundle` | 长期团队或项目工作流规则。 | 已评审的 tracked profile YAML。 | 从已提交源码可重复生成的 bundle。 |
+| `forma-creator` | 一次性或试验性工作流想法。 | 已评审自然语言约束，先分类成 temporary injection JSON。 | 面向固定 target 的一次性 verified 产物。 |
 
-`forma create` 是确定性的 profile 路径。
+`forma create-bundle` 是确定性的 profile 路径。
 
 `forma-creator` 是快速试手感的路径。它适合在团队还不知道哪些规则值得沉淀成长期 profile 前使用。
 
@@ -26,20 +26,22 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
 ```
 
-Codex creator 生成 Codex 形态的 workflow bundle。Claude Code creator 生成 Claude Code 形态的 workflow bundle。不要用一个 target 的 creator 去生成另一个 target 的 bundle。
+Codex creator 生成 Codex 形态的 workflow bundle，也可以在用户要求 plugin 输出时生成 Codex plugin artifact。Claude Code creator 只生成 Claude Code 形态的 workflow bundle。不要用一个 target 的 creator 去生成另一个 target 的 bundle。
+
+Creator 只报告输出路径和安装提示，不会把生成产物安装到用户或项目的 skill roots。
 
 ## Temporary Injection 生命周期
 
-Temporary injection 只属于一次生成出来的 bundle。
+Temporary injection 只属于一次生成出来的产物。
 
 正常生命周期是：
 
 1. 用户描述 workflow 约束。
 2. Agent 先分类每条约束，再写 JSON。
 3. Creator 写 temporary injection JSON 文件。
-4. Creator 生成 bundle。
+4. Creator 生成固定 target contract 允许的 bundle 或 Codex plugin artifact。
 5. Creator 运行随 bundle 携带的 verifier。
-6. 用户试用这个 workflow。
+6. 用户或接收方 Agent 安装 verified 产物并试用这个 workflow。
 7. 只有反复有用的规则才提升到 tracked profile。
 
 Temporary injection 不是 profile。除非用户明确把它提升到 profile，否则不要把它当成已评审的团队规则。
@@ -80,7 +82,7 @@ Source adapter 不是 Forma 基础能力。只有 profile 或 temporary injectio
 
 ## 验证
 
-`forma-creator` 应该在报告成功前运行验证。验证会检查生成 bundle 的结构和方法规则，但不证明注入规则本身是正确的产品决策。
+`forma-creator` 应该在报告成功前运行验证。验证会检查生成产物的结构和方法规则，但不证明注入规则本身是正确的产品决策。
 
 边界见 [Verifier](./verifier.zh-CN.md)。
 

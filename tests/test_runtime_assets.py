@@ -47,7 +47,7 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     generated = tmp_path / "generated"
     _run_installed(
         [
-            "create",
+            "create-bundle",
             "--target",
             "codex",
             "--profile",

@@ -35,7 +35,8 @@ Generated bundles can be installed for one user or checked into a project.
 
 | Target | Personal install | Project/team install |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 Review project or team skills before trusting them. Skills can include scripts and target-specific tool behavior.
@@ -62,7 +63,7 @@ Use this path for durable team or project rules that live in a reviewed profile.
 Generate a Codex workflow:
 
 ```bash
-forma create \
+forma create-bundle \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex
@@ -73,8 +74,7 @@ forma verify /tmp/backend-plan-first-codex
 Install it into Codex:
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -R /tmp/backend-plan-first-codex/* ~/.agents/skills/
+forma install --target codex --scope user /tmp/backend-plan-first-codex
 ```
 
 Then start Codex in a repository and invoke one generated skill.
@@ -90,7 +90,7 @@ Do not implement yet.
 Generate a Claude Code workflow from the same profile:
 
 ```bash
-forma create \
+forma create-bundle \
   --target claude-code \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-claude-code
@@ -101,8 +101,7 @@ forma verify /tmp/backend-plan-first-claude-code
 Install it into Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /tmp/backend-plan-first-claude-code/* ~/.claude/skills/
+forma install --target claude-code --scope user /tmp/backend-plan-first-claude-code
 ```
 
 In Claude Code, invoke the corresponding generated skill directly or use a matching natural-language request. Project skills require trusting the workspace before skill-owned tools can apply.
@@ -128,8 +127,7 @@ forma verify /tmp/forma-creator-dist/codex/forma-creator
 Install it into Codex:
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.agents/skills/
+forma install --target codex --scope user /tmp/forma-creator-dist/codex/forma-creator
 ```
 
 Build a Claude Code creator:
@@ -145,13 +143,14 @@ forma verify /tmp/forma-creator-dist/claude-code/forma-creator
 Install it into Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
+forma install --target claude-code --scope user /tmp/forma-creator-dist/claude-code/forma-creator
 ```
 
 Each generated `forma-creator` has a fixed target contract.
 
-A Codex creator generates Codex-shaped plan-first workflow bundles. A Claude Code creator generates Claude Code-shaped bundles.
+A Codex creator generates Codex-shaped plan-first workflow bundles and can
+emit Codex plugin artifacts when its fixed target contract says so. A Claude
+Code creator generates Claude Code-shaped bundles only.
 
 After installation, try workflow constraints inside the agent:
 
@@ -165,6 +164,31 @@ Use forma-creator to generate a Plan-First workflow bundle from these workflow c
 
 Show how these constraints are classified before generation.
 Verify the generated bundle before reporting success.
+```
+
+---
+
+## Path 3: Generate A Codex Plugin
+
+Use this path when the receiving Codex environment should install one plugin
+that exposes the five default Plan-First skills.
+
+```bash
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma verify /tmp/forma-codex-plugin
+forma install --target codex --scope user /tmp/forma-codex-plugin
+```
+
+The installed plugin exposes `forma-plan`, `forma-ground`, `forma-lock`,
+`forma-execute`, and `forma-showhand`. Claude Code plugin output is out of
+scope; use a Claude Code skill bundle instead.
+
+Agent handoff:
+
+```text
+Install the local Forma Codex plugin at /tmp/forma-codex-plugin.
+Verify it before installation.
+Then use forma-plan to clarify the first task and forma-showhand only after a plan is locked.
 ```
 
 ---

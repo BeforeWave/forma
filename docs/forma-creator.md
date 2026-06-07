@@ -6,17 +6,17 @@ Chinese version: [forma-creator.zh-CN.md](./forma-creator.zh-CN.md)
 
 Use it when you want to try a workflow idea without first writing a durable
 profile YAML file. It helps an agent turn reviewed natural-language workflow
-constraints into temporary injection JSON, generate a target-specific skill
-bundle, and verify that bundle before handoff.
+constraints into temporary injection JSON, generate a target-specific artifact,
+and verify that artifact before handoff.
 
-## How It Differs From `forma create`
+## How It Differs From `forma create-bundle`
 
 | Path | Best for | Input | Output |
 |---|---|---|---|
-| `forma create` | Durable team or project workflow rules. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
-| `forma-creator` | One-off or experimental workflow ideas. | Reviewed natural-language constraints classified into temporary injection JSON. | One generated bundle for the fixed target. |
+| `forma create-bundle` | Durable team or project workflow rules. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
+| `forma-creator` | One-off or experimental workflow ideas. | Reviewed natural-language constraints classified into temporary injection JSON. | One verified artifact for the fixed target. |
 
-`forma create` is the deterministic profile path.
+`forma create-bundle` is the deterministic profile path.
 
 `forma-creator` is the try-it-now path. It is useful before a team knows which
 rules deserve to become durable profile source.
@@ -30,22 +30,28 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
 ```
 
-A Codex creator generates Codex-shaped workflow bundles. A Claude Code creator
-generates Claude Code-shaped workflow bundles. Do not use a creator built for
-one target to generate a bundle for another target.
+A Codex creator generates Codex-shaped workflow bundles and can also generate a
+Codex plugin artifact when the user asks for plugin output. A Claude Code
+creator generates Claude Code-shaped workflow bundles only. Do not use a
+creator built for one target to generate a bundle for another target.
+
+The creator reports output paths and install hints only. It does not install
+the generated artifact into user or project skill roots.
 
 ## Temporary Injection Lifecycle
 
-Temporary injection is local to one generated bundle.
+Temporary injection is local to one generated artifact.
 
 The normal lifecycle is:
 
 1. The user describes workflow constraints.
 2. The agent classifies each constraint before writing JSON.
 3. The creator writes a temporary injection JSON file.
-4. The creator generates the bundle.
+4. The creator generates the bundle or Codex plugin artifact allowed by its
+   fixed target contract.
 5. The creator runs the bundled verifier.
-6. The user tries the workflow.
+6. The user or receiving agent installs the verified artifact and tries the
+   workflow.
 7. Only useful repeated rules are promoted into a tracked profile.
 
 Temporary injection is not a profile. It should not be treated as reviewed team
@@ -94,8 +100,8 @@ temporary local paths.
 ## Verification
 
 `forma-creator` should run verification before reporting success. Verification
-checks generated bundle structure and methodology rules, but it does not prove
-that the injected policy is a good product decision.
+checks generated artifact structure and methodology rules, but it does not
+prove that the injected policy is a good product decision.
 
 See [Verifier](./verifier.md) for the boundary.
 

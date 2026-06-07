@@ -18,28 +18,49 @@ forma verify /tmp/backend-plan-first-codex
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
-### `forma create`
+### `forma create-bundle`
 
 把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 workflow bundle：
 
 ```bash
-forma create \
-  --target codex \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-codex
+forma create-bundle --target codex --output /tmp/forma-codex-bundle
 ```
 
 必需选项：
 
 - `--target codex|claude-code`
-- `--profile <file>`
 - `--output <dir>`
+
+可选输入：
+
+- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出无注入的通用 Plan-First workflow，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
 开发时可选覆盖：
 
 - `--methodology <dir>`：使用指定的方法目录，而不是打包内置的运行时资源。
 
 Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
+
+### `forma create-plugin`
+
+从 profile 生成本地 plugin 产物。当前 plugin 输出只支持 Codex：
+
+```bash
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+```
+
+输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
+
+必需选项：
+
+- `--target codex`
+- `--output <dir>`
+
+可选输入：
+
+- `--profile <file>`：顶层 tracked profile。省略时，plugin 会暴露 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
+
+`--target claude-code` 会明确失败，因为当前不支持 Claude Code plugin 输出。
 
 ### `forma build-creator`
 
@@ -60,7 +81,29 @@ forma build-creator \
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
-每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 workflow bundle。Claude Code creator 生成 Claude Code 形态的 workflow bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 workflow bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 workflow bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+
+### `forma install`
+
+安装已经验证过的本地单个 skill、skill bundle 或 Codex plugin：
+
+```bash
+forma install --target codex --scope project /tmp/forma-codex-bundle
+forma install --target codex --scope project /tmp/forma-codex-plugin
+forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
+```
+
+必需参数和选项：
+
+- `PATH`：本地产物路径；这个命令故意不做 URL 下载。
+- `--target codex|claude-code`
+- `--scope user|project`
+
+覆盖行为：
+
+- 不加 `--replace` 时，如果目标目录已经存在，会拒绝覆盖。
+- 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
+- Claude Code plugin 安装会明确失败。
 
 ### `forma explain`
 
@@ -75,11 +118,12 @@ forma explain temporary-injection --format json --target codex
 
 ## 安装目标
 
-Forma 生成的是 target 专用 bundle。把生成技能目录复制到对应位置：
+Forma 生成 target 专用 bundle 和 Codex plugin。`forma install` 会把 verified 本地产物写到对应位置：
 
 | 目标 | 个人安装 | 项目/团队安装 |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
@@ -169,7 +213,8 @@ git diff --check
 
 打包安装后的 Forma 命令默认使用 `forma.assets` 中的运行时资源。源码路径只作为开发覆盖：
 
-- `forma create` 默认使用打包内置的方法，除非提供 `--methodology`。
+- `forma create-bundle` 和 `forma create-plugin` 默认使用打包内置的方法，除非提供 `--methodology`。
+- `forma install` 只安装 verified 本地产物，不下载 URL。
 - `forma build-creator` 默认使用打包内置的 creator 源，除非提供 `--source`。
 - `forma explain` 从打包内置的 references 渲染编写指南。
 

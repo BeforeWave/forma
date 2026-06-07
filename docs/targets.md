@@ -2,31 +2,37 @@
 
 Chinese version: [targets.zh-CN.md](./targets.zh-CN.md)
 
-Forma emits target-specific skill bundles.
+Forma emits target-specific skill bundles and Codex plugin artifacts.
 
 The workflow source can be the same, but the emitted bundle must match the
 target that will load it.
 
 ## Supported Targets
 
-| Target | CLI value | Personal install | Project/team install |
+| Artifact | CLI target | Personal install | Project/team install |
 |---|---|---|---|
-| Codex | `codex` | `$HOME/.agents/skills` | `.agents/skills` |
-| Claude Code | `claude-code` | `$HOME/.claude/skills` | `.claude/skills` |
+| Codex skills | `codex` | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `codex` | `$HOME/.codex/plugins` | `.codex/plugins` |
+| Claude Code skills | `claude-code` | `$HOME/.claude/skills` | `.claude/skills` |
 
 Use the matching `--target` value:
 
 ```bash
-forma create --target codex --profile <profile.yaml> --output <dir>
-forma create --target claude-code --profile <profile.yaml> --output <dir>
+forma create-bundle --target codex --profile <profile.yaml> --output <dir>
+forma create-bundle --target claude-code --profile <profile.yaml> --output <dir>
+forma create-plugin --target codex --profile <profile.yaml> --output <dir>
 ```
 
 ## Codex
 
 Codex reads skills from repository, user, admin, and bundled system locations.
 
-For project skills, Codex supports `.agents/skills`. User skills live under
-`$HOME/.agents/skills`.
+For project skills, Forma installs into `.codex/skills`. User skills install
+under `$HOME/.codex/skills`.
+
+For project plugins, Forma installs into `.codex/plugins/<plugin-id>`. User
+plugins install under `$HOME/.codex/plugins/<plugin-id>`. The installed plugin
+root keeps `.codex-plugin/plugin.json`.
 
 Codex target bundles may include `agents/openai.yaml` for UI metadata,
 invocation policy, and tool dependency declarations.
@@ -43,6 +49,9 @@ Claude Code also discovers project skills from parent directories and nested
 `.claude/skills` directories while working in a repository. Project skills may
 require workspace trust before tool permissions apply.
 
+Claude Code plugin output is not supported by Forma in this release. Use a
+Claude Code skill bundle instead.
+
 See the official Claude Code skills docs:
 <https://code.claude.com/docs/en/skills>.
 
@@ -55,6 +64,8 @@ For example:
 
 - Codex output may include `agents/openai.yaml`.
 - Claude Code output should not contain Codex-only metadata.
+- Codex plugin output includes `.codex-plugin/plugin.json`, root
+  `.forma-manifest.json`, and nested `skills/`.
 - Skill directory names and frontmatter must match the target-readable bundle
   contract.
 

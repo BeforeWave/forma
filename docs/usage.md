@@ -21,29 +21,58 @@ Use it before installing, committing, or sharing generated bundles.
 profile review or product judgment. See [Verifier](./verifier.md) for the
 verification boundary.
 
-### `forma create`
+### `forma create-bundle`
 
 Composes the canonical methodology and a resolved tracked profile into a
 target-specific workflow bundle:
 
 ```bash
-forma create \
-  --target codex \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-codex
+forma create-bundle --target codex --output /tmp/forma-codex-bundle
 ```
 
 Required options:
 
 - `--target codex|claude-code`
-- `--profile <file>`
 - `--output <dir>`
+
+Optional inputs:
+
+- `--profile <file>`: top-level tracked profile. If omitted, Forma emits the
+  generic no-injection Plan-First workflow with `forma-plan`,
+  `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`.
 
 Optional development override:
 
 - `--methodology <dir>`: use a source methodology directory instead of packaged runtime assets.
 
 Profile format is documented in [Profile Schema](./profile-schema.md).
+
+### `forma create-plugin`
+
+Builds a local plugin artifact from a profile. Currently plugin output is
+Codex-only:
+
+```bash
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+```
+
+The output root contains `.codex-plugin/plugin.json`, root
+`.forma-manifest.json`, and `skills/<skill-id>/` directories. It does not emit
+`dist/skill-bundles` or any sibling bundle output.
+
+Required options:
+
+- `--target codex`
+- `--output <dir>`
+
+Optional inputs:
+
+- `--profile <file>`: top-level tracked profile. If omitted, the plugin exposes
+  `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
+  `forma-showhand`.
+
+`--target claude-code` fails clearly because Claude Code plugin output is not
+supported.
 
 ### `forma build-creator`
 
@@ -65,9 +94,34 @@ Optional development override:
 - `--source <dir>`: use a source `forma-creator` directory instead of packaged runtime assets.
 
 Each generated `forma-creator` has a fixed target contract. A Codex creator
-generates Codex-shaped workflow bundles. A Claude Code creator generates Claude
-Code-shaped workflow bundles. See [Forma Creator](./forma-creator.md) for the
-agent-side generation path.
+generates Codex-shaped workflow bundles and can emit Codex plugin artifacts
+when the fixed target contract allows it. A Claude Code creator generates
+Claude Code-shaped workflow bundles only. See [Forma Creator](./forma-creator.md)
+for the agent-side generation path.
+
+### `forma install`
+
+Installs a verified local single skill, skill bundle, or Codex plugin:
+
+```bash
+forma install --target codex --scope project /tmp/forma-codex-bundle
+forma install --target codex --scope project /tmp/forma-codex-plugin
+forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
+```
+
+Required arguments and options:
+
+- `PATH`: local artifact path; URL download is intentionally not part of this
+  command.
+- `--target codex|claude-code`
+- `--scope user|project`
+
+Overwrite behavior:
+
+- Without `--replace`, existing destination directories are rejected.
+- With `--replace`, Forma replaces only the destination artifacts selected by
+  the verified source.
+- Claude Code plugin install attempts fail clearly.
 
 ### `forma explain`
 
@@ -84,12 +138,13 @@ injection.
 
 ## Install Targets
 
-Forma emits target-specific bundles. Copy generated skill directories into the
-matching target location:
+Forma emits target-specific bundles and Codex plugins. `forma install` writes
+verified local artifacts into the matching target location:
 
 | Target | Personal install | Project/team install |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 For target-specific discovery, metadata, and trust details, see
@@ -184,7 +239,8 @@ See [Repository Structure](../STRUCTURE.md) for the detailed tree map.
 Packaged Forma commands use `forma.assets` runtime assets by default. Source
 paths are development overrides only:
 
-- `forma create` uses packaged methodology unless `--methodology` is provided.
+- `forma create-bundle` and `forma create-plugin` use packaged methodology unless `--methodology` is provided.
+- `forma install` only installs verified local artifacts; it does not download URLs.
 - `forma build-creator` uses packaged creator source unless `--source` is provided.
 - `forma explain` renders canonical guidance from packaged references.
 

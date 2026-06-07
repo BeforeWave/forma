@@ -24,7 +24,7 @@ examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code
 ## 生成 Bundle
 
 ```bash
-forma create \
+forma create-bundle \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex

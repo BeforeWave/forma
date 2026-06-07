@@ -3,8 +3,8 @@
   "creator": {
     "directory": "forma-creator",
     "file_hashes": {
-      "SKILL.md": "692abc33044bad4720c0fc38086fb86cc4ce2da3a7499e432d83c5b74c86231c",
-      "interfaces/codex/openai.yaml": "7b668074d1de1d864716140fd4a7d921df8a5ec4de2f05944aa907337aa986d2",
+      "SKILL.md": "33e56e08b206fb11169964eb8e015a805b73f6ece97fe4666e09a95bf9930827",
+      "interfaces/codex/openai.yaml": "a35d65e3d45ce669c5d9bd3c0ce31300f9947d724c4ded9549433aa0e5b0740e",
       "references/canonical-plan-first.md": "49a12232e9edf8e6a8ae22ff4624118f84f9c22dc185b6a3b3aa0f7bda2b6611",
       "references/profile-authoring-principles.md": "777ecd99aae97f367ae2dd2513c5209743346eed28363f86c31babbd6519eaa9",
       "references/temporary-injection-generation.md": "5ff2d48102dbda6344f787e9dde804818275b5e5c8b59ef6f89a7d1a57d07e3b",
@@ -29,19 +29,19 @@
       "scripts/verify.py": "51a9a82ef1f4592d81b335a421d7efbc7d21b5b2e86b1781d49c800d632c178a"
     },
     "name": "forma-creator",
-    "source_revision": "307e0af",
+    "source_revision": "649154d",
     "source_revision_type": "git-short-sha",
-    "source_tree_digest": "768efef61efb6ed36e3ebe7a7b0fd03155732f30ce506ee343b8f55bfa1c3ee4"
+    "source_tree_digest": "35e61c9097beeb4c0c17d94197663abefa78514d8f2a577661969db1a215f05a"
   },
   "format": "forma-creator-manifest-v1",
-  "generated_at": "2026-06-07T13:44:42Z",
+  "generated_at": "2026-06-07T13:54:24Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.0"
   },
   "generator_version": "0.1.0",
-  "methodology_source_revision": "307e0af",
+  "methodology_source_revision": "649154d",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "e8ff346bb3aaf08288f9cac898b6f1230629a24bac5cd2df0f16444c266956e6",
   "methodology_version": "0.1.0",

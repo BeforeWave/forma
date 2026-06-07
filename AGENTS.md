@@ -1,6 +1,6 @@
 # AGENTS
 
-Forma is a source workspace for plan-first skill-suite creation. It contains canonical methodology fragments, a self-contained `forma-creator` meta skill source with an embedded verifier, and a developer Python CLI/generator/creator-builder.
+Forma is a source workspace for Plan-First skill-bundle and Codex plugin creation. It contains canonical methodology fragments, a self-contained `forma-creator` meta skill source with an embedded verifier, generated release artifacts under `dist/`, and a developer Python CLI/generator/creator-builder.
 
 ## Read first
 
@@ -8,6 +8,7 @@ Forma is a source workspace for plan-first skill-suite creation. It contains can
 - `STRUCTURE.md` — the current source tree
 - `plans/issue-<id>/plan.md` — current issue goal, scope, approach, validation
 - `plans/issue-<id>/tasks.md` — current issue task checklist
+- `dist/` — committed install surface for generated creator skills, skill bundles, and the Codex plugin
 
 ## Working rules
 
@@ -21,7 +22,21 @@ Forma is a source workspace for plan-first skill-suite creation. It contains can
 - Keep pip/pipx installed CLI behavior independent of the source checkout. Runtime guidance, default methodology, and default creator source must be available through packaged `forma.assets`; source paths are overrides only.
 - Keep Forma's committed profile examples sanitized. Real downstream profiles with organization-specific workflow commands or private constraints belong in their owning repositories.
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.
+- Use `forma create-bundle --target codex|claude-code --output <dir>` for local skill-bundle output.
+- Use `forma create-plugin --target codex --output <dir>` for Codex plugin output. Claude Code plugin output is not supported.
+- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local artifacts. Do not imply URL download support inside `forma install`.
+- Verify generated or release artifacts before recommending them: `forma verify <path>`.
 
 ## Workflow state
 
-Each issue's plan, tasks, and execution evidence live under `plans/issue-<id>/`. Treat `source/methodology/` as canonical methodology source and `source/skill-creator/` as the Layer 1 meta source. Install target-specific `forma-creator` bundles only after generating them with `forma build-creator --target <agent>`; each generated creator has a fixed target contract for its later `shape` / `gauge` / `seal` / `pour` / `flow` output.
+Each issue's plan, tasks, and execution evidence live under `plans/issue-<id>/`. Treat `source/methodology/` as canonical methodology source and `source/skill-creator/` as the Layer 1 meta source. Install target-specific `forma-creator` bundles only after generating them with `forma build-creator --target <agent>`; each generated creator has a fixed target contract for later workflow output. Codex-targeted creators can generate workflow bundles and Codex plugin artifacts; Claude Code-targeted creators generate workflow bundles only.
+
+## Release surface
+
+- `dist/skills/codex/forma-creator`
+- `dist/skills/claude-code/forma-creator`
+- `dist/skill-bundles/codex/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
+- `dist/skill-bundles/claude-code/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
+- `dist/plugins/codex/forma`
+
+When handing off to another agent, give it the local path or release URL for one of those artifacts, ask it to verify the artifact first, then install the local verified path into the requested target/scope.

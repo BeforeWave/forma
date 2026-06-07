@@ -33,7 +33,8 @@ forma --help
 
 | 目标 | 个人安装 | 项目/团队安装 |
 |---|---|---|
-| Codex | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
 信任项目或团队技能前先审查内容。技能可以包含脚本，也可能带有 target 专用的工具行为。
@@ -60,7 +61,7 @@ forma --help
 生成 Codex 工作流：
 
 ```bash
-forma create \
+forma create-bundle \
   --target codex \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-codex
@@ -71,8 +72,7 @@ forma verify /tmp/backend-plan-first-codex
 安装到 Codex：
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -R /tmp/backend-plan-first-codex/* ~/.agents/skills/
+forma install --target codex --scope user /tmp/backend-plan-first-codex
 ```
 
 然后在某个仓库里启动 Codex，调用一个生成出来的技能。
@@ -88,7 +88,7 @@ Do not implement yet.
 同一个 profile 也可以生成 Claude Code 工作流：
 
 ```bash
-forma create \
+forma create-bundle \
   --target claude-code \
   --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
   --output /tmp/backend-plan-first-claude-code
@@ -99,8 +99,7 @@ forma verify /tmp/backend-plan-first-claude-code
 安装到 Claude Code：
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /tmp/backend-plan-first-claude-code/* ~/.claude/skills/
+forma install --target claude-code --scope user /tmp/backend-plan-first-claude-code
 ```
 
 在 Claude Code 里，可以直接调用对应生成技能，也可以用匹配的自然语言请求。项目级 skills 需要先信任 workspace，技能自带的工具才会生效。
@@ -126,8 +125,7 @@ forma verify /tmp/forma-creator-dist/codex/forma-creator
 安装到 Codex：
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -R /tmp/forma-creator-dist/codex/forma-creator ~/.agents/skills/
+forma install --target codex --scope user /tmp/forma-creator-dist/codex/forma-creator
 ```
 
 生成 Claude Code 版 creator：
@@ -143,13 +141,12 @@ forma verify /tmp/forma-creator-dist/claude-code/forma-creator
 安装到 Claude Code：
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -R /tmp/forma-creator-dist/claude-code/forma-creator ~/.claude/skills/
+forma install --target claude-code --scope user /tmp/forma-creator-dist/claude-code/forma-creator
 ```
 
 每个 `forma-creator` 都固定一个 target。
 
-Codex 版 creator 生成 Codex 形态的 Plan-First 工作流套件。Claude Code 版 creator 生成 Claude Code 形态的套件。
+Codex 版 creator 生成 Codex 形态的 Plan-First 工作流 bundle，也可以在固定 target contract 明确允许时生成 Codex plugin。Claude Code 版 creator 只生成 Claude Code 形态的 bundle。
 
 安装后，可以在 Agent 里快速试工作流想法：
 
@@ -163,6 +160,28 @@ Codex 版 creator 生成 Codex 形态的 Plan-First 工作流套件。Claude Cod
 
 生成前先说明这些规则会如何分类。
 生成后验证套件。
+```
+
+---
+
+## 路径 3：生成 Codex Plugin
+
+如果接收方 Codex 环境希望安装一个 plugin，并通过这个 plugin 暴露五个默认 Plan-First skills，用这个路径：
+
+```bash
+forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma verify /tmp/forma-codex-plugin
+forma install --target codex --scope user /tmp/forma-codex-plugin
+```
+
+安装后的 plugin 暴露 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。Claude Code plugin 不在当前范围内；Claude Code 用 skill bundle。
+
+给 Agent 的交接话术：
+
+```text
+安装本地 Forma Codex plugin：/tmp/forma-codex-plugin。
+安装前先验证。
+然后用 forma-plan 澄清第一个任务；只有计划锁定后才用 forma-showhand。
 ```
 
 ---
