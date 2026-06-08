@@ -23,8 +23,13 @@ forma --help
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
 ```
 
-然后把这个本地 plugin 加到 Codex marketplace，用
-`codex plugin add <plugin>@<marketplace>` 安装，或在 Codex plugin UI 里安装。
+这一步写出的是本地 plugin source。先把这个目录加到 Codex marketplace。local test
+可以用 repo 级 `.agents/plugins/marketplace.json`，也可以用个人级
+`~/.agents/plugins/marketplace.json`；marketplace entry 的 `source.path`
+指向生成出的 plugin 目录，或指向复制后的 `./plugins/forma` 目录。先运行
+`codex plugin marketplace list` 查看可用的 marketplace name 和 root。然后运行
+`codex plugin add forma@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
+Codex thread。
 
 把当前 issue 或任务背景发给 Codex，并要求先从规划开始：
 

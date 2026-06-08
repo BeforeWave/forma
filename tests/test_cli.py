@@ -65,8 +65,21 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0, result.output
-    assert "codex plugin add <plugin>@<marketplace>" in result.output
-    assert "Codex plugin UI" in result.output
+    assert "Codex plugin generated, not installed." in result.output
+    assert "name: forma" in result.output
+    assert "root:" in result.output
+    assert "Install with Codex:" in result.output
+    assert "codex plugin marketplace list" in result.output
+    assert ".agents/plugins/marketplace.json" in result.output
+    assert "marketplace root path:" in result.output
+    assert "marketplace name:" in result.output
+    assert "mapping: <marketplace-root-path>/.agents/plugins/marketplace.json" in result.output
+    assert "plugins[].source.path points from marketplace root path" in result.output
+    assert "codex plugin marketplace add <marketplace-root-path>" in result.output
+    assert "codex plugin add forma@<marketplace-name>" in result.output
+    assert "codex plugin add forma@personal" in result.output
+    assert "Start a new Codex thread" in result.output
+    assert "Forma does not install Codex plugins" in result.output
     assert (output / ".codex-plugin" / "plugin.json").is_file()
     assert (output / ".forma-manifest.json").is_file()
     assert (output / "skills" / "forma-plan" / "SKILL.md").is_file()
@@ -243,9 +256,21 @@ def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> 
     )
 
     assert install.exit_code != 0
-    assert "forma install does not install Codex plugins" in install.output
-    assert "codex plugin add <plugin>@<marketplace>" in install.output
-    assert "Codex plugin UI" in install.output
+    assert "forma install does not install Codex plugin artifacts" in install.output
+    assert "Codex plugin generated, not installed." in install.output
+    assert "name: forma" in install.output
+    assert "root:" in install.output
+    assert "Install with Codex:" in install.output
+    assert "codex plugin marketplace list" in install.output
+    assert ".agents/plugins/marketplace.json" in install.output
+    assert "marketplace root path:" in install.output
+    assert "marketplace name:" in install.output
+    assert "mapping: <marketplace-root-path>/.agents/plugins/marketplace.json" in install.output
+    assert "plugins[].source.path points from marketplace root path" in install.output
+    assert "codex plugin add forma@<marketplace-name>" in install.output
+    assert "codex plugin add forma@personal" in install.output
+    assert "Start a new Codex thread" in install.output
+    assert "Forma does not install Codex plugins" in install.output
     assert not (project / ".codex" / "plugins").exists()
 
 
@@ -280,5 +305,6 @@ def test_install_rejects_profile_named_codex_plugin(
     )
 
     assert install.exit_code != 0
-    assert "forma install does not install Codex plugins" in install.output
-    assert "codex plugin add <plugin>@<marketplace>" in install.output
+    assert "forma install does not install Codex plugin artifacts" in install.output
+    assert "name: sample-backend-go-github-issue-tracked" in install.output
+    assert "codex plugin add sample-backend-go-github-issue-tracked@<marketplace-name>" in install.output

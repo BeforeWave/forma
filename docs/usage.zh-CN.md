@@ -102,8 +102,8 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 
 - 不加 `--replace` 时，如果目标目录已经存在，会拒绝覆盖。
 - 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
-- Codex plugin 安装会明确失败，并提示使用
-  `codex plugin add <plugin>@<marketplace>` 或 Codex plugin UI。
+- Codex plugin 安装会明确失败，并提示 Codex marketplace 设置、
+  `codex plugin add <plugin>@<marketplace-name>`，以及安装后新开 thread。
 
 ### `forma explain`
 
@@ -125,8 +125,15 @@ Forma 生成 target 专用 skill bundle。`forma install` 会把 verified 本地
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin 输出是本地 plugin source。把生成出的 plugin 加到 Codex marketplace 后，
-用 `codex plugin add <plugin>@<marketplace>` 安装，或在 Codex plugin UI 里安装。
+Codex plugin 输出是本地 plugin source。先把生成出的 plugin root 加到 Codex
+marketplace：可以用 repo 级 `.agents/plugins/marketplace.json`，个人级
+`~/.agents/plugins/marketplace.json`，也可以用
+`codex plugin marketplace add <marketplace-root-path>` 注册单独的本地 marketplace
+root path。先运行 `codex plugin marketplace list` 查看可用的 marketplace name 和
+root。然后运行 `codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI
+里安装。安装后新开 Codex thread，这样 plugin skills 才会被发现。
+`<marketplace-name>` 来自
+`<marketplace-root-path>/.agents/plugins/marketplace.json` 的顶层 `name`。
 
 target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 

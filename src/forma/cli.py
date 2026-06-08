@@ -17,6 +17,7 @@ from forma.adapters import ADAPTER_TARGETS, build_creator
 from forma.creator import build_bundle
 from forma.explain import render_guidance
 from forma.install import install_artifact
+from forma.plugin_guidance import codex_plugin_install_hint
 from forma.plugins import build_codex_plugin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
@@ -136,11 +137,8 @@ def create_plugin_command(
         raise click.ClickException(str(exc)) from exc
     click.echo(f"forma create-plugin: wrote Codex plugin: {output_dir}")
     click.echo(f"plugin: {plugin_json}")
-    click.echo(
-        "install hint: add this plugin to a Codex marketplace, then run "
-        "`codex plugin add <plugin>@<marketplace>` or install it from the "
-        "Codex plugin UI"
-    )
+    click.echo("install hint:")
+    click.echo(codex_plugin_install_hint(output_dir))
 
 
 @main.command("install")

@@ -124,8 +124,9 @@ Overwrite behavior:
 - Without `--replace`, existing destination directories are rejected.
 - With `--replace`, Forma replaces only the destination outputs selected by
   the verified source.
-- Codex plugin install attempts fail with guidance to use
-  `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
+- Codex plugin install attempts fail with guidance for Codex marketplace setup,
+  `codex plugin add <plugin>@<marketplace-name>`, and starting a new thread
+  after install.
 
 ### `forma explain`
 
@@ -153,9 +154,16 @@ local skill outputs into the matching target location:
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin outputs are local plugin sources. Add the generated plugin to a
-Codex marketplace, then run `codex plugin add <plugin>@<marketplace>` or install
-it from the Codex plugin UI.
+Codex plugin outputs are local plugin sources. Add the generated plugin root to
+a Codex marketplace first: use a repo marketplace at
+`.agents/plugins/marketplace.json`, a personal marketplace at
+`~/.agents/plugins/marketplace.json`, or register a separate local marketplace
+root path with `codex plugin marketplace add <marketplace-root-path>`. Run
+`codex plugin marketplace list` to see available marketplace names and roots.
+Then run `codex plugin add <plugin>@<marketplace-name>`, or install it from the
+Codex plugin UI. Start a new Codex thread after installing so the plugin skills
+are discovered. `<marketplace-name>` is the top-level `name` in
+`<marketplace-root-path>/.agents/plugins/marketplace.json`.
 
 For target-specific discovery, metadata, and trust details, see
 [Targets](./targets.md).

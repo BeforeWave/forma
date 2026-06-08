@@ -25,9 +25,14 @@ Generate the default Plan-First plugin:
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
 ```
 
-Then add that local plugin to a Codex marketplace and install it with
-`codex plugin add <plugin>@<marketplace>`, or install it from the Codex plugin
-UI.
+This writes a local plugin source. Add that folder to a Codex marketplace
+first. For local testing, use a repo marketplace at
+`.agents/plugins/marketplace.json` or a personal marketplace at
+`~/.agents/plugins/marketplace.json`; the marketplace entry's `source.path`
+points at the generated plugin folder or a copied `./plugins/forma` folder.
+Run `codex plugin marketplace list` to see available marketplace names and
+roots. Then run `codex plugin add forma@<marketplace-name>`, or install it from
+the Codex plugin UI. Start a new Codex thread after installing.
 
 Send the current issue or task context to Codex and ask it to start with planning:
 

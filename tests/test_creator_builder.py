@@ -351,8 +351,21 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     assert result.returncode == 0, result.stderr + result.stdout
     assert "forma creator build-plugin" in result.stdout
     assert "install hint:" in result.stdout
-    assert "codex plugin add <plugin>@<marketplace>" in result.stdout
-    assert "Codex plugin UI" in result.stdout
+    assert "Codex plugin generated, not installed." in result.stdout
+    assert "name: forma" in result.stdout
+    assert "root:" in result.stdout
+    assert "Install with Codex:" in result.stdout
+    assert "codex plugin marketplace list" in result.stdout
+    assert ".agents/plugins/marketplace.json" in result.stdout
+    assert "marketplace root path:" in result.stdout
+    assert "marketplace name:" in result.stdout
+    assert "mapping: <marketplace-root-path>/.agents/plugins/marketplace.json" in result.stdout
+    assert "plugins[].source.path points from marketplace root path" in result.stdout
+    assert "codex plugin marketplace add <marketplace-root-path>" in result.stdout
+    assert "codex plugin add forma@<marketplace-name>" in result.stdout
+    assert "codex plugin add forma@personal" in result.stdout
+    assert "Start a new Codex thread" in result.stdout
+    assert "Forma does not install Codex plugins" in result.stdout
     assert (generated / ".codex-plugin" / "plugin.json").is_file()
     assert (generated / ".forma-manifest.json").is_file()
     assert (generated / "skills" / "forma-plan" / "SKILL.md").is_file()

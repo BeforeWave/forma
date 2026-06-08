@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Literal
 
+from forma.plugin_guidance import codex_plugin_install_hint
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
@@ -31,7 +32,10 @@ def install_artifact(
     source = source.resolve()
     artifact_kind = _classify_artifact(source)
     if artifact_kind == "codex-plugin":
-        raise ValueError(_codex_plugin_install_guidance())
+        raise ValueError(
+            "forma install does not install Codex plugin artifacts.\n\n"
+            + codex_plugin_install_hint(source)
+        )
     if artifact_kind == "skill":
         _verify_source(source)
         name = _skill_name(source)
@@ -109,11 +113,3 @@ def _copy_targets(targets: Iterable[tuple[Path, Path]], replace: bool) -> None:
     for source, destination in targets:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(source, destination)
-
-
-def _codex_plugin_install_guidance() -> str:
-    return (
-        "forma install does not install Codex plugins. Use `codex plugin add "
-        "<plugin>@<marketplace>` after adding the plugin to a Codex marketplace, "
-        "or install it from the Codex plugin UI."
-    )
