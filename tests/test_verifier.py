@@ -46,12 +46,20 @@ def copy_valid_plugin(tmp_path: Path) -> Path:
         json.dumps(
             {
                 "id": "fixture",
-                "name": "Fixture",
+                "name": "fixture",
+                "version": "0.1.0",
                 "description": "Fixture plugin.",
-                "skills": [
-                    {"id": kind, "description": f"{kind} skill."}
-                    for kind in ("shape", "gauge", "seal", "pour", "flow")
-                ],
+                "author": {"name": "Fixture"},
+                "skills": "./skills/",
+                "interface": {
+                    "displayName": "Fixture",
+                    "shortDescription": "Fixture plugin.",
+                    "longDescription": "Fixture plugin.",
+                    "developerName": "Fixture",
+                    "category": "Productivity",
+                    "capabilities": ["Read", "Write"],
+                    "defaultPrompt": ["Use Fixture."],
+                },
             }
         ),
         encoding="utf-8",
@@ -321,17 +329,17 @@ def test_codex_plugin_manifest_matches_emitted_skills(tmp_path: Path) -> None:
     assert report.passed, report.format_human()
 
 
-def test_codex_plugin_manifest_rejects_mismatched_skill_ids(tmp_path: Path) -> None:
+def test_codex_plugin_manifest_rejects_bad_skills_path(tmp_path: Path) -> None:
     plugin = copy_valid_plugin(tmp_path)
     plugin_json = plugin / ".codex-plugin" / "plugin.json"
     raw = json.loads(plugin_json.read_text(encoding="utf-8"))
-    raw["skills"][0]["id"] = "wrong-shape"
+    raw["skills"] = "./wrong-skills/"
     plugin_json.write_text(json.dumps(raw), encoding="utf-8")
 
     report = verify(plugin)
 
     assert_has_error(report, "R203")
-    assert "must match emitted skills" in report.format_human()
+    assert "must resolve to `skills`" in report.format_human()
 
 
 def test_conditional_manifest_rejects_missing_overlay_route(tmp_path: Path) -> None:

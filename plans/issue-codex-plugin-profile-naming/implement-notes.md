@@ -100,3 +100,24 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 6: codex-plugin-ingestion-contract
+
+Outcome:
+- Codex plugin generation now emits the current `plugin-creator` manifest contract, the verifier rejects legacy plugin schema drift, dist artifacts were regenerated, and `forma@personal` installs through Codex's marketplace flow.
+
+Decision Notes:
+- Options considered were preserving the previous `plugin.json.skills` skill-list array versus switching to the current Codex contract where `skills` points at `./skills/`. Selected the current contract because `plugin-creator` validation and Codex marketplace ingestion both reject the legacy array shape.
+- Options considered for personal marketplace source were a symlink under `~/.agents/plugins/plugins/forma` versus the scaffolded personal marketplace source under `~/plugins/forma`. Selected `~/plugins/forma` because `plugin-creator` defines `./plugins/<plugin-name>` relative to the personal marketplace root as the user plugin source.
+
+Plan Gaps Found:
+- The original task contract treated `plugin.json` skill ids as the Codex plugin skill registry. Current Codex ingestion discovers bundled skills through the `skills` path and nested `SKILL.md` files.
+
+Classifications:
+- The user-scope install and marketplace mutation were intentionally performed after the user requested global install/debugging, even though the original issue validation only allowed temporary project-scope install smoke.
+
+Deviations From Plan:
+- Added `plugin-creator` validation and `codex plugin add forma@personal` evidence because Forma's own verifier was insufficient to prove Codex UI installability.
+
+Follow-ups:
+- Task 7 will change the Forma self profile skill names and plugin page copy now that the install path is usable.

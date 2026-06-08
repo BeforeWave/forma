@@ -51,7 +51,7 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 
 输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
 
-对 tracked profile 来说，Codex plugin id 来自 profile 的 `bundle.name`。plugin 展示名也从这个值派生，`plugin.json` 里的 skill id 跟随 `.forma-manifest.json` 记录的 emitted skill 名称。如果 profile 通过 `stages.<stage>.name` 改了技能名，plugin 也会暴露这些改名后的 skills。
+对 tracked profile 来说，Codex plugin id 来自 profile 的 `bundle.name`。plugin 展示名也从这个值派生，`plugin.json` 指向嵌套的 `./skills/` 目录。嵌套 skill 名称跟随 `.forma-manifest.json` 记录的 emitted skill 名称。如果 profile 通过 `stages.<stage>.name` 改了技能名，plugin 也会暴露这些改名后的 skills。
 
 必需选项：
 
@@ -159,7 +159,7 @@ stages:
 - `display_name` 是 target 里的展示名；
 - `name` 和 `directory` 必须是 lower kebab-case；
 - 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
-- 同一个 profile 用于 `forma create-plugin` 时，plugin id 仍然是 `bundle.name`，plugin 的 skill 列表跟随改名后的 emitted skills。
+- 同一个 profile 用于 `forma create-plugin` 时，plugin id 仍然是 `bundle.name`，plugin 的嵌套 skills 跟随改名后的 emitted skills。
 
 ### 一次性 creator 命名
 

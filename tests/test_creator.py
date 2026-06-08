@@ -791,30 +791,12 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
 
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
-    assert plugin["name"] == "Forma"
+    assert plugin["name"] == "forma"
+    assert plugin["version"] == "0.1.0"
+    assert plugin["author"]["name"] == "Forma"
+    assert plugin["interface"]["displayName"] == "Forma"
     assert "Plan-First" in plugin["description"]
-    assert plugin["skills"] == [
-        {
-            "id": "forma-plan",
-            "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
-        },
-        {
-            "id": "forma-ground",
-            "description": "Inspect code, docs, issues, and evidence before deciding.",
-        },
-        {
-            "id": "forma-lock",
-            "description": "Lock the execution plan and task contract.",
-        },
-        {
-            "id": "forma-execute",
-            "description": "Execute one accepted task and leave verifiable evidence.",
-        },
-        {
-            "id": "forma-showhand",
-            "description": "Continue remaining tasks, but stop when evidence is insufficient.",
-        },
-    ]
+    assert plugin["skills"] == "./skills/"
 
 
 def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
@@ -831,12 +813,10 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert (plugin_dir / "skills" / "forma-flow" / "SKILL.md").is_file()
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
-    assert plugin["name"] == "Forma"
+    assert plugin["name"] == "forma"
+    assert plugin["interface"]["displayName"] == "Forma"
     assert "self-iteration" in plugin["description"]
-    assert [skill["id"] for skill in plugin["skills"]] == list(
-        FORMA_SELF_STAGE_DIRS.values()
-    )
-    assert all(skill["description"] for skill in plugin["skills"])
+    assert plugin["skills"] == "./skills/"
     manifest = json.loads(
         (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
     )
@@ -856,10 +836,9 @@ def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:
     assert verify(plugin_dir).passed
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "sample-backend-go-github-issue-tracked"
-    assert plugin["name"] == "Sample Backend Go Github Issue Tracked"
-    assert [skill["id"] for skill in plugin["skills"]] == list(
-        SAMPLE_STAGE_DIRS.values()
-    )
+    assert plugin["name"] == "sample-backend-go-github-issue-tracked"
+    assert plugin["interface"]["displayName"] == "Sample Backend Go Github Issue Tracked"
+    assert plugin["skills"] == "./skills/"
 
 
 def test_codex_plugin_rejects_non_kebab_bundle_name(tmp_path: Path) -> None:

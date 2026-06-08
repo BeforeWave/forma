@@ -36,7 +36,7 @@ Depends: plugin-verifier-consistency
 Depends: docs-plugin-naming
 Constraint: do not install into user scope; update `dist/plugins/codex/forma` only if default plugin output changes.
 
-- [ ] [codex-plugin-ingestion-contract] Align Codex plugin schema and personal marketplace installation with plugin-creator
+- [x] [codex-plugin-ingestion-contract] Align Codex plugin schema and personal marketplace installation with plugin-creator
 Accept: Task Type=step; Forma Codex plugin generation emits the current plugin-creator manifest shape, verifier rejects old plugin schema drift, dist artifacts are regenerated, and `forma@personal` installs through Codex's marketplace flow
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py tests/test_cli.py tests/test_verifier.py
 Validate: local Codex plugin validator against dist/plugins/codex/forma

@@ -100,9 +100,9 @@ def _plugin_id(plugin_root: Path) -> str:
     )
     if not isinstance(raw, dict):
         raise ValueError("plugin.json must contain an object")
-    plugin_id = raw.get("id")
+    plugin_id = raw.get("name", raw.get("id"))
     if not isinstance(plugin_id, str) or not plugin_id.strip():
-        raise ValueError("plugin.json must include non-empty id")
+        raise ValueError("plugin.json must include non-empty name")
     return plugin_id.strip()
 
 

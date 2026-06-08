@@ -28,14 +28,14 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-08T04:52:03Z",
+  "generated_at": "2026-06-08T08:28:28Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.0"
   },
   "generator_version": "0.1.0",
-  "methodology_source_revision": "35efe50",
+  "methodology_source_revision": "e98e36f",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "d308a33537ff7b9bcfff9fe98e439386b2055bd46e0b4c9e2a314e6a40fc4392",
   "methodology_version": "0.1.0",

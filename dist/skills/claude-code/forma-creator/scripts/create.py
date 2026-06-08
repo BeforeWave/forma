@@ -46,6 +46,8 @@ DEFAULT_CODEX_PLUGIN_ID = "forma"
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
+CODEX_PLUGIN_VERSION = "0.1.0"
+CODEX_PLUGIN_DEVELOPER = "Forma"
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 REQUIRED_STAGE_SECTIONS = (
     "Description",
@@ -559,17 +561,26 @@ def _plugin_manifest(
     descriptions: Mapping[str, str],
 ) -> dict[str, object]:
     plugin_id = _plugin_id(injection)
+    display_name = _plugin_display_name(plugin_id)
     return {
         "id": plugin_id,
-        "name": _plugin_display_name(plugin_id),
+        "name": plugin_id,
+        "version": CODEX_PLUGIN_VERSION,
         "description": CODEX_PLUGIN_DESCRIPTION,
-        "skills": [
-            {
-                "id": skill_names[kind],
-                "description": descriptions.get(kind, ""),
-            }
-            for kind in KINDS
-        ],
+        "author": {
+            "name": CODEX_PLUGIN_DEVELOPER,
+        },
+        "skills": "./skills/",
+        "interface": {
+            "displayName": display_name,
+            "shortDescription": CODEX_PLUGIN_DESCRIPTION,
+            "longDescription": CODEX_PLUGIN_DESCRIPTION,
+            "developerName": CODEX_PLUGIN_DEVELOPER,
+            "category": "Productivity",
+            "capabilities": ["Read", "Write"],
+            "defaultPrompt": _default_prompts(display_name),
+            "brandColor": "#10A37F",
+        },
     }
 
 
@@ -584,6 +595,13 @@ def _plugin_id(injection: Mapping[str, Any]) -> str:
 
 def _plugin_display_name(plugin_id: str) -> str:
     return " ".join(part.capitalize() for part in plugin_id.split("-"))
+
+
+def _default_prompts(display_name: str) -> list[str]:
+    return [
+        f"Use {display_name} to shape a plan-first issue.",
+        f"Use {display_name} to execute the finalized plan.",
+    ]
 
 
 def _write_manifest(

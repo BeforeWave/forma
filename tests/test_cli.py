@@ -75,14 +75,9 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
         (output / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
     assert plugin["id"] == "forma"
-    assert plugin["name"] == "Forma"
-    assert [skill["id"] for skill in plugin["skills"]] == [
-        "forma-plan",
-        "forma-ground",
-        "forma-lock",
-        "forma-execute",
-        "forma-showhand",
-    ]
+    assert plugin["name"] == "forma"
+    assert plugin["interface"]["displayName"] == "Forma"
+    assert plugin["skills"] == "./skills/"
 
 
 def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
@@ -113,13 +108,8 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
         (output / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
     assert plugin["id"] == "forma"
-    assert [skill["id"] for skill in plugin["skills"]] == [
-        "forma-shape",
-        "forma-gauge",
-        "forma-seal",
-        "forma-pour",
-        "forma-flow",
-    ]
+    assert plugin["name"] == "forma"
+    assert plugin["skills"] == "./skills/"
 
 
 def test_create_plugin_rejects_claude_code_target(tmp_path: Path) -> None:

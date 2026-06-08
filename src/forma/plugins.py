@@ -17,6 +17,8 @@ from forma_verifier.rules import parse_frontmatter
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
+CODEX_PLUGIN_VERSION = "0.1.0"
+CODEX_PLUGIN_DEVELOPER = "Forma"
 STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow")
 PLUGIN_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -89,12 +91,28 @@ def _plugin_manifest(
     skills_dir: Path,
 ) -> dict[str, object]:
     plugin_id = _plugin_id(profile.bundle_name)
-    skills = _plugin_skills(manifest, skills_dir)
+    _validate_plugin_skills(manifest, skills_dir)
+    description = profile.bundle_description or CODEX_PLUGIN_DESCRIPTION
+    display_name = _plugin_display_name(plugin_id)
     return {
         "id": plugin_id,
-        "name": _plugin_display_name(plugin_id),
-        "description": profile.bundle_description or CODEX_PLUGIN_DESCRIPTION,
-        "skills": skills,
+        "name": plugin_id,
+        "version": CODEX_PLUGIN_VERSION,
+        "description": description,
+        "author": {
+            "name": CODEX_PLUGIN_DEVELOPER,
+        },
+        "skills": "./skills/",
+        "interface": {
+            "displayName": display_name,
+            "shortDescription": description,
+            "longDescription": description,
+            "developerName": CODEX_PLUGIN_DEVELOPER,
+            "category": "Productivity",
+            "capabilities": ["Read", "Write"],
+            "defaultPrompt": _default_prompts(display_name),
+            "brandColor": "#10A37F",
+        },
     }
 
 
@@ -111,16 +129,22 @@ def _plugin_display_name(plugin_id: str) -> str:
     return " ".join(part.capitalize() for part in plugin_id.split("-"))
 
 
-def _plugin_skills(
+def _default_prompts(display_name: str) -> list[str]:
+    return [
+        f"Use {display_name} to shape a plan-first issue.",
+        f"Use {display_name} to execute the finalized plan.",
+    ]
+
+
+def _validate_plugin_skills(
     manifest: Mapping[str, object],
     skills_dir: Path,
-) -> list[dict[str, str]]:
+) -> None:
     emitted = manifest.get("emitted_skills")
     if not isinstance(emitted, Mapping):
         raise ValueError(
             "bundle manifest must include emitted_skills for Codex plugin metadata"
         )
-    skills: list[dict[str, str]] = []
     for kind in STAGE_ORDER:
         raw = emitted.get(kind)
         if raw is None:
@@ -139,14 +163,11 @@ def _plugin_skills(
                 f"emitted skill is missing SKILL.md: skills/{skill_dir}/SKILL.md"
             )
         frontmatter, _body = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
-        description = frontmatter.get("description")
-        skills.append(
-            {
-                "id": skill_id,
-                "description": description if isinstance(description, str) else "",
-            }
-        )
-    return skills
+        if frontmatter.get("name") != skill_id:
+            raise ValueError(
+                f"emitted skill name {skill_id!r} must match "
+                f"skills/{skill_dir}/SKILL.md frontmatter name"
+            )
 
 
 def _manifest_string(raw: Mapping[str, Any], key: str, field_name: str) -> str:

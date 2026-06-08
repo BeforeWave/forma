@@ -1,27 +1,26 @@
 {
+  "author": {
+    "name": "Forma"
+  },
   "description": "Generic Plan-First workflow bundle for agents.",
   "id": "forma",
-  "name": "Forma",
-  "skills": [
-    {
-      "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
-      "id": "forma-plan"
-    },
-    {
-      "description": "Inspect code, docs, issues, and evidence before deciding.",
-      "id": "forma-ground"
-    },
-    {
-      "description": "Lock the execution plan and task contract.",
-      "id": "forma-lock"
-    },
-    {
-      "description": "Execute one accepted task and leave verifiable evidence.",
-      "id": "forma-execute"
-    },
-    {
-      "description": "Continue remaining tasks, but stop when evidence is insufficient.",
-      "id": "forma-showhand"
-    }
-  ]
+  "interface": {
+    "brandColor": "#10A37F",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "category": "Productivity",
+    "defaultPrompt": [
+      "Use Forma to shape a plan-first issue.",
+      "Use Forma to execute the finalized plan."
+    ],
+    "developerName": "Forma",
+    "displayName": "Forma",
+    "longDescription": "Generic Plan-First workflow bundle for agents.",
+    "shortDescription": "Generic Plan-First workflow bundle for agents."
+  },
+  "name": "forma",
+  "skills": "./skills/",
+  "version": "0.1.0"
 }

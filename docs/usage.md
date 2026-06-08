@@ -61,9 +61,10 @@ The output root contains `.codex-plugin/plugin.json`, root
 `dist/skill-bundles` or any sibling bundle output.
 
 For a tracked profile, the Codex plugin id is the profile `bundle.name`. The
-plugin display name is derived from the same value, and `plugin.json` skill ids
-follow the emitted skill names in `.forma-manifest.json`. If a profile renames
-skills with `stages.<stage>.name`, the plugin exposes those renamed skills.
+plugin display name is derived from the same value, and `plugin.json` points to
+the nested `./skills/` directory. Nested skill names follow the emitted skill
+names in `.forma-manifest.json`. If a profile renames skills with
+`stages.<stage>.name`, the plugin exposes those renamed skills.
 
 Required options:
 
@@ -190,7 +191,7 @@ Rules:
 - `name` and `directory` must be lower kebab-case.
 - Semantic stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`.
 - When the same profile is used with `forma create-plugin`, the plugin id stays
-  `bundle.name` and the plugin skill list follows the renamed emitted skills.
+  `bundle.name` and the nested plugin skills follow the renamed emitted skills.
 
 ### One-off creator names
 

@@ -363,29 +363,11 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
         (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
     assert plugin["id"] == "forma"
-    assert plugin["name"] == "Forma"
-    assert plugin["skills"] == [
-        {
-            "id": "forma-plan",
-            "description": "Clarify goals, constraints, boundaries, and acceptance criteria.",
-        },
-        {
-            "id": "forma-ground",
-            "description": "Inspect code, docs, issues, and evidence before deciding.",
-        },
-        {
-            "id": "forma-lock",
-            "description": "Lock the execution plan and task contract.",
-        },
-        {
-            "id": "forma-execute",
-            "description": "Execute one accepted task and leave verifiable evidence.",
-        },
-        {
-            "id": "forma-showhand",
-            "description": "Continue remaining tasks, but stop when evidence is insufficient.",
-        },
-    ]
+    assert plugin["name"] == "forma"
+    assert plugin["version"] == "0.1.0"
+    assert plugin["author"]["name"] == "Forma"
+    assert plugin["interface"]["displayName"] == "Forma"
+    assert plugin["skills"] == "./skills/"
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
@@ -429,14 +411,9 @@ def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
         (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
     assert plugin["id"] == "acme-plan-first"
-    assert plugin["name"] == "Acme Plan First"
-    assert [skill["id"] for skill in plugin["skills"]] == [
-        "acme-plan-first-plan",
-        "acme-plan-first-ground",
-        "acme-plan-first-lock",
-        "acme-plan-first-execute",
-        "acme-plan-first-showhand",
-    ]
+    assert plugin["name"] == "acme-plan-first"
+    assert plugin["interface"]["displayName"] == "Acme Plan First"
+    assert plugin["skills"] == "./skills/"
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )

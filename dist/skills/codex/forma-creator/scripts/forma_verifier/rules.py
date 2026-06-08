@@ -660,29 +660,85 @@ def check_codex_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[Ru
     if not isinstance(raw, dict):
         return [RuleResult("R203", path, "error", "plugin.json must be an object")]
     results: List[RuleResult] = []
-    raw_skills = raw.get("skills")
-    if not isinstance(raw_skills, list):
-        return [RuleResult(
-            "R203", path, "error", "plugin.json `skills` must be a list"
-        )]
-    skill_ids: List[str] = []
-    for index, item in enumerate(raw_skills):
-        if not isinstance(item, dict):
-            results.append(RuleResult(
-                "R203", path, "error", f"plugin skill #{index + 1} must be an object"
-            ))
-            continue
-        skill_id = item.get("id")
-        if not isinstance(skill_id, str) or not skill_id.strip():
-            results.append(RuleResult(
-                "R203", path, "error", f"plugin skill #{index + 1} must include id"
-            ))
-            continue
-        skill_ids.append(skill_id.strip())
-    if len(skill_ids) != len(set(skill_ids)):
+    plugin_name = raw.get("name")
+    if not isinstance(plugin_name, str) or not plugin_name.strip():
         results.append(RuleResult(
-            "R203", path, "error", "plugin.json skill ids must be unique"
+            "R203", path, "error", "plugin.json must include non-empty name"
         ))
+    elif not KEBAB_CASE_RE.match(plugin_name.strip()):
+        results.append(RuleResult(
+            "R203",
+            path,
+            "error",
+            f"plugin.json name is not kebab-case: {plugin_name!r}",
+        ))
+    plugin_id = raw.get("id")
+    if plugin_id is not None and plugin_id != plugin_name:
+        results.append(RuleResult(
+            "R203", path, "error", "plugin.json id must match name when present"
+        ))
+    for field in ("version", "description"):
+        if not isinstance(raw.get(field), str) or not raw.get(field, "").strip():
+            results.append(RuleResult(
+                "R203", path, "error", f"plugin.json must include non-empty {field}"
+            ))
+    author = raw.get("author")
+    if (
+        not isinstance(author, dict)
+        or not isinstance(author.get("name"), str)
+        or not author.get("name", "").strip()
+    ):
+        results.append(RuleResult(
+            "R203", path, "error", "plugin.json must include author.name"
+        ))
+    raw_skills = raw.get("skills")
+    if _plugin_contract_path(raw_skills) != "skills":
+        results.append(RuleResult(
+            "R203", path, "error", "plugin.json `skills` must resolve to `skills`"
+        ))
+    interface = raw.get("interface")
+    if not isinstance(interface, dict):
+        results.append(RuleResult(
+            "R203", path, "error", "plugin.json must include interface object"
+        ))
+    else:
+        for field in (
+            "displayName",
+            "shortDescription",
+            "longDescription",
+            "developerName",
+            "category",
+        ):
+            if (
+                not isinstance(interface.get(field), str)
+                or not interface.get(field, "").strip()
+            ):
+                results.append(RuleResult(
+                    "R203",
+                    path,
+                    "error",
+                    f"plugin.json must include interface.{field}",
+                ))
+        capabilities = interface.get("capabilities")
+        if not isinstance(capabilities, list) or not all(
+            isinstance(value, str) and value.strip() for value in capabilities
+        ):
+            results.append(RuleResult(
+                "R203",
+                path,
+                "error",
+                "plugin.json interface.capabilities must be a string list",
+            ))
+        default_prompt = interface.get("defaultPrompt", interface.get("default_prompt"))
+        if not isinstance(default_prompt, list) or not all(
+            isinstance(value, str) and value.strip() for value in default_prompt
+        ):
+            results.append(RuleResult(
+                "R203",
+                path,
+                "error",
+                "plugin.json interface.defaultPrompt must be a string list",
+            ))
     emitted = ctx.manifest.get("emitted_skills")
     if not isinstance(emitted, dict):
         results.append(RuleResult(
@@ -691,49 +747,63 @@ def check_codex_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[Ru
             "error",
             "Codex plugin root must include manifest emitted_skills",
         ))
-        emitted_ids: List[str] = []
     else:
-        emitted_ids = _emitted_skill_names(emitted)
-        if skill_ids != emitted_ids:
-            results.append(RuleResult(
-                "R203",
-                path,
-                "error",
-                f"plugin.json skill ids {skill_ids!r} must match emitted skills {emitted_ids!r}",
-            ))
-    skill_names = {
-        item.frontmatter.get("name")
-        for item in ctx.skills
-        if isinstance(item.frontmatter.get("name"), str)
-    }
-    for skill_id in skill_ids:
-        skill_file = ctx.root / "skills" / skill_id / "SKILL.md"
-        if not skill_file.is_file():
-            results.append(RuleResult(
-                "R203",
-                path,
-                "error",
-                f"plugin skill id {skill_id!r} must exist at skills/{skill_id}/SKILL.md",
-            ))
-        if skill_id not in skill_names:
-            results.append(RuleResult(
-                "R203",
-                path,
-                "error",
-                f"plugin skill id {skill_id!r} must match a nested SKILL.md name",
-            ))
+        emitted_records = _emitted_skill_records(emitted)
+        for skill_id, skill_dir in emitted_records:
+            skill_file = ctx.root / "skills" / skill_dir / "SKILL.md"
+            if not skill_file.is_file():
+                results.append(RuleResult(
+                    "R203",
+                    path,
+                    "error",
+                    f"emitted plugin skill {skill_id!r} must exist at "
+                    f"skills/{skill_dir}/SKILL.md",
+                ))
+                continue
+            frontmatter, _body = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
+            if frontmatter.get("name") != skill_id:
+                results.append(RuleResult(
+                    "R203",
+                    path,
+                    "error",
+                    f"emitted plugin skill {skill_id!r} must match "
+                    f"skills/{skill_dir}/SKILL.md name",
+                ))
     return results
 
 
-def _emitted_skill_names(emitted: Mapping[str, object]) -> List[str]:
-    names: List[str] = []
+def _plugin_contract_path(raw_path: object) -> Optional[str]:
+    if not isinstance(raw_path, str):
+        return None
+    path = Path(raw_path)
+    if path.is_absolute():
+        return None
+    normalized = path.as_posix().rstrip("/")
+    return normalized or None
+
+
+def _emitted_skill_records(emitted: Mapping[str, object]) -> List[Tuple[str, str]]:
+    records: List[Tuple[str, str]] = []
     for kind in PLAN_FIRST_KINDS:
         item = emitted.get(kind)
         if not isinstance(item, dict):
             continue
         name = item.get("name")
-        if isinstance(name, str) and name.strip():
-            names.append(name.strip())
+        directory = item.get("directory")
+        if (
+            isinstance(name, str)
+            and name.strip()
+            and isinstance(directory, str)
+            and directory.strip()
+        ):
+            records.append((name.strip(), directory.strip()))
+    return records
+
+
+def _emitted_skill_names(emitted: Mapping[str, object]) -> List[str]:
+    names: List[str] = []
+    for name, _directory in _emitted_skill_records(emitted):
+        names.append(name)
     return names
 
 
