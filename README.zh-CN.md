@@ -1,3 +1,7 @@
+<p align="right">
+  <a href="./README.md">English</a> | <a href="./README.zh-CN.md">中文</a>
+</p>
+
 # Forma
 
 **一句话启动，把静态项目规则编译成专属任务工作流。**
@@ -34,8 +38,6 @@ Layer 2 — 任务级执行
 ```
 
 **Forma 适合那些不只要最终 patch，还要把项目规则落到具体文件、边界、命令、测试和 proof 里接受审查的开发任务。**
-
-[English](./README.md)
 
 ---
 

@@ -1,3 +1,7 @@
+<p align="right">
+  <a href="./README.md">English</a> | <a href="./README.zh-CN.md">中文</a>
+</p>
+
 # Forma
 
 **Start with one sentence, then compile static project rules into custom task workflows.**
@@ -34,8 +38,6 @@ For each development task, the rules become concrete, repository-specific obliga
 ```
 
 **Use Forma when you need static project rules to become reviewable files, boundaries, commands, tests, and proof alongside the final patch.**
-
-[中文文档](./README.zh-CN.md)
 
 ---
 
