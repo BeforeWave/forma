@@ -23,13 +23,13 @@ forma --help
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
 ```
 
-这一步写出的是本地 plugin source。先把这个目录加到 Codex marketplace。local test
-可以用 repo 级 `.agents/plugins/marketplace.json`，也可以用个人级
-`~/.agents/plugins/marketplace.json`；marketplace entry 的 `source.path`
-指向生成出的 plugin 目录，或指向复制后的 `./plugins/forma` 目录。先运行
-`codex plugin marketplace list` 查看可用的 marketplace name 和 root。然后运行
+这一步写出的是本地 plugin source。Forma 不安装 Codex plugin。按照当前 Codex
+官方文档把这个本地 plugin 加到 Codex marketplace，然后运行
 `codex plugin add forma@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
 Codex thread。
+
+- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
+- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 
 把当前 issue 或任务背景发给 Codex，并要求先从规划开始：
 

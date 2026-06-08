@@ -125,15 +125,13 @@ Forma 生成 target 专用 skill bundle。`forma install` 会把 verified 本地
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin 输出是本地 plugin source。先把生成出的 plugin root 加到 Codex
-marketplace：可以用 repo 级 `.agents/plugins/marketplace.json`，个人级
-`~/.agents/plugins/marketplace.json`，也可以用
-`codex plugin marketplace add <marketplace-root-path>` 注册单独的本地 marketplace
-root path。先运行 `codex plugin marketplace list` 查看可用的 marketplace name 和
-root。然后运行 `codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI
-里安装。安装后新开 Codex thread，这样 plugin skills 才会被发现。
-`<marketplace-name>` 来自
-`<marketplace-root-path>/.agents/plugins/marketplace.json` 的顶层 `name`。
+Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。按照当前 Codex
+官方文档把生成出的 plugin root 加到 Codex marketplace，然后运行
+`codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
+Codex thread，这样 plugin skills 才会被发现。
+
+- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
+- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 
 target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 

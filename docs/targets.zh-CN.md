@@ -28,14 +28,12 @@ Codex 会从 repository、user、admin 和 bundled system 等位置读取 skills
 
 Codex 项目级 skills 安装到 `.codex/skills`。用户级 skills 安装到 `$HOME/.codex/skills`。
 
-对 Codex plugins，Forma 只生成本地 plugin source。先把这个 source 加到 Codex
-marketplace：repo 级 marketplace 使用 `.agents/plugins/marketplace.json`，个人级
-marketplace 使用 `~/.agents/plugins/marketplace.json`，单独的本地 marketplace root
-path 可以用 `codex plugin marketplace add <marketplace-root-path>` 注册。然后交给
-Codex 安装和启用。先运行 `codex plugin marketplace list`；它会打印可用的
-marketplace name 和 root path。`codex plugin add` 里的 marketplace name 来自
-`<marketplace-root-path>/.agents/plugins/marketplace.json` 的顶层 `name`。运行
+对 Codex plugins，Forma 只生成本地 plugin source。按照当前 Codex 官方文档把这个
+source 加到 Codex marketplace，然后交给 Codex 安装和启用：运行
 `codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开 thread。
+
+- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
+- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 
 对 profile 生成的 Codex plugin，`<plugin-id>` 是 profile 的 `bundle.name`。对 Codex `forma-creator` 生成的 plugin，如果存在 `rename.prefix`，`<plugin-id>` 就是这个 prefix；否则保持 `forma`。plugin manifest 指向 `./skills/`；`.forma-manifest.json` 记录的 emitted skill 名称决定嵌套 skill 目录和 frontmatter 名称，所以 profile 或 creator 改名后的 skills 会同步出现在 plugin 里。
 

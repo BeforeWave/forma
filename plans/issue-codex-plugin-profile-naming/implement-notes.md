@@ -21,6 +21,17 @@ Deviations From Plan:
 Follow-ups:
 - None.
 
+## Post-Task: Codex plugin install guidance refinement
+
+Outcome:
+- `forma create-plugin`, `forma install` rejection output, and generated `forma-creator` plugin output now link to the current Codex plugin docs instead of restating Codex marketplace JSON or local registration rules.
+
+Decision Notes:
+- Selected official Codex docs links over Forma-authored marketplace instructions because Codex owns marketplace registration, install, UI enablement, and thread discovery behavior.
+
+Classifications:
+- This is a prompt/docs refinement only; it does not reintroduce Codex plugin installation into `forma install`.
+
 ## Task 5: dist-creator-plugin-refresh
 
 Outcome:

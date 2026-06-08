@@ -154,16 +154,14 @@ local skill outputs into the matching target location:
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin outputs are local plugin sources. Add the generated plugin root to
-a Codex marketplace first: use a repo marketplace at
-`.agents/plugins/marketplace.json`, a personal marketplace at
-`~/.agents/plugins/marketplace.json`, or register a separate local marketplace
-root path with `codex plugin marketplace add <marketplace-root-path>`. Run
-`codex plugin marketplace list` to see available marketplace names and roots.
-Then run `codex plugin add <plugin>@<marketplace-name>`, or install it from the
-Codex plugin UI. Start a new Codex thread after installing so the plugin skills
-are discovered. `<marketplace-name>` is the top-level `name` in
-`<marketplace-root-path>/.agents/plugins/marketplace.json`.
+Codex plugin outputs are local plugin sources. Forma does not install Codex
+plugins. Follow the current Codex docs to add the generated plugin root to a
+Codex marketplace, then run `codex plugin add <plugin>@<marketplace-name>` or
+install it from the Codex plugin UI. Start a new Codex thread after installing
+so the plugin skills are discovered.
+
+- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
+- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 
 For target-specific discovery, metadata, and trust details, see
 [Targets](./targets.md).
