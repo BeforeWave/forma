@@ -9,7 +9,7 @@
       "references/profile-authoring-principles.md": "301bfd3e7bb9ac87304d927023e42c59e97b71dbd68a71be26fecd7cde453602",
       "references/temporary-injection-generation.md": "15bd237528bf56a8788f0c90f42775800e39f07f6515f89bf285d043a82731c8",
       "scripts/__pycache__/create.cpython-313.pyc": "ca38c9aac3890cbfded7eac045ed637f362c3fc29d30cc2c45594a105ad6ed42",
-      "scripts/create.py": "e81b91c277596ec10d1c75c7f2d39c8dafb3b419448d0f1a53f5ae5657bfbf6a",
+      "scripts/create.py": "46c35010eeeb977c9ce65ee8a63dcfa0778648ba6576e95d9437ca8e88f0da8c",
       "scripts/forma_verifier/__init__.py": "3c26a5e7d2f7f7c399ef65523bf66091738f2a8b9ebc95d680080a4e8f5e8029",
       "scripts/forma_verifier/__pycache__/__init__.cpython-311.pyc": "e73dea75d598489af7953388133f49d65d691d997933304e4ac19d6cb371b18d",
       "scripts/forma_verifier/__pycache__/__init__.cpython-313.pyc": "a9e44b433b2f0610b700e33c662ab90986862dbfd65d37549456f70dbfc171fe",
@@ -29,19 +29,19 @@
       "scripts/verify.py": "51a9a82ef1f4592d81b335a421d7efbc7d21b5b2e86b1781d49c800d632c178a"
     },
     "name": "forma-creator",
-    "source_revision": "e98e36f",
+    "source_revision": "3653551",
     "source_revision_type": "git-short-sha",
-    "source_tree_digest": "71a9200840983712a3450e51fb41f5f4a13f9b6685bfdf05e25977304b526fa8"
+    "source_tree_digest": "99e8a49b9e9e5622be5c7a03cbaf29297ea0b2677ff1ae3e9d71595606b47f57"
   },
   "format": "forma-creator-manifest-v1",
-  "generated_at": "2026-06-08T08:29:26Z",
+  "generated_at": "2026-06-08T08:48:27Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.0"
   },
   "generator_version": "0.1.0",
-  "methodology_source_revision": "e98e36f",
+  "methodology_source_revision": "3653551",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "d308a33537ff7b9bcfff9fe98e439386b2055bd46e0b4c9e2a314e6a40fc4392",
   "methodology_version": "0.1.0",

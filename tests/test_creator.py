@@ -53,11 +53,11 @@ SOFTWARE_STAGE_DIRS = {
     "flow": "software-plan-first-showhand",
 }
 FORMA_SELF_STAGE_DIRS = {
-    "shape": "forma-shape",
-    "gauge": "forma-gauge",
-    "seal": "forma-seal",
-    "pour": "forma-pour",
-    "flow": "forma-flow",
+    "shape": "forma-plan",
+    "gauge": "forma-ground",
+    "seal": "forma-lock",
+    "pour": "forma-execute",
+    "flow": "forma-showhand",
 }
 
 
@@ -164,9 +164,9 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
         "forma-self-iteration-overlays",
         "forma-self-iteration",
     )
-    assert profile.stages["shape"].name == "forma-shape"
-    assert profile.stages["flow"].directory == "forma-flow"
-    assert "$forma-flow" in profile.stages["flow"].default_prompt
+    assert profile.stages["shape"].name == "forma-plan"
+    assert profile.stages["flow"].directory == "forma-showhand"
+    assert "$forma-showhand" in profile.stages["flow"].default_prompt
     assert "Layer impact" in profile.decision_gate_extras
     assert not any("README.md" in item for item in profile.constraints["default"])
     assert any("dirty worktree" in item for item in profile.constraints["default"])
@@ -543,7 +543,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
         codex_dir / FORMA_SELF_STAGE_DIRS["flow"] / "agents" / "openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert 'name: "forma-shape"' in shape_text
+    assert 'name: "forma-plan"' in shape_text
     assert "references/forma-iteration-boundaries.md" in shape_text
     assert "Settle `Iteration Area`" in shape_text
     assert "If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint" in pour_text
@@ -551,7 +551,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface." not in pour_text
     assert "If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md" in pour_text
     assert "If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md" in pour_text
-    assert "$forma-flow" in flow_agent
+    assert "$forma-showhand" in flow_agent
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
     assert manifest["profile"]["top_level_id"] == "forma-self-iteration"
@@ -563,7 +563,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     ]
     assert (
         manifest["emitted_skills"]["shape"]["directory"]
-        == "forma-shape"
+        == "forma-plan"
     )
     assert manifest["conditional_overlays"]["decision"]["name"] == "Iteration Area"
     assert manifest["conditional_overlays"]["routes"][5]["overlays"] == [
@@ -809,19 +809,23 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     )
 
     assert verify(plugin_dir).passed
-    assert (plugin_dir / "skills" / "forma-shape" / "SKILL.md").is_file()
-    assert (plugin_dir / "skills" / "forma-flow" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "forma-plan" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "forma-showhand" / "SKILL.md").is_file()
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
     assert plugin["interface"]["displayName"] == "Forma"
-    assert "self-iteration" in plugin["description"]
+    assert "scoped planning" in plugin["description"]
+    assert plugin["interface"]["defaultPrompt"] == [
+        "Draft a scoped plan for this change.",
+        "Execute the finalized task plan.",
+    ]
     assert plugin["skills"] == "./skills/"
     manifest = json.loads(
         (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
     )
     assert manifest["profile"]["bundle_name"] == "forma"
-    assert manifest["emitted_skills"]["shape"]["name"] == "forma-shape"
+    assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
 
 
 def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:

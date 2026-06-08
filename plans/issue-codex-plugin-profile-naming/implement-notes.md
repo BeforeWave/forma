@@ -121,3 +121,24 @@ Deviations From Plan:
 
 Follow-ups:
 - Task 7 will change the Forma self profile skill names and plugin page copy now that the install path is usable.
+
+## Task 7: forma-self-public-skill-names
+
+Outcome:
+- `profiles/forma-self` now emits the default public skill names `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`; the installed `forma@personal` plugin exposes those names and uses user-facing workflow copy.
+
+Decision Notes:
+- The Codex plugin page already displays the plugin name before each starter prompt, so prompts that started with "Use Forma..." produced visible repetition. Selected short action prompts without the plugin name prefix.
+- The previous bundle description described the implementation detail that a profile emits skills. Selected product-facing copy that explains the usable workflow surface: scoped planning through verified execution.
+
+Plan Gaps Found:
+- The original issue acceptance expected forma-self to emit `forma-shape` through `forma-flow`; the addendum reversed that requirement after the user tested the plugin page.
+
+Classifications:
+- Updating `~/plugins/forma`, reinstalling `forma@personal`, and refreshing the legacy `~/.codex/plugins/forma` copy are user-scope install actions requested by the user to validate the real Codex plugin surface.
+
+Deviations From Plan:
+- Regenerated the default Codex plugin dist artifact because the shared starter prompt generator changed.
+
+Follow-ups:
+- Restart Codex Desktop or open a new thread for the app UI to pick up the latest installed plugin cache.

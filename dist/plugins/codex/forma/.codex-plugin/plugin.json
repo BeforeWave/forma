@@ -12,8 +12,8 @@
     ],
     "category": "Productivity",
     "defaultPrompt": [
-      "Use Forma to shape a plan-first issue.",
-      "Use Forma to execute the finalized plan."
+      "Draft a scoped plan for this change.",
+      "Execute the finalized task plan."
     ],
     "developerName": "Forma",
     "displayName": "Forma",

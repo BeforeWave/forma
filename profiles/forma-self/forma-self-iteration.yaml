@@ -7,40 +7,40 @@ includes:
   - forma-self-iteration-overlays
 bundle:
   name: forma
-  description: Project-owned profile that emits canonical forma-* plan-first skills for Forma self-iteration.
+  description: Workflows for Forma development, from scoped planning through verified execution.
 stages:
   shape:
-    name: forma-shape
-    directory: forma-shape
-    display_name: Forma Shape
-    short_description: Converge a Forma self-iteration plan with layer, profile, generated baseline, docs, and validation boundaries.
+    name: forma-plan
+    directory: forma-plan
+    display_name: Forma Plan
+    short_description: Converge a Forma development issue into a scoped Plan-First contract.
     default_prompt: >-
-      $forma-shape: 为 Forma 仓库收敛一个自我迭代计划，明确 Layer impact、profile ownership、generated baseline policy、文档更新和验证边界；不要读仓库或写计划文件。
+      $forma-plan: 为 Forma 仓库收敛一个自我迭代计划，明确 Layer impact、profile ownership、generated baseline policy、文档更新和验证边界；不要读仓库或写计划文件。
   gauge:
-    name: forma-gauge
-    directory: forma-gauge
-    display_name: Forma Gauge
-    short_description: Read Forma repository facts and produce grounding for a self-iteration plan.
+    name: forma-ground
+    directory: forma-ground
+    display_name: Forma Ground
+    short_description: Read Forma repository facts and produce a grounding handoff for planning.
     default_prompt: >-
-      $forma-gauge: 只读确认 Forma 当前计划、文档、methodology、creator、profiles、tests 和 generated baseline 状态，输出 grounding handoff。
+      $forma-ground: 只读确认 Forma 当前计划、文档、methodology、creator、profiles、tests 和 generated baseline 状态，输出 grounding handoff。
   seal:
-    name: forma-seal
-    directory: forma-seal
-    display_name: Forma Seal
-    short_description: Finalize a Forma self-iteration plan with tasks, validation gates, and generated-output policy.
+    name: forma-lock
+    directory: forma-lock
+    display_name: Forma Lock
+    short_description: Finalize the Forma plan, tasks, validation gates, and generated-output policy.
     default_prompt: >-
-      $forma-seal: 把已收敛并 grounding 过的 Forma 自我迭代计划写入 plan.md/tasks.md，并明确每个 task 的验证和 generated baseline 边界。
+      $forma-lock: 把已收敛并 grounding 过的 Forma 自我迭代计划写入 plan.md/tasks.md，并明确每个 task 的验证和 generated baseline 边界。
   pour:
-    name: forma-pour
-    directory: forma-pour
-    display_name: Forma Pour
-    short_description: Execute one Forma self-iteration task through focused validation and review.
+    name: forma-execute
+    directory: forma-execute
+    display_name: Forma Execute
+    short_description: Execute one Forma task with focused validation and review-ready evidence.
     default_prompt: >-
-      $forma-pour: 按 sealed tasks.md 执行当前 Forma 自我迭代 task，先跑相关窄验证，再跑必要共享 gate，进入 review-ready。
+      $forma-execute: 按 sealed tasks.md 执行当前 Forma 自我迭代 task，先跑相关窄验证，再跑必要共享 gate，进入 review-ready。
   flow:
-    name: forma-flow
-    directory: forma-flow
-    display_name: Forma Flow
-    short_description: Execute a finalized Forma self-iteration plan when all layer, profile, generated baseline, and validation gates pass.
+    name: forma-showhand
+    directory: forma-showhand
+    display_name: Forma Showhand
+    short_description: Complete remaining finalized Forma tasks when boundaries and gates are clear.
     default_prompt: >-
-      $forma-flow: 在 Layer、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。
+      $forma-showhand: 在 Layer、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。

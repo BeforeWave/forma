@@ -129,10 +129,10 @@ def _plugin_display_name(plugin_id: str) -> str:
     return " ".join(part.capitalize() for part in plugin_id.split("-"))
 
 
-def _default_prompts(display_name: str) -> list[str]:
+def _default_prompts(_display_name: str) -> list[str]:
     return [
-        f"Use {display_name} to shape a plan-first issue.",
-        f"Use {display_name} to execute the finalized plan.",
+        "Draft a scoped plan for this change.",
+        "Execute the finalized task plan.",
     ]
 
 

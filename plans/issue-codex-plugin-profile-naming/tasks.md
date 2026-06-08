@@ -46,7 +46,7 @@ Validate: git diff --check
 Depends: dist-creator-plugin-refresh
 Constraint: use `plugin-creator` marketplace and manifest conventions; do not rely on hand-written legacy `plugin.json` skill arrays.
 
-- [ ] [forma-self-public-skill-names] Restore Forma self profile to default public skill names and product-facing plugin copy
+- [x] [forma-self-public-skill-names] Restore Forma self profile to default public skill names and product-facing plugin copy
 Accept: Task Type=step; `profiles/forma-self` emits `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`, plugin page copy is user-facing, and generated/installed plugin artifacts expose the default public skill names
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py::test_load_profile_resolves_forma_self_iteration tests/test_creator.py::test_forma_self_iteration_profile_emits_valid_bundles tests/test_creator.py::test_forma_self_profile_and_codex_plugin_metadata tests/test_cli.py::test_create_plugin_with_forma_self_profile_uses_emitted_skills
 Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --target codex --profile profiles/forma-self/forma-self-iteration.yaml --output "$tmp_dir/plugin"; test -d "$tmp_dir/plugin/skills/forma-plan"; test -d "$tmp_dir/plugin/skills/forma-showhand"; run local Codex plugin validator against "$tmp_dir/plugin"; rm -rf "$tmp_dir"
