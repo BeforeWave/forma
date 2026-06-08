@@ -9,13 +9,13 @@ This page is the command reference for Forma. For a first run, start with
 
 ### `forma verify <path>`
 
-Verifies a generated skill bundle or a `forma-creator` bundle:
+Verifies a generated skill bundle, `forma-creator` bundle, or Codex plugin:
 
 ```bash
 forma verify /tmp/backend-plan-first-codex
 ```
 
-Use it before installing, committing, or sharing generated bundles.
+Use it before installing, committing, or sharing generated workflow outputs.
 
 `forma verify` checks structure and methodology rules. It does not replace
 profile review or product judgment. See [Verifier](./verifier.md) for the
@@ -24,7 +24,7 @@ verification boundary.
 ### `forma create-bundle`
 
 Composes the canonical methodology and a resolved tracked profile into a
-target-specific skill bundle:
+target-specific workflow bundle:
 
 ```bash
 forma create-bundle --target codex --output /tmp/forma-codex-bundle
@@ -38,7 +38,7 @@ Required options:
 Optional inputs:
 
 - `--profile <file>`: top-level tracked profile. If omitted, Forma emits the
-  generic no-injection Plan-First skills with `forma-plan`,
+  generic Plan-First skills with `forma-plan`,
   `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`.
 
 Optional development override:
@@ -79,9 +79,7 @@ supported.
 Builds a target-specific installable `forma-creator`:
 
 ```bash
-forma build-creator \
-  --target codex \
-  --output /tmp/forma-creator-dist
+forma build-creator --target codex --output /tmp/forma-creator-dist
 ```
 
 Required options:
@@ -101,7 +99,7 @@ for the agent-side generation path.
 
 ### `forma install`
 
-Installs a verified local single skill, skill bundle, or Codex plugin:
+Installs a verified local skill, skill bundle, or Codex plugin:
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
@@ -134,7 +132,10 @@ forma explain temporary-injection --format json --target codex
 ```
 
 Use this when another agent needs guidance for drafting profiles or temporary
-injection.
+injection. A lightweight profile-drafting flow is: run
+`forma explain profile --target codex`, then ask the agent to inspect the
+repository, incorporate human input, and propose tracked profile YAML. This
+path produces profile source, not a one-off harness.
 
 ## Install Targets
 
@@ -224,7 +225,7 @@ git diff --check
 
 ## Source Layout
 
-- `source/methodology/`: canonical plan-first methodology used to emit the default workflow skills.
+- `source/methodology/`: canonical plan-first methodology used to emit task-level workflow skills.
 - `source/skill-creator/`: self-contained `forma-creator` source with bundled references, creator script, and verifier.
 - `src/forma/`: Python CLI, profile compiler, runtime asset resolver, and target emitters.
 - `profiles/forma-self/`: Forma-owned profile stack for this repository.
@@ -249,7 +250,7 @@ checkout.
 
 ## Related Docs
 
-- [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, and proof.
+- [Workflow Contract](./workflow-contract.md): stages, task contracts, gates, boundaries, and proof.
 - [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
 - [Forma Creator](./forma-creator.md): agent-side one-off generation.

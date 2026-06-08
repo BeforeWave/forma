@@ -6,8 +6,9 @@ A skill bundle is Forma's compiled workflow output.
 
 The profile is source. The Forma compiler resolves that source with the
 canonical methodology and target adapter, then emits installable skills for
-Codex or Claude Code. Once installed, those skills become the runtime harness
-around concrete development goals.
+Codex or Claude Code. Once installed, those skills become the workflow harness
+that turns concrete development goals into task files, boundaries, commands,
+validation gates, and proof.
 
 ## Profile To Workflow Output
 
@@ -94,7 +95,7 @@ Each generated skill directory is a target-readable unit.
 - workflow instructions;
 - load-as-needed references;
 - profile constraints selected for that stage;
-- validation or proof expectations when applicable.
+- validation gate or proof expectations when applicable.
 
 `references/` contains larger stable guidance that should not be duplicated into
 the stage body.
@@ -126,7 +127,8 @@ for which target, and with which emitted skills?
 
 ## Generated Skill Quality
 
-A generated bundle should feel like a runtime harness, not a pile of copied policy.
+A generated bundle should feel like a task-level workflow harness, not a pile
+of copied policy.
 
 Good bundles usually have:
 
@@ -137,7 +139,7 @@ Good bundles usually have:
 - scripts only when a stage explicitly owns them;
 - light default constraints;
 - route-specific behavior in conditional overlays;
-- visible validation or proof paths for executable stages.
+- visible validation gates and proof paths for executable stages.
 
 If every skill repeats every rule, the profile is probably too global. Move
 rules into stage constraints, references, resources, or conditional overlays.

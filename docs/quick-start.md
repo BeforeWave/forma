@@ -3,7 +3,8 @@
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
 
 This page gets you from zero to a running Forma workflow. Start with the default
-Codex plugin, then shape the harness only after you have seen one real run.
+Codex plugin, then shape the harness after you have seen one real task produce
+plan files, task boundaries, validation gates, and proof.
 
 ## Install Forma
 
@@ -25,25 +26,42 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
 
-Then ask Codex to start with planning:
+Send the current issue or task context to Codex and ask it to start with planning:
 
 ```text
 Use forma-plan to plan this issue first.
+
+Issue:
+<paste the current issue, problem context, or task goal here>
 ```
 
-A useful first run should not jump from goal to patch. It should clarify the
-goal, gather evidence, lock an execution contract, then execute tasks with
-proof.
+A useful first run should not jump from goal to patch. The first result should
+be a chat-level proposal or handoff, not plan files. It should settle the goal,
+scope, approach, validation model, and whether repository grounding is needed.
+
+If repository evidence is needed, ask Codex to use `forma-ground`.
+
+After the proposal and any grounding are accepted, lock the plan:
+
+```text
+Use forma-lock to write the plan and task contract.
+```
+
+Then execute the next accepted task:
+
+```text
+Use forma-execute to execute the next accepted task.
+```
 
 ## What To Inspect
 
 After a workflow-guided run, look for reviewable output:
 
 - `plans/issue-<id>/plan.md`: clarified goal, scope, approach, validation,
-  strategy, and output and proof boundary.
+  strategy, and artifact/evidence boundary when needed.
 - `plans/issue-<id>/tasks.md`: ordered accepted tasks with delivery targets,
-  proof obligations, dependencies, and constraints.
-- `plans/issue-<id>/runs/`: execution proof when the workflow records it.
+  exact validation commands or shared checks, dependencies, and constraints.
+- `plans/issue-<id>/runs/`: task proof when the workflow records completed work.
 
 In this repository, real Forma plans live under [`../plans/`](../plans/).
 
@@ -62,48 +80,56 @@ forma install --target codex --scope project /tmp/forma-creator/codex/forma-crea
 Then talk to Codex like a collaborator:
 
 ```text
-Use forma-creator to customize a workflow for this repo. First look at the
-repository structure and common validation paths. I care about generated
-outputs coming from source, lightweight checks for docs-only changes, nearby
-tests before code changes, and surfacing uncertain calls for me to decide.
+Customize a workflow for this repo.
+
+First inspect the repository structure, validation paths, generated outputs,
+and project conventions.
+
+I care about:
+- generated outputs must come from source;
+- docs-only changes should use lightweight checks;
+- behavior changes should look for nearby tests first;
+- risky judgments should stop for my confirmation.
 ```
 
-The creator should classify those concerns, generate a target-specific workflow
-bundle or Codex plugin allowed by its fixed target contract, and verify the
-output before handoff.
+The creator should classify those concerns, generate the target-specific
+workflow bundle or Codex plugin allowed by its fixed target contract, and verify
+the output before handoff.
+
+## Two Lightweight Customization Paths
+
+There are two lightweight ways to let an agent shape project rules. Both can be
+conversational; they differ by output:
+
+| Path | Input | Output |
+|---|---|---|
+| `forma-creator` | Natural-language project concerns, classified by the creator into temporary injection. | Verified one-off harness: a skill bundle or Codex plugin. |
+| `forma explain profile` + agent | CLI profile authoring guidance, repository inspection, and human input. | Tracked profile YAML; after review, the CLI can regenerate the harness consistently. |
 
 ## Generate From A Tracked Profile
 
-Use a tracked profile when project principles are durable enough to review as
+Use a tracked profile when project rules are durable enough to review as
 source.
 
 Generate Codex skills:
 
 ```bash
-forma create-bundle \
-  --target codex \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-codex
-
-forma verify /tmp/backend-plan-first-codex
+forma create-bundle --target codex --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-codex
+forma verify /tmp/software-plan-first-codex
 ```
 
 Install them into Codex:
 
 ```bash
-forma install --target codex --scope user /tmp/backend-plan-first-codex
+forma install --target codex --scope user /tmp/software-plan-first-codex
 ```
 
 The same profile can target Claude Code:
 
 ```bash
-forma create-bundle \
-  --target claude-code \
-  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
-  --output /tmp/backend-plan-first-claude-code
-
-forma verify /tmp/backend-plan-first-claude-code
-forma install --target claude-code --scope user /tmp/backend-plan-first-claude-code
+forma create-bundle --target claude-code --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-claude-code
+forma verify /tmp/software-plan-first-claude-code
+forma install --target claude-code --scope user /tmp/software-plan-first-claude-code
 ```
 
 ## Install Locations
@@ -119,7 +145,7 @@ Generated workflows can be installed for one user or into a project:
 Review project skills before trusting them. Generated skills can include
 scripts and target-specific tool behavior.
 
-## Ask An Agent To Draft A Profile
+## Draft A Profile Conversationally With The CLI
 
 Inside a downstream project with Forma installed, tell the agent:
 
@@ -133,12 +159,12 @@ Show the profile structure before writing files.
 Explain each constraint placement and mark unknowns explicitly.
 ```
 
-Use this as a drafting path, not an auto-commit path. Review the profile before
-using it as durable source.
+This is also a lightweight path, but the output is versionable profile source,
+not a one-off harness. Review the profile before using it as durable source.
 
 ## Next Reads
 
-- [Concepts](./concepts.md): the profile, workflow, and runtime harness model.
+- [Concepts](./concepts.md): the project rules, workflow harness, and task execution model.
 - [Workflow Contract](./workflow-contract.md): what the generated workflow enforces.
 - [Skill Bundle](./skill-bundle.md): what Forma writes to disk.
 - [Profile Schema](./profile-schema.md): how durable workflow source is structured.

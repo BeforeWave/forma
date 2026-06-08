@@ -8,19 +8,19 @@
 
 ### `forma verify <path>`
 
-验证生成的 skill bundle 或 `forma-creator` bundle：
+验证生成的 skill bundle、`forma-creator` bundle 或 Codex plugin：
 
 ```bash
 forma verify /tmp/backend-plan-first-codex
 ```
 
-安装、提交或分享生成 bundle 前，先运行这个命令。
+安装、提交或分享生成 workflow 产物前，先运行这个命令。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
 ### `forma create-bundle`
 
-把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 skill bundle：
+把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 workflow bundle：
 
 ```bash
 forma create-bundle --target codex --output /tmp/forma-codex-bundle
@@ -33,7 +33,7 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 
 可选输入：
 
-- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出无注入的通用 Plan-First skills，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
+- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出通用 Plan-First skills，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
 开发时可选覆盖：
 
@@ -67,9 +67,7 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 生成 target 专用的可安装 `forma-creator`：
 
 ```bash
-forma build-creator \
-  --target codex \
-  --output /tmp/forma-creator-dist
+forma build-creator --target codex --output /tmp/forma-creator-dist
 ```
 
 必需选项：
@@ -114,7 +112,7 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-当另一个 Agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。
+当另一个 Agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。轻量起草 profile 的常用方式是：先运行 `forma explain profile --target codex`，再让 Agent 读仓库、吸收人的补充，并提出 tracked profile YAML。这个路径的产物是 profile 源，不是一次性 harness。
 
 ## 安装目标
 
@@ -197,7 +195,7 @@ git diff --check
 
 ## 源码结构
 
-- `source/methodology/`：生成默认 Plan-First 工作流技能的标准方法。
+- `source/methodology/`：生成 task 级 Plan-First 工作流技能的标准方法。
 - `source/skill-creator/`：自包含的 `forma-creator` 源码，包含 references、creator script 和 verifier。
 - `src/forma/`：Python CLI、profile compiler、runtime asset resolver 和 target emitters。
 - `profiles/forma-self/`：Forma 管理本仓库时使用的 profile。
@@ -220,7 +218,7 @@ git diff --check
 
 ## 相关文档
 
-- [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、门禁、边界和证明。
+- [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、task 契约、门禁、边界和证明。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
 - [Forma Creator](./forma-creator.zh-CN.md)：Agent 侧一次性生成。

@@ -2,8 +2,8 @@
 
 Chinese version: [targets.zh-CN.md](./targets.zh-CN.md)
 
-Forma emits target-specific skill bundles. A Codex plugin is a Codex install
-shape for the same skills.
+Forma emits target-specific workflow bundles. A Codex plugin is a Codex install
+shape for the same task-level skills.
 
 The workflow source can be the same, but the emitted bundle must match the
 target that will load it.
@@ -59,7 +59,7 @@ See the official Claude Code skills docs:
 ## Target-Specific Output
 
 Target adapters affect emitted metadata and install behavior. They should not
-change the workflow contract itself.
+change the task-level workflow contract itself.
 
 For example:
 

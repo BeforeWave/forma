@@ -61,7 +61,7 @@ conditional_overlays:
           - Keep source/methodology as the canonical source and do not duplicate methodology truth inside source/skill-creator.
       validation_commands:
         pour:
-          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py
           - uv run --extra dev forma verify source/skill-creator/
     verifier:
       description: Layer 2 verifier rules.
@@ -72,7 +72,7 @@ conditional_overlays:
           - Add paired positive and negative verifier coverage for rule changes.
       validation_commands:
         pour:
-          - uv run --extra dev pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
     creator:
       description: Layer 3 composer, emitter, manifest, adapter, and CLI rules.
       constraints:
@@ -82,7 +82,7 @@ conditional_overlays:
           - Keep generated skill bodies deterministic except for generated_at unless a plan explicitly changes that contract.
       validation_commands:
         pour:
-          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
     profiles:
       description: Tracked profile stack rules.
       constraints:
@@ -95,7 +95,7 @@ conditional_overlays:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
       validation_commands:
         pour:
-          - uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py
     generated:
       description: Committed generated output baseline rules.
       constraints:
@@ -111,4 +111,4 @@ conditional_overlays:
           - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
           - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
         flow:
-          - uv run --extra dev pytest -p no:cacheprovider tests/
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/

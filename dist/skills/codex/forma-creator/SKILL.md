@@ -1,11 +1,11 @@
 ---
 name: forma-creator
-description: Create or update self-contained Forma Plan-First workflow artifacts. Use when an agent needs to generate an installable workflow bundle, generate a Codex plugin when the fixed target contract allows it, adapt Plan-First methodology with temporary injection, or verify generated artifacts with the bundled Forma verifier before reporting success.
+description: Create or update self-contained Forma Plan-First workflow outputs. Use when an agent needs to generate an installable workflow bundle, generate a Codex plugin when the fixed target contract allows it, adapt Plan-First methodology with temporary injection, or verify generated workflow outputs with the bundled Forma verifier before reporting success.
 ---
 
 # Forma Creator
 
-Use this skill to create Forma Plan-First workflow artifacts. By default it
+Use this skill to create Forma Plan-First workflow outputs. By default it
 creates a workflow bundle: a flat, ready-to-install set of five plan-first
 skills named `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
 `forma-showhand`. If this installed creator includes a fixed target reference, that
@@ -19,9 +19,9 @@ target contract.
 
 ## Workflow
 
-1. Confirm the output directory and any business injection values: organization
-   name, stage display text, validation-command preferences, local reference
-   files, and extra Decision Gate dimensions.
+1. Confirm the output directory and any workflow customization values:
+   organization name, stage display text, validation-command preferences,
+   local reference files, final skill names, and extra Decision Gate dimensions.
 2. Classify the injection shape before writing JSON:
    - Fixed scenario: use ordinary `constraints`, `resources`,
      `validation_commands`, and `decision_gate_extras`; every injected rule is
@@ -47,11 +47,12 @@ target contract.
    final names under `rename.stages` in the temporary JSON. If they do not, use
    the defaults.
 4. Read `references/canonical-plan-first.md` and preserve the canonical
-   workflow shape. It is derived from the validated
-   plan-first model: chat-only convergence, read-only grounding,
-   finalization, review-gated task execution, and automated full-flow
-   execution. Do not remove gate dimensions, rename on-disk artifacts such as
-   `plan.md` / `tasks.md`, or make workflow stages optional.
+   workflow shape. It is derived from the validated plan-first model:
+   chat-only convergence, read-only grounding, task-contract finalization,
+   review-gated task execution, and automated full-flow execution. Do not
+   remove gate dimensions, weaken task-level validation/proof requirements,
+   rename on-disk files such as `plan.md` / `tasks.md`, or make workflow
+   stages optional.
 5. Convert the current conversation's one-off injection into a temporary JSON
    file. This JSON is not a profile and must not be treated as tracked source.
    Before generation, output the temporary injection path and a short
@@ -73,7 +74,7 @@ The script creates exactly `forma-plan/`, `forma-ground/`, `forma-lock/`,
 `rename.stages`, the script creates those final installable skill directories
 instead. The script copies bundled methodology resources, applies the temporary
 injection, writes metadata, and runs the bundled verifier. Only report success
-after it exits cleanly. Do not install generated artifacts from this creator;
+after it exits cleanly. Do not install generated outputs from this creator;
 report the output path and install hint only.
 
 ## Stage Rules
@@ -83,12 +84,11 @@ uses these internal stage keys, while installable skill directories and
 frontmatter names use the public default names:
 
 - `shape` / `forma-plan` is chat-only convergence. It settles Goal, Scope, Approach,
-  Validation, and Plan Strategy before `proposal-ready`.
+  Validation, Plan Strategy, and task-level artifact/evidence boundaries before `proposal-ready`.
 - `gauge` / `forma-ground` is read-only repository inspection. It produces a grounding handoff
   for `seal` and does not write files.
-- `seal` / `forma-lock` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/` using
-  the project issue-workflow init step.
-- `pour` / `forma-execute` executes one task at a time through `review-ready` and `complete`.
+- `seal` / `forma-lock` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/`, including accepted files/surfaces, validation gates, proof requirements, dependencies, and constraints.
+- `pour` / `forma-execute` executes one accepted task contract at a time through `review-ready` and `complete`.
 - `flow` / `forma-showhand` executes all remaining tasks automatically after the plan is sealed,
   while still honoring validation, safety, and permission gates.
 
@@ -109,7 +109,7 @@ creator bundle by `forma build-creator`.
   `resources/plan-first/methodology/resources/pour/` and
   `resources/plan-first/methodology/resources/flow/`.
 
-One-off business injection may add local references and constraints, but must
+One-off workflow injection may add local references and constraints, but must
 not replace the canonical runner or change internal stage keys, and must not
 manually rename generated directories outside `rename.stages` or borrow
 resources from sibling skill directories.

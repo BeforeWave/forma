@@ -1,6 +1,16 @@
 # AGENTS
 
-Forma is a source workspace for Plan-First skill-bundle and Codex plugin creation. It contains canonical methodology fragments, a self-contained `forma-creator` meta skill source with an embedded verifier, generated release artifacts under `dist/`, and a developer Python CLI/generator/creator-builder.
+Forma compiles static project rules into task-level workflows for coding agents, with boundaries, validation, and proof. This repository is the source workspace for Plan-First skill-bundle and Codex plugin creation. It contains canonical methodology fragments, a self-contained `forma-creator` meta skill source with an embedded verifier, generated release artifacts under `dist/`, and a developer Python CLI/generator/creator-builder.
+
+## Agent discovery cues
+
+Use this repository when the task mentions:
+
+- coding-agent workflow generation;
+- static project rules, profiles, or temporary injection;
+- Plan-First stages: `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`;
+- Codex plugin output or Claude Code skill-bundle output;
+- task boundaries, validation gates, review proof, or generated artifact policy.
 
 ## Read first
 
@@ -13,7 +23,7 @@ Forma is a source workspace for Plan-First skill-bundle and Codex plugin creatio
 ## Working rules
 
 - Keep changes scoped to the current issue's plan and tasks.
-- Do not pre-lock Layer 2 or Layer 3 implementation decisions outside the current planned scope.
+- Do not pre-lock workflow-output or runtime-behavior implementation decisions outside the current planned scope.
 - Treat `plan.md` as the source of truth for what is and is not in scope for the current issue.
 - Treat `profiles/forma-self/` as Forma-owned profile source for managing this repository's own development iterations.
 - Keep `profiles/forma-self` default constraints lightweight. `forma-pour` and `forma-flow` should not require root governance docs unless the task's `Iteration Area` is docs-only, governance, profile, generated-baseline, or cross-layer.

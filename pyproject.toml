@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "forma"
 version = "0.1.0"
-description = "Compile Plan-First agent workflows into verified Codex and Claude Code skill bundles and Codex plugins."
+description = "Compile project rules into verified Plan-First workflow bundles and Codex plugins."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

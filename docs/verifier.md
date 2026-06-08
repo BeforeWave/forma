@@ -5,9 +5,9 @@ Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 `forma verify` checks generated skill bundles, `forma-creator` bundles, and
 Codex plugin outputs.
 
-It is the engineering boundary that keeps Forma from being only a prompt
-generator: generated outputs must have a valid structure, match the target
-contract, and preserve the expected Plan-First harness shape.
+It is the engineering boundary that keeps Forma from being only prose:
+generated outputs must have a valid structure, match the target contract, and
+preserve the expected Plan-First workflow shape.
 
 ## When To Run It
 
@@ -56,8 +56,8 @@ Verification is not semantic review.
 It does not prove:
 
 - the profile is a good project decision;
-- the generated workflow is complete for a specific project;
-- every validation command is sufficient;
+- the generated workflow is complete for a specific project's task contracts;
+- every validation command, gate, or proof path is sufficient;
 - external source adapters are authenticated or reachable;
 - the agent will always behave correctly;
 - generated examples reflect a real successful project run;
@@ -88,7 +88,7 @@ Verification uses that manifest to understand the bundle. Drift checks compare
 committed generated baselines against what the current compiler should emit.
 
 The manifest is provenance. Verification is conformance. Neither replaces
-review of the profile's intent.
+review of the profile's intent or the task-level contract it produces.
 
 ## CI Usage
 

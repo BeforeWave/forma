@@ -20,7 +20,7 @@ This document maps the current Forma source tree and the role of each area.
 | `source/` | Canonical methodology source and Layer 1 meta skill source | present |
 | `src/forma/` | Developer Python package and CLI | present |
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
-| `examples/` | Composable profile examples and generated Mode-S workflow bundles | present |
+| `examples/` | Composable profile examples and generated Plan-First workflow bundles | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
 | `dist/` | Committed release artifacts for creator skills, skill bundles, and the Codex plugin | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
@@ -77,9 +77,9 @@ generated skill resources.
 | `src/forma/plugins.py` | Codex plugin artifact builder |
 | `src/forma/creator/manifest.py` | Methodology lookup and provenance manifest helpers |
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |
-| `src/forma/creator/composer.py` | Methodology + resolved profile composition into Mode-S skill contents |
+| `src/forma/creator/composer.py` | Methodology + resolved profile composition into Plan-First skill contents |
 | `src/forma/adapters/skill.py` | Target-specific `forma-creator` builder with fixed output contracts |
-| `src/forma/creator/emitter.py` | Output writer for generated workflow bundles |
+| `src/forma/creator/emitter.py` | Output writer for generated task-level workflow bundles |
 
 ## Documentation
 
@@ -144,8 +144,8 @@ heavy scenario-specific behavior belongs in conditional overlays.
 |---|---|
 | `examples/profiles/sample-backend/` | Profile stack showing base/dev/backend/language composition |
 | `examples/profiles/sample-software/` | Profile stack showing generic software plan-first behavior, Chinese workflow wording, Impact Profile / Impact Boundary controls, and safe showhand gates |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Mode-S workflow bundle and drift baseline |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Mode-S workflow bundle and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Plan-First workflow bundle and drift baseline |
+| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Plan-First workflow bundle and drift baseline |
 
 Real downstream profiles with organization-specific workflow commands, private
 paths, credentials, or business rules belong in the downstream repository that

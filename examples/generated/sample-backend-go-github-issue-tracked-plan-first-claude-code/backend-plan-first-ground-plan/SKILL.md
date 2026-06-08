@@ -45,8 +45,8 @@ Inspect backend repository facts read-only and produce a grounding handoff.
 - Prefer module-local Go tests when available.
 - This sample demonstrates tracked profile composition without organization-specific workflow details.
 - Inspect source layout, test entrypoints, and dependency files without writing.
-- Use profile validation command when it applies: `python -m pytest tests/`
-- Use profile validation command when it applies: `go test ./...`
+- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply profile validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

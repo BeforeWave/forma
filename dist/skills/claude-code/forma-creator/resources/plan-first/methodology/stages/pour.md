@@ -6,12 +6,12 @@ resources, and resolved constraints.
 
 ## Description
 
-Execute the current workflow task through review-ready, wait for user approval, then complete and continue if another task remains.
+Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
 
 ## Interaction Semantics
 
-- Use this skill as a review-gated task executor.
-- For each task, implement only the current workflow task, run review-ready, and wait for explicit user approval before completion.
+- Use this skill as a review-gated task executor for one accepted task contract.
+- For each task, implement only the current task's accepted files/surfaces, run its validation gates through review-ready, and wait for explicit user approval before completion.
 - After an approved task is completed successfully, check for the next task immediately and continue if one remains.
 - Stop only when review is needed, no unchecked task remains, validation fails, workflow fails, escalation is needed, or the user interrupts.
 
@@ -20,7 +20,7 @@ Execute the current workflow task through review-ready, wait for user approval, 
 - Read `./plans/issue-<id>/plan.md`.
 - Use `scripts/forma-workflow.sh next <issue-id>` from this installed skill package to get the current task.
 - Resolve `scripts/forma-workflow.sh` relative to the current triggered skill package only; never switch to a same-named script in a sibling skill directory, even if the contents match.
-- Implement only the current task by treating `Accept:` as the delivery target and `Validate:` / `Use-Check:` as proof; if it is the last remaining task, `review-ready` will also run `## Final Validation`.
+- Implement only the current task by treating `Accept:` as the delivery target and `Validate:` / `Use-Check:` as validation gates and proof obligations; if it is the last remaining task, `review-ready` will also run `## Final Validation`.
 - For `loop-batch`, report metric/artifact movement before validation; for `gate`, name the protected decision boundary; for `promote`, write only the surfaces explicitly allowed by the current task.
 - Record meaningful execution decisions, plan gaps, classifications, deviations, and follow-ups in `plans/issue-<id>/implement-notes.md` using the bundled notes reference.
 - Run `scripts/forma-workflow.sh review-ready <issue-id>` before presenting the current task result for user review.

@@ -1,7 +1,7 @@
 - When invoking `scripts/forma-workflow.sh`, resolve it relative to the current triggered skill package only; do not switch to a same-named script in a sibling skill directory, even if the contents match.
 - Treat the output of `scripts/forma-workflow.sh next <issue-id>` and the current task block's `Accept:` / `Validate:` / `Use-Check:` / `Depends:` / `Constraint:` lines as the source of truth for the current task.
 - Infer missing `Plan Strategy` as `step-execution` and missing `Task Type` as `step`; do not require legacy plans to be rewritten before execution.
-- Treat the current task's `Accept:` as the delivery target and `Validate:` / `Use-Check:` as proof obligations, not as replacement goals.
+- Treat the current task's `Accept:` as the delivery target and `Validate:` / `Use-Check:` as validation gates and proof obligations, not as replacement goals.
 - Do not broaden the task to add diagnostics, expand output schemas, clean up adjacent tooling, or refactor nearby code unless that work is necessary for the current `Accept:` or prevents unsafe formal/destructive writes or decision-critical mistakes.
 - For `Task Type=loop-batch`, prioritize metric/artifact movement and report that outcome before validation details; never allow empty selection or failed filtering to fall back to an unintended full run.
 - For `Task Type=gate`, require a decision-critical boundary in the task text, such as protecting later selection, closure, artifact acceptance, promotion, or destructive write decisions; otherwise record the issue as follow-up instead of implementing generic cleanup.

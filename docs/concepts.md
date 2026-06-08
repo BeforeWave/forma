@@ -2,13 +2,13 @@
 
 Chinese version: [concepts.zh-CN.md](./concepts.zh-CN.md)
 
-This page expands the README mental model. Read it after the homepage framing
-and before writing a large profile.
+This page expands the README layer model. Read it after the homepage framing
+and before writing a durable profile.
 
 Agents do not usually fail because they cannot produce text or change files.
 They fail because the project-specific way of working is implicit.
 
-Forma is for compiling that way of working into a runtime harness.
+Forma compiles that way of working into a workflow harness.
 
 ## What Changes
 
@@ -25,9 +25,9 @@ test habits, and review standards. With agents in the loop, projects also need
 to express how work is delegated: what the agent must clarify, what it must
 read, when it may act, when it must stop, and how it proves the result.
 
-Forma treats that agent-working style as source. It compiles project principles
-into staged skills, then those skills shape how the agent handles each concrete
-development goal.
+Forma treats that agent-working style as source. It compiles static project
+rules into staged skills, then those skills turn each concrete development goal
+into task-level files, boundaries, commands, validation gates, and proof.
 
 ## Three Layers
 
@@ -35,12 +35,12 @@ Forma works in three layers:
 
 | Layer | Meaning |
 |---|---|
-| Layer 0: Build the profile | Define the project's long-lived engineering principles and boundaries. |
-| Layer 1: Generate the workflow | Forma compiles the profile into a project-specific Plan-First workflow skill bundle. |
-| Layer 2: Runtime harness | When a concrete development goal appears, the agent runs under that workflow. |
+| Layer 0: Project rules | Define standing rules: code conventions, mutation boundaries, validation requirements, review expectations, generated-file policy, risky areas, and evidence sources. |
+| Layer 1: Workflow harness | Forma compiles those rules into a project-specific Plan-First skill bundle or Codex plugin. |
+| Layer 2: Task execution | The installed workflow turns a concrete goal into task-level obligations: files, boundaries, commands, gates, and proof. |
 
 Keep these layers separate. A profile is not an installed skill. A generated
-skill bundle is not the source of truth. The runtime harness is not another
+skill bundle is not the source of truth. The workflow harness is not another
 file; it is how the installed workflow constrains the agent while it works.
 
 ## Compiler Model
@@ -48,8 +48,8 @@ file; it is how the installed workflow constrains the agent while it works.
 Forma is a compiler for project-specific Plan-First workflow skills.
 
 ```text
-profile  ->  Forma compiler  ->  workflow skill bundle  ->  runtime harness
-source       compiler            installed output            agent behavior
+profile  ->  Forma compiler  ->  workflow bundle/plugin  ->  task execution contract
+source       compiler            installed output            files, commands, gates, proof
 ```
 
 Codex and Claude Code are targets. The same profile can produce target-specific
@@ -62,8 +62,8 @@ follows while executing tasks.
 
 | Concept | Meaning |
 |---|---|
-| Workflow contract | The staged rules for moving from demand to evidence, plan, execution, proof, and review. |
-| Profile | Durable project principle source reviewed like project source. |
+| Workflow contract | The staged rules for moving from demand to evidence, plan, task execution, proof, and review. |
+| Profile | Durable project-rule source reviewed like project source. |
 | Temporary injection | One-off generation input for scoped rules that should not become durable policy by accident. |
 | Skill bundle | Target-specific compiled output containing stage skills, references, scripts, and a manifest. |
 | Target | The agent environment that loads generated skills, currently Codex or Claude Code. |
@@ -105,14 +105,15 @@ verifiable workflow source. It helps make agent work:
 
 - repeatable: durable rules have a source location and lifecycle;
 - staged: clarification, evidence, planning, execution, and proof are not collapsed into one prompt;
-- bounded: implementation stays inside accepted tasks;
-- reviewable: reviewers can inspect the path from demand to evidence, plan, execution, and proof;
+- bounded: implementation stays inside accepted task files and mutation boundaries;
+- concrete: validation is expressed as exact commands, gates, and proof paths instead of vague reminders;
+- reviewable: reviewers can inspect the path from demand to evidence, plan, task execution, and proof;
 - portable: the same profile can be emitted for supported targets.
 
 ## Fit
 
-Use Forma when a project's standing principles should shape how agents handle
-development goals at runtime.
+Use Forma when a project's standing rules should shape how agents handle
+development goals at task-execution time.
 
 AI coding is the first obvious fit, but it is not the only one. Forma can also
 fit research, analysis, publishing, design review, customer handoff, governance,
@@ -128,7 +129,8 @@ You probably do not need Forma when:
 
 Forma can work beside spec tools, planning docs, project instructions, and
 generic skill creators. Those layers define demand, local context, or
-capabilities. Forma defines how the agent moves through them.
+capabilities. Forma defines how the agent moves through them and what proof it
+must leave behind.
 
 ## First Successful Run
 
@@ -138,7 +140,7 @@ Do not begin by designing a perfect profile. Try one small workflow first.
 2. Generate the default Codex plugin or a small target bundle.
 3. Install it into one target.
 4. Trigger one plan-first task.
-5. Inspect the plan, task contract, validation result, and proof.
+5. Inspect the task contract: files, boundaries, commands, validation gates, and proof.
 6. Shape the harness with creator or profile rules only after the workflow proves useful.
 
 See [Quick Start](./quick-start.md) for the concrete path.

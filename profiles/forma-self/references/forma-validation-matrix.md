@@ -5,7 +5,7 @@ Select the narrowest relevant validation first, then run the shared gate before 
 ## Shared Gate
 
 ```bash
-uv run --extra dev pytest -p no:cacheprovider tests/
+uv run --extra dev python -m pytest -p no:cacheprovider tests/
 uv run --extra dev forma verify source/skill-creator/
 git diff --check
 ```
@@ -13,7 +13,7 @@ git diff --check
 ## Layer 1 And Layer 2
 
 ```bash
-uv run --extra dev pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
+uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
 uv run --extra dev forma verify source/skill-creator/
 ```
 
@@ -22,7 +22,7 @@ Use this for creator skill source, verifier rules, target-layout rules, and agen
 ## Layer 3 Creator
 
 ```bash
-uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
+uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
 ```
 
 Use this for profile loading, composition, emission, manifest provenance, output replacement, target adapters, and creator builder behavior.

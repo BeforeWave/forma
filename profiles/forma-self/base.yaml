@@ -10,7 +10,7 @@ terminology:
   issue: Forma issue
   repository: Forma workspace
   profile: tracked Forma profile
-  generated suite: target-specific Mode-S output
+  generated suite: target-specific Plan-First workflow output
 constraints:
   default:
     - Treat this profile stack as Forma-owned project source, not a sanitized public example.
@@ -28,6 +28,6 @@ constraints:
     - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
 validation_commands:
   default:
-    - uv run --extra dev pytest -p no:cacheprovider tests/
+    - uv run --extra dev python -m pytest -p no:cacheprovider tests/
     - uv run --extra dev forma verify source/skill-creator/
     - git diff --check

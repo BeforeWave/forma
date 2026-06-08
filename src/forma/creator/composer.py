@@ -557,7 +557,7 @@ def _requirements_for_kind(
         )
     validation_commands = _commands_for_kind(kind, profile.validation_commands)
     requirements.extend(
-        f"Use profile validation command when it applies: `{command}`"
+            f"Apply profile validation gate when it is relevant to the current task: `{command}`"
         for command in validation_commands
     )
     requirements.extend(_conditional_requirements(kind, profile.conditional_overlays))
@@ -596,7 +596,7 @@ def _conditional_requirements(
                 )
             for command in _items_for_kind(overlay.validation_commands, kind):
                 requirements.append(
-                    f"If `{decision_name}` is `{route.id}`, use `{overlay_id}` overlay validation command when it applies: `{command}`"
+                    f"If `{decision_name}` is `{route.id}`, apply `{overlay_id}` overlay validation gate when it is relevant to the current task: `{command}`"
                 )
     return requirements
 

@@ -25,13 +25,13 @@ from forma_verifier import verify as verify_bundle
 @click.group()
 @click.version_option()
 def main() -> None:
-    """Forma — compile project-specific agent workflows into skill bundles."""
+    """Forma — compile project rules into task-level agent workflows."""
 
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True, path_type=Path))
 def verify(path: Path) -> None:
-    """Verify a generated Forma workflow bundle at PATH."""
+    """Verify a generated Forma workflow output at PATH."""
     report = verify_bundle(path)
     click.echo(report.format_human())
     if not report.passed:
@@ -44,21 +44,21 @@ def verify(path: Path) -> None:
     "profile_file",
     required=False,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Top-level bundle profile file (default: generic Forma Plan-First).",
+    help="Tracked profile file that owns project workflow rules (default: generic Plan-First).",
 )
 @click.option(
     "--target",
     "target_agent",
     required=True,
     type=click.Choice(ADAPTER_TARGETS),
-    help="Agent target to emit.",
+    help="Agent target for the generated workflow.",
 )
 @click.option(
     "--output",
     "output_dir",
     required=True,
     type=click.Path(file_okay=False, path_type=Path),
-    help="Output directory for the generated workflow bundle.",
+    help="Directory to write the generated workflow bundle.",
 )
 @click.option(
     "--methodology",
@@ -73,7 +73,7 @@ def create_bundle_command(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compile a resolved profile into a target-specific workflow bundle."""
+    """Compile project rules into a target-specific workflow bundle."""
     try:
         resolved_profile = _resolve_profile_file(profile_file)
         manifest = build_bundle(
@@ -84,7 +84,7 @@ def create_bundle_command(
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma create-bundle: wrote {output_dir}")
+    click.echo(f"forma create-bundle: wrote workflow bundle: {output_dir}")
     click.echo(f"manifest: {manifest}")
 
 
@@ -94,21 +94,21 @@ def create_bundle_command(
     "profile_file",
     required=False,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Top-level bundle profile file (default: generic Forma Plan-First).",
+    help="Tracked profile file that owns project workflow rules (default: generic Plan-First).",
 )
 @click.option(
     "--target",
     "target_agent",
     required=True,
     type=click.Choice(ADAPTER_TARGETS),
-    help="Plugin target to emit. Currently only codex is supported.",
+    help="Plugin target for the generated workflow. Currently only codex is supported.",
 )
 @click.option(
     "--output",
     "output_dir",
     required=True,
     type=click.Path(file_okay=False, path_type=Path),
-    help="Output directory for the generated plugin.",
+    help="Directory to write the generated plugin.",
 )
 @click.option(
     "--methodology",
@@ -123,7 +123,7 @@ def create_plugin_command(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compile a profile into a target-specific plugin artifact."""
+    """Compile project rules into a target-specific plugin output."""
     if target_agent != "codex":
         raise click.ClickException("forma create-plugin currently supports only --target codex")
     try:
@@ -134,7 +134,7 @@ def create_plugin_command(
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma create-plugin: wrote {output_dir}")
+    click.echo(f"forma create-plugin: wrote Codex plugin: {output_dir}")
     click.echo(f"plugin: {plugin_json}")
 
 
@@ -207,19 +207,19 @@ def _resolve_profile_file(profile_file: Path | None) -> Path:
     "target_agent",
     required=True,
     type=click.Choice(ADAPTER_TARGETS),
-    help="Agent target to emit.",
+    help="Agent target for the generated creator.",
 )
 def build_creator_command(
     source_dir: Path | None,
     output_dir: Path,
     target_agent: str,
 ) -> None:
-    """Build target-specific installable Forma creator bundles."""
+    """Build target-specific creators that generate and verify workflow outputs."""
     try:
         output = build_creator(source_dir, output_dir, target_agent)
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma build-creator: wrote {output}")
+    click.echo(f"forma build-creator: wrote creator bundle: {output}")
 
 
 @main.group()
@@ -244,7 +244,7 @@ def explain() -> None:
     help="Optional agent target context.",
 )
 def explain_profile(output_format: str, target_agent: str | None) -> None:
-    """Explain durable profile authoring and constraint placement."""
+    """Explain durable profile authoring and task-rule placement."""
     try:
         click.echo(render_guidance("profile", output_format, target_agent), nl=False)
     except ValueError as exc:
@@ -271,7 +271,7 @@ def explain_temporary_injection(
     output_format: str,
     target_agent: str | None,
 ) -> None:
-    """Explain temporary injection classification and output rules."""
+    """Explain temporary injection classification for one-off workflow rules."""
     try:
         click.echo(
             render_guidance("temporary-injection", output_format, target_agent),

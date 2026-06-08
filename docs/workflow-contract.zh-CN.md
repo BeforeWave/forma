@@ -2,31 +2,31 @@
 
 英文版：[workflow-contract.md](./workflow-contract.md)
 
-Workflow contract 是 Forma 生成 workflow 的运行时形状。它定义 Agent 如何从一个具体开发目标走到证据、计划、有序任务、证明和 review。
+Workflow contract 是 Forma 生成 workflow 的 task 执行形状。它定义 Agent 如何从一个具体开发目标走到证据、计划、有序任务、验证 gate、证明和 review。
 
-Forma 把项目原则编译成 target 专用 skills。当这些 skills 被调用时，contract 就变成包住 Agent 工作路径的 harness。
+Forma 把静态项目规则编译成 target 专用 skills。当这些 skills 被调用时，contract 就变成包住 Agent 工作路径的 harness。
 
 ## 实际作用
 
 Forma 不保证 Agent 行为完美。它提供的是更清晰的工作流控制点。
 
-| 只有提示词的工作流 | Forma runtime harness |
+| 只有提示词的工作流 | Forma workflow harness |
 |---|---|
 | 规则需要在每次对话里重新解释。 | 长期规则进入 profiles。 |
 | 规划、取证和执行容易混在一起。 | 阶段会拆开澄清、取证、定稿、执行和继续。 |
-| 验证可能到最后才想起来。 | 证明要求写进任务契约。 |
+| 验证可能到最后才想起来。 | 具体验证命令、共享检查和证明要求写进任务契约。 |
 | 是否继续取决于 Agent 当下判断。 | `forma-showhand` 在已锁定计划下自动推进已接受任务。 |
 
 ## Contract 流程
 
-Forma 默认方法使用五个对外技能：
+Forma 默认方法使用四个核心对外 workflow skills，并带一个用于连续执行的 `forma-showhand`：
 
 ```text
 goal -> proposal -> evidence -> execution contract -> ordered task -> proof
-        plan        ground     lock                 execute        review
+        plan        ground     lock                 execute
 ```
 
-每个阶段只有一个核心职责：
+每个核心阶段只有一个职责：
 
 | 对外技能 | 职责 | 交接物 |
 |---|---|---|
@@ -34,13 +34,14 @@ goal -> proposal -> evidence -> execution contract -> ordered task -> proof
 | `forma-ground` | 只读收集仓库、Spec、文档和历史证据。 | 包含事实、风险和未知项的 grounding handoff。 |
 | `forma-lock` | 把已收敛方案和证据变成执行契约。 | `plans/issue-<id>/plan.md` 和 `tasks.md`。 |
 | `forma-execute` | 执行一个已接受任务，并记录证明。 | 可评审的任务结果和验证证据。 |
-| `forma-showhand` | review 完毕、方案固定后的连续 `forma-execute` candy skill。 | 已完成的已接受任务，或第一个无法安全继续的阻塞。 |
+
+`forma-showhand` 是 `forma-execute` 的连续执行 candy skill，不是独立阶段。review 完毕、方案固定后，它会沿着已锁定任务列表继续推进，直到 proof、验证、权限或前置条件阻塞安全继续。
 
 这些技能名是默认值。Profile 可以重命名生成技能，但工作流语义不变。
 
-## 阶段权限
+## 技能权限
 
-Contract 有价值，是因为每个阶段的权限不同。
+Contract 有价值，是因为每个对外技能的权限不同。
 
 | 对外技能 | 允许 | 不允许 |
 |---|---|---|
@@ -55,18 +56,19 @@ Contract 有价值，是因为每个阶段的权限不同。
 请求：
 
 ```text
-Update the billing API behavior.
+更新一个生成 schema 的 source。
 ```
 
 Forma workflow 应该让这个请求按 contract 推进：
 
 | 对外技能 | 发生什么 |
 |---|---|
-| `forma-plan` | 判断这是否改变 public API 行为、持久化或兼容性预期。 |
-| `forma-ground` | 读取当前 routes、API docs、tests，以及相关历史 plan 或 issue 证据。 |
-| `forma-lock` | 写出带验证的已接受任务，例如 API tests、兼容性检查或契约评审。 |
-| `forma-execute` | 执行一个已接受任务，并运行该任务要求的证明。 |
-| `forma-showhand` | review 完毕、方案固定后继续推进已接受任务，直到证明、验证、权限或前置条件阻塞。 |
+| `forma-plan` | 判断这个任务是否只能改 source、生成文件是否出界、完成前需要什么 proof。 |
+| `forma-ground` | 读取 source schema、生成器入口、附近测试和现有生成文件策略。 |
+| `forma-lock` | 写出带具体边界和命令的已接受任务，例如 `make generate-schema` 加 schema 验证 gate。 |
+| `forma-execute` | 只修改已接受的 source/test 文件，运行 task 验证，并记录 generated diff 和命令输出作为 proof。 |
+
+review 完毕、方案固定后，`forma-showhand` 可以继续推进已接受任务，直到证明、验证、权限或前置条件阻塞。
 
 ## 证据策略
 
@@ -91,7 +93,8 @@ Workflow contract 应说明 Agent 在行动前必须使用哪些证据。
 - 哪个任务已经被接受；
 - 哪些文件或子系统在范围内；
 - 哪些工作路线需要额外批准；
-- 哪些命令能证明结果；
+- 哪些具体命令或共享检查能证明结果；
+- 生成输出、日志或运行证据应该写到哪里；
 - 哪些情况必须停止自动继续。
 
 宽泛规则不应该复制进每个 skill。稳定默认规则进 profile，阶段规则进 stage constraints，路线专用规则进 conditional overlays。

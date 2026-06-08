@@ -1,146 +1,256 @@
 # Forma
 
-**Compile project-specific principles into runtime harnesses for coding agents.**
+**Start with one sentence, then compile static project rules into custom task workflows.**
 
-Forma works in three layers:
+Forma compiles project rules into a project-specific workflow harness, then turns them into concrete boundaries, validation steps, and proof for each development task.
 
-- **Layer 0: Build the profile.** Use a profile to define the project's
-  long-lived engineering principles and the boundaries agents should
-  consistently follow.
-- **Layer 1: Generate the workflow.** Forma compiles the profile into a
-  project-specific Plan-First workflow skill bundle that carries those
-  principles.
-- **Layer 2: Runtime harness.** When a concrete development goal appears, the
-  agent runs under that workflow: clarify the goal, gather evidence, lock the
-  execution contract, execute ordered tasks, record proof, wait for human
-  review, and stop when boundaries change.
+It works in three layers:
 
-The skill bundle is the installed output; the runtime harness is how it shapes
-the agent's work on a concrete development goal.
+```text
+Layer 0 — Project Profile
+With Forma, the agent helps turn repository evidence and human input into a project profile:
+rules, boundaries, validation requirements, review expectations, risky areas, and evidence sources.
 
-Chinese documentation: [README.zh-CN.md](./README.zh-CN.md)
+        ↓ compiled by Forma
 
-## What Gets Installed
+Layer 1 — Workflow Harness
+Forma compiles these rules into a project-specific skill bundle or plugin.
+The harness guides the agent:
+plan → ground → lock → execute → record proof
 
-Forma installs a project-specific workflow harness as coordinated skills:
+        ↓ executed by the agent
 
-| Skill | Harness job |
+Layer 2 — Task Execution
+For each development task, the rules become concrete, repository-specific obligations:
+- this task is grounded on `File A`, `File B`, and `Issue C`
+- it may touch `Module X`, but must not touch `Generated File Y`
+- it is complete only when behavior `Z` works through path `P`
+- it must be verified with `Command M` and `Test N`
+- `Proof R` must be recorded before proceeding
+```
+
+**Use Forma when you need static project rules to become reviewable files, boundaries, commands, tests, and proof alongside the final patch.**
+
+[中文文档](./README.zh-CN.md)
+
+---
+
+## Why Forma Exists
+
+Coding agents can generate code quickly.
+
+The harder problem is making them work by the rules of a specific project.
+
+Most projects already have rules:
+
+```text
+Read relevant implementation before planning.
+Behavior changes require nearby tests.
+Keep public APIs compatible.
+Risky changes require review.
+Record validation proof before finishing.
+```
+
+These rules are valuable, but they are usually principle-level rules.
+
+Project docs, architecture notes, `AGENTS.md`, and review guidelines mostly describe “what this project is like” and “which principles work should follow.” They can give an agent the right direction, but they do not automatically translate a concrete change into:
+
+```text
+Which file should be read first.
+Where this plan item may change code, and where it must not.
+Which test validates the behavior change.
+Which source should regenerate the generated file.
+Which output counts as proof.
+Which uncertainty must stop execution and go back to the user.
+```
+
+The result: the agent has read the principles, but when it starts changing code, it still improvises under those principles.
+
+Forma exists to close that gap.
+
+It compiles project rules into a Plan-First workflow harness, then lets that harness turn the principles into concrete boundaries, validation steps, and proof requirements for each development task.
+
+For example, a static rule like this:
+
+```text
+Do not edit generated files directly.
+After changing source, regenerate outputs and run the relevant validation.
+```
+
+needs to become a task-level contract:
+
+```text
+Task 002 — Update the generated schema source
+- Evidence: read `schema/source.yaml`, the generator entrypoint, and nearby schema tests first.
+- Boundary: this task may edit `schema/source.yaml` and its tests; it must not hand-edit `schema/generated.json`.
+- Command: run `make generate-schema` and the schema validation command recorded in `tasks.md`.
+- Validation gate: generated output must come only from the source change, and schema validation must pass.
+- Proof: record the generation command, validation output, and generated diff in `plans/issue-<id>/runs/task-002.md`.
+```
+
+That is the level Forma pushes static rules down to: concrete evidence, concrete boundaries, concrete commands, validation gates, and proof.
+
+---
+
+## What Forma Installs
+
+Forma installs four core Plan-First workflow skills, plus `forma-showhand` for continuous execution.
+
+| Skill | Purpose |
 |---|---|
-| `forma-plan` | Clarify the development goal under the project's principles: scope, risks, acceptance criteria, strategy, and unresolved decisions. |
-| `forma-ground` | Gather the evidence this goal needs from the repository, docs, specs, issues, and other project sources. |
-| `forma-lock` | Lock the current execution contract: accepted boundaries, ordered tasks, validation, and review expectations. |
+| `forma-plan` | Clarify the development goal, scope, risks, acceptance criteria, strategy, and unresolved decisions. |
+| `forma-ground` | Gather repository evidence from code, docs, issues, tests, fixtures, and project references. |
+| `forma-lock` | Lock the execution contract: concrete boundaries, task order, validation, and review expectations. |
 | `forma-execute` | Execute one accepted task at a time, record proof, and surface drift or blockers. |
 
-`forma-showhand` is the candy skill for continuous `forma-execute`, not a
-separate stage: confident in your harness constraints? Review done, plan fixed,
-then show hand and let the agent drive you to the destination.
+`forma-showhand` is the continuous `forma-execute` candy skill, not a separate stage. Once review is done, the plan is locked, and the harness constraints are solid, show hand and let the agent enter autopilot, keep moving along the locked plan, and leave proof all the way.
 
-Not into the names? Rename them. They are defaults. The important part is the
-generated workflow: project principles live inside the skills the agent invokes
-while working on development goals.
+Not into the names? Rename them. They are defaults.
 
-In Codex, the same workflow can also be packaged as a plugin for one-step
-installation.
+The important part is the generated workflow: project principles live inside the skills the agent invokes while working on development goals.
 
-## Try It
+---
 
-Install the Forma CLI first:
+## Quick Try
+
+The fastest way to feel Forma is to make an agent produce a plan and proof for a real development goal before it writes the patch.
+
+### 1. Try the default Plan-First workflow
+
+Install the CLI:
 
 ```bash
 pipx install git+https://github.com/BeforeWave/forma.git
 ```
 
-Using Codex as the example, generate and install the default Plan-First plugin:
+Create and install the Codex plugin:
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
 forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
 
-After installation, start with the planning skill:
+Send the current issue or task context to the agent and ask it to use `forma-plan` first:
 
-> Use `forma-plan` to plan this issue first.
+```text
+Use forma-plan to plan this issue first.
 
-That gives you the default harness. Codex should not jump from goal to patch. It
-should clarify the goal, gather evidence, lock the execution contract, then
-execute tasks with proof.
+Issue:
+<paste the current issue, problem context, or task goal here>
+```
 
-## Reviewable Output
+The first result should be a chat-level proposal or handoff, not a patch and not plan files. It should settle the goal, scope, approach, validation model, and whether repository grounding is needed.
 
-For each development goal, the runtime harness should leave reviewable output:
+If repository evidence is needed, ask the agent to use `forma-ground`.
 
-- `plans/issue-<id>/plan.md`: the clarified goal, scope, approach, validation,
-  strategy, and output and proof boundary.
-- `plans/issue-<id>/tasks.md`: ordered accepted tasks with delivery targets,
-  proof obligations, dependencies, and constraints.
-- `plans/issue-<id>/runs/`: execution proof recorded as tasks complete.
+After the proposal and any grounding are accepted, lock the plan:
 
-Actual Forma plans are in [`plans/`](./plans/).
+```text
+Use forma-lock to write the plan and task contract.
+```
 
-That is the difference between "the agent followed instructions" and a workflow
-reviewers can inspect: what was clarified, what was locked, what ran, and what
-proof exists.
+You should then see a task-specific plan:
 
-## Shape The Harness
+```text
+plans/issue-<id>/plan.md
+plans/issue-<id>/tasks.md
+```
 
-The default harness is only the baseline. The point of Forma is to shape it with
-the engineering principles this project cares about.
+The Forma workflow should sort out, ask for, or lock down the necessary details: which files ground the task, what is in or out of bounds, how each task is accepted, which command or test validates it, and what proof must be recorded before execution continues.
 
-Project principles can cover different kinds of concerns:
+Then execute the next accepted task:
 
-- evidence sources the agent should prefer before planning;
-- mutation boundaries such as generated outputs, public APIs, or data paths;
-- risk checkpoints for permission, billing, deletion, migration, or compatibility work;
-- validation expectations for different kinds of tasks;
-- review and stop conditions when the plan drifts or evidence is thin.
+```text
+Use forma-execute to execute the next accepted task.
+```
 
-For a quick project-specific harness, install the creator skill:
+The run should leave proof under:
+
+```text
+plans/issue-<id>/runs/<task-id>.md
+```
+
+The first thing to check is whether the agent leaves a plan, boundaries, validation, and proof instead of only a patch.
+
+### 2. Shape a project-specific harness conversationally with forma-creator
+
+To quickly create a project-specific harness, install the creator skill:
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator
 forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
-Then talk to Codex like you would to a collaborator:
+Then talk to Codex like you would talk to a collaborator:
 
-> Use `forma-creator` to customize a workflow for this repo. First look at the
-> repository structure and common validation paths. I care about generated
-> outputs coming from source, lightweight checks for docs-only changes, nearby
-> tests before code changes, and surfacing uncertain calls for me to decide.
+```text
+Customize a workflow for this repo.
 
-For durable rules, write a profile and generate the workflow from source. For
-Claude Code, verification, install locations, profile authoring, and full
-command details, see [Usage](./docs/usage.md).
+First inspect the repository structure, validation paths, generated outputs, and project conventions.
 
-## When To Use It
+I care about:
+- generated outputs must come from source;
+- docs-only changes should use lightweight checks;
+- behavior changes should look for nearby tests first;
+- risky judgments should stop for my confirmation.
+```
 
-Use Forma when a project's standing principles should shape how agents handle
-development goals at runtime. Good fits include projects where planning,
-evidence, task boundaries, validation, review proof, or stop conditions should
-be more than background instructions.
+The creator skill classifies that conversation into temporary injection, then generates and verifies a one-off harness.
 
-Forma is usually too much for typo fixes, short summaries, or a few simple repo
-reminders. For those, a direct prompt, a single custom skill, or local project
-instructions may be enough.
+Rules that need reuse belong in a tracked profile. `forma explain profile --target codex` gives an agent the profile authoring standard; after the profile is versioned and reviewed, it can regenerate the harness consistently.
 
-## Forma On Forma
+---
 
-Forma uses Forma-managed Plan-First skills for its own development. The source
-profile for this repository lives in [`profiles/forma-self/`](./profiles/forma-self/).
-It defines how this repo's agents handle docs, governance, generated baselines,
-profile work, validation, and proof. Forma self-iterations use the same
-`plans/issue-<id>/` plan, task, and proof trail described above.
+## When To Use Forma
+
+Good fits:
+
+- repositories with frequent agent-assisted coding;
+- projects with generated files, fixtures, migrations, public APIs, or sensitive data paths;
+- teams that need agents to produce reviewable plans and proof;
+- workflows where validation differs by task type;
+- situations where the agent must stop when scope, evidence, or permission is unclear.
+
+Probably too much for:
+
+- typo fixes;
+- one-off summaries;
+- tiny edits with obvious scope;
+- repositories that only need a few static instructions.
+
+---
 
 ## Documentation
 
 - [Usage](./docs/usage.md): commands, install locations, verification, targets, and custom generation.
-- [Quick Start](./docs/quick-start.md): a longer first-run walkthrough.
+- [Quick Start](./docs/quick-start.md): first-run walkthrough.
 - [Concepts](./docs/concepts.md): mental model and fit.
-- [Forma Creator](./docs/forma-creator.md): custom project-specific skill generation.
+- [Forma Creator](./docs/forma-creator.md): custom project-specific workflow generation.
 - [Profile Schema](./docs/profile-schema.md): durable profile source format.
 - [Targets](./docs/targets.md): Codex and Claude Code behavior.
-- [STRUCTURE.md](./STRUCTURE.md): source tree and ownership boundaries.
+- [Project Structure](./STRUCTURE.md): source tree and ownership boundaries.
+
+---
+
+## Status
+
+Forma is early.
+
+Forma gives agents a better control surface, not a behavioral guarantee. Whether an agent follows generated skills still depends on the model and host. Putting workflow into files, stages, and proof requirements is more reliable than relying on chat memory alone, but it is not a magic guarantee.
+
+The current focus is:
+
+- making Plan-First agent workflows easier to install;
+- making project-specific workflow profiles easier to author;
+- improving generated bundle verification;
+- improving examples that show real planning, execution, validation, and review proof.
+
+Committed generated examples are useful as drift baselines, not proof of runtime agent behavior.
+
+BTW, Forma also uses its own Plan-First workflow for development; this repository’s source profile lives in `profiles/forma-self/`.
+
+---
 
 ## License
 
-Apache-2.0 - see [LICENSE](./LICENSE).
+Apache-2.0. See [LICENSE](./LICENSE).

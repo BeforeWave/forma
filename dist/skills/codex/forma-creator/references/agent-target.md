@@ -2,11 +2,11 @@
 
 This `forma-creator` bundle is fixed to `codex`. Its generated plan-first output must contain exactly five skill directories. Defaults are:
 
-- `forma-plan/` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary before plan finalization.
+- `forma-plan/` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization.
 - `forma-ground/` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
-- `forma-lock/` - Materialize an already-settled plan into plan.md and tasks.md without reopening planning decisions.
-- `forma-execute/` - Execute the current workflow task through review-ready, wait for user approval, then complete and continue if another task remains.
-- `forma-showhand/` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation, evidence, and safety gates.
+- `forma-lock/` - Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
+- `forma-execute/` - Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
+- `forma-showhand/` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops.
 
 ## Output Contract
 
@@ -36,5 +36,5 @@ This `forma-creator` bundle is fixed to `codex`. Its generated plan-first output
 - Do not copy user docs verbatim, do not put governance/root-doc reading requirements in `constraints.default`, and do not make routine `pour` / `flow` read broad docs, all runs, generated baselines, or full profile stacks by default.
 - Do not put `profile`, `includes`, tracked profile ids, or stage `name` / `directory` overrides in that temporary injection JSON. Final installable names belong only under `rename.stages`.
 - Run `python scripts/create.py --artifact bundle --output <generated-bundle-path> --injection-json <temporary-injection.json>` before handing off or reporting success.
-- Do not install generated artifacts from this creator. Report the output path and install hint only.
+- Do not install generated outputs from this creator. Report the output path and install hint only.
 - Do not represent one-off constraints as tracked source. If the user wants durable tracking, help them promote the constraints into a Layer 3 profile in the owning repository.

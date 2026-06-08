@@ -272,7 +272,7 @@ def _interactive_constraint_contract() -> List[str]:
         "- Run `python scripts/create.py --artifact bundle --output "
         "<generated-bundle-path> --injection-json <temporary-injection.json>` "
         "before handing off or reporting success.",
-        "- Do not install generated artifacts from this creator. Report the "
+        "- Do not install generated outputs from this creator. Report the "
         "output path and install hint only.",
         "- Do not represent one-off constraints as tracked source. If the user "
         "wants durable tracking, help them promote the constraints into a "

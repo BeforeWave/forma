@@ -900,7 +900,9 @@ def _requirements(
         for item in injection.get("decision_gate_extras", []) or []:
             result.append(f"Settle injected decision-gate dimension before proposal-ready: {item}")
     for command in _stage_items(injection.get("validation_commands", {}), kind):
-        result.append(f"Use injected validation command when it applies: `{command}`")
+        result.append(
+            f"Apply workflow validation gate when it is relevant to the current task: `{command}`"
+        )
     result.extend(_conditional_requirements(kind, conditional_overlays))
     return _unique(result)
 
@@ -961,7 +963,7 @@ def _conditional_requirements(
                 )
             for command in _items_for_kind(overlay.validation_commands, kind):
                 result.append(
-                    f"If `{decision_name}` is `{route.id}`, use `{overlay_id}` overlay validation command when it applies: `{command}`"
+                    f"If `{decision_name}` is `{route.id}`, apply `{overlay_id}` overlay validation gate when it is relevant to the current task: `{command}`"
                 )
     return result
 

@@ -1,4 +1,4 @@
-"""Emit generated Mode-S workflow bundles to disk."""
+"""Emit generated Forma workflow bundles to disk."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def build_bundle(
     target_agent: str,
     methodology_dir: Path | None = None,
 ) -> Path:
-    """Create a Mode-S workflow bundle on disk and return the manifest path."""
+    """Create a task-level workflow bundle on disk and return the manifest path."""
     _assert_target(target_agent)
     with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
         profile = load_profile(profile_file)

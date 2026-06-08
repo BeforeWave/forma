@@ -9,8 +9,8 @@ Execute one planned Go task through tests and review handoff.
 
 ## Interaction Semantics
 
-- Use this skill as a review-gated task executor.
-- For each task, implement only the current workflow task, run review-ready, and wait for explicit user approval before completion.
+- Use this skill as a review-gated task executor for one accepted task contract.
+- For each task, implement only the current task's accepted files/surfaces, run its validation gates through review-ready, and wait for explicit user approval before completion.
 - After an approved task is completed successfully, check for the next task immediately and continue if one remains.
 - Stop only when review is needed, no unchecked task remains, validation fails, workflow fails, escalation is needed, or the user interrupts.
 
@@ -19,7 +19,7 @@ Execute one planned Go task through tests and review handoff.
 - Read `./plans/issue-<id>/plan.md`.
 - Use `scripts/forma-workflow.sh next <issue-id>` from this installed skill package to get the current task.
 - Resolve `scripts/forma-workflow.sh` relative to the current triggered skill package only; never switch to a same-named script in a sibling skill directory, even if the contents match.
-- Implement only the current task by treating `Accept:` as the delivery target and `Validate:` / `Use-Check:` as proof; if it is the last remaining task, `review-ready` will also run `## Final Validation`.
+- Implement only the current task by treating `Accept:` as the delivery target and `Validate:` / `Use-Check:` as validation gates and proof obligations; if it is the last remaining task, `review-ready` will also run `## Final Validation`.
 - For `loop-batch`, report metric/artifact movement before validation; for `gate`, name the protected decision boundary; for `promote`, write only the surfaces explicitly allowed by the current task.
 - Record meaningful execution decisions, plan gaps, classifications, deviations, and follow-ups in `plans/issue-<id>/implement-notes.md` using the bundled notes reference.
 - Run `scripts/forma-workflow.sh review-ready <issue-id>` before presenting the current task result for user review.
@@ -59,8 +59,8 @@ Read these files first:
 - Stop and re-plan if implementation requires API or stream changes missing from the sealed plan.
 - Call out contract, compatibility, data, or operational risk in the task summary when behavior changes.
 - Add or update Go tests when changing Go behavior.
-- Use profile validation command when it applies: `python -m pytest tests/`
-- Use profile validation command when it applies: `go test ./...`
+- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply profile validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

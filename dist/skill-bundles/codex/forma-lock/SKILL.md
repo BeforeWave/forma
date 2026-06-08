@@ -9,7 +9,7 @@ Lock the execution plan and task contract.
 
 ## Interaction Semantics
 
-- Use this skill to materialize an already-settled plan into the repository planning files.
+- Use this skill to materialize an already-settled plan into repository planning files and task contracts.
 - Do not reopen brainstorming or fill planning gaps during finalization.
 - Keep the planning handoff narrow: write the current issue plan files and stop before execution begins.
 
@@ -34,7 +34,7 @@ Lock the execution plan and task contract.
 - If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` from this installed skill package.
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
-- Finalize `tasks.md` for the issue, encoding each new task type in `Accept:` while preserving the structured task schema.
+- Finalize `tasks.md` for the issue, encoding each task's accepted surface, validation gates, proof obligations, dependencies, and constraints while preserving the structured task schema.
 - Commit only `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` before leaving the planning phase.
 
 ## Read After Gate

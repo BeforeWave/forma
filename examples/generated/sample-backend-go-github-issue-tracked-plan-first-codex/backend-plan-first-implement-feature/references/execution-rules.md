@@ -17,7 +17,7 @@ Use these rules for plan-first task execution skills.
 - For non-showhand execution skills, work one workflow task at a time; do not move on to the next task before the current task is review-ready and, after user approval, completed.
 - The agent may decompose execution internally into steps such as inspect, implement, test, and validate, but must not reinterpret one planned task as multiple plan tasks unless `plan.md` / `tasks.md` explicitly define that boundary.
 - Infer missing `Plan Strategy` as `step-execution` and missing `Task Type` as `step`; do not require legacy plans to be rewritten before execution.
-- Treat the current task's `Accept:` as the delivery target and `Validate:` / `Use-Check:` as proof obligations, not as replacement goals.
+- Treat the current task's `Accept:` as the delivery target and `Validate:` / `Use-Check:` as validation gates and proof obligations, not as replacement goals.
 - Do not broaden the task to add diagnostics, expand output schemas, clean up adjacent tooling, or refactor nearby code unless required by the current `Accept:` or needed to prevent unsafe formal/destructive writes or decision-critical mistakes.
 - For `Task Type=loop-batch`, prioritize metric/artifact movement and report that outcome before validation details; never allow empty selection or failed filtering to fall back to an unintended full run.
 - For `Task Type=gate`, require a decision-critical boundary in the task text, such as protecting later selection, closure, artifact acceptance, promotion, or destructive write decisions; otherwise record the issue as follow-up instead of implementing generic cleanup.

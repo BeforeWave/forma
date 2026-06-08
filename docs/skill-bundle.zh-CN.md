@@ -4,7 +4,7 @@
 
 Skill bundle 是 Forma 编译出来的 workflow 安装产物。
 
-Profile 是源码。Forma compiler 会解析 profile、标准方法和 target adapter，然后生成可以安装到 Codex 或 Claude Code 的 skills。安装后，这些 skills 就成为具体开发目标上的 runtime harness。
+Profile 是源码。Forma compiler 会解析 profile、标准方法和 target adapter，然后生成可以安装到 Codex 或 Claude Code 的 skills。安装后，这些 skills 就成为 workflow harness，把具体开发目标落成 task 文件、边界、命令、验证 gate 和 proof。
 
 ## 从 Profile 到 Workflow 产物
 
@@ -86,7 +86,7 @@ examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
 - workflow 指令；
 - 按需加载的 references；
 - 该阶段选中的 profile 约束；
-- 适用时的验证或证明要求。
+- 适用时的验证 gate 或 proof 要求。
 
 `references/` 存放较长、稳定、无需复制进阶段正文的指导。
 
@@ -112,7 +112,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 ## 生成技能质量
 
-生成 bundle 应该像 runtime harness，而不是复制出来的一堆规则文本。
+生成 bundle 应该像 task 级 workflow harness，而不是复制出来的一堆规则文本。
 
 好的 bundle 通常具备：
 
@@ -123,7 +123,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 - scripts 只在阶段明确拥有时出现；
 - 轻量默认约束；
 - 路线专用行为放进 conditional overlays；
-- 可执行阶段有明确验证或证明路径。
+- 可执行阶段有明确验证 gate 和 proof 路径。
 
 如果每个 skill 都重复每条规则，通常说明 profile 太全局。应把规则移到阶段约束、references、resources 或 conditional overlays。
 
@@ -144,7 +144,7 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 forma verify <generated-bundle-dir>
 ```
 
-验证检查结构和方法规则。它不证明 profile 是正确的项目决策，也不证明生成的 harness 在语义上完整。见 [Verifier](./verifier.zh-CN.md)。人工评审仍然必要。
+验证检查结构和方法规则。它不证明 profile 是正确的项目决策，也不证明生成的 task 契约在语义上完整。见 [Verifier](./verifier.zh-CN.md)。人工评审仍然必要。
 
 ## 相关文档
 

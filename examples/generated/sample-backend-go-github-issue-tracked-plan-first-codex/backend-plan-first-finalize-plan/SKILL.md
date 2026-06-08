@@ -1,15 +1,15 @@
 ---
 name: "backend-plan-first-finalize-plan"
-description: "Materialize an already-settled plan into plan.md and tasks.md without reopening planning decisions."
+description: "Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions."
 ---
 
 # Backend Plan-First Finalize Plan
 
-Materialize an already-settled plan into plan.md and tasks.md without reopening planning decisions.
+Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
 
 ## Interaction Semantics
 
-- Use this skill to materialize an already-settled plan into the repository planning files.
+- Use this skill to materialize an already-settled plan into repository planning files and task contracts.
 - Do not reopen brainstorming or fill planning gaps during finalization.
 - Keep the planning handoff narrow: write the current issue plan files and stop before execution begins.
 
@@ -34,7 +34,7 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 - If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` from this installed skill package.
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
-- Finalize `tasks.md` for the issue, encoding each new task type in `Accept:` while preserving the structured task schema.
+- Finalize `tasks.md` for the issue, encoding each task's accepted surface, validation gates, proof obligations, dependencies, and constraints while preserving the structured task schema.
 - Commit only `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` before leaving the planning phase.
 
 ## Read After Gate
@@ -73,8 +73,8 @@ Materialize an already-settled plan into plan.md and tasks.md without reopening 
 - Include task-local validation for behavior-changing backend work.
 - Require an approved contract or source handoff before finalizing API- or stream-changing backend work.
 - When the planning handoff depends on GitHub issue refs, load and follow `references/script-resource-adapter.md`, then run `python3 scripts/github_issue_context.py <issue-url-or-user-text>` before finalization if issue body and key comments are not already confirmed.
-- Use profile validation command when it applies: `python -m pytest tests/`
-- Use profile validation command when it applies: `go test ./...`
+- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply profile validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

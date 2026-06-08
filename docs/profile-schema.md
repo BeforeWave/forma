@@ -2,7 +2,7 @@
 
 Chinese version: [profile-schema.zh-CN.md](./profile-schema.zh-CN.md)
 
-A profile is Layer 0 source: durable project principles and boundaries.
+A profile is Layer 0 source: durable project rules and boundaries.
 
 Profiles describe how Forma should specialize the canonical Plan-First
 methodology for a project, route, language, or target naming convention. They
@@ -30,11 +30,12 @@ constraints:
 For a complete composable example, start with:
 
 ```text
-examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml
+examples/profiles/sample-software/sample-software-plan-first.yaml
 ```
 
-That top-level profile includes the sample base, development, backend, and Go
-layers, then renames the generated stage skills for a backend issue workflow.
+That top-level profile includes sanitized software defaults and renames the
+generated stage skills without depending on organization-specific paths or
+private workflow commands.
 
 ## Top-Level Keys
 
@@ -55,23 +56,21 @@ layers, then renames the generated stage skills for a backend issue workflow.
 
 ## Includes
 
-Use `includes` to compose project principles from general to specific:
+Use `includes` to compose project rules from general to specific:
 
 ```yaml
 profile:
-  id: sample-backend-go
+  id: sample-software-plan-first
 includes:
-  - sample-base
-  - sample-dev
-  - sample-backend
-  - languages/go.yaml
+  - sample-software-base
+  - sample-software
 ```
 
 Included profiles are resolved before the local profile. Later profiles can
 refine earlier fields according to the merge rules implemented by Forma.
 
 Use includes for stable layers such as project defaults, development policy,
-backend policy, and language policy. Do not use includes to hide one-off user
+domain policy, and language policy. Do not use includes to hide one-off user
 instructions; use temporary injection for that.
 
 ## Stage Names And Target Display
@@ -81,11 +80,11 @@ Use `stages` when the generated skill names should use project language:
 ```yaml
 stages:
   shape:
-    name: backend-plan-first-plan-issue
-    directory: backend-plan-first-plan-issue
-    display_name: Backend Plan-First Plan Issue
-    short_description: Clarify backend work before finalizing a plan.
-    default_prompt: Clarify backend work and stop before repository inspection.
+    name: software-plan-first-plan-issue
+    directory: software-plan-first-plan-issue
+    display_name: Software Plan-First Plan Issue
+    short_description: Clarify software work before finalizing a plan.
+    default_prompt: Clarify the software task and stop before repository inspection.
 ```
 
 The stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`. Only the
@@ -100,7 +99,7 @@ Keep `constraints.default` light. Put rules in the stage that needs them:
 | `constraints.shape` | Demand clarification, route selection, scope, plan strategy, and unresolved decisions. |
 | `constraints.gauge` | Read-only grounding and evidence collection. |
 | `constraints.seal` | Plan materialization, accepted tasks, validation contracts, and handoff certification. |
-| `constraints.pour` | Current-task execution, review gates, and proof. |
+| `constraints.pour` | Current-task files, commands, validation gates, review gates, and proof. |
 | `constraints.flow` | Safe continuation and stop conditions. |
 
 Bad pattern:
@@ -120,9 +119,9 @@ constraints:
   gauge:
     - Read only evidence needed for the selected scope.
   seal:
-    - Put validation requirements into each accepted task.
+    - Put exact validation commands or shared checks into each accepted task.
   pour:
-    - Execute only the current accepted task and record proof.
+    - Execute only the current accepted task and record proof under `plans/issue-<id>/runs/`.
 ```
 
 ## Resources

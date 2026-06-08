@@ -107,7 +107,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "--artifact bundle" in codex_target
     assert "--artifact plugin" in codex_target
     assert ".codex-plugin/plugin.json" in codex_target
-    assert "Do not install generated artifacts from this creator" in codex_target
+    assert "Do not install generated outputs from this creator" in codex_target
     assert (codex / "references" / "profile-authoring-principles.md").is_file()
     temp_standard = (
         codex / "references" / "temporary-injection-generation.md"
@@ -190,7 +190,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "--artifact bundle" in claude_target
     assert "--artifact plugin" not in claude_target
     assert "Codex plugin output is unsupported" in claude_target
-    assert "Do not install generated artifacts from this creator" in claude_target
+    assert "Do not install generated outputs from this creator" in claude_target
     assert "--artifact plugin" not in (claude / "SKILL.md").read_text(
         encoding="utf-8"
     )

@@ -19,12 +19,12 @@ Do not append tasks below the template text or example.
 Example final file:
 
 ```text
-- [ ] [update-target-flow] Implement the settled behavior change
-Accept: Task Type=step; success path, invalid input path, and one regression check are covered
-Validate: <project-native validation command>
-Use-Check: fast-regression
-Depends: prerequisite-review
-Constraint: do not change out-of-scope behavior
+- [ ] [update-schema-source] Update the generated schema source
+Accept: Task Type=step; source schema and nearby tests are updated without hand-editing generated output
+Validate: make generate-schema
+Validate: <project-native schema validation command>
+Depends: none
+Constraint: generated output must come only from the accepted source change
 ```
 
 `Depends:` lines must use bare task ids, for example `Depends: prerequisite-review`.

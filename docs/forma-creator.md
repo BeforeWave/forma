@@ -2,7 +2,7 @@
 
 Chinese version: [forma-creator.zh-CN.md](./forma-creator.zh-CN.md)
 
-`forma-creator` is Forma's agent-side harness generation entrypoint.
+`forma-creator` is Forma's agent-side workflow generation entrypoint.
 
 Use it when a concrete project needs a workflow harness before you are ready to
 write durable profile YAML. It helps an agent turn reviewed natural-language
@@ -13,13 +13,14 @@ workflow bundle or Codex plugin, and verify the output before handoff.
 
 | Path | Best for | Input | Output |
 |---|---|---|---|
-| `forma create-bundle` | Durable project workflow rules. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
-| `forma-creator` | Shape a project-specific harness in the moment. | Reviewed natural-language concerns classified into temporary injection JSON. | Verified workflow output for the fixed target. |
+| `forma-creator` | Shape a project-specific workflow conversationally. | Reviewed natural-language concerns classified into temporary injection JSON. | Verified one-off harness for the fixed target. |
+| `forma explain profile` + agent | Draft a durable profile conversationally. | CLI profile authoring guidance, repository evidence, and human input. | Tracked profile YAML; after review, generate a harness from it. |
+| `forma create-bundle` | Deterministic generation from an existing profile. | Reviewed tracked profile YAML. | Repeatable bundle from committed source. |
 
-`forma create-bundle` is the deterministic profile path.
-
-`forma-creator` is the try-it-now path. It is useful before a project knows
-which rules deserve to become durable profile source.
+`forma-creator` and `forma explain profile` + agent are both lightweight entry
+points. The first produces a tryable one-off harness; the second produces
+versionable profile source. `forma create-bundle` is the deterministic build
+path after a profile exists.
 
 ## Fixed Target Contract
 
@@ -40,7 +41,7 @@ the generated output into user or project skill roots.
 
 ## Temporary Injection Lifecycle
 
-Temporary injection is local to one generated output.
+Temporary injection is local to one generated workflow output.
 
 The normal lifecycle is:
 
@@ -69,8 +70,8 @@ Temporary injection maps always use internal stage keys (`shape`, `gauge`,
 | `constraints.default` | Minimal always-true bottom lines. |
 | `constraints.shape` | Demand clarification, route selection, scope, and unresolved decisions. |
 | `constraints.gauge` | Read-only evidence collection. |
-| `constraints.seal` | Plan and task materialization. |
-| `constraints.pour` | Current-task execution and proof. |
+| `constraints.seal` | Plan and task materialization, including task boundaries, validation gates, and proof requirements. |
+| `constraints.pour` | Current-task execution, validation gates, and proof. |
 | `constraints.flow` | Safe continuation and stop conditions. |
 | `conditional_overlays` | Heavy route-specific behavior such as docs-only, migration, generated-baseline, governance, backend, or cross-layer work. |
 | `resources` | Explicit references, scripts, or support files selected by the workflow. |

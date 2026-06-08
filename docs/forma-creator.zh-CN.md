@@ -2,7 +2,7 @@
 
 英文版：[forma-creator.md](./forma-creator.md)
 
-`forma-creator` 是 Forma 的 Agent 侧 harness 生成入口。
+`forma-creator` 是 Forma 的 Agent 侧 workflow 生成入口。
 
 当一个项目需要先做出一套 workflow harness，但还不想写长期 profile YAML 时，用它。它会帮助 Agent 把已经评审过的项目关注点整理成 temporary injection JSON，生成 target 专用 workflow bundle 或 Codex plugin，并在交付前验证。
 
@@ -10,12 +10,11 @@
 
 | 路径 | 适合 | 输入 | 输出 |
 |---|---|---|---|
-| `forma create-bundle` | 长期项目工作流规则。 | 已评审的 tracked profile YAML。 | 从已提交源码可重复生成的 bundle。 |
-| `forma-creator` | 临场塑造项目专属 harness。 | 已评审自然语言关注点，先分类成 temporary injection JSON。 | 面向固定 target 的 verified workflow 产物。 |
+| `forma-creator` | 对话式塑造项目专属 workflow。 | 已评审自然语言关注点，先分类成 temporary injection JSON。 | 面向固定 target 的 verified 一次性 harness。 |
+| `forma explain profile` + Agent | 对话式起草长期 profile。 | CLI 输出的 profile 编写标准、仓库证据和人的补充。 | tracked profile YAML；review 后再生成 harness。 |
+| `forma create-bundle` | 从已存在 profile 确定性生成。 | 已评审的 tracked profile YAML。 | 从已提交源码可重复生成的 bundle。 |
 
-`forma create-bundle` 是确定性的 profile 路径。
-
-`forma-creator` 是快速试手感的路径。它适合在项目还不知道哪些规则值得沉淀成长期 profile 前使用。
+`forma-creator` 和 `forma explain profile` + Agent 都是轻量入口。前者直接生成可试用的一次性 harness；后者生成可版本化的 profile 源。`forma create-bundle` 是 profile 已经存在后的确定性生成路径。
 
 ## 固定目标契约
 
@@ -32,7 +31,7 @@ Creator 只报告输出路径和安装提示，不会把生成产物安装到用
 
 ## Temporary Injection 生命周期
 
-Temporary injection 只属于一次生成出来的产物。
+Temporary injection 只属于一次生成出来的 workflow 产物。
 
 正常生命周期是：
 
@@ -57,8 +56,8 @@ Temporary injection 的 map 始终使用内部阶段键 `shape`、`gauge`、`sea
 | `constraints.default` | 最轻量、永远成立的底线规则。 |
 | `constraints.shape` | 需求澄清、路线选择、范围和未决问题。 |
 | `constraints.gauge` | 只读证据收集。 |
-| `constraints.seal` | 计划和任务定稿。 |
-| `constraints.pour` | 当前任务执行和证明。 |
+| `constraints.seal` | 计划和任务定稿，包括 task 边界、验证 gate 和 proof 要求。 |
+| `constraints.pour` | 当前任务执行、验证 gate 和 proof。 |
 | `constraints.flow` | 安全继续和停止条件。 |
 | `conditional_overlays` | docs-only、migration、generated-baseline、governance、backend、cross-layer 等重场景规则。 |
 | `resources` | 工作流明确选中的 references、scripts 或支持文件。 |

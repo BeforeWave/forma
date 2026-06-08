@@ -35,7 +35,7 @@ Before `proposal-ready`, the plan must be concrete enough that the executor can 
 
 - Block `proposal-ready` if the executor would still need to decide any exact CLI command, API name, function name, skill id, plugin id, file name, directory name, manifest field, argument, default, unsupported value, error behavior, output paths and output layout, install destination, scope, overwrite behavior, mutation boundary, target support matrix, artifact state, compatibility policy, validation proof, or important negative proof.
 - For CLI or API work, name the concrete command or API shape, input flags or parameters, default behavior, output location, unsupported cases, and at least one direct behavior check.
-- For generated artifacts, name every generated path and classify it as committed, transient, ignored, evidence-only, or source-of-truth; if an output must not be produced as a side effect, name the forbidden path explicitly.
+- For generated outputs, name every generated path and classify it as committed, transient, ignored, evidence-only, or source-of-truth; if an output must not be produced as a side effect, name the forbidden path explicitly.
 - For multi-target work, provide a target support matrix where each target is supported, unsupported with a clear failure, or explicitly out of scope.
 - For installation or other filesystem mutation, name the source artifact shape, destination path, user/project scope behavior, overwrite policy, verification-before-write rule, and rollback or partial-write expectation when relevant.
 - For validation, require direct create/install/verify commands or file assertions for the primary success path and the most important negative path when direct behavior can be checked.

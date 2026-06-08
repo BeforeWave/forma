@@ -9,7 +9,7 @@ Clarify goals, constraints, boundaries, and acceptance criteria.
 
 ## Interaction Semantics
 
-- Use this skill to converge an executable plan with the user before any repo plan files are written.
+- Use this skill to converge an executable task contract with the user before any repo plan files are written.
 - Stay in clarification or proposal mode until the user confirms the proposal is ready to hand off.
 - Do not start execution work or materialize planning files from this skill.
 
@@ -26,7 +26,7 @@ Clarify goals, constraints, boundaries, and acceptance criteria.
 - Load bundled planning references only from the current triggered skill package; never switch to same-named resources in sibling skill directories.
 - Always load `references/output-format.md` and `references/plan-issue-rules.md` before deciding whether to clarify, block, propose, or hand off.
 - If the user context is still incomplete, continue clarification with the user instead of exploring the repository or writing repo files.
-- Classify the issue as `Plan Strategy: step-execution`, `loop-exploration`, or `hybrid`; for loop-exploration, hybrid, generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans, settle the Artifact/Evidence Boundary before proposal-ready.
+- Classify the issue as `Plan Strategy: step-execution`, `loop-exploration`, or `hybrid`; for loop-exploration, hybrid, generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans, settle concrete artifact paths, evidence paths, validation gates, and proof requirements before proposal-ready.
 - After the Decision Gate passes, identify the grounding producer needed before `finalize-plan`; if repository facts are needed, hand off to that producer instead of exploring the repository from `plan-issue`.
 - Keep the proposal in chat only. Do not write `plan.md`, do not write `tasks.md`, and do not execute workflow scripts.
 - After the user reviews and confirms the proposal, stop and hand off to `finalize-plan` to write `plan.md` and `tasks.md`.
