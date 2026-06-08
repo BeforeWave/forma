@@ -817,6 +817,71 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     ]
 
 
+def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
+    plugin_dir = tmp_path / "plugin"
+
+    plugin_json = build_codex_plugin(
+        profile_file=FORMA_SELF_PROFILE,
+        output_dir=plugin_dir,
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert verify(plugin_dir).passed
+    assert (plugin_dir / "skills" / "forma-shape" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "forma-flow" / "SKILL.md").is_file()
+    plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
+    assert plugin["id"] == "forma"
+    assert plugin["name"] == "Forma"
+    assert "self-iteration" in plugin["description"]
+    assert [skill["id"] for skill in plugin["skills"]] == list(
+        FORMA_SELF_STAGE_DIRS.values()
+    )
+    assert all(skill["description"] for skill in plugin["skills"])
+    manifest = json.loads(
+        (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["profile"]["bundle_name"] == "forma"
+    assert manifest["emitted_skills"]["shape"]["name"] == "forma-shape"
+
+
+def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:
+    plugin_dir = tmp_path / "plugin"
+
+    plugin_json = build_codex_plugin(
+        profile_file=SAMPLE_PROFILE,
+        output_dir=plugin_dir,
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert verify(plugin_dir).passed
+    plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
+    assert plugin["id"] == "sample-backend-go-github-issue-tracked"
+    assert plugin["name"] == "Sample Backend Go Github Issue Tracked"
+    assert [skill["id"] for skill in plugin["skills"]] == list(
+        SAMPLE_STAGE_DIRS.values()
+    )
+
+
+def test_codex_plugin_rejects_non_kebab_bundle_name(tmp_path: Path) -> None:
+    profile_file = tmp_path / "bad-plugin-id.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: bad-plugin-id
+bundle:
+  name: Bad Plugin
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="bundle.name must be lower kebab-case"):
+        build_codex_plugin(
+            profile_file=profile_file,
+            output_dir=tmp_path / "plugin",
+            methodology_dir=METHODOLOGY,
+        )
+
+
 def test_creator_honors_custom_stage_names_and_enabled_matrix(tmp_path: Path) -> None:
     profile_file = tmp_path / "custom.yaml"
     profile_file.write_text(

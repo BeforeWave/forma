@@ -10,6 +10,14 @@ from forma.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
 METHODOLOGY = ROOT / "source" / "methodology"
+FORMA_SELF_PROFILE = ROOT / "profiles" / "forma-self" / "forma-self-iteration.yaml"
+SAMPLE_PROFILE = (
+    ROOT
+    / "examples"
+    / "profiles"
+    / "sample-backend"
+    / "sample-backend-go-github-issue-tracked.yaml"
+)
 
 
 def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
@@ -74,6 +82,43 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
         "forma-lock",
         "forma-execute",
         "forma-showhand",
+    ]
+
+
+def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "plugin"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(FORMA_SELF_PROFILE),
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (output / "skills" / "forma-shape" / "SKILL.md").is_file()
+    assert (output / "skills" / "forma-flow" / "SKILL.md").is_file()
+    plugin = json.loads(
+        (output / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["id"] == "forma"
+    assert [skill["id"] for skill in plugin["skills"]] == [
+        "forma-shape",
+        "forma-gauge",
+        "forma-seal",
+        "forma-pour",
+        "forma-flow",
     ]
 
 
@@ -208,3 +253,39 @@ def test_install_codex_plugin_project_scope(tmp_path: Path, monkeypatch) -> None
     assert install.exit_code == 0, install.output
     assert (project / ".codex" / "plugins" / "forma" / ".codex-plugin" / "plugin.json").is_file()
     assert (project / ".codex" / "plugins" / "forma" / "skills" / "forma-plan").is_dir()
+
+
+def test_install_profile_named_codex_plugin_project_scope(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    plugin = tmp_path / "plugin"
+    project = tmp_path / "project"
+    project.mkdir()
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(SAMPLE_PROFILE),
+            "--output",
+            str(plugin),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    monkeypatch.chdir(project)
+    install = runner.invoke(
+        main,
+        ["install", "--target", "codex", "--scope", "project", str(plugin)],
+    )
+
+    installed = project / ".codex" / "plugins" / "sample-backend-go-github-issue-tracked"
+    assert install.exit_code == 0, install.output
+    assert (installed / ".codex-plugin" / "plugin.json").is_file()
+    assert (installed / "skills" / "backend-plan-first-plan-issue").is_dir()

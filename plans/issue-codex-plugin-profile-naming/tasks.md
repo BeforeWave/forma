@@ -1,4 +1,4 @@
-- [ ] [plugin-emitter-profile-identity] Fix CLI Codex plugin metadata from profile bundle and emitted skills
+- [x] [plugin-emitter-profile-identity] Fix CLI Codex plugin metadata from profile bundle and emitted skills
 Accept: Task Type=step; profile-based `create-plugin` writes plugin id from `bundle.name`, plugin skill ids from emitted skills, and descriptions from generated `SKILL.md` frontmatter while preserving default profile output
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_cli.py
 Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --target codex --profile profiles/forma-self/forma-self-iteration.yaml --output "$tmp_dir/plugin"; test -d "$tmp_dir/plugin/skills/forma-shape"; python3 -m json.tool "$tmp_dir/plugin/.codex-plugin/plugin.json" >/dev/null; rg -n '"id": "forma-shape"' "$tmp_dir/plugin/.codex-plugin/plugin.json"; rm -rf "$tmp_dir"
