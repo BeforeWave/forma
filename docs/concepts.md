@@ -29,6 +29,33 @@ Forma treats that agent-working style as source. It compiles static project
 rules into staged skills, then those skills turn each concrete development goal
 into task-level files, boundaries, commands, validation gates, and proof.
 
+## Task Workflow Compilation
+
+Forma starts with AI coding because software work is easy to check: source
+files, generated files, tests, commands, diffs, and review proof.
+
+The same model can fit other repeatable work. If a task has sources,
+boundaries, validation, and proof, it can have a generated workflow.
+
+Different tasks validate different things:
+
+- coding checks tests, generated outputs, and diffs;
+- research checks sources, claims, and citations;
+- analysis checks data assumptions, calculations, and outputs;
+- operations checks runbooks, safety gates, and execution logs.
+
+## Generated Workflow vs Fixed Workflow
+
+A fixed workflow gives every project the same process.
+
+Forma generates the workflow from the project or task rules.
+
+| Fixed workflow | Forma-generated workflow |
+|---|---|
+| Install one preset process. | Compile a workflow from the project's own rules. |
+| Use the same validation model everywhere. | Let validation match the task type. |
+| Treat project rules as extra instructions. | Turn project rules into stages, boundaries, gates, and proof. |
+
 ## Three Layers
 
 Forma works in three layers:

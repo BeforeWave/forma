@@ -2,7 +2,11 @@
 
 **Start with one sentence, then compile static project rules into custom task workflows.**
 
-Forma compiles project rules into a project-specific workflow harness, then turns them into concrete boundaries, validation steps, and proof for each development task.
+Forma compiles project rules into custom task workflows. For each task, the generated workflow turns rules into concrete boundaries, validation steps, and proof.
+
+AI coding is the first target because code has clear sources, tests, diffs, and review proof. The same model can fit other repeatable work with sources, boundaries, validation, and proof.
+
+Unlike a fixed workflow tool, Forma generates the workflow from project or task rules instead of installing one preset process.
 
 It works in three layers:
 

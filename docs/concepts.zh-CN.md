@@ -18,6 +18,31 @@ Agent 遵守的 Spec、读取的证据、定稿的计划、接受的任务边界
 
 Forma 把这套 Agent 工作方式当成源码来处理。它把静态项目规则编译成分阶段 skills，再让这些 skills 在具体开发目标出现时落成 task 级文件、边界、命令、验证 gate 和 proof。
 
+## 任务工作流编译
+
+Forma 先从 AI coding 开始，因为软件任务容易检查：source 文件、生成文件、测试、命令、diff 和 review proof 都很清楚。
+
+同一个模型也可以用于其他重复工作。只要一类任务有来源、边界、验证和 proof，就可以生成自己的 workflow。
+
+不同任务验证的东西不同：
+
+- coding 检查测试、生成结果和 diff；
+- research 检查来源、结论和引用；
+- analysis 检查数据假设、计算和输出；
+- operations 检查 runbook、安全 gate 和执行日志。
+
+## 生成式 Workflow vs 固定 Workflow
+
+固定 workflow 给每个项目同一套流程。
+
+Forma 从项目或任务自己的规则生成 workflow。
+
+| 固定 workflow | Forma 生成的 workflow |
+|---|---|
+| 安装一套预设流程。 | 从项目自己的规则编译 workflow。 |
+| 到处使用同一种验证方式。 | 让验证方式匹配任务类型。 |
+| 把项目规则当作额外说明。 | 把项目规则变成阶段、边界、gate 和 proof。 |
+
 ## 三层工作
 
 Forma 分三层工作：
