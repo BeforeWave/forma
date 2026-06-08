@@ -21,6 +21,26 @@ Deviations From Plan:
 Follow-ups:
 - None.
 
+## Task 4: docs-plugin-naming
+
+Outcome:
+- English and Chinese Usage/Targets docs now state that profile-generated Codex plugin ids come from `bundle.name`, creator plugin ids come from `rename.prefix` when present, and plugin skill ids follow emitted renamed skills.
+
+Decision Notes:
+- Kept the docs change to `docs/usage*` and `docs/targets*` because the task contract names those surfaces and the README quick-start does not need the full naming matrix.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.
+
 ## Task 3: plugin-verifier-consistency
 
 Outcome:

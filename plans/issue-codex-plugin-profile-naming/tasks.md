@@ -18,7 +18,7 @@ Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_verifier.py t
 Depends: plugin-emitter-profile-identity
 Constraint: verifier rule must be deterministic and stdlib-only.
 
-- [ ] [docs-plugin-naming] Document plugin identity and renamed skill propagation
+- [x] [docs-plugin-naming] Document plugin identity and renamed skill propagation
 Accept: Task Type=step; English and Chinese Usage/Targets docs state that profile-based Codex plugin ids come from `bundle.name`, installs land under `.codex/plugins/<bundle.name>`, and plugin skills follow emitted renamed skills
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_docs_links.py
 Validate: rg -n -e "bundle.name|plugin id|\\.codex/plugins/<" docs/usage.md docs/targets.md docs/usage.zh-CN.md docs/targets.zh-CN.md

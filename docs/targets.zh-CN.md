@@ -30,6 +30,8 @@ Codex 项目级 skills 安装到 `.codex/skills`。用户级 skills 安装到 `$
 
 Codex 项目级 plugins 安装到 `.codex/plugins/<plugin-id>`。用户级 plugins 安装到 `$HOME/.codex/plugins/<plugin-id>`。安装后的 plugin root 会保留 `.codex-plugin/plugin.json`。
 
+对 profile 生成的 Codex plugin，`<plugin-id>` 是 profile 的 `bundle.name`。对 Codex `forma-creator` 生成的 plugin，如果存在 `rename.prefix`，`<plugin-id>` 就是这个 prefix；否则保持 `forma`。plugin 的 skill id 是 `.forma-manifest.json` 记录的 emitted skill 名称，所以 profile 或 creator 改名后的 skills 会同步出现在 plugin manifest 里。
+
 Codex target bundle 可以包含 `agents/openai.yaml`，用于界面信息、调用策略和工具依赖声明。
 
 官方文档见：
@@ -55,6 +57,7 @@ Target adapter 会影响生成的 metadata 和安装行为，但不应该改变 
 - Codex 输出可以包含 `agents/openai.yaml`。
 - Claude Code 输出不应该包含 Codex-only metadata。
 - Codex plugin 输出包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和嵌套 `skills/`。
+- Codex plugin 的 `plugin.json` 使用 profile 的 `bundle.name` 或 creator 的 `rename.prefix` 作为 plugin id，并且其中的 `skills` 必须匹配已生成的嵌套 skills。
 - Skill 目录名和 frontmatter 必须符合该 target 的 bundle 契约。
 
 ## 分发边界

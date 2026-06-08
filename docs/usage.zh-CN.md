@@ -51,6 +51,8 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 
 输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
 
+对 tracked profile 来说，Codex plugin id 来自 profile 的 `bundle.name`。plugin 展示名也从这个值派生，`plugin.json` 里的 skill id 跟随 `.forma-manifest.json` 记录的 emitted skill 名称。如果 profile 通过 `stages.<stage>.name` 改了技能名，plugin 也会暴露这些改名后的 skills。
+
 必需选项：
 
 - `--target codex`
@@ -124,6 +126,10 @@ Forma 生成 target 专用 skill bundle。Codex plugin 是同一套 skills 的 C
 | Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
+Codex plugin 安装时会把 plugin id 作为最后一级目录。比如 profile 的
+`bundle.name` 是 `sample-backend-go-github-issue-tracked` 时，项目级安装位置是
+`.codex/plugins/sample-backend-go-github-issue-tracked`。
+
 target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 
 ## 重命名生成技能
@@ -153,6 +159,7 @@ stages:
 - `display_name` 是 target 里的展示名；
 - `name` 和 `directory` 必须是 lower kebab-case；
 - 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
+- 同一个 profile 用于 `forma create-plugin` 时，plugin id 仍然是 `bundle.name`，plugin 的 skill 列表跟随改名后的 emitted skills。
 
 ### 一次性 creator 命名
 
@@ -174,6 +181,7 @@ planning skill 命名为 `backend-plan-first-plan-issue`，showhand skill 命名
 - 内部 injection map 使用内部阶段键 `shape`、`gauge`、`seal`、`pour`、`flow`，不要用 `forma-plan` 或 `forma-showhand` 这类对外 skill id 当键；
 - 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
 - creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，现场命名进 `rename`。
+- 通过 `forma-creator` 生成 Codex plugin 时，`rename.prefix` 也会成为 plugin id。没有 prefix 时，plugin id 保持 `forma`。
 
 改名后验证生成 bundle：
 

@@ -60,6 +60,11 @@ The output root contains `.codex-plugin/plugin.json`, root
 `.forma-manifest.json`, and `skills/<skill-id>/` directories. It does not emit
 `dist/skill-bundles` or any sibling bundle output.
 
+For a tracked profile, the Codex plugin id is the profile `bundle.name`. The
+plugin display name is derived from the same value, and `plugin.json` skill ids
+follow the emitted skill names in `.forma-manifest.json`. If a profile renames
+skills with `stages.<stage>.name`, the plugin exposes those renamed skills.
+
 Required options:
 
 - `--target codex`
@@ -149,6 +154,10 @@ the matching target location:
 | Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
+Codex plugin installs add the plugin id as the final directory. A profile whose
+`bundle.name` is `sample-backend-go-github-issue-tracked` installs to
+`.codex/plugins/sample-backend-go-github-issue-tracked` for project scope.
+
 For target-specific discovery, metadata, and trust details, see
 [Targets](./targets.md).
 
@@ -180,6 +189,8 @@ Rules:
 - `display_name` is the target-surface display label.
 - `name` and `directory` must be lower kebab-case.
 - Semantic stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`.
+- When the same profile is used with `forma create-plugin`, the plugin id stays
+  `bundle.name` and the plugin skill list follows the renamed emitted skills.
 
 ### One-off creator names
 
@@ -203,6 +214,8 @@ Rules:
 - Internal injection maps use internal stage keys (`shape`, `gauge`, `seal`, `pour`, `flow`), not public skill ids such as `forma-plan` or `forma-showhand`.
 - Names must be unique kebab-case strings and must not be bare stage names like `shape` or `flow`.
 - Creator injections do not accept profile-style `stages.shape.name`. Durable names belong in profiles; one-off names belong in `rename`.
+- For Codex plugin output from `forma-creator`, `rename.prefix` also becomes
+  the plugin id. Without a prefix, the plugin id remains `forma`.
 
 After renaming, verify the generated bundle:
 
