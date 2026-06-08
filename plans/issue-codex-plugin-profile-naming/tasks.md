@@ -35,3 +35,22 @@ Depends: creator-plugin-prefix-identity
 Depends: plugin-verifier-consistency
 Depends: docs-plugin-naming
 Constraint: do not install into user scope; update `dist/plugins/codex/forma` only if default plugin output changes.
+
+- [ ] [codex-plugin-ingestion-contract] Align Codex plugin schema and personal marketplace installation with plugin-creator
+Accept: Task Type=step; Forma Codex plugin generation emits the current plugin-creator manifest shape, verifier rejects old plugin schema drift, dist artifacts are regenerated, and `forma@personal` installs through Codex's marketplace flow
+Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py tests/test_cli.py tests/test_verifier.py
+Validate: local Codex plugin validator against dist/plugins/codex/forma
+Validate: uv run --extra dev forma verify dist/plugins/codex/forma
+Validate: codex plugin list | rg -n 'forma@personal[[:space:]]+installed, enabled'
+Validate: git diff --check
+Depends: dist-creator-plugin-refresh
+Constraint: use `plugin-creator` marketplace and manifest conventions; do not rely on hand-written legacy `plugin.json` skill arrays.
+
+- [ ] [forma-self-public-skill-names] Restore Forma self profile to default public skill names and product-facing plugin copy
+Accept: Task Type=step; `profiles/forma-self` emits `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and `forma-showhand`, plugin page copy is user-facing, and generated/installed plugin artifacts expose the default public skill names
+Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator.py::test_load_profile_resolves_forma_self_iteration tests/test_creator.py::test_forma_self_iteration_profile_emits_valid_bundles tests/test_creator.py::test_forma_self_profile_and_codex_plugin_metadata tests/test_cli.py::test_create_plugin_with_forma_self_profile_uses_emitted_skills
+Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --target codex --profile profiles/forma-self/forma-self-iteration.yaml --output "$tmp_dir/plugin"; test -d "$tmp_dir/plugin/skills/forma-plan"; test -d "$tmp_dir/plugin/skills/forma-showhand"; run local Codex plugin validator against "$tmp_dir/plugin"; rm -rf "$tmp_dir"
+Validate: uv run --extra dev forma verify dist/plugins/codex/forma
+Validate: git diff --check
+Depends: codex-plugin-ingestion-contract
+Constraint: preserve Forma-owned profile constraints and do not rename internal stage keys `shape`, `gauge`, `seal`, `pour`, and `flow`.

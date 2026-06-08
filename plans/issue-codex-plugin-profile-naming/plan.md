@@ -95,3 +95,27 @@ git diff --check
 
 - The current verifier passes the broken generated plugin, so the negative verifier test is required before future plugin artifacts can be trusted.
 - Invalid non-kebab `bundle.name` values should fail clearly when building a Codex plugin because `bundle.name` is now plugin identity.
+
+## Addendum: Codex Plugin Ingestion And Public Self Profile Names
+
+The live Codex plugin page proved the original `plugin.json` shape was still not
+the current Codex ingestion contract. The follow-up scope adds two tasks:
+
+- Align generated Codex plugin manifests and personal marketplace registration
+  with the current `plugin-creator` contract: plugin `name` is the kebab-case
+  identifier, `skills` points to `./skills/`, and installability is proven
+  through `codex plugin add forma@personal`.
+- Change `profiles/forma-self` back to the default public skill names
+  `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
+  `forma-showhand`, and make the Codex plugin page copy describe the workflow
+  rather than the implementation detail that a profile emits skills.
+
+Additional acceptance:
+
+- `plugin-creator` validation passes for generated, dist, source, and installed
+  Forma Codex plugin artifacts.
+- `codex plugin list` shows `forma@personal` as installed and enabled.
+- `profiles/forma-self/forma-self-iteration.yaml` emits the default public
+  skill names while preserving Forma-owned self-iteration constraints.
+- The plugin page description and starter prompts are concise user-facing
+  workflow copy.
