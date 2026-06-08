@@ -20,3 +20,23 @@ Deviations From Plan:
 
 Follow-ups:
 - None.
+
+## Task 2: creator-plugin-prefix-identity
+
+Outcome:
+- Installed Codex creator plugin output now uses `rename.prefix` as plugin id/name source while preserving default `forma` identity when no prefix is present.
+
+Decision Notes:
+- Options considered were deriving plugin id from the first emitted skill name versus using `rename.prefix`. Selected `rename.prefix` because it is the existing creator-side bundle-wide naming control and matches the settled plan.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

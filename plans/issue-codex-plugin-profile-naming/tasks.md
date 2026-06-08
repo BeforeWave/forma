@@ -5,7 +5,7 @@ Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --targe
 Depends: none
 Constraint: do not add a `plugin` profile schema or infer plugin identity from stage names.
 
-- [ ] [creator-plugin-prefix-identity] Align installed creator plugin identity with rename prefix
+- [x] [creator-plugin-prefix-identity] Align installed creator plugin identity with rename prefix
 Accept: Task Type=step; Codex-targeted installed creator plugin output uses `rename.prefix` as plugin id/name source when provided and keeps default `forma` identity otherwise
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_creator_builder.py
 Validate: uv run --extra dev forma verify source/skill-creator/

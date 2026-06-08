@@ -394,6 +394,56 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     assert verify(generated).passed
 
 
+def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "codex")
+    injection = tmp_path / "prefix-plugin-injection.json"
+    generated = tmp_path / "generated-plugin"
+    injection.write_text(
+        json.dumps({"rename": {"prefix": "acme-plan-first"}}),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (generated / "skills" / "acme-plan-first-plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "acme-plan-first-showhand" / "SKILL.md").is_file()
+    plugin = json.loads(
+        (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["id"] == "acme-plan-first"
+    assert plugin["name"] == "Acme Plan First"
+    assert [skill["id"] for skill in plugin["skills"]] == [
+        "acme-plan-first-plan",
+        "acme-plan-first-ground",
+        "acme-plan-first-lock",
+        "acme-plan-first-execute",
+        "acme-plan-first-showhand",
+    ]
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["emitted_skills"]["shape"]["name"] == "acme-plan-first-plan"
+    assert verify(generated).passed
+
+
 def test_installed_claude_creator_script_rejects_plugin_artifact(
     tmp_path: Path,
 ) -> None:
