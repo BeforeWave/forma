@@ -366,7 +366,7 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     )
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
-    assert plugin["version"] == "0.1.0"
+    assert plugin["version"] == __version__
     assert plugin["author"]["name"] == "Forma"
     assert plugin["interface"]["displayName"] == "Forma"
     assert plugin["skills"] == "./skills/"

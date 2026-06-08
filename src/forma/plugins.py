@@ -17,7 +17,7 @@ from forma_verifier.rules import parse_frontmatter
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
-CODEX_PLUGIN_VERSION = "0.1.0"
+CODEX_PLUGIN_VERSION = "0.1.1"
 CODEX_PLUGIN_DEVELOPER = "Forma"
 STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow")
 PLUGIN_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

@@ -792,7 +792,7 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
-    assert plugin["version"] == "0.1.0"
+    assert plugin["version"] == __version__
     assert plugin["author"]["name"] == "Forma"
     assert plugin["interface"]["displayName"] == "Forma"
     assert "Plan-First" in plugin["description"]

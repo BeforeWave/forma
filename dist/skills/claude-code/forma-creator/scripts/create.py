@@ -46,7 +46,7 @@ DEFAULT_CODEX_PLUGIN_ID = "forma"
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
-CODEX_PLUGIN_VERSION = "0.1.0"
+CODEX_PLUGIN_VERSION = "0.1.1"
 CODEX_PLUGIN_DEVELOPER = "Forma"
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 REQUIRED_STAGE_SECTIONS = (
