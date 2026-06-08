@@ -25,7 +25,7 @@ Validate: rg -n -e "bundle.name|plugin id|\\.codex/plugins/<" docs/usage.md docs
 Depends: plugin-emitter-profile-identity
 Constraint: do not imply Claude Code plugin support or URL install support.
 
-- [ ] [dist-creator-plugin-refresh] Regenerate affected release artifacts and prove install smoke
+- [x] [dist-creator-plugin-refresh] Regenerate affected release artifacts and prove install smoke
 Accept: Task Type=step; regenerated creator dist artifacts include the plugin identity fix, default Codex plugin release remains verified, and temporary project install smoke proves forma-self plugin output is usable
 Validate: uv run --extra dev forma verify dist/skills/codex/forma-creator
 Validate: uv run --extra dev forma verify dist/skills/claude-code/forma-creator

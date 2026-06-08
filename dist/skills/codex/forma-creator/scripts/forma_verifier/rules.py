@@ -7,6 +7,7 @@ ALL_RULES in order.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -641,6 +642,101 @@ def _check_claude_code_metadata(skill: SkillFile) -> List[RuleResult]:
     return []
 
 
+# ----- Codex plugin rules (apply when .codex-plugin/plugin.json exists) -----
+
+def check_codex_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
+    if not _is_first_skill(skill, ctx):
+        return []
+    plugin_json = ctx.root / ".codex-plugin" / "plugin.json"
+    if not plugin_json.is_file():
+        return []
+    path = ".codex-plugin/plugin.json"
+    try:
+        raw = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [RuleResult(
+            "R203", path, "error", f"plugin.json could not be parsed: {exc}"
+        )]
+    if not isinstance(raw, dict):
+        return [RuleResult("R203", path, "error", "plugin.json must be an object")]
+    results: List[RuleResult] = []
+    raw_skills = raw.get("skills")
+    if not isinstance(raw_skills, list):
+        return [RuleResult(
+            "R203", path, "error", "plugin.json `skills` must be a list"
+        )]
+    skill_ids: List[str] = []
+    for index, item in enumerate(raw_skills):
+        if not isinstance(item, dict):
+            results.append(RuleResult(
+                "R203", path, "error", f"plugin skill #{index + 1} must be an object"
+            ))
+            continue
+        skill_id = item.get("id")
+        if not isinstance(skill_id, str) or not skill_id.strip():
+            results.append(RuleResult(
+                "R203", path, "error", f"plugin skill #{index + 1} must include id"
+            ))
+            continue
+        skill_ids.append(skill_id.strip())
+    if len(skill_ids) != len(set(skill_ids)):
+        results.append(RuleResult(
+            "R203", path, "error", "plugin.json skill ids must be unique"
+        ))
+    emitted = ctx.manifest.get("emitted_skills")
+    if not isinstance(emitted, dict):
+        results.append(RuleResult(
+            "R203",
+            path,
+            "error",
+            "Codex plugin root must include manifest emitted_skills",
+        ))
+        emitted_ids: List[str] = []
+    else:
+        emitted_ids = _emitted_skill_names(emitted)
+        if skill_ids != emitted_ids:
+            results.append(RuleResult(
+                "R203",
+                path,
+                "error",
+                f"plugin.json skill ids {skill_ids!r} must match emitted skills {emitted_ids!r}",
+            ))
+    skill_names = {
+        item.frontmatter.get("name")
+        for item in ctx.skills
+        if isinstance(item.frontmatter.get("name"), str)
+    }
+    for skill_id in skill_ids:
+        skill_file = ctx.root / "skills" / skill_id / "SKILL.md"
+        if not skill_file.is_file():
+            results.append(RuleResult(
+                "R203",
+                path,
+                "error",
+                f"plugin skill id {skill_id!r} must exist at skills/{skill_id}/SKILL.md",
+            ))
+        if skill_id not in skill_names:
+            results.append(RuleResult(
+                "R203",
+                path,
+                "error",
+                f"plugin skill id {skill_id!r} must match a nested SKILL.md name",
+            ))
+    return results
+
+
+def _emitted_skill_names(emitted: Mapping[str, object]) -> List[str]:
+    names: List[str] = []
+    for kind in PLAN_FIRST_KINDS:
+        item = emitted.get(kind)
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        if isinstance(name, str) and name.strip():
+            names.append(name.strip())
+    return names
+
+
 # ----- Rule registry -----
 
 ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
@@ -657,4 +753,5 @@ ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
     check_pour_methodology,
     check_conditional_overlays,
     check_target_metadata,
+    check_codex_plugin_manifest,
 ]

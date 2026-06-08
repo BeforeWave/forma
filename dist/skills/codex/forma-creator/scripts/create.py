@@ -42,8 +42,7 @@ FORMA_GENERATOR_REPOSITORY_URL = "https://github.com/BeforeWave/forma"
 STAGE_KEYS = ("default", *KINDS)
 TARGETS = ("codex", "claude-code")
 ARTIFACTS = ("bundle", "plugin")
-CODEX_PLUGIN_ID = "forma"
-CODEX_PLUGIN_NAME = "Forma"
+DEFAULT_CODEX_PLUGIN_ID = "forma"
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
@@ -510,6 +509,7 @@ def build_plugin(
     (plugin_dir / "plugin.json").write_text(
         json.dumps(
             _plugin_manifest(
+                injection=injection,
                 skill_names=skill_names,
                 descriptions=_skill_descriptions(methodology_dir, injection),
             ),
@@ -554,12 +554,14 @@ def _skill_descriptions(
 
 
 def _plugin_manifest(
+    injection: Mapping[str, Any],
     skill_names: Mapping[str, str],
     descriptions: Mapping[str, str],
 ) -> dict[str, object]:
+    plugin_id = _plugin_id(injection)
     return {
-        "id": CODEX_PLUGIN_ID,
-        "name": CODEX_PLUGIN_NAME,
+        "id": plugin_id,
+        "name": _plugin_display_name(plugin_id),
         "description": CODEX_PLUGIN_DESCRIPTION,
         "skills": [
             {
@@ -569,6 +571,19 @@ def _plugin_manifest(
             for kind in KINDS
         ],
     }
+
+
+def _plugin_id(injection: Mapping[str, Any]) -> str:
+    rename = injection.get("rename", {})
+    if isinstance(rename, Mapping):
+        raw_prefix = rename.get("prefix")
+        if isinstance(raw_prefix, str) and raw_prefix.strip():
+            return raw_prefix.strip()
+    return DEFAULT_CODEX_PLUGIN_ID
+
+
+def _plugin_display_name(plugin_id: str) -> str:
+    return " ".join(part.capitalize() for part in plugin_id.split("-"))
 
 
 def _write_manifest(

@@ -1,5 +1,5 @@
 {
-  "description": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
+  "description": "Generic Plan-First workflow bundle for agents.",
   "id": "forma",
   "name": "Forma",
   "skills": [

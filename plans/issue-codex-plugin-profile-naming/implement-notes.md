@@ -21,6 +21,26 @@ Deviations From Plan:
 Follow-ups:
 - None.
 
+## Task 5: dist-creator-plugin-refresh
+
+Outcome:
+- Rebuilt Codex and Claude Code `forma-creator` dist artifacts, rebuilt the default Codex plugin dist artifact, and proved forma-self plugin output installs into a temporary project with `forma-shape` exposed.
+
+Decision Notes:
+- The default Codex plugin dist artifact changed because the updated emitter now writes the default profile `bundle.description` into `plugin.json`, and regenerated manifest provenance reflects the current source revision. Included that dist change because it is generated from the updated emitter.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.
+
 ## Task 4: docs-plugin-naming
 
 Outcome:
