@@ -21,6 +21,26 @@ Deviations From Plan:
 Follow-ups:
 - None.
 
+## Task 3: plugin-verifier-consistency
+
+Outcome:
+- `forma verify` now rejects Codex plugin roots whose `plugin.json` skill ids do not match manifest emitted skills and nested `skills/<id>/SKILL.md` entries.
+
+Decision Notes:
+- Options considered were checking plugin consistency once per nested skill versus once per plugin root. Selected a bundle-level rule gated to the first discovered skill so one mismatch produces one focused verifier error.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- None.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.
+
 ## Task 2: creator-plugin-prefix-identity
 
 Outcome:

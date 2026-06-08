@@ -20,6 +20,45 @@ def copy_valid_bundle(tmp_path: Path) -> Path:
     return dst
 
 
+def copy_valid_plugin(tmp_path: Path) -> Path:
+    plugin = tmp_path / "plugin"
+    skills_dir = plugin / "skills"
+    shutil.copytree(VALID_BUNDLE, skills_dir)
+    emitted = {
+        kind: {
+            "name": kind,
+            "directory": kind,
+        }
+        for kind in ("shape", "gauge", "seal", "pour", "flow")
+    }
+    (plugin / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": emitted,
+            }
+        ),
+        encoding="utf-8",
+    )
+    plugin_dir = plugin / ".codex-plugin"
+    plugin_dir.mkdir()
+    (plugin_dir / "plugin.json").write_text(
+        json.dumps(
+            {
+                "id": "fixture",
+                "name": "Fixture",
+                "description": "Fixture plugin.",
+                "skills": [
+                    {"id": kind, "description": f"{kind} skill."}
+                    for kind in ("shape", "gauge", "seal", "pour", "flow")
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return plugin
+
+
 def overwrite_skill(bundle: Path, kind: str, text: str) -> None:
     (bundle / kind / "SKILL.md").write_text(text.strip() + "\n", encoding="utf-8")
 
@@ -272,6 +311,27 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
 
     report = verify(bundle)
     assert report.passed, report.format_human()
+
+
+def test_codex_plugin_manifest_matches_emitted_skills(tmp_path: Path) -> None:
+    plugin = copy_valid_plugin(tmp_path)
+
+    report = verify(plugin)
+
+    assert report.passed, report.format_human()
+
+
+def test_codex_plugin_manifest_rejects_mismatched_skill_ids(tmp_path: Path) -> None:
+    plugin = copy_valid_plugin(tmp_path)
+    plugin_json = plugin / ".codex-plugin" / "plugin.json"
+    raw = json.loads(plugin_json.read_text(encoding="utf-8"))
+    raw["skills"][0]["id"] = "wrong-shape"
+    plugin_json.write_text(json.dumps(raw), encoding="utf-8")
+
+    report = verify(plugin)
+
+    assert_has_error(report, "R203")
+    assert "must match emitted skills" in report.format_human()
 
 
 def test_conditional_manifest_rejects_missing_overlay_route(tmp_path: Path) -> None:

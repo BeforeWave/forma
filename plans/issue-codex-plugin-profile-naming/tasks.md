@@ -12,7 +12,7 @@ Validate: uv run --extra dev forma verify source/skill-creator/
 Depends: plugin-emitter-profile-identity
 Constraint: keep `source/skill-creator/scripts/forma_verifier/` stdlib-only and do not add creator-side install behavior.
 
-- [ ] [plugin-verifier-consistency] Add plugin.json consistency verification
+- [x] [plugin-verifier-consistency] Add plugin.json consistency verification
 Accept: Task Type=step; verifier rejects Codex plugin roots where `plugin.json` skills do not match nested skill directories and manifest emitted skills
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_verifier.py tests/test_creator.py tests/test_creator_builder.py
 Depends: plugin-emitter-profile-identity
