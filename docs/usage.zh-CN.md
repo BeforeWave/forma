@@ -85,11 +85,10 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 
 ### `forma install`
 
-安装已经验证过的本地单个 skill、skill bundle 或 Codex plugin：
+安装已经验证过的本地单个 skill 或 skill bundle：
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
-forma install --target codex --scope project /tmp/forma-codex-plugin
 forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 ```
 
@@ -103,7 +102,8 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 
 - 不加 `--replace` 时，如果目标目录已经存在，会拒绝覆盖。
 - 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
-- Claude Code plugin 安装会明确失败。
+- Codex plugin 安装会明确失败，并提示使用
+  `codex plugin add <plugin>@<marketplace>` 或 Codex plugin UI。
 
 ### `forma explain`
 
@@ -118,17 +118,15 @@ forma explain temporary-injection --format json --target codex
 
 ## 安装目标
 
-Forma 生成 target 专用 skill bundle。Codex plugin 是同一套 skills 的 Codex 安装形态。`forma install` 会把 verified 本地产物写到对应位置：
+Forma 生成 target 专用 skill bundle。`forma install` 会把 verified 本地 skill 产物写到对应位置：
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin 安装时会把 plugin id 作为最后一级目录。比如 profile 的
-`bundle.name` 是 `sample-backend-go-github-issue-tracked` 时，项目级安装位置是
-`.codex/plugins/sample-backend-go-github-issue-tracked`。
+Codex plugin 输出是本地 plugin source。把生成出的 plugin 加到 Codex marketplace 后，
+用 `codex plugin add <plugin>@<marketplace>` 安装，或在 Codex plugin UI 里安装。
 
 target 发现规则、metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 

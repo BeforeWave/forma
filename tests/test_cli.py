@@ -65,6 +65,8 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0, result.output
+    assert "codex plugin add <plugin>@<marketplace>" in result.output
+    assert "Codex plugin UI" in result.output
     assert (output / ".codex-plugin" / "plugin.json").is_file()
     assert (output / ".forma-manifest.json").is_file()
     assert (output / "skills" / "forma-plan" / "SKILL.md").is_file()
@@ -215,7 +217,7 @@ def test_install_claude_code_bundle_project_scope(
     assert (project / ".claude" / "skills" / "forma-showhand").is_dir()
 
 
-def test_install_codex_plugin_project_scope(tmp_path: Path, monkeypatch) -> None:
+def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> None:
     plugin = tmp_path / "plugin"
     project = tmp_path / "project"
     project.mkdir()
@@ -240,12 +242,14 @@ def test_install_codex_plugin_project_scope(tmp_path: Path, monkeypatch) -> None
         ["install", "--target", "codex", "--scope", "project", str(plugin)],
     )
 
-    assert install.exit_code == 0, install.output
-    assert (project / ".codex" / "plugins" / "forma" / ".codex-plugin" / "plugin.json").is_file()
-    assert (project / ".codex" / "plugins" / "forma" / "skills" / "forma-plan").is_dir()
+    assert install.exit_code != 0
+    assert "forma install does not install Codex plugins" in install.output
+    assert "codex plugin add <plugin>@<marketplace>" in install.output
+    assert "Codex plugin UI" in install.output
+    assert not (project / ".codex" / "plugins").exists()
 
 
-def test_install_profile_named_codex_plugin_project_scope(
+def test_install_rejects_profile_named_codex_plugin(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -275,7 +279,6 @@ def test_install_profile_named_codex_plugin_project_scope(
         ["install", "--target", "codex", "--scope", "project", str(plugin)],
     )
 
-    installed = project / ".codex" / "plugins" / "sample-backend-go-github-issue-tracked"
-    assert install.exit_code == 0, install.output
-    assert (installed / ".codex-plugin" / "plugin.json").is_file()
-    assert (installed / "skills" / "backend-plan-first-plan-issue").is_dir()
+    assert install.exit_code != 0
+    assert "forma install does not install Codex plugins" in install.output
+    assert "codex plugin add <plugin>@<marketplace>" in install.output

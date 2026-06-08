@@ -136,6 +136,11 @@ def create_plugin_command(
         raise click.ClickException(str(exc)) from exc
     click.echo(f"forma create-plugin: wrote Codex plugin: {output_dir}")
     click.echo(f"plugin: {plugin_json}")
+    click.echo(
+        "install hint: add this plugin to a Codex marketplace, then run "
+        "`codex plugin add <plugin>@<marketplace>` or install it from the "
+        "Codex plugin UI"
+    )
 
 
 @main.command("install")
@@ -165,7 +170,7 @@ def install_command(
     replace: bool,
     path: Path,
 ) -> None:
-    """Install a verified local Forma skill, bundle, or Codex plugin."""
+    """Install a verified local Forma skill or skill bundle."""
     try:
         result = install_artifact(
             source=path,

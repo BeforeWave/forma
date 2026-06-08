@@ -11,7 +11,7 @@ Forma 生成的是 target 专用 workflow bundle。Codex plugin 是同一套 tas
 | 产物 | CLI target | 个人安装 | 项目安装 |
 |---|---|---|---|
 | Codex skills | `codex` | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `codex` | `$HOME/.codex/plugins` | `.codex/plugins` |
+| Codex plugins | `codex` | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `claude-code` | `$HOME/.claude/skills` | `.claude/skills` |
 
 使用对应的 `--target`：
@@ -28,7 +28,8 @@ Codex 会从 repository、user、admin 和 bundled system 等位置读取 skills
 
 Codex 项目级 skills 安装到 `.codex/skills`。用户级 skills 安装到 `$HOME/.codex/skills`。
 
-Codex 项目级 plugins 安装到 `.codex/plugins/<plugin-id>`。用户级 plugins 安装到 `$HOME/.codex/plugins/<plugin-id>`。安装后的 plugin root 会保留 `.codex-plugin/plugin.json`。
+对 Codex plugins，Forma 只生成本地 plugin source。安装和启用交给 Codex：使用
+`codex plugin add <plugin>@<marketplace>`，或在 Codex plugin UI 里安装。
 
 对 profile 生成的 Codex plugin，`<plugin-id>` 是 profile 的 `bundle.name`。对 Codex `forma-creator` 生成的 plugin，如果存在 `rename.prefix`，`<plugin-id>` 就是这个 prefix；否则保持 `forma`。plugin manifest 指向 `./skills/`；`.forma-manifest.json` 记录的 emitted skill 名称决定嵌套 skill 目录和 frontmatter 名称，所以 profile 或 creator 改名后的 skills 会同步出现在 plugin 里。
 

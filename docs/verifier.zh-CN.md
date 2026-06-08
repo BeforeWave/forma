@@ -10,7 +10,7 @@
 
 这些时候运行验证：
 
-- 安装生成 bundle 或 Codex plugin 前；
+- 安装生成 bundle 前，或把 Codex plugin 交给 Codex 安装前；
 - 提交生成基线前；
 - 修改 profile 后；
 - 使用 temporary injection 后；

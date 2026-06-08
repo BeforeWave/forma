@@ -17,12 +17,14 @@ forma --help
 
 ## 第一次跑通：默认 Codex Plugin
 
-生成并安装默认 Plan-First plugin：
+生成默认 Plan-First plugin：
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
+
+然后把这个本地 plugin 加到 Codex marketplace，用
+`codex plugin add <plugin>@<marketplace>` 安装，或在 Codex plugin UI 里安装。
 
 把当前 issue 或任务背景发给 Codex，并要求先从规划开始：
 
@@ -127,7 +129,7 @@ forma install --target claude-code --scope user /tmp/software-plan-first-claude-
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
+| Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 
 信任项目 skills 前先审查内容。生成技能可以包含脚本，也可能带有 target 专用工具行为。

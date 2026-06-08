@@ -142,3 +142,24 @@ Deviations From Plan:
 
 Follow-ups:
 - Restart Codex Desktop or open a new thread for the app UI to pick up the latest installed plugin cache.
+
+## Task 8: remove-forma-plugin-install
+
+Outcome:
+- `forma install` now rejects Codex plugin artifacts and points users to `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI; `forma create-plugin` and Codex `forma-creator` plugin output print the same install guidance.
+
+Decision Notes:
+- Options considered were teaching `forma install` to mutate Codex marketplaces versus removing plugin install support from Forma. Selected removal because Codex's plugin system owns marketplace registration, cache installation, and enabled state.
+- Kept `forma install` support for skills and skill bundles unchanged because those artifacts still map directly to stable skill roots.
+
+Plan Gaps Found:
+- Earlier docs and `AGENTS.md` still implied plugin install roots under `.codex/plugins`. Updated those surfaces so future agents do not repeat the old path.
+
+Classifications:
+- Codex plugin artifacts remain valid outputs of `forma create-plugin`; only the installation mechanism moved fully to Codex.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

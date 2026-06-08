@@ -266,8 +266,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"forma creator build-plugin: wrote {args.output}")
         print(f"plugin manifest: {output_dir / '.codex-plugin' / 'plugin.json'}")
         print(
-            "install hint: use `forma install --target codex --scope "
-            f"<user|project> {output_dir}` or give this plugin path to the agent"
+            "install hint: add this plugin to a Codex marketplace, then run "
+            "`codex plugin add <plugin>@<marketplace>` or install it from the "
+            "Codex plugin UI"
         )
     else:
         print(f"forma creator build-bundle: wrote {args.output}")

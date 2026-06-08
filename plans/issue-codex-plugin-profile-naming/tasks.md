@@ -55,7 +55,7 @@ Validate: git diff --check
 Depends: codex-plugin-ingestion-contract
 Constraint: preserve Forma-owned profile constraints and do not rename internal stage keys `shape`, `gauge`, `seal`, `pour`, and `flow`.
 
-- [ ] [remove-forma-plugin-install] Remove Codex plugin support from `forma install`
+- [x] [remove-forma-plugin-install] Remove Codex plugin support from `forma install`
 Accept: Task Type=step; `forma install` rejects Codex plugin artifacts with guidance to use `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI, while `forma create-plugin` and creator plugin output print that same install guidance
 Validate: uv run --extra dev pytest -p no:cacheprovider tests/test_cli.py tests/test_creator_builder.py
 Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --target codex --profile profiles/forma-self/forma-self-iteration.yaml --output "$tmp_dir/plugin" | tee "$tmp_dir/create.log"; rg -n 'codex plugin add|Codex plugin UI' "$tmp_dir/create.log"; if uv run --extra dev forma install --target codex --scope project "$tmp_dir/plugin" >"$tmp_dir/install.log" 2>&1; then cat "$tmp_dir/install.log"; exit 1; fi; rg -n 'codex plugin add|Codex plugin UI' "$tmp_dir/install.log"; rm -rf "$tmp_dir"

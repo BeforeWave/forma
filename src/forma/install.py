@@ -1,8 +1,7 @@
-"""Install verified local Forma artifacts into agent skill/plugin roots."""
+"""Install verified local Forma skill artifacts into agent roots."""
 
 from __future__ import annotations
 
-import json
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,13 +31,7 @@ def install_artifact(
     source = source.resolve()
     artifact_kind = _classify_artifact(source)
     if artifact_kind == "codex-plugin":
-        if target_agent != "codex":
-            raise ValueError("Codex plugins can only be installed with --target codex")
-        _verify_source(source)
-        plugin_id = _plugin_id(source)
-        destination = _plugin_root(target_agent, scope) / plugin_id
-        _copy_targets([(source, destination)], replace)
-        return InstallResult(artifact_kind, (destination,))
+        raise ValueError(_codex_plugin_install_guidance())
     if artifact_kind == "skill":
         _verify_source(source)
         name = _skill_name(source)
@@ -67,7 +60,7 @@ def _classify_artifact(source: Path) -> str:
     if _bundle_skill_dirs(source):
         return "skill-bundle"
     raise ValueError(
-        "path is not a supported Forma artifact: expected a skill, skill bundle, or Codex plugin"
+        "path is not a supported Forma install artifact: expected a skill or skill bundle"
     )
 
 
@@ -94,18 +87,6 @@ def _skill_name(skill_dir: Path) -> str:
     return name.strip()
 
 
-def _plugin_id(plugin_root: Path) -> str:
-    raw = json.loads(
-        (plugin_root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
-    )
-    if not isinstance(raw, dict):
-        raise ValueError("plugin.json must contain an object")
-    plugin_id = raw.get("name", raw.get("id"))
-    if not isinstance(plugin_id, str) or not plugin_id.strip():
-        raise ValueError("plugin.json must include non-empty name")
-    return plugin_id.strip()
-
-
 def _skills_root(target_agent: InstallTarget, scope: InstallScope) -> Path:
     if target_agent == "codex":
         root = Path.home() / ".codex" / "skills" if scope == "user" else Path.cwd() / ".codex" / "skills"
@@ -114,12 +95,6 @@ def _skills_root(target_agent: InstallTarget, scope: InstallScope) -> Path:
         root = Path.home() / ".claude" / "skills" if scope == "user" else Path.cwd() / ".claude" / "skills"
         return root
     raise ValueError(f"unsupported install target: {target_agent}")
-
-
-def _plugin_root(target_agent: InstallTarget, scope: InstallScope) -> Path:
-    if target_agent != "codex":
-        raise ValueError("plugin install roots are only supported for Codex")
-    return Path.home() / ".codex" / "plugins" if scope == "user" else Path.cwd() / ".codex" / "plugins"
 
 
 def _copy_targets(targets: Iterable[tuple[Path, Path]], replace: bool) -> None:
@@ -134,3 +109,11 @@ def _copy_targets(targets: Iterable[tuple[Path, Path]], replace: bool) -> None:
     for source, destination in targets:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(source, destination)
+
+
+def _codex_plugin_install_guidance() -> str:
+    return (
+        "forma install does not install Codex plugins. Use `codex plugin add "
+        "<plugin>@<marketplace>` after adding the plugin to a Codex marketplace, "
+        "or install it from the Codex plugin UI."
+    )

@@ -123,12 +123,15 @@ Install the CLI:
 pipx install git+https://github.com/BeforeWave/forma.git
 ```
 
-Create and install the Codex plugin:
+Create the Codex plugin:
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
+
+Then add that local plugin to a Codex marketplace and install it with
+`codex plugin add <plugin>@<marketplace>`, or install it from the Codex plugin
+UI.
 
 Send the current issue or task context to the agent and ask it to use `forma-plan` first:
 

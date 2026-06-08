@@ -351,6 +351,8 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     assert result.returncode == 0, result.stderr + result.stdout
     assert "forma creator build-plugin" in result.stdout
     assert "install hint:" in result.stdout
+    assert "codex plugin add <plugin>@<marketplace>" in result.stdout
+    assert "Codex plugin UI" in result.stdout
     assert (generated / ".codex-plugin" / "plugin.json").is_file()
     assert (generated / ".forma-manifest.json").is_file()
     assert (generated / "skills" / "forma-plan" / "SKILL.md").is_file()

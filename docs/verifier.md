@@ -13,7 +13,7 @@ preserve the expected Plan-First workflow shape.
 
 Run verification:
 
-- before installing a generated bundle or Codex plugin;
+- before installing a generated bundle or handing a Codex plugin to Codex;
 - before committing a generated baseline;
 - after changing a profile;
 - after temporary injection;

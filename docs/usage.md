@@ -105,11 +105,10 @@ for the agent-side generation path.
 
 ### `forma install`
 
-Installs a verified local skill, skill bundle, or Codex plugin:
+Installs a verified local skill or skill bundle:
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
-forma install --target codex --scope project /tmp/forma-codex-plugin
 forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 ```
 
@@ -125,7 +124,8 @@ Overwrite behavior:
 - Without `--replace`, existing destination directories are rejected.
 - With `--replace`, Forma replaces only the destination outputs selected by
   the verified source.
-- Claude Code plugin install attempts fail clearly.
+- Codex plugin install attempts fail with guidance to use
+  `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
 
 ### `forma explain`
 
@@ -145,19 +145,17 @@ path produces profile source, not a one-off harness.
 
 ## Install Targets
 
-Forma emits target-specific skill bundles. A Codex plugin is the Codex install
-shape for the same skills. `forma install` writes verified local outputs into
-the matching target location:
+Forma emits target-specific skill bundles. `forma install` writes verified
+local skill outputs into the matching target location:
 
 | Target | Personal install | Project install |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
 | Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
 
-Codex plugin installs add the plugin id as the final directory. A profile whose
-`bundle.name` is `sample-backend-go-github-issue-tracked` installs to
-`.codex/plugins/sample-backend-go-github-issue-tracked` for project scope.
+Codex plugin outputs are local plugin sources. Add the generated plugin to a
+Codex marketplace, then run `codex plugin add <plugin>@<marketplace>` or install
+it from the Codex plugin UI.
 
 For target-specific discovery, metadata, and trust details, see
 [Targets](./targets.md).

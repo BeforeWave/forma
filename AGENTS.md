@@ -34,7 +34,8 @@ Use this repository when the task mentions:
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.
 - Use `forma create-bundle --target codex|claude-code --output <dir>` for local skill-bundle output.
 - Use `forma create-plugin --target codex --output <dir>` for Codex plugin output. Claude Code plugin output is not supported.
-- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local artifacts. Do not imply URL download support inside `forma install`.
+- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local skill or skill-bundle artifacts. Do not imply URL download support or Codex plugin installation inside `forma install`.
+- Install Codex plugin output through Codex itself: add the generated local plugin to a Codex marketplace, then use `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
 - Verify generated or release artifacts before recommending them: `forma verify <path>`.
 
 ## Workflow state

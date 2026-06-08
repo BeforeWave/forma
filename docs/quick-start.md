@@ -19,12 +19,15 @@ The examples below assume `forma` is available on `PATH`.
 
 ## First Run: Default Codex Plugin
 
-Generate and install the default Plan-First plugin:
+Generate the default Plan-First plugin:
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma install --target codex --scope project /tmp/forma-codex-plugin
 ```
+
+Then add that local plugin to a Codex marketplace and install it with
+`codex plugin add <plugin>@<marketplace>`, or install it from the Codex plugin
+UI.
 
 Send the current issue or task context to Codex and ask it to start with planning:
 
@@ -139,7 +142,7 @@ Generated workflows can be installed for one user or into a project:
 | Target | Personal install | Project install |
 |---|---|---|
 | Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Codex plugins | `$HOME/.codex/plugins` | `.codex/plugins` |
+| Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 
 Review project skills before trusting them. Generated skills can include
