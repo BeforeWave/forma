@@ -119,3 +119,9 @@ Additional acceptance:
   skill names while preserving Forma-owned self-iteration constraints.
 - The plugin page description and starter prompts are concise user-facing
   workflow copy.
+
+Follow-up install boundary:
+
+- `forma install` must stop accepting Codex plugin artifacts. Generated plugin
+  output should direct users to install through Codex's plugin system:
+  `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
