@@ -8,6 +8,10 @@
 
 - Plan Strategy: step-execution
 
+## Iteration Area
+
+- creator-profile
+
 ## Scope
 
 - In scope:
