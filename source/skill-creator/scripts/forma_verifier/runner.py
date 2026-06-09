@@ -117,12 +117,22 @@ def verify(path: Union[str, Path]) -> Report:
 def main(argv: List[str] = None) -> int:
     """Entry point for the `verify.py` script and `python -m forma_verifier.runner`."""
     args = argv if argv is not None else sys.argv[1:]
-    if not args:
-        print("usage: verify.py <path>", file=sys.stderr)
+    json_output = False
+    paths: List[str] = []
+    for arg in args:
+        if arg == "--json":
+            json_output = True
+        else:
+            paths.append(arg)
+    if len(paths) != 1:
+        print("usage: verify.py [--json] <path>", file=sys.stderr)
         return 2
-    path = args[0]
+    path = paths[0]
     report = verify(path)
-    print(report.format_human())
+    if json_output:
+        print(report.format_json())
+    else:
+        print(report.format_human())
     return 0 if report.passed else 1
 
 

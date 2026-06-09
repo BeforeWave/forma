@@ -153,10 +153,22 @@ def main(ctx: click.Context) -> None:
 
 
 @main.command(cls=RawEpilogCommand, epilog=VERIFY_HELP)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Emit a machine-readable verification report.",
+)
 @click.argument("path", type=click.Path(exists=True, path_type=Path))
-def verify(path: Path) -> None:
+@click.pass_context
+def verify(ctx: click.Context, json_output: bool, path: Path) -> None:
     """Verify a generated Forma workflow output at PATH."""
     report = verify_bundle(path)
+    if json_output:
+        click.echo(report.format_json())
+        if not report.passed:
+            ctx.exit(1)
+        return
     click.echo(report.format_human())
     if not report.passed:
         raise click.ClickException("verification failed")

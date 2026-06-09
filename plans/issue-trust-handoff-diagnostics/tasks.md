@@ -1,4 +1,4 @@
-- [ ] [verifier-json] Add shared verifier JSON output and semantic failure classes
+- [x] [verifier-json] Add shared verifier JSON output and semantic failure classes
 Accept: Task Type=step; the shared Layer 2 verifier emits stable JSON with semantic failure classes through both `forma verify --json <path>` and bundled `scripts/verify.py --json <path>`, while default human output and exit-code behavior remain compatible
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_cli.py tests/test_layer_1_dogfood.py
 Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-bundle --target codex --output "$tmp_dir/bundle"; uv run --extra dev forma verify --json "$tmp_dir/bundle"; python3 source/skill-creator/scripts/verify.py --json "$tmp_dir/bundle"; exit_status=$?; rm -rf "$tmp_dir"; exit "$exit_status"

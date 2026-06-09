@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import subprocess
 import shutil
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -125,6 +127,52 @@ def test_invalid_fixture_fails() -> None:
     assert_has_error(report, "R003")
     assert_has_error(report, "R004")
     assert_has_error(report, "R005")
+
+
+def test_report_json_includes_summary_and_failure_classes() -> None:
+    report = verify(INVALID_BUNDLE)
+
+    data = json.loads(report.format_json())
+
+    assert data["schema"] == "forma.verify.report.v1"
+    assert data["path"] == str(INVALID_BUNDLE.resolve())
+    assert data["bundle_kind"] == "plan-first-bundle"
+    assert data["passed"] is False
+    assert data["summary"]["errors"] == len(report.errors)
+    assert data["summary"]["total"] == len(report.results)
+    by_rule = {item["rule_id"]: item for item in data["results"]}
+    assert by_rule["R001"]["failure_class"] == "skill_metadata"
+    assert by_rule["R002"]["failure_class"] == "skill_identity"
+    assert by_rule["R003"]["failure_class"] == "artifact_shape"
+    assert by_rule["R004"]["failure_class"] == "resource_link"
+    assert by_rule["R005"]["failure_class"] == "runtime_boundary"
+    assert all("path" in item for item in data["results"])
+
+
+def test_bundled_verify_script_emits_json(tmp_path: Path) -> None:
+    bundle = copy_valid_bundle(tmp_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "source" / "skill-creator" / "scripts" / "verify.py"),
+            "--json",
+            str(bundle),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    data = json.loads(result.stdout)
+    assert data["schema"] == "forma.verify.report.v1"
+    assert data["passed"] is True
+    assert data["summary"] == {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "total": 0,
+    }
 
 
 def test_missing_frontmatter_rule(tmp_path: Path) -> None:

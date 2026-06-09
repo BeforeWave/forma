@@ -18,6 +18,7 @@ SAMPLE_PROFILE = (
     / "sample-backend"
     / "sample-backend-go-github-issue-tracked.yaml"
 )
+INVALID_BUNDLE = ROOT / "tests" / "fixtures" / "invalid-bundle"
 
 
 def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
@@ -112,6 +113,19 @@ def test_old_create_command_is_rejected_with_current_command_names() -> None:
     assert "No such command 'create'" in result.output
     assert "create-bundle" in result.output
     assert "create-plugin" in result.output
+
+def test_verify_json_emits_machine_readable_report_for_failures() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["verify", "--json", str(INVALID_BUNDLE)])
+
+    assert result.exit_code == 1
+    data = json.loads(result.output)
+    assert data["schema"] == "forma.verify.report.v1"
+    assert data["passed"] is False
+    assert data["summary"]["errors"] > 0
+    assert data["results"][0]["failure_class"]
+    assert "Error:" not in result.output
 
 
 def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
