@@ -7,7 +7,33 @@ memorizing commands; start with [Quick Start](./quick-start.md): install creator
 for the agent, then use a natural-language request to extract rules and generate
 a workflow.
 
+Running `forma` with no subcommand is a successful discovery entrypoint. It exits
+`0` and prints the same agent routing guide as `forma --help`, so a coding agent
+can start there when it is unsure which command path to use.
+
+## Agent Command Routing
+
+| Goal | Command path | Next action |
+|---|---|---|
+| Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>/<target>/forma-creator`, then `forma install --target <target> --scope <scope> <creator-path>` with scope `user` or `project`. |
+| Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
+| Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
+| Build Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | `forma verify <dir>`, then install the plugin through Codex, not `forma install`. |
+| Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
+
+Use `create-bundle` or `create-plugin`; the old `forma create` command is not
+supported.
+
 ## Commands
+
+### `forma` / `forma --help`
+
+Prints the root command guide and command list. With no subcommand, `forma`
+returns exit code `0` and shows the same routing guide as `forma --help`.
+
+Use it as the first command when an agent needs to discover whether to build a
+creator, create a skill bundle, create a Codex plugin, install a verified local
+output, verify an output, or print authoring guidance.
 
 ### `forma verify <path>`
 
@@ -18,6 +44,12 @@ forma verify /tmp/settings-workflow-codex
 ```
 
 Use it before installing, committing, or sharing generated workflow outputs.
+
+Next action:
+
+- If a skill bundle or creator verifies, install the verified local path with
+  `forma install`.
+- If a Codex plugin verifies, install it through Codex, not `forma install`.
 
 `forma verify` checks structure and methodology rules. It does not replace
 profile review or product judgment. See [Verifier](./verifier.md) for the
@@ -46,6 +78,9 @@ Optional inputs:
 Optional development override:
 
 - `--methodology <dir>`: use a source methodology directory instead of packaged runtime assets.
+
+Next action: run `forma verify <output-dir>`, then install the verified local
+bundle with `forma install`.
 
 Profile format is documented in [Profile Schema](./profile-schema.md).
 
@@ -82,6 +117,9 @@ Optional inputs:
 `--target claude-code` reports an error because Claude Code plugin output is not
 supported.
 
+Next action: run `forma verify <output-dir>`, then install the plugin through
+Codex marketplace/plugin UI. Do not pass Codex plugin output to `forma install`.
+
 ### `forma build-creator`
 
 Builds a target-specific installable `forma-creator`. After installing it for
@@ -106,6 +144,9 @@ fixed target contract allows it. A Claude Code creator generates Claude
 Code-shaped skill bundles only. See [Forma Creator](./forma-creator.md) for the
 on-the-spot customization path.
 
+Next action: run `forma verify <output-dir>/<target>/forma-creator`, then install
+that verified creator path with `forma install`.
+
 ### `forma install`
 
 Installs a verified local skill or skill bundle:
@@ -128,6 +169,9 @@ Overwrite behavior:
 - Codex plugin install attempts report Codex marketplace guidance,
   `codex plugin add <plugin>@<marketplace-name>`, and the need to start a new thread after install.
 
+Next action: after installing a skill or skill bundle, start a new agent thread
+so the installed skills are discovered.
+
 ### `forma explain`
 
 Prints canonical authoring guidance without requiring an external agent to read
@@ -149,6 +193,9 @@ draft a profile for me.
 The agent uses `forma explain profile --target codex` to load the authoring
 standard, then combines it with project facts to propose tracked profile YAML.
 This path produces durable profile source, not a one-off workflow.
+
+Next action: after the profile is reviewed, use `forma create-bundle` for a skill
+bundle or `forma create-plugin` for Codex plugin source.
 
 ## Install Targets
 

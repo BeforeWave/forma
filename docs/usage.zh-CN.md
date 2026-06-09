@@ -4,7 +4,32 @@
 
 这页是 Forma 的命令参考。第一次跑通不要从命令背起，先看 [快速开始](./quick-start.zh-CN.md)：把 creator 装给 agent，再用自然请求让它挖掘准则、生成 workflow。
 
+不带子命令运行 `forma` 是一个成功的 discovery 入口。它会以退出码 `0`
+打印和 `forma --help` 相同的 agent 路由指南，所以 coding agent 不确定该走哪条
+命令路径时，可以先从这里开始。
+
+## Agent 命令路由
+
+| 目标 | 命令路径 | 下一步 |
+|---|---|---|
+| 安装 creator，让 agent 从项目事实里定制 workflow | `forma build-creator --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>/<target>/forma-creator`，再用 `forma install --target <target> --scope <scope> <creator-path>` 安装，`scope` 填 `user` 或 `project`。 |
+| 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
+| 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
+| 生成 Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`，然后通过 Codex 安装 plugin，不要用 `forma install`。 |
+| 给 agent 提供编写规则 | `forma explain profile --target codex` 或 `forma explain temporary-injection --target codex` | 把输出作为只读指南，再起草 profile 或一次性 creator injection。 |
+
+使用 `create-bundle` 或 `create-plugin`；旧的 `forma create` 命令不再支持。
+
 ## 命令
+
+### `forma` / `forma --help`
+
+打印根命令指南和命令列表。不带子命令时，`forma` 返回退出码 `0`，并显示
+和 `forma --help` 相同的路由指南。
+
+当 agent 需要判断是 build creator、create skill bundle、create Codex plugin、
+install verified 本地产物、verify 产物，还是打印 authoring guidance 时，先用
+这个命令做 discovery。
 
 ### `forma verify <path>`
 
@@ -15,6 +40,11 @@ forma verify /tmp/settings-workflow-codex
 ```
 
 安装、提交或分享生成 workflow 产物前，先运行这个命令。
+
+下一步：
+
+- 如果 skill bundle 或 creator 验证通过，用 `forma install` 安装 verified 本地路径。
+- 如果 Codex plugin 验证通过，通过 Codex 安装，不要用 `forma install`。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
@@ -38,6 +68,8 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 开发时可选覆盖：
 
 - `--methodology <dir>`：使用指定的方法目录，而不是打包内置的运行时资源。
+
+下一步：运行 `forma verify <output-dir>`，再用 `forma install` 安装 verified 本地 bundle。
 
 Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
@@ -64,6 +96,9 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 
 `--target claude-code` 会明确报错，因为当前不支持 Claude Code plugin 输出。
 
+下一步：运行 `forma verify <output-dir>`，然后通过 Codex marketplace/plugin UI 安装
+plugin。不要把 Codex plugin 产物传给 `forma install`。
+
 ### `forma build-creator`
 
 生成 target 专用的可安装 `forma-creator`。把它装给 agent 后，就可以用一句自然请求让 agent 临场定制项目 workflow：
@@ -82,6 +117,9 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
 每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。临场定制路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+
+下一步：运行 `forma verify <output-dir>/<target>/forma-creator`，再用 `forma install`
+安装这个 verified creator 路径。
 
 ### `forma install`
 
@@ -105,6 +143,8 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 - Codex plugin 安装会明确报错，并提示 Codex marketplace 设置、
   `codex plugin add <plugin>@<marketplace-name>`，以及安装后新开 thread。
 
+下一步：安装 skill 或 skill bundle 后，新开 agent thread，让新安装的 skills 被发现。
+
 ### `forma explain`
 
 输出标准编写指南，让外部 agent 不需要阅读 Forma 源码：
@@ -121,6 +161,9 @@ forma explain temporary-injection --format json --target codex
 ```
 
 agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 tracked profile YAML。这个路径的产物是长期 profile 源，不是一次性 workflow。
+
+下一步：profile review 通过后，用 `forma create-bundle` 生成 skill bundle，或用
+`forma create-plugin` 生成 Codex plugin source。
 
 ## 安装目标
 
