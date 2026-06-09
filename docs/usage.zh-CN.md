@@ -13,6 +13,7 @@
 | 目标 | 命令路径 | 下一步 |
 |---|---|---|
 | 安装 creator，让 agent 从项目事实里定制 workflow | `forma build-creator --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>/<target>/forma-creator`，再用 `forma install --target <target> --scope <scope> <creator-path>` 安装，`scope` 填 `user` 或 `project`。 |
+| 从明确的项目规则文件起草可评审 profile candidate | `forma profile draft --profile-id <kebab> --source <path> --output <dir>` | Review `profile.draft.yaml`，处理 `missing-decisions.md`，再把确认后的 YAML 移到所属 tracked profile 路径，之后再用 `create-bundle` 或 `create-plugin`。 |
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
 | 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
 | 生成 Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`，然后通过 Codex 安装 plugin，不要用 `forma install`。 |
@@ -30,6 +31,41 @@
 当 agent 需要判断是 build creator、create skill bundle、create Codex plugin、
 install verified 本地产物、verify 产物，还是打印 authoring guidance 时，先用
 这个命令做 discovery。
+
+### `forma profile draft`
+
+从明确给出的本地规则来源起草一个可评审 profile package：
+
+```bash
+forma profile draft \
+  --profile-id settings-workflow \
+  --source AGENTS.md \
+  --source docs/engineering-rules \
+  --output /tmp/settings-profile-draft
+```
+
+必需选项：
+
+- `--profile-id <kebab>`：draft 使用的稳定 lower kebab-case profile id。
+- `--source <file-or-dir>`：可重复传入的明确来源路径。目录来源只读取 `.md`、`.txt`、`.yaml` 和 `.yml`。
+- `--output <dir>`：写入 draft package 的目录。
+
+可选输入：
+
+- `--bundle-name <kebab>`：生成 workflow bundle 的名字，默认等于 `--profile-id`。
+- `--org-name <name>`：profile owner 名称，默认是 `Local Team`。
+- `--replace`：替换已经存在的输出目录。
+
+这个命令只写三个文件：
+
+- `profile.draft.yaml`：候选 profile YAML，并通过 `load_profile()` 自检。
+- `missing-decisions.md`：没有进入 YAML 的模糊、较重、私有、adapter-like、路线专用或一次性材料。
+- `agent-review.md`：来源路径、跳过路径、提取摘要和自检结果。
+
+`profile.draft.yaml` 在人工或 agent review 之前不是长期 tracked profile source。
+先处理 missing decisions，再把确认后的 YAML 移入所属 profile 路径。Review 通过后，
+用确认后的 profile 运行 `forma create-bundle` 或 `forma create-plugin`，并对生成产物运行
+`forma verify`。
 
 ### `forma verify <path>`
 

@@ -13,7 +13,7 @@ Depends: profile-draft-cli-contract
 Constraint: keep `constraints.default` minimal and never place broad reading, generated-baseline, governance, adapter, or route-specific requirements there by default.
 Constraint: no LLM/API/network call may be part of extraction.
 
-- [ ] [profile-draft-docs-smoke] Document the draft workflow and prove the generated draft can build a bundle
+- [x] [profile-draft-docs-smoke] Document the draft workflow and prove the generated draft can build a bundle
 Accept: Task Type=step; English and Chinese docs describe `forma profile draft` as a reviewable candidate-profile package, CLI help routes agents to it, and a smoke draft can feed `forma create-bundle` plus `forma verify`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_profile_draft.py tests/test_cli.py tests/test_docs_links.py
 Validate: tmp_root=/private/tmp/forma-profile-draft-task-smoke; rm -rf "$tmp_root"; mkdir -p "$tmp_root/source"; printf '%s\n' '# Agent Rules' '- Preserve unrelated user work.' '- Clarify scope before implementation.' '- Validate with `python -m pytest tests/`.' > "$tmp_root/source/AGENTS.md"; uv run --extra dev forma profile draft --profile-id task-smoke-profile --source "$tmp_root/source" --output "$tmp_root/draft"; uv run --extra dev forma create-bundle --target codex --profile "$tmp_root/draft/profile.draft.yaml" --output "$tmp_root/bundle"; uv run --extra dev forma verify "$tmp_root/bundle"

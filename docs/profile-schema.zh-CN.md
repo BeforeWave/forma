@@ -40,6 +40,26 @@ examples/profiles/sample-software/sample-software-plan-first.yaml
 
 这个顶层 profile 引入已清洗的软件默认准则，并重命名生成阶段技能，不依赖组织私有路径或私有 workflow 命令。
 
+## 先起草再提升为长期 Profile
+
+当你已经有明确的项目规则来源文件，并希望先得到一份可评审 candidate，再形成长期 tracked profile source 时，用 `forma profile draft`：
+
+```bash
+forma profile draft \
+  --profile-id sample-docs-workflow \
+  --source AGENTS.md \
+  --source docs/team-rules \
+  --output /tmp/sample-docs-profile-draft
+```
+
+输出 package 包含：
+
+- `profile.draft.yaml`：候选 YAML，并通过 Forma profile loader。
+- `missing-decisions.md`：没有提升进 YAML 的宽泛读取、generated-baseline、governance、adapter-like、路线专用、私有/本地或一次性材料。
+- `agent-review.md`：来源路径、跳过路径、提取摘要和自检结果。
+
+把这份 draft 当成候选产物。它在 review、处理 missing decisions，并把确认后的 YAML 移进所属 profile 路径之前，不是长期 profile source。提升后，再用 `forma create-bundle` 或 `forma create-plugin` 生成产物，并验证生成结果。
+
 ## 顶层键
 
 | 键 | 用途 |

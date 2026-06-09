@@ -16,6 +16,7 @@ can start there when it is unsure which command path to use.
 | Goal | Command path | Next action |
 |---|---|---|
 | Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>/<target>/forma-creator`, then `forma install --target <target> --scope <scope> <creator-path>` with scope `user` or `project`. |
+| Draft a reviewable profile candidate from explicit project-rule files | `forma profile draft --profile-id <kebab> --source <path> --output <dir>` | Review `profile.draft.yaml`, resolve `missing-decisions.md`, then move the approved YAML into the owning tracked profile path before using `create-bundle` or `create-plugin`. |
 | Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
 | Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
 | Build Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | `forma verify <dir>`, then install the plugin through Codex, not `forma install`. |
@@ -34,6 +35,46 @@ returns exit code `0` and shows the same routing guide as `forma --help`.
 Use it as the first command when an agent needs to discover whether to build a
 creator, create a skill bundle, create a Codex plugin, install a verified local
 output, verify an output, or print authoring guidance.
+
+### `forma profile draft`
+
+Drafts a reviewable profile package from explicit local rule sources:
+
+```bash
+forma profile draft \
+  --profile-id settings-workflow \
+  --source AGENTS.md \
+  --source docs/engineering-rules \
+  --output /tmp/settings-profile-draft
+```
+
+Required options:
+
+- `--profile-id <kebab>`: stable lower kebab-case profile id for the draft.
+- `--source <file-or-dir>`: repeatable explicit source path. Directory sources
+  include only `.md`, `.txt`, `.yaml`, and `.yml`.
+- `--output <dir>`: directory for the draft package.
+
+Optional inputs:
+
+- `--bundle-name <kebab>`: generated workflow bundle name. Defaults to
+  `--profile-id`.
+- `--org-name <name>`: profile owner name. Defaults to `Local Team`.
+- `--replace`: replace an existing output directory.
+
+The command writes exactly:
+
+- `profile.draft.yaml`: candidate profile YAML that passes `load_profile()`.
+- `missing-decisions.md`: ambiguous, heavy, private, adapter-like,
+  route-specific, or one-off material kept out of YAML.
+- `agent-review.md`: source paths, skipped paths, extraction summary, and
+  self-check result.
+
+`profile.draft.yaml` is not durable tracked profile source until a human or
+agent reviews it, resolves missing decisions, and moves the approved YAML into
+the owning profile path. After review, use the approved profile with
+`forma create-bundle` or `forma create-plugin`, then run `forma verify` on the
+generated output.
 
 ### `forma verify <path>`
 

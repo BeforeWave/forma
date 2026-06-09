@@ -48,6 +48,33 @@ That top-level profile includes sanitized software defaults and renames the
 generated stage skills without depending on organization-specific paths or
 private workflow commands.
 
+## Draft Before Promotion
+
+Use `forma profile draft` when you have explicit project-rule source files and
+want a reviewable candidate before creating durable tracked profile source:
+
+```bash
+forma profile draft \
+  --profile-id sample-docs-workflow \
+  --source AGENTS.md \
+  --source docs/team-rules \
+  --output /tmp/sample-docs-profile-draft
+```
+
+The output package contains:
+
+- `profile.draft.yaml`: candidate YAML that passes Forma's profile loader.
+- `missing-decisions.md`: broad reading, generated-baseline, governance,
+  adapter-like, route-specific, private/local, or one-off material that was not
+  promoted into YAML.
+- `agent-review.md`: source paths, skipped paths, extraction summary, and the
+  self-check result.
+
+Treat the draft as candidate output. It is not durable profile source until it
+is reviewed, missing decisions are resolved, and the approved YAML is moved into
+the owning profile path. After promotion, generate output with
+`forma create-bundle` or `forma create-plugin` and verify the generated artifact.
+
 ## Top-Level Keys
 
 | Key | Purpose |
