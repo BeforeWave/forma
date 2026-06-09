@@ -15,6 +15,7 @@ from pathlib import Path
 import click
 from forma.adapters import ADAPTER_TARGETS, build_creator
 from forma.creator import build_bundle
+from forma.doctor import diagnose_artifact
 from forma.explain import render_guidance
 from forma.install import install_artifact
 from forma.plugin_guidance import codex_plugin_install_hint
@@ -75,6 +76,14 @@ Next:
     forma install --target codex|claude-code --scope user|project <path>
 
   If verification passes for a Codex plugin source, install it through Codex.
+"""
+
+
+DOCTOR_HELP = """
+Next:
+
+  Use this before handoff when you need to know what an artifact is, whether
+  Forma can install it, and which install route is correct.
 """
 
 
@@ -172,6 +181,26 @@ def verify(ctx: click.Context, json_output: bool, path: Path) -> None:
     click.echo(report.format_human())
     if not report.passed:
         raise click.ClickException("verification failed")
+
+
+@main.command(cls=RawEpilogCommand, epilog=DOCTOR_HELP)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Emit a machine-readable artifact diagnosis.",
+)
+@click.argument("path", type=click.Path(path_type=Path))
+@click.pass_context
+def doctor(ctx: click.Context, json_output: bool, path: Path) -> None:
+    """Diagnose a generated Forma artifact at PATH."""
+    report = diagnose_artifact(path)
+    if json_output:
+        click.echo(report.format_json())
+    else:
+        click.echo(report.format_human())
+    if report.blockers:
+        ctx.exit(1)
 
 
 @main.command("create-bundle", cls=RawEpilogCommand, epilog=CREATE_BUNDLE_HELP)

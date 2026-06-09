@@ -30,7 +30,7 @@ def install_artifact(
 ) -> InstallResult:
     """Install a verified local artifact and return installed destination paths."""
     source = source.resolve()
-    artifact_kind = _classify_artifact(source)
+    artifact_kind = classify_install_artifact(source)
     if artifact_kind == "codex-plugin":
         raise ValueError(
             "forma install does not install Codex plugin artifacts.\n\n"
@@ -56,7 +56,8 @@ def install_artifact(
     raise ValueError(f"unsupported local Forma artifact: {source}")
 
 
-def _classify_artifact(source: Path) -> str:
+def classify_install_artifact(source: Path) -> str:
+    """Classify a local artifact by the install surface Forma supports."""
     if (source / ".codex-plugin" / "plugin.json").is_file():
         return "codex-plugin"
     if (source / "SKILL.md").is_file():

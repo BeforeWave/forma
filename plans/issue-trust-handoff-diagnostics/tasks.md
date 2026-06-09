@@ -5,7 +5,7 @@ Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-bundle --targe
 Use-Check: verifier-focused
 Constraint: keep `source/skill-creator/scripts/forma_verifier/` stdlib-only and do not make human verifier output depend on JSON serialization.
 
-- [ ] [doctor-cli] Add CLI-only artifact diagnosis
+- [x] [doctor-cli] Add CLI-only artifact diagnosis
 Accept: Task Type=step; `forma doctor [--json] <path>` identifies artifact kind, target, verification status, Forma installability, correct install route, blockers, and next steps for skills, skill bundles, and Codex plugins
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py tests/test_verifier.py
 Validate: tmp_dir="$(mktemp -d)"; uv run --extra dev forma create-plugin --target codex --output "$tmp_dir/plugin"; uv run --extra dev forma doctor "$tmp_dir/plugin"; uv run --extra dev forma doctor --json "$tmp_dir/plugin"; exit_status=$?; rm -rf "$tmp_dir"; exit "$exit_status"

@@ -80,6 +80,14 @@ def test_command_help_includes_agent_next_steps() -> None:
             ],
         ),
         (
+            ["doctor", "--help"],
+            [
+                "Diagnose a generated Forma artifact at PATH.",
+                "whether",
+                "install route",
+            ],
+        ),
+        (
             ["explain", "profile", "--help"],
             [
                 "Explain durable profile authoring and task-rule placement.",
@@ -229,6 +237,84 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
     assert plugin["skills"] == "./skills/"
+
+
+def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> None:
+    output = tmp_path / "bundle"
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "codex",
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    result = runner.invoke(main, ["doctor", "--json", str(output)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["schema"] == "forma.doctor.report.v1"
+    assert data["artifact_kind"] == "skill-bundle"
+    assert data["target"] == "codex"
+    assert data["verification"]["passed"] is True
+    assert data["forma_install_supported"] is True
+    assert data["installable_now"] is True
+    assert data["install_route"] == "forma-install:codex"
+    assert data["blockers"] == []
+
+
+def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
+    output = tmp_path / "plugin"
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    human = runner.invoke(main, ["doctor", str(output)])
+    result = runner.invoke(main, ["doctor", "--json", str(output)])
+
+    assert human.exit_code == 0, human.output
+    assert "artifact kind : codex-plugin" in human.output
+    assert "forma install : no" in human.output
+    assert "install route : codex-plugin" in human.output
+    data = json.loads(result.output)
+    assert result.exit_code == 0, result.output
+    assert data["artifact_kind"] == "codex-plugin"
+    assert data["target"] == "codex"
+    assert data["forma_install_supported"] is False
+    assert data["installable_now"] is False
+    assert data["install_route"] == "codex-plugin"
+    assert data["blockers"] == []
+    assert any("codex plugin add forma@<marketplace-name>" in step for step in data["next_steps"])
+
+
+def test_doctor_json_reports_invalid_bundle_blockers() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--json", str(INVALID_BUNDLE)])
+
+    assert result.exit_code == 1
+    data = json.loads(result.output)
+    assert data["artifact_kind"] == "skill-bundle"
+    assert data["verification"]["passed"] is False
+    assert "verification failed" in data["blockers"]
 
 
 def test_create_plugin_rejects_claude_code_target(tmp_path: Path) -> None:
