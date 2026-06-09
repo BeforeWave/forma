@@ -541,6 +541,103 @@ extract_fenced_validation_commands() {
   ' "$PLAN_FILE"
 }
 
+command_has_top_level_whitespace() {
+  local command="$1"
+  local quote=""
+  local char
+  local next
+  local escaped=0
+  local depth=0
+  local i
+
+  for ((i = 0; i < ${#command}; i++)); do
+    char="${command:i:1}"
+
+    if [ "$escaped" -eq 1 ]; then
+      escaped=0
+      continue
+    fi
+
+    if [ "$quote" = "'" ]; then
+      [ "$char" = "'" ] && quote=""
+      continue
+    fi
+
+    if [ "$quote" = '"' ]; then
+      case "$char" in
+        "\\")
+          escaped=1
+          ;;
+        '"')
+          quote=""
+          ;;
+      esac
+      continue
+    fi
+
+    case "$char" in
+      "\\")
+        escaped=1
+        ;;
+      "'")
+        quote="'"
+        ;;
+      '"')
+        quote='"'
+        ;;
+      '$')
+        next="${command:i+1:1}"
+        if [ "$next" = "(" ]; then
+          depth=$((depth + 1))
+          i=$((i + 1))
+        fi
+        ;;
+      ")")
+        if [ "$depth" -gt 0 ]; then
+          depth=$((depth - 1))
+        fi
+        ;;
+      [[:space:]])
+        if [ "$depth" -eq 0 ]; then
+          return 0
+        fi
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+validation_command_requires_cross_line_state() {
+  local command="$1"
+  local trimmed
+
+  trimmed=$(printf '%s' "$command" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+
+  case "$trimmed" in
+    "")
+      return 1
+      ;;
+    *";"*|*"&&"*|*"||"*)
+      return 1
+      ;;
+    cd|cd\ *|export|export\ *)
+      return 0
+      ;;
+  esac
+
+  if [[ "$trimmed" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+    if [[ "$trimmed" =~ ^([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]+[[:space:]]*)+$ ]]; then
+      return 0
+    fi
+    if ! command_has_top_level_whitespace "$trimmed"; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 classify_validation_failure() {
   local command="$1"
   local output_file="$2"
@@ -1011,6 +1108,10 @@ append_fenced_validation_records() {
         continue
         ;;
     esac
+
+    if validation_command_requires_cross_line_state "$command"; then
+      die "$heading command must be self-contained; state-setting lines are not allowed because validation lines run independently: $command"
+    fi
 
     found=1
     printf 'CMD\t%s\t%s\n' "$scope" "$command" >>"$records_file"
