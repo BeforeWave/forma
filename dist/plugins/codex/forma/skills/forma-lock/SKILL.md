@@ -1,11 +1,11 @@
 ---
 name: "forma-lock"
-description: "Lock the execution plan and task contract."
+description: "Finalize a Forma self-iteration plan with tasks, validation gates, and generated-output policy."
 ---
 
 # Forma Lock
 
-Lock the execution plan and task contract.
+Finalize a Forma self-iteration plan with tasks, validation gates, and generated-output policy.
 
 ## Interaction Semantics
 
@@ -45,6 +45,20 @@ Lock the execution plan and task contract.
 - `references/finalization-decision-gate.md`
 - `references/plan-materialization.md`
 - `references/task-structure.md`
+- `references/forma-iteration-boundaries.md`
+- `references/forma-validation-matrix.md`
+- `references/forma-profile-policy.md`
+
+## Conditional References
+
+Use the recorded `Iteration Area` before loading overlay references.
+
+- If `Iteration Area` is `docs-only`, do not load overlay references.
+- If `Iteration Area` is `governance`, do not load overlay references.
+- If `Iteration Area` is `methodology-verifier`, do not load overlay references.
+- If `Iteration Area` is `creator-profile`, do not load overlay references.
+- If `Iteration Area` is `generated-baseline`, do not load overlay references.
+- If `Iteration Area` is `cross-layer`, do not load overlay references.
 
 ## Requirements
 
@@ -55,6 +69,20 @@ Lock the execution plan and task contract.
 - Load and follow `references/finalization-decision-gate.md` for the finalization decision gate.
 - Load and follow `references/plan-materialization.md` for plan materialization.
 - Load and follow `references/task-structure.md` for task structure.
+- Treat this profile stack as Forma-owned project source, not a sanitized public example.
+- Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
+- Keep changes scoped to the active issue plan and tasks.
+- Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plans/issue-<id>/ files before writing final tasks that affect Forma governance, profile ownership, generated baselines, or documentation policy.
+- Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
+- Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in finalized plans and tasks.
+- Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+- Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
+- Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
+- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Record finalized `Iteration Area` in `plan.md` so execution skills can read the route without re-deciding it.
 
 ## Output
 

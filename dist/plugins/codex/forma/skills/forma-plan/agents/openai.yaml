@@ -1,4 +1,4 @@
 interface:
   display_name: "Forma Plan"
-  short_description: "Clarify goals, constraints, boundaries, and acceptance criteria."
-  default_prompt: "Use $forma-plan to clarify goals, constraints, boundaries, and acceptance criteria before implementation."
+  short_description: "Converge a Forma development issue into a scoped Plan-First contract."
+  default_prompt: "$forma-plan: 为 Forma 仓库收敛一个自我迭代计划，明确 Layer impact、profile ownership、generated baseline policy、文档更新和验证边界；不要读仓库或写计划文件。"
