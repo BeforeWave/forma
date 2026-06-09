@@ -18,6 +18,7 @@ from forma.creator import build_bundle
 from forma.explain import render_guidance
 from forma.install import install_artifact
 from forma.plugin_guidance import codex_plugin_install_hint
+from forma.profile_draft import create_profile_draft
 from forma.plugins import build_codex_plugin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
@@ -49,6 +50,9 @@ Agent paths:
   Start from creator:
     forma build-creator --target codex --output <dir>
     forma install --target codex --scope project <dir>/codex/forma-creator
+
+  Draft a reviewable tracked profile candidate:
+    forma profile draft --profile-id <kebab> --source <path> --output <dir>
 
   Build a skill bundle from a reviewed profile:
     forma create-bundle --target codex --profile <profile.yaml> --output <dir>
@@ -143,6 +147,26 @@ Next:
 """
 
 
+PROFILE_HELP = """
+Use profile draft when explicit local project-rule files should become a
+reviewable profile candidate before tracked profile promotion.
+"""
+
+
+PROFILE_DRAFT_HELP = """
+Output:
+
+  profile.draft.yaml      Reviewable profile candidate; not durable source yet.
+  missing-decisions.md    Ambiguous or unsafe material kept out of YAML.
+  agent-review.md         Source, skip, extraction, and self-check summary.
+
+Next:
+
+  Review profile.draft.yaml before moving it into a tracked profile path.
+  Build from the reviewed profile with forma create-bundle or forma create-plugin.
+"""
+
+
 @click.group(cls=RawEpilogGroup, invoke_without_command=True, epilog=ROOT_HELP)
 @click.version_option()
 @click.pass_context
@@ -150,6 +174,75 @@ def main(ctx: click.Context) -> None:
     """Forma — compile project rules into task-level agent workflows."""
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+
+
+@main.group(cls=RawEpilogGroup, epilog=PROFILE_HELP)
+def profile() -> None:
+    """Draft and manage reviewable Forma profiles."""
+
+
+@profile.command("draft", cls=RawEpilogCommand, epilog=PROFILE_DRAFT_HELP)
+@click.option(
+    "--profile-id",
+    required=True,
+    help="Lower kebab-case profile id for the draft.",
+)
+@click.option(
+    "--source",
+    "source_paths",
+    multiple=True,
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Explicit file or directory containing project-rule source.",
+)
+@click.option(
+    "--output",
+    "output_dir",
+    required=True,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Directory to write the three-file draft package.",
+)
+@click.option(
+    "--bundle-name",
+    required=False,
+    help="Lower kebab-case bundle name for generated workflow output.",
+)
+@click.option(
+    "--org-name",
+    default="Local Team",
+    show_default=True,
+    help="Organization name to place in the draft profile.",
+)
+@click.option(
+    "--replace",
+    is_flag=True,
+    help="Replace an existing output directory.",
+)
+def profile_draft_command(
+    profile_id: str,
+    source_paths: tuple[Path, ...],
+    output_dir: Path,
+    bundle_name: str | None,
+    org_name: str,
+    replace: bool,
+) -> None:
+    """Draft a reviewable profile package from explicit source files."""
+    try:
+        result = create_profile_draft(
+            profile_id=profile_id,
+            source_paths=source_paths,
+            output_dir=output_dir,
+            bundle_name=bundle_name,
+            org_name=org_name,
+            replace=replace,
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"forma profile draft: wrote draft package: {result.output_dir}")
+    click.echo(f"profile: {result.profile_file}")
+    click.echo(f"missing decisions: {result.missing_decisions_file}")
+    click.echo(f"agent review: {result.agent_review_file}")
+    click.echo(f"self-check: {result.self_check}")
 
 
 @main.command(cls=RawEpilogCommand, epilog=VERIFY_HELP)

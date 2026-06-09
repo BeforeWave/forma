@@ -114,6 +114,20 @@ def test_old_create_command_is_rejected_with_current_command_names() -> None:
     assert "create-plugin" in result.output
 
 
+def test_profile_draft_help_routes_agents_to_reviewable_candidate() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["profile", "draft", "--help"])
+
+    assert result.exit_code == 0, result.output
+    assert "Draft a reviewable profile package from explicit source files." in result.output
+    assert "profile.draft.yaml" in result.output
+    assert "missing-decisions.md" in result.output
+    assert "agent-review.md" in result.output
+    assert "not durable source yet" in result.output
+    assert "forma create-bundle or forma create-plugin" in result.output
+
+
 def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
     output = tmp_path / "bundle"
     runner = CliRunner()

@@ -1,4 +1,4 @@
-- [ ] [profile-draft-cli-contract] Add the profile draft command and file boundary
+- [x] [profile-draft-cli-contract] Add the profile draft command and file boundary
 Accept: Task Type=step; `forma profile draft` exists with the settled options, validates source/output/profile-id behavior, writes a three-file draft package, and makes the initial `profile.draft.yaml` pass `load_profile()`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_profile_draft.py -k "cli_contract or source_boundary or output_policy or load_profile_self_check"
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py -k "profile_draft"
