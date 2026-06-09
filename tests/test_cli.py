@@ -20,6 +20,100 @@ SAMPLE_PROFILE = (
 )
 
 
+def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
+    runner = CliRunner()
+
+    no_args = runner.invoke(main, [])
+    help_result = runner.invoke(main, ["--help"])
+
+    for result in (no_args, help_result):
+        assert result.exit_code == 0, result.output
+        assert "Agent paths:" in result.output
+        assert "forma build-creator --target codex --output <dir>" in result.output
+        assert "forma create-bundle --target codex --profile <profile.yaml> --output <dir>" in result.output
+        assert "forma create-plugin --target codex --profile <profile.yaml> --output <dir>" in result.output
+        assert "Install plugins through Codex, not forma install." in result.output
+        assert "The old forma create command is not supported." in result.output
+
+
+def test_command_help_includes_agent_next_steps() -> None:
+    runner = CliRunner()
+    cases = [
+        (
+            ["build-creator", "--help"],
+            [
+                "Verify the generated creator skill:",
+                "forma install --target codex|claude-code --scope user|project <creator-path>",
+            ],
+        ),
+        (
+            ["create-bundle", "--help"],
+            [
+                "Compile project rules into a target-specific skill bundle.",
+                "Verify before installing:",
+                "forma install --target codex|claude-code --scope user|project <output-dir>",
+            ],
+        ),
+        (
+            ["create-plugin", "--help"],
+            [
+                "Compile project rules into a Codex plugin source.",
+                "Verify the plugin source:",
+                "Install Codex plugins through Codex marketplace/plugin UI, not forma install.",
+            ],
+        ),
+        (
+            ["install", "--help"],
+            [
+                "Install only verified local skills or skill bundles.",
+                "Do not pass URLs.",
+                "Do not pass Codex plugin sources; install plugins through Codex.",
+            ],
+        ),
+        (
+            ["verify", "--help"],
+            [
+                "Verify a generated Forma workflow output at PATH.",
+                "If verification passes for a skill bundle, install it with:",
+                "If verification passes for a Codex plugin source, install it through Codex.",
+            ],
+        ),
+        (
+            ["explain", "profile", "--help"],
+            [
+                "Explain durable profile authoring and task-rule placement.",
+                "draft a tracked profile YAML",
+                "forma create-bundle or forma create-plugin",
+            ],
+        ),
+        (
+            ["explain", "temporary-injection", "--help"],
+            [
+                "Explain temporary injection classification for one-off workflow rules.",
+                "classify one-off workflow rules",
+                "not durable tracked profile source",
+            ],
+        ),
+    ]
+
+    for args, expected_phrases in cases:
+        result = runner.invoke(main, args)
+        assert result.exit_code == 0, result.output
+        for phrase in expected_phrases:
+            assert phrase in result.output
+
+
+def test_old_create_command_is_rejected_with_current_command_names() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["create", "--help"])
+
+    assert result.exit_code != 0
+    assert "No such command 'create'" in result.output
+    assert "create-bundle" in result.output
+    assert "create-plugin" in result.output
+
+
 def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
     output = tmp_path / "bundle"
     runner = CliRunner()

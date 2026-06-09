@@ -23,13 +23,136 @@ from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
 
 
-@click.group()
+class RawEpilogMixin:
+    """Write Click epilog text without paragraph reflow."""
+
+    epilog: str | None
+
+    def format_epilog(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
+        if self.epilog:
+            formatter.write_paragraph()
+            formatter.write(self.epilog.strip("\n"))
+            formatter.write("\n")
+
+
+class RawEpilogCommand(RawEpilogMixin, click.Command):
+    """Click command that preserves command examples in epilog text."""
+
+
+class RawEpilogGroup(RawEpilogMixin, click.Group):
+    """Click group that preserves command examples in epilog text."""
+
+
+ROOT_HELP = """
+Agent paths:
+
+  Start from creator:
+    forma build-creator --target codex --output <dir>
+    forma install --target codex --scope project <dir>/codex/forma-creator
+
+  Build a skill bundle from a reviewed profile:
+    forma create-bundle --target codex --profile <profile.yaml> --output <dir>
+    forma verify <dir>
+    forma install --target codex --scope project <dir>
+
+  Build a Codex plugin source:
+    forma create-plugin --target codex --profile <profile.yaml> --output <dir>
+    forma verify <dir>
+    # Install plugins through Codex, not forma install.
+
+  Ask for authoring guidance:
+    forma explain profile --target codex
+    forma explain temporary-injection --target codex
+
+Use create-bundle or create-plugin. The old forma create command is not supported.
+"""
+
+
+VERIFY_HELP = """
+Next:
+
+  If verification passes for a skill bundle, install it with:
+    forma install --target codex|claude-code --scope user|project <path>
+
+  If verification passes for a Codex plugin source, install it through Codex.
+"""
+
+
+CREATE_BUNDLE_HELP = """
+Next:
+
+  Verify before installing:
+    forma verify <output-dir>
+
+  Install verified local skill bundles with:
+    forma install --target codex|claude-code --scope user|project <output-dir>
+"""
+
+
+CREATE_PLUGIN_HELP = """
+Next:
+
+  Verify the plugin source:
+    forma verify <output-dir>
+
+  Install Codex plugins through Codex marketplace/plugin UI, not forma install.
+  Claude Code plugin output is unsupported.
+"""
+
+
+INSTALL_HELP = """
+Boundaries:
+
+  Install only verified local skills or skill bundles.
+  Do not pass URLs.
+  Do not pass Codex plugin sources; install plugins through Codex.
+  Use --replace only when replacing existing installed artifacts is intended.
+"""
+
+
+BUILD_CREATOR_HELP = """
+Next:
+
+  Verify the generated creator skill:
+    forma verify <output-dir>/<target>/forma-creator
+
+  Install the verified creator for the target:
+    forma install --target codex|claude-code --scope user|project <creator-path>
+"""
+
+
+EXPLAIN_HELP = """
+Use this when an agent needs rules for drafting durable profiles or
+temporary one-off workflow constraints without reading Forma source files.
+"""
+
+
+EXPLAIN_PROFILE_HELP = """
+Next:
+
+  Combine this guidance with project facts to draft a tracked profile YAML.
+  Then generate output with forma create-bundle or forma create-plugin.
+"""
+
+
+EXPLAIN_INJECTION_HELP = """
+Next:
+
+  Use this guidance inside forma-creator to classify one-off workflow rules.
+  Temporary injection is not durable tracked profile source.
+"""
+
+
+@click.group(cls=RawEpilogGroup, invoke_without_command=True, epilog=ROOT_HELP)
 @click.version_option()
-def main() -> None:
+@click.pass_context
+def main(ctx: click.Context) -> None:
     """Forma — compile project rules into task-level agent workflows."""
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@main.command()
+@main.command(cls=RawEpilogCommand, epilog=VERIFY_HELP)
 @click.argument("path", type=click.Path(exists=True, path_type=Path))
 def verify(path: Path) -> None:
     """Verify a generated Forma workflow output at PATH."""
@@ -39,7 +162,7 @@ def verify(path: Path) -> None:
         raise click.ClickException("verification failed")
 
 
-@main.command("create-bundle")
+@main.command("create-bundle", cls=RawEpilogCommand, epilog=CREATE_BUNDLE_HELP)
 @click.option(
     "--profile",
     "profile_file",
@@ -74,7 +197,7 @@ def create_bundle_command(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compile project rules into a target-specific workflow bundle."""
+    """Compile project rules into a target-specific skill bundle."""
     try:
         resolved_profile = _resolve_profile_file(profile_file)
         manifest = build_bundle(
@@ -89,7 +212,7 @@ def create_bundle_command(
     click.echo(f"manifest: {manifest}")
 
 
-@main.command("create-plugin")
+@main.command("create-plugin", cls=RawEpilogCommand, epilog=CREATE_PLUGIN_HELP)
 @click.option(
     "--profile",
     "profile_file",
@@ -124,7 +247,7 @@ def create_plugin_command(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compile project rules into a target-specific plugin output."""
+    """Compile project rules into a Codex plugin source."""
     if target_agent != "codex":
         raise click.ClickException("forma create-plugin currently supports only --target codex")
     try:
@@ -141,7 +264,7 @@ def create_plugin_command(
     click.echo(codex_plugin_install_hint(output_dir))
 
 
-@main.command("install")
+@main.command("install", cls=RawEpilogCommand, epilog=INSTALL_HELP)
 @click.option(
     "--target",
     "target_agent",
@@ -190,7 +313,7 @@ def _resolve_profile_file(profile_file: Path | None) -> Path:
         return path
 
 
-@main.command("build-creator")
+@main.command("build-creator", cls=RawEpilogCommand, epilog=BUILD_CREATOR_HELP)
 @click.option(
     "--source",
     "source_dir",
@@ -225,12 +348,12 @@ def build_creator_command(
     click.echo(f"forma build-creator: wrote creator bundle: {output}")
 
 
-@main.group()
+@main.group(cls=RawEpilogGroup, epilog=EXPLAIN_HELP)
 def explain() -> None:
     """Print read-only Forma authoring guidance."""
 
 
-@explain.command("profile")
+@explain.command("profile", cls=RawEpilogCommand, epilog=EXPLAIN_PROFILE_HELP)
 @click.option(
     "--format",
     "output_format",
@@ -254,7 +377,7 @@ def explain_profile(output_format: str, target_agent: str | None) -> None:
         raise click.ClickException(str(exc)) from exc
 
 
-@explain.command("temporary-injection")
+@explain.command("temporary-injection", cls=RawEpilogCommand, epilog=EXPLAIN_INJECTION_HELP)
 @click.option(
     "--format",
     "output_format",

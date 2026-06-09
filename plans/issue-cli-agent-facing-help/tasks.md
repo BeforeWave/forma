@@ -12,7 +12,7 @@ Validate: uv run --extra dev forma verify dist/plugins/codex/forma
 Depends: none
 Constraint: specialize the shared plan template during bundle/plugin/creator generation; do not rely on `forma-lock` to infer missing conditional decision fields after a plan is written.
 
-- [ ] [cli-agent-help-surface] Update CLI help and no-argument routing behavior
+- [x] [cli-agent-help-surface] Update CLI help and no-argument routing behavior
 Accept: Task Type=step; `forma` exits 0 with agent-facing routing guidance, `forma --help` exposes the same routing guidance, command help names the next action for each major command, and old `forma create --help` remains rejected with suggestions for `create-bundle` / `create-plugin`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py
 Validate: uv run --extra dev forma
