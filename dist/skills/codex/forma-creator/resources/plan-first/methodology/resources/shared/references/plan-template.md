@@ -14,6 +14,7 @@ If Goal, Scope, Approach, Validation, Plan Strategy, or any applicable Artifact/
 - Use `Plan Strategy: hybrid` when iterative batches and deterministic setup/gate/promote tasks are both needed.
 - If omitted in a legacy plan, the default is `Plan Strategy: step-execution`.
 
+{{ conditional_decision_section }}
 ## Scope
 
 - State what is in scope for this issue.

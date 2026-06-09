@@ -61,6 +61,7 @@ REQUIRED_STAGE_SECTIONS = (
 )
 INCLUDE_PREFIX = "{{ include:"
 INCLUDE_SUFFIX = "}}"
+CONDITIONAL_DECISION_SECTION_PLACEHOLDER = "{{ conditional_decision_section }}"
 
 
 @dataclass(frozen=True)
@@ -162,7 +163,7 @@ def compose_bundle(methodology_dir: Path, profile: ProfileConfig) -> ComposedBun
         stage_source = stage_sources[kind]
         requirement_references = _requirement_references(methodology_dir, kind)
         methodology_resources = (
-            *_methodology_resources(methodology_dir, kind),
+            *_methodology_resources(methodology_dir, kind, profile.conditional_overlays),
             *(ref.resource for ref in requirement_references),
         )
         profile_resources = _resources_for_kind(kind, profile.resources)
@@ -326,7 +327,11 @@ def _bullet_items(lines: Sequence[str], source_path: Path, section: str) -> List
     return items
 
 
-def _methodology_resources(methodology_dir: Path, kind: str) -> Tuple[ResourceSpec, ...]:
+def _methodology_resources(
+    methodology_dir: Path,
+    kind: str,
+    conditional_overlays: ConditionalOverlays | None = None,
+) -> Tuple[ResourceSpec, ...]:
     resources: List[ResourceSpec] = []
     for source_rel, dest, executable in METHODOLOGY_RESOURCES[kind]:
         source = methodology_dir / source_rel
@@ -337,6 +342,12 @@ def _methodology_resources(methodology_dir: Path, kind: str) -> Tuple[ResourceSp
             if marker not in text:
                 raise ValueError(f"Runner source missing init-disable marker: {source}")
             content = text.replace(marker, 'ISSUE_WORKFLOW_INIT_DISABLED="1"', 1)
+        elif dest == "references/plan-template.md":
+            content = _render_plan_template(
+                source.read_text(encoding="utf-8"),
+                conditional_overlays,
+                source,
+            )
         resources.append(
             ResourceSpec(
                 source=source,
@@ -346,6 +357,29 @@ def _methodology_resources(methodology_dir: Path, kind: str) -> Tuple[ResourceSp
             )
         )
     return tuple(resources)
+
+
+def _render_plan_template(
+    text: str,
+    conditional_overlays: ConditionalOverlays | None,
+    source: Path,
+) -> str:
+    if CONDITIONAL_DECISION_SECTION_PLACEHOLDER not in text:
+        raise ValueError(f"Plan template missing conditional decision placeholder: {source}")
+    if conditional_overlays is None:
+        return text.replace(f"{CONDITIONAL_DECISION_SECTION_PLACEHOLDER}\n", "", 1)
+    decision_name = conditional_overlays.decision.name
+    lines = [
+        f"## {decision_name}",
+        "",
+        f"- Record the selected `{decision_name}` route before finalization. Valid routes:",
+        *(
+            f"  - `{route.id}`: {route.description}"
+            for route in conditional_overlays.routes
+        ),
+        "",
+    ]
+    return text.replace(CONDITIONAL_DECISION_SECTION_PLACEHOLDER, "\n".join(lines), 1)
 
 
 def _requirement_references(

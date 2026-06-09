@@ -786,6 +786,11 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert (bundle_dir / "forma-lock" / "SKILL.md").is_file()
     assert (bundle_dir / "forma-execute" / "SKILL.md").is_file()
     assert (bundle_dir / "forma-showhand" / "SKILL.md").is_file()
+    default_plan_template = (
+        bundle_dir / "forma-lock" / "references" / "plan-template.md"
+    ).read_text(encoding="utf-8")
+    assert "{{ conditional_decision_section }}" not in default_plan_template
+    assert "## Conditional Decision" not in default_plan_template
     assert verify(bundle_dir).passed
     assert verify(plugin_dir).passed
 
@@ -811,6 +816,12 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert verify(plugin_dir).passed
     assert (plugin_dir / "skills" / "forma-plan" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "forma-showhand" / "SKILL.md").is_file()
+    plan_template = (
+        plugin_dir / "skills" / "forma-lock" / "references" / "plan-template.md"
+    ).read_text(encoding="utf-8")
+    assert "## Iteration Area" in plan_template
+    assert "`creator-profile`: Layer 3 creator, profile schema, or profile stack changes." in plan_template
+    assert "{{ conditional_decision_section }}" not in plan_template
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
@@ -961,9 +972,15 @@ conditional_overlays:
     shape_text = (output_dir / "shape" / "SKILL.md").read_text(encoding="utf-8")
     seal_text = (output_dir / "seal" / "SKILL.md").read_text(encoding="utf-8")
     pour_text = (output_dir / "pour" / "SKILL.md").read_text(encoding="utf-8")
+    plan_template = (
+        output_dir / "seal" / "references" / "plan-template.md"
+    ).read_text(encoding="utf-8")
     assert (output_dir / "shape" / "references" / "backend-rules.md").is_file()
     assert "## Conditional References" in shape_text
     assert "Use the recorded `Plan Type`" in shape_text
+    assert "## Plan Type" in plan_template
+    assert "`backend-non-go`: Backend work outside the Go stack." in plan_template
+    assert "{{ conditional_decision_section }}" not in plan_template
     assert "If `Plan Type` is `generic-dev`, do not load overlay references." in shape_text
     assert "If `Plan Type` is `backend-non-go`, load:" in shape_text
     assert "references/backend-rules.md" not in shape_text.split(

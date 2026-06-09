@@ -1,10 +1,25 @@
+- [x] [conditional-decision-plan-template] Include conditional decisions in generated plan templates
+Accept: Task Type=step; generated `plan-template.md` files name the exact conditional decision such as `Iteration Area` when a profile defines conditional overlays, no-overlay generated templates remove the placeholder, and affected example baselines plus `dist/` release artifacts are refreshed from source
+Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_layer_1_dogfood.py tests/test_creator_builder.py
+Validate: uv run --extra dev forma verify source/skill-creator/
+Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
+Validate: uv run --extra dev forma verify dist/skills/codex/forma-creator
+Validate: uv run --extra dev forma verify dist/skills/claude-code/forma-creator
+Validate: uv run --extra dev forma verify dist/skill-bundles/codex
+Validate: uv run --extra dev forma verify dist/skill-bundles/claude-code
+Validate: uv run --extra dev forma verify dist/plugins/codex/forma
+Depends: none
+Constraint: specialize the shared plan template during bundle/plugin/creator generation; do not rely on `forma-lock` to infer missing conditional decision fields after a plan is written.
+
 - [ ] [cli-agent-help-surface] Update CLI help and no-argument routing behavior
 Accept: Task Type=step; `forma` exits 0 with agent-facing routing guidance, `forma --help` exposes the same routing guidance, command help names the next action for each major command, and old `forma create --help` remains rejected with suggestions for `create-bundle` / `create-plugin`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py
 Validate: uv run --extra dev forma
 Validate: uv run --extra dev forma --help
 Validate: ! uv run --extra dev forma create --help
-Depends: none
+Use-Check: creator-template-tests
+Depends: conditional-decision-plan-template
 Constraint: change only help/no-args behavior; do not change generation, verification, install, or explain execution semantics.
 Constraint: keep help assertions focused on stable agent-routing phrases, not full Click output snapshots.
 
