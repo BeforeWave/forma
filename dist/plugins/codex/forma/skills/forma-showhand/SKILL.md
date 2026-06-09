@@ -59,6 +59,7 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Load and follow `references/automated-execution.md` for automated execution.
 - Treat this profile stack as Forma-owned project source, not a sanitized public example.
 - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
 - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
 - Keep changes scoped to the active issue plan and tasks.
 - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
@@ -72,9 +73,11 @@ Use the recorded `Iteration Area` before loading overlay references.
 - If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated documentation edits.
 - If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plan files before automated governance or self-management policy changes.
 - If `Iteration Area` is `creator-profile`, apply `profiles` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
+- If `Iteration Area` is `creator-profile`, apply `profiles` overlay constraint: After automated profiles/forma-self changes, regenerate the Forma Codex plugin and reinstall it through Codex before closure.
 - If `Iteration Area` is `generated-baseline`, apply `generated` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated generated baseline replacement.
 - If `Iteration Area` is `generated-baseline`, apply `generated` overlay validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
 - If `Iteration Area` is `cross-layer`, apply `profiles` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
+- If `Iteration Area` is `cross-layer`, apply `profiles` overlay constraint: After automated profiles/forma-self changes, regenerate the Forma Codex plugin and reinstall it through Codex before closure.
 - If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated generated baseline replacement.
 - If `Iteration Area` is `cross-layer`, apply `generated` overlay validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
 - If `Iteration Area` is `cross-layer`, apply `docs` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated documentation edits.

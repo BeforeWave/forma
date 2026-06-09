@@ -21,7 +21,7 @@ Use-Check: local-user-path-policy
 Depends: doctor-cli
 Constraint: do not broaden cleanup to unrelated `/private/tmp`, `/absolute/path/to/...`, or synthetic non-local examples.
 
-- [ ] [regenerate-install-plugin] Regenerate release surfaces and install the refreshed Codex plugin
+- [x] [regenerate-install-plugin] Regenerate release surfaces and install the refreshed Codex plugin
 Accept: Task Type=promote; regenerated creator and Codex plugin artifacts reflect the source/profile changes, verify successfully, and the refreshed plugin is installed through Codex so `forma@personal` is visible to new Codex work
 Validate: uv run --extra dev forma verify dist/skills/codex/forma-creator
 Validate: uv run --extra dev forma verify dist/skills/claude-code/forma-creator

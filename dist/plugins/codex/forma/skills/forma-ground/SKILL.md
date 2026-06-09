@@ -49,6 +49,7 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Do not write `plan.md`, do not write `tasks.md`, and do not start implementation.
 - Treat this profile stack as Forma-owned project source, not a sanitized public example.
 - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
 - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
 - Keep changes scoped to the active issue plan and tasks.
 - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plan/task files, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.

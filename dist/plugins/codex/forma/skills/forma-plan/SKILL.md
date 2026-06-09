@@ -71,9 +71,11 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Load and follow `references/grounding-handoff.md` for grounding handoff selection.
 - Treat this profile stack as Forma-owned project source, not a sanitized public example.
 - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
 - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
 - Keep changes scoped to the active issue plan and tasks.
 - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plans/issue-<id>/ files when converging Forma governance, scope, validation, or boundary decisions.
+- For new or changed Forma functionality, plan the developer CLI surface first; if behavior is creator-visible, include the matching forma-creator and bundled-verifier sync in the same issue.
 - For Layer 1 temporary injection work, classify natural-language constraints into minimal default, stage-specific execution, or conditional overlay targets before writing examples or tasks.
 - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
 - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.

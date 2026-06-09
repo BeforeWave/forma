@@ -42,3 +42,26 @@ Deviations From Plan:
 
 Follow-ups:
 - History rewrite for older commits remains outside this issue.
+
+## Task 4: regenerate-install-plugin
+
+Outcome:
+- Regenerated the Codex and Claude Code creator release surfaces plus the Forma Codex plugin release surface, then reinstalled `forma@personal` through Codex.
+
+Decision Notes:
+- The regenerated plugin source was synchronized into the existing `personal` marketplace source before running Codex remove/add, so Codex reinstalled from the refreshed generated artifact rather than stale marketplace contents.
+- The marketplace source path was intentionally not recorded because repository files must not persist local machine paths.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- `dist/skills/codex/forma-creator` and `dist/skills/claude-code/forma-creator`: committed creator release surfaces.
+- `dist/plugins/codex/forma`: committed Codex plugin source.
+- `forma@personal`: external installed plugin state verified through Codex.
+
+Deviations From Plan:
+- None.
+
+Follow-ups:
+- None.

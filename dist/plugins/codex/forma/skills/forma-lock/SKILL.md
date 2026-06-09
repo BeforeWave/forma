@@ -71,9 +71,12 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Load and follow `references/task-structure.md` for task structure.
 - Treat this profile stack as Forma-owned project source, not a sanitized public example.
 - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
 - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
 - Keep changes scoped to the active issue plan and tasks.
 - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plans/issue-<id>/ files before writing final tasks that affect Forma governance, profile ownership, generated baselines, or documentation policy.
+- For creator-visible functionality changes, write tasks that validate both the developer CLI path and the bundled forma-creator path.
+- If profiles/forma-self changes, include regeneration and Codex plugin installation proof before issue closure.
 - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
 - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in finalized plans and tasks.
 - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
