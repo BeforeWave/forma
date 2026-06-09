@@ -6,7 +6,7 @@ Depends: none
 Constraint: do not change `create-bundle`, `create-plugin`, `install`, `verify`, or `explain` runtime behavior.
 Constraint: do not edit `dist/`, `examples/generated/`, `source/methodology/`, `source/skill-creator/`, or `profiles/forma-self/`.
 
-- [ ] [profile-draft-extractor] Classify conservative rules, validation commands, and missing decisions
+- [x] [profile-draft-extractor] Classify conservative rules, validation commands, and missing decisions
 Accept: Task Type=step; explicit source documents are parsed into high-confidence stage-specific constraints and validation commands while ambiguous, heavy, route-specific, adapter-like, or one-off material is reported in `missing-decisions.md`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_profile_draft.py -k "extractor or classification or validation_commands or missing_decisions or unsupported_source"
 Depends: profile-draft-cli-contract

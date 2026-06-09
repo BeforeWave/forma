@@ -20,3 +20,24 @@ Deviations From Plan:
 
 Follow-ups:
 - None
+
+## Task 2: profile-draft-extractor
+
+Outcome:
+- Added conservative extraction coverage for stage-specific constraints, supported validation commands, unsupported explicit sources, and review-only missing decisions.
+
+Decision Notes:
+- Options considered: place ambiguous validation-looking lines with no recognized command in `validation_commands`, or let them continue through rule and missing-decision classification. Selected continued classification so path references such as `plans/issue-<id>/runs/` remain execution constraints instead of disappearing as failed command extraction.
+- Options considered: treat every broad planning phrase as `constraints.default`, or keep `constraints.default` limited to always-on safety rules such as preserving unrelated work. Selected the minimal default path because broad reading, generated baselines, adapter material, route-specific rules, and private/local paths must stay out of default constraints.
+
+Plan Gaps Found:
+- None
+
+Classifications:
+- Broad root-doc reading, generated-baseline/release checks, adapter-like source collection, route-specific rules, one-off task material, and private/local paths are reported in `missing-decisions.md`.
+
+Deviations From Plan:
+- None
+
+Follow-ups:
+- None

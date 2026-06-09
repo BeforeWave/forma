@@ -192,10 +192,25 @@ def extract_draft_content(source_files: Sequence[SourceFile]) -> DraftExtraction
             if not candidate:
                 continue
             if _looks_like_validation(candidate):
-                stage = _stage_for_text(candidate, heading)
-                for command in _extract_commands(candidate):
-                    _append_unique(validation_commands[stage], command)
-                continue
+                reason = _missing_decision_reason(candidate, heading)
+                if reason:
+                    missing.append(
+                        MissingDecision(
+                            source=source.display_path,
+                            line=line_number,
+                            reason=reason,
+                            text=_shorten(candidate),
+                        )
+                    )
+                    continue
+                commands = _extract_commands(candidate)
+                if not commands:
+                    pass
+                else:
+                    stage = _stage_for_text(candidate, heading)
+                    for command in commands:
+                        _append_unique(validation_commands[stage], command)
+                    continue
             if not _looks_like_rule(candidate):
                 continue
             reason = _missing_decision_reason(candidate, heading)
@@ -478,6 +493,11 @@ def _looks_like_rule(text: str) -> bool:
             "validate ",
             "stop ",
             "keep ",
+            "clarify ",
+            "inspect ",
+            "review ",
+            "use ",
+            "apply ",
         )
     )
 
@@ -488,31 +508,45 @@ def _missing_decision_reason(text: str, heading: str) -> str:
         return "private-or-local"
     if any(marker in combined for marker in ("adapter", "source adapter", "connector")):
         return "adapter-like"
-    if any(marker in combined for marker in ("generated baseline", "examples/generated", "dist/", "release artifact")):
+    if any(marker in combined for marker in ("generated baseline", "generated-baseline", "examples/generated", "dist/", "release artifact")):
         return "generated-baseline-or-release"
     if any(marker in combined for marker in ("current issue", "current task", "this issue", "one-off", "temporary injection")):
         return "one-off-or-task-specific"
-    if any(marker in combined for marker in ("conditional overlay", "route-specific", "impact profile")):
+    if any(marker in combined for marker in ("conditional overlay", "route-specific", "impact profile", "only for backend", "only for frontend")):
         return "route-specific"
-    if "read first" in combined or "read these files first" in combined:
+    if any(
+        marker in combined
+        for marker in (
+            "read first",
+            "read these files first",
+            "read all",
+            "all docs",
+            "root docs",
+            "governance",
+            "readme.md",
+            "structure.md",
+        )
+    ):
         return "broad-reading"
     return ""
 
 
 def _stage_for_text(text: str, heading: str) -> str:
     combined = f"{heading} {text}".lower()
+    if any(keyword in combined for keyword in ("preserve unrelated", "do not revert")):
+        return "default"
+    if any(keyword in combined for keyword in ("proof", "runs/")):
+        return "pour"
     stage_keywords = (
         ("flow", ("showhand", "continue remaining", "autopilot")),
-        ("pour", ("implement", "execute", "validate", "validation", "proof", "runs/", "preserve unrelated")),
         ("seal", ("plan.md", "tasks.md", "lock", "task contract")),
         ("gauge", ("ground", "inspect", "evidence", "read code", "read docs")),
-        ("shape", ("plan", "clarify", "scope", "acceptance", "before implementation")),
+        ("shape", ("planning", "clarify", "scope", "acceptance", "before implementation")),
+        ("pour", ("implement", "execute", "validate", "validation", "check", "test", "verify", "proof", "runs/")),
     )
     for stage, keywords in stage_keywords:
         if any(keyword in combined for keyword in keywords):
             return stage
-    if any(keyword in combined for keyword in ("preserve unrelated", "do not revert")):
-        return "default"
     return "shape"
 
 

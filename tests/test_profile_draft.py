@@ -185,3 +185,142 @@ def test_load_profile_self_check_accepts_generated_draft_yaml(tmp_path: Path) ->
     assert profile.profile_id == "review-profile"
     assert profile.bundle_name == "review-bundle"
     assert profile.org_name == "Review Team"
+
+
+def test_extractor_classification_places_stage_specific_rules_and_commands(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "rules.md"
+    source.write_text(
+        "\n".join(
+            [
+                "# Planning",
+                "- Before implementation, clarify scope and acceptance criteria.",
+                "# Evidence",
+                "- Inspect code and docs before deciding.",
+                "# Execution",
+                "- Preserve unrelated user work.",
+                "- Record proof under `plans/issue-<id>/runs/`.",
+                "- Validate with `python -m pytest tests/`.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = create_profile_draft(
+        profile_id="classified-profile",
+        source_paths=[source],
+        output_dir=tmp_path / "draft",
+    )
+
+    profile = load_profile(result.profile_file)
+    assert any("clarify scope" in item for item in profile.constraints["shape"])
+    assert any("Inspect code and docs" in item for item in profile.constraints["gauge"])
+    assert any("Preserve unrelated user work" in item for item in profile.constraints["default"])
+    assert any("Record proof" in item for item in profile.constraints["pour"])
+    assert "python -m pytest tests/" in profile.validation_commands["pour"]
+
+
+def test_missing_decisions_keep_ambiguous_heavy_route_and_adapter_out_of_yaml(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "rules.md"
+    source.write_text(
+        "\n".join(
+            [
+                "# Read First",
+                "- Always read README.md and STRUCTURE.md before every task.",
+                "# Generated Baselines",
+                "- Always compare generated baselines before implementation.",
+                "# Adapter Rules",
+                "- Use the source adapter for repository facts.",
+                "# Route Rules",
+                "- Apply this only for backend Impact Profile work.",
+                "# Local Material",
+                "- Never copy <user-home>/private/token.txt into generated artifacts.",
+                "# Safe Rule",
+                "- Preserve unrelated user work.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = create_profile_draft(
+        profile_id="review-profile",
+        source_paths=[source],
+        output_dir=tmp_path / "draft",
+    )
+
+    profile = load_profile(result.profile_file)
+    yaml_constraints = "\n".join(
+        item
+        for values in profile.constraints.values()
+        for item in values
+    )
+    assert "README.md" not in yaml_constraints
+    assert "source adapter" not in yaml_constraints
+    assert "Impact Profile" not in yaml_constraints
+    assert "<user-home>" not in yaml_constraints
+    assert profile.constraints["default"] == ["Preserve unrelated user work."]
+    missing = (result.missing_decisions_file).read_text(encoding="utf-8")
+    assert "[broad-reading]" in missing
+    assert "[generated-baseline-or-release]" in missing
+    assert "[adapter-like]" in missing
+    assert "[route-specific]" in missing
+    assert "[private-or-local]" in missing
+
+
+def test_validation_commands_extracts_supported_commands_without_promoting_paths(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "rules.md"
+    source.write_text(
+        "\n".join(
+            [
+                "- Record proof under `plans/issue-<id>/runs/`.",
+                "- Check with `uv run pytest tests/`.",
+                "- Run `forma verify /private/tmp/example` only as a local smoke.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = create_profile_draft(
+        profile_id="command-profile",
+        source_paths=[source],
+        output_dir=tmp_path / "draft",
+    )
+
+    profile = load_profile(result.profile_file)
+    assert any("Record proof" in item for item in profile.constraints["pour"])
+    assert "uv run pytest tests/" in profile.validation_commands["pour"]
+    assert all(
+        "forma verify /private/tmp/example" not in command
+        for commands in profile.validation_commands.values()
+        for command in commands
+    )
+    missing = (result.missing_decisions_file).read_text(encoding="utf-8")
+    assert "forma verify /private/tmp/example" in missing
+
+
+def test_unsupported_source_rejects_explicit_unsupported_file(tmp_path: Path) -> None:
+    source = tmp_path / "rules.json"
+    source.write_text("{}", encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "draft",
+            "--profile-id",
+            "sample-profile",
+            "--source",
+            str(source),
+            "--output",
+            str(tmp_path / "draft"),
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "unsupported source type:" in result.output
