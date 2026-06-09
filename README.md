@@ -19,8 +19,8 @@ miss task-level constraints the team can rely on and verify.
 Forma closes that gap. You can tell the agent:
 
 ```text
-Use Forma to customize a workflow for this project. Read the docs and code,
-extract the engineering rules, and generate a workflow I can try.
+Use the Forma CLI to customize a workflow for this project. Read the docs and
+code, extract the engineering rules, and generate a workflow I can use.
 ```
 
 Forma helps the team clarify the practices that matter most, then generates a
@@ -31,133 +31,12 @@ planning, validation, proof, and stop conditions.
 
 ## How Forma Works
 
-Forma has the agent derive rules from project facts: authoritative sources,
-change boundaries, required tools, validation depth, proof, and stop conditions.
+Forma does not execute the project task itself. It turns project rules into an
+agent workflow. Once installed, that workflow makes the agent write a task
+contract before it edits files, then carries those rules through evidence,
+implementation, validation, and proof.
 
-If you only want to try a workflow, those rules go into the generated output for
-that run. If you want something maintained over time, they become a reviewable,
-versioned `profile`.
-
-Once installed, the workflow makes the agent produce a task contract and carry
-those rules through evidence collection, implementation, validation, and proof.
-
----
-
-## Same Goal, Different Acceptance Standards
-
-For the same product goal, a generic workflow can send the agent through similar
-stages: understand the goal, read evidence, write a plan, implement, validate.
-Forma changes what makes that plan acceptable for the project.
-
-Here is the same goal under different team rules. Before editing, the agent must
-pin down different facts, boundaries, validation, and stop conditions.
-
-```text
-Product goal:
-Ship rate limiting for the settings experience.
-```
-
-### API-contract-heavy Backend
-
-The project cares most about API truth. Issue text alone is not enough; API
-compatibility must be decided before implementation; generated output must trace
-back to generator proof.
-
-```text
-Task contract excerpt:
-  Focus: classify API impact before handler work.
-  Evidence: GitHub issue comments / linked commits; contracts/api/v1/settings.yaml.
-  Tasks:
-    1. contract-impact: classify none / additive / breaking and decide whether to update the contract.
-    2. implementation: add the limiter without changing the public response shape.
-    3. generated-proof: if the contract changes, run the generator and record the generated diff source.
-  Boundary: do not start handler changes until API impact is classified.
-  Validate: contract compatibility check; generated output check; focused handler test.
-  Stop if: issue comments conflict with the API contract;
-           generated files changed without generator proof;
-           compatibility needs API/product review.
-```
-
-### Runtime-behavior-heavy Backend
-
-The project cares most about runtime control. The limiter must fit existing
-configuration or rollout paths; local tests must cover the important behavior;
-contract sync should not lead behavior stability.
-
-```text
-Task contract excerpt:
-  Focus: place the limiter behind existing runtime controls before contract sync.
-  Evidence: handler; service config; feature flags; recent settings commits.
-  Tasks:
-    1. route-selection: choose the existing config / rollout flag / limiter path.
-    2. behavior-coverage: cover allowed, limited, disabled, and invalid-config cases.
-    3. response-stability: keep the public response shape stable.
-  Boundary: prefer existing runtime controls over new shared infrastructure.
-  Validate: service behavior coverage; handler response coverage; config/schema check.
-  Stop if: new shared infrastructure is required;
-           local tests cannot cover the rollout path;
-           the response shape must change.
-```
-
-Under API-contract rules, the task contract starts with API facts,
-compatibility, and generated proof. Under runtime-behavior rules, it starts with
-runtime control, behavior coverage, and response stability. If the plan misses
-that entry point, implementation has not earned its start.
-
-### Design-system-heavy Frontend
-
-The project cares most about design-system semantics. The visible state must
-come from existing component meaning; copy, state coverage, responsive behavior,
-and accessibility must be provable.
-
-```text
-Task contract excerpt:
-  Focus: map the rate-limit response to an existing design-system state.
-  Evidence: source design context; API error metadata; design-system docs.
-  Tasks:
-    1. state-mapping: choose the existing component state, copy source, and retry affordance.
-    2. ui-change: avoid new tokens, primitives, or visual patterns.
-    3. proof: record mobile, desktop, and accessibility proof.
-  Boundary: do not add tokens, primitives, or new visual patterns without review.
-  Validate: component state coverage; browser flow coverage; accessibility check.
-  Stop if: the design system has no matching state;
-           the API lacks stable error or retry metadata;
-           a new design-system variant is required.
-```
-
-### Ops-console-heavy Frontend
-
-The project cares most about operator action. The signal must appear where an
-operator can do something; table efficiency must not regress; telemetry, audit,
-and runbook behavior must line up.
-
-```text
-Task contract excerpt:
-  Focus: place the rate-limit signal where an operator can act.
-  Evidence: support runbook; admin route; telemetry registry; table/filter behavior.
-  Tasks:
-    1. placement: choose row status / banner / audit log and bind the runbook action.
-    2. admin-ui: preserve dense table layout, filters, and the existing operator flow.
-    3. telemetry-proof: use a registered event and record audit trace plus state source.
-  Boundary: preserve dense table layout, filters, and the existing operator flow.
-  Validate: admin flow coverage; event registry check; table/filter regression coverage.
-  Stop if: the runbook does not define the operator action;
-           the telemetry event is not registered;
-           the backend cannot distinguish rate limit from generic error.
-```
-
-Under design-system rules, the task contract starts with state semantics, copy
-source, and experience proof. Under ops-console rules, it starts with operator
-action, table efficiency, telemetry, and runbook alignment.
-
-The same goal now produces different task contracts because the team rules
-change what the agent must write down before editing.
-
----
-
-## Outputs and Runtime Model
-
-Forma puts team rules into three layers:
+Those rules move through three layers:
 
 - `profile`: team-approved practices, kept in version control for review and maintenance.
 - `workflow output`: the installed agent workflow, as a Codex / Claude Code skill bundle or a Codex plugin.
@@ -184,30 +63,26 @@ new constraints.
 
 ## Start Using Forma
 
-The fastest path is to install `forma-creator` for the agent. Once it is
-installed, say:
+`forma-creator` is the lightest entrypoint: use natural language to have the
+agent read the project, extract rules, and generate a workflow for personal use.
+When those rules need team review and ongoing iteration, use `Forma CLI +
+profile`.
+
+For personal use:
 
 ```text
 Use forma-creator to customize a workflow for this project.
-Read the docs and code, extract the engineering rules, show them to me first;
-after I confirm, generate the workflow and install it from the hints.
+Summarize the key rules for me first.
+After I confirm, generate and install it from the hints.
 ```
 
-This path is for on-the-spot customization. The creator extracts rules from the
-project, waits for your confirmation, then generates and verifies a workflow you
-can try. Rules that keep proving useful can later move into a tracked profile.
-
-If you want a long-term profile from the start, you can say:
+For long-term team maintenance, prepare a profile first:
 
 ```text
-Use Forma to extract engineering rules from this project's docs and code, and
-draft a profile for me. After I approve the profile, create and install the
-Codex workflow from it.
+Use the Forma CLI profile path for this project:
+draft a profile from project facts for review, then generate, verify, and
+install the Codex workflow from that profile.
 ```
-
-That path uses `forma explain profile --target codex` to load the authoring
-standard. The agent drafts the profile first; after you approve it, the agent
-generates, verifies, and installs the workflow from the hints.
 
 After installation, start a new thread:
 
@@ -226,22 +101,36 @@ Codex skill bundle, Claude Code, and install-location details are in
 
 ---
 
+## Same Goal, Different Team Standards
+
+For the same goal, "add rate limiting to settings", a generic plan may say:
+read the code, add the limiter, run tests. Forma pushes the plan to answer what
+the team will actually review:
+
+- API contract stability: classify API impact, response shape, and generator proof before changing handlers.
+- Runtime control stability: reuse existing config, rollout switches, or limiter paths, and cover allowed, limited, disabled, and invalid-config cases.
+- Design-system consistency: map to an existing component state, name the copy source, and record responsive and accessibility proof.
+- Operator efficiency: place the state where an operator can act, preserve table and filter flow, and align runbook, telemetry, and audit behavior.
+
+If the plan misses the team's highest-risk standard, implementation has not
+earned its start. See [Workflow Contract](./docs/workflow-contract.md) for a
+detailed task-contract example and [Examples](./docs/examples.md) for profiles
+and real tracked runs.
+
+---
+
 ## Who It Fits
 
 Forma starts with coding agents because software work has concrete source files,
 generated outputs, tests, diffs, and review proof.
 
-The same method fits other agent-run work when the work has stable sources,
-clear boundaries, validation, and proof: research, analysis, operations,
-release, governance, customer handoff, or internal process execution.
+It fits projects with many rules, boundaries, and validation requirements: the
+team does not only want an agent to perform one capability, but to plan,
+validate, and stop according to project standards across tasks.
 
-Forma is most useful when the team cares about:
-
-- which sources count as authoritative facts for the current task;
-- which artifacts, systems, contracts, data paths, or decisions must not be touched casually;
-- what validation proves the result;
-- where proof should be recorded;
-- when the agent must stop for review.
+The same method can fit research, analysis, operations, release, governance,
+customer handoff, or internal process execution when the work has stable
+sources, clear boundaries, validation, and proof.
 
 If the work only needs a few local preferences or one reusable capability, a
 regular custom skill may be enough.
