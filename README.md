@@ -226,6 +226,45 @@ Codex skill bundle, Claude Code, and install-location details are in
 
 ---
 
+## Who It Fits
+
+Forma starts with coding agents because software work has concrete source files,
+generated outputs, tests, diffs, and review proof.
+
+The same method fits other agent-run work when the work has stable sources,
+clear boundaries, validation, and proof: research, analysis, operations,
+release, governance, customer handoff, or internal process execution.
+
+Forma is most useful when the team cares about:
+
+- which sources count as authoritative facts for the current task;
+- which artifacts, systems, contracts, data paths, or decisions must not be touched casually;
+- what validation proves the result;
+- where proof should be recorded;
+- when the agent must stop for review.
+
+If the work only needs a few local preferences or one reusable capability, a
+regular custom skill may be enough.
+
+---
+
+## Real Samples And Runs
+
+The repository contains more than concept docs.
+
+`examples/profiles/` contains sanitized profiles derived from real workflow
+families. They show how teams express engineering rules, source adapters,
+validation depth, proof, and stop conditions.
+
+`examples/generated/` contains Codex and Claude Code baselines compiled from
+those profiles. They are used to inspect generated output and catch drift.
+
+`plans/issue-*/` is Forma's own workflow track. Each issue records `plan.md`,
+`tasks.md`, and `runs/task-*.md` with real task contracts, validation results,
+and proof from Forma development.
+
+---
+
 ## Status
 
 Forma is still early.
@@ -254,14 +293,14 @@ source profile lives in [`profiles/forma-self/`](./profiles/forma-self/).
 | | |
 |---|---|
 | [Quick Start](./docs/quick-start.md) | First run, creator path, and tracked-profile path. |
-| [Concepts](./docs/concepts.md) | Layer model, compiler model, and stage boundaries. |
-| [Workflow Contract](./docs/workflow-contract.md) | Stages, permissions, evidence, validation, and proof. |
-| [Profile Schema](./docs/profile-schema.md) | YAML profile structure, constraints, resources, and overlays. |
+| [Concepts](./docs/concepts.md) | Project rules, workflow outputs, task contracts, and stage boundaries. |
+| [Workflow Contract](./docs/workflow-contract.md) | How task contracts organize evidence, boundaries, validation, and proof. |
+| [Profile Schema](./docs/profile-schema.md) | YAML source for durable engineering rules. |
 | [Forma Creator](./docs/forma-creator.md) | Conversational workflow generation and temporary injection. |
 | [Skill Bundle](./docs/skill-bundle.md) | Generated output layout. |
 | [Verifier](./docs/verifier.md) | What verification checks and cannot prove. |
 | [Targets](./docs/targets.md) | Codex and Claude Code target behavior. |
-| [Examples](./docs/examples.md) | End-to-end workflow walkthrough. |
+| [Examples](./docs/examples.md) | Sanitized sample profiles, generated baselines, and real tracked runs. |
 | [Usage](./docs/usage.md) | Command reference. |
 
 Apache-2.0 - see [LICENSE](./LICENSE)

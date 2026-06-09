@@ -2,9 +2,9 @@
 
 英文版：[targets.md](./targets.md)
 
-Forma 生成的是 target 专用 workflow bundle。Codex plugin 是同一套 task 级 skills 的 Codex 安装形态。这里的 target 指加载这套技能的 Agent 环境，例如 Codex 或 Claude Code。
+Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 task 级 skills 的 Codex 安装形态。这里的 target 指加载这套技能的 agent 环境，例如 Codex 或 Claude Code。
 
-同一份 workflow profile 可以生成到不同 target，但生成产物必须匹配实际加载它的 Agent。
+同一份 tracked profile 可以生成到不同 target；`forma-creator` 生成的一次性 workflow 则由 creator 固定 target。无论哪条路径，生成产物都必须匹配实际加载它的 agent。
 
 ## 支持的 Target
 
@@ -67,9 +67,9 @@ Target adapter 会影响生成的 metadata 和安装行为，但不应该改变 
 
 ## 分发边界
 
-直接使用 skill 目录，适合本地编写和项目级 workflow。
+直接使用 skill 目录，适合本地试用和项目级 workflow。
 
-如果 workflow 要更广泛分发，打包或分发方式可能会和 target 绑定。Forma profile 仍然是工作流来源，再按目标生成需要的产物。
+如果 workflow 要更广泛分发，打包或分发方式可能会和 target 绑定。长期路径里，Forma profile 仍然是工作流来源，再按目标生成需要的产物；creator 路径里，先试用生成产物，再决定哪些准则提升成 profile。
 
 ## 信任前先审查
 

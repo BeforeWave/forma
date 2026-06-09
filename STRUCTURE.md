@@ -73,7 +73,7 @@ generated skill resources.
 | `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
 | `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
 | `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
-| `src/forma/install.py` | Verified local artifact installer for single skills, skill bundles, and Codex plugins |
+| `src/forma/install.py` | Verified local artifact installer for single skills and skill bundles; rejects Codex plugin artifacts with Codex marketplace guidance |
 | `src/forma/plugins.py` | Codex plugin artifact builder |
 | `src/forma/creator/manifest.py` | Methodology lookup and provenance manifest helpers |
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |

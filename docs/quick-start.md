@@ -2,38 +2,43 @@
 
 Chinese version: [quick-start.zh-CN.md](./quick-start.zh-CN.md)
 
-This page gets you from zero to a running Forma workflow. Start with the default
-Codex plugin, then shape the harness after you have seen one real task produce
-plan files, task boundaries, validation gates, and proof.
+This page gets you from zero to Forma: install the CLI, install
+`forma-creator` for the agent, let it extract project rules from docs and code,
+then generate a workflow you can try. Once the rules prove useful, promote them
+into a tracked profile.
 
-## Install Forma
+## 1. Install CLI And Creator
 
-Install the CLI:
+Install the Forma CLI:
 
 ```bash
 pipx install git+https://github.com/BeforeWave/forma.git
 forma --help
 ```
 
-The examples below assume `forma` is available on `PATH`.
-
-## First Run: Default Codex Plugin
-
-Generate the default Plan-First plugin:
+For Codex, build and install the creator skill:
 
 ```bash
-forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma build-creator --target codex --output /tmp/forma-creator
+forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
-This writes a local plugin source. Forma does not install Codex plugins. Follow
-the current Codex docs to add the local plugin to a Codex marketplace, then run
-`codex plugin add forma@<marketplace-name>` or install it from the Codex plugin
-UI. Start a new Codex thread after installing.
+Start a new agent thread and say:
 
-- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
-- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
+```text
+Use forma-creator to customize a workflow for this project.
+Read the docs and code, extract the engineering rules, show them to me first;
+after I confirm, generate the workflow and install it from the hints.
+```
 
-Send the current issue or task context to Codex and ask it to start with planning:
+The creator makes the agent extract rules from project facts: authoritative
+sources, change boundaries, validation depth, proof, and stop conditions. After
+you confirm them, it generates and verifies a workflow output you can try, then
+reports the output path and install hints.
+
+## 2. Try The Generated Workflow
+
+After installing the generated output, start a new thread:
 
 ```text
 Use forma-plan to plan this issue first.
@@ -42,102 +47,74 @@ Issue:
 <paste the current issue, problem context, or task goal here>
 ```
 
-A useful first run should not jump from goal to patch. The first result should
-be a chat-level proposal or handoff, not plan files. It should settle the goal,
-scope, approach, validation model, and whether repository grounding is needed.
+The first useful output should be a proposal, not a patch. It should state the
+goal, scope, project rules, and validation approach before touching files.
 
-If repository evidence is needed, ask Codex to use `forma-ground`.
+If repository evidence is needed, continue with:
 
-After the proposal and any grounding are accepted, lock the plan:
+```text
+Use forma-ground to gather the evidence needed for this plan.
+```
+
+After evidence and the approach are accepted, lock the task contract:
 
 ```text
 Use forma-lock to write the plan and task contract.
 ```
 
-Then execute the next accepted task:
+Then execute one accepted task:
 
 ```text
 Use forma-execute to execute the next accepted task.
 ```
 
-## What To Inspect
+## 3. Inspect The Outputs
 
-After a workflow-guided run, look for reviewable output:
+Look for these files:
 
-- `plans/issue-<id>/plan.md`: clarified goal, scope, approach, validation,
-  strategy, and artifact/evidence boundary when needed.
-- `plans/issue-<id>/tasks.md`: ordered accepted tasks with delivery targets,
-  exact validation commands or shared checks, dependencies, and constraints.
-- `plans/issue-<id>/runs/`: task proof when the workflow records completed work.
+- `plans/issue-<id>/plan.md`: current goal, scope, project rules, evidence paths, and validation strategy.
+- `plans/issue-<id>/tasks.md`: ordered accepted tasks with boundaries, validation, and stop conditions.
+- `plans/issue-<id>/runs/`: execution proof, validation results, and review records.
 
 In this repository, real Forma plans live under [`../plans/`](../plans/).
 
-## Shape The Harness With `forma-creator`
+## 4. Promote Rules Into A Profile
 
-Use `forma-creator` when you want an agent to turn project-specific concerns
-into a one-off workflow before writing durable profile YAML.
-
-Build and install a Codex creator:
-
-```bash
-forma build-creator --target codex --output /tmp/forma-creator
-forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
-```
-
-Then talk to Codex like a collaborator:
+If you want durable profile source from the start, ask the agent:
 
 ```text
-Customize a workflow for this repo.
-
-First inspect the repository structure, validation paths, generated outputs,
-and project conventions.
-
-I care about:
-- generated outputs must come from source;
-- docs-only changes should use lightweight checks;
-- behavior changes should look for nearby tests first;
-- risky judgments should stop for my confirmation.
+Use Forma to extract engineering rules from this project's docs and code, and
+draft a profile for me. After I approve the profile, create and install the
+Codex workflow from it.
 ```
 
-The creator should classify those concerns, generate the target-specific
-workflow bundle or Codex plugin allowed by its fixed target contract, and verify
-the output before handoff.
+The agent uses `forma explain profile --target codex` to load the profile
+authoring standard. The flow is: draft profile, review it, then generate,
+verify, and install the workflow from the hints.
 
-## Two Lightweight Customization Paths
-
-There are two lightweight ways to let an agent shape project rules. Both can be
-conversational; they differ by output:
-
-| Path | Input | Output |
-|---|---|---|
-| `forma-creator` | Natural-language project concerns, classified by the creator into temporary injection. | Verified one-off harness: a skill bundle or Codex plugin. |
-| `forma explain profile` + agent | CLI profile authoring guidance, repository inspection, and human input. | Tracked profile YAML; after review, the CLI can regenerate the harness consistently. |
-
-## Generate From A Tracked Profile
-
-Use a tracked profile when project rules are durable enough to review as
-source.
-
-Generate Codex skills:
+If you already have a reviewed profile, generate deterministically:
 
 ```bash
-forma create-bundle --target codex --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-codex
-forma verify /tmp/software-plan-first-codex
-```
-
-Install them into Codex:
-
-```bash
-forma install --target codex --scope user /tmp/software-plan-first-codex
+forma create-bundle --target codex --profile myproject.yaml --output /tmp/bundle
+forma verify /tmp/bundle
+forma install --target codex --scope project /tmp/bundle
 ```
 
 The same profile can target Claude Code:
 
 ```bash
-forma create-bundle --target claude-code --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-claude-code
-forma verify /tmp/software-plan-first-claude-code
-forma install --target claude-code --scope user /tmp/software-plan-first-claude-code
+forma create-bundle --target claude-code --profile myproject.yaml --output /tmp/bundle-cc
+forma verify /tmp/bundle-cc
+forma install --target claude-code --scope user /tmp/bundle-cc
 ```
+
+## Choose A Path
+
+| Path | Best for | Output |
+|---|---|---|
+| `forma-creator` | On-the-spot customization; try a project workflow first. | Verified one-off skill bundle or Codex plugin. |
+| `forma explain profile` + agent | Durable, reviewable source from the start. | Tracked profile YAML, then compiled workflow. |
+| `forma create-bundle` | A reviewed profile already exists. | Repeatable workflow bundle from profile source. |
 
 ## Install Locations
 
@@ -152,30 +129,26 @@ Generated workflows can be installed for one user or into a project:
 Review project skills before trusting them. Generated skills can include
 scripts and target-specific tool behavior.
 
-## Draft A Profile Conversationally With The CLI
+## Verify Outputs
 
-Inside a downstream project with Forma installed, tell the agent:
+Always verify before installing, committing, or sharing a generated bundle or
+plugin source:
 
-```text
-Run:
-  forma explain profile --target codex
-
-Use that output as the profile authoring standard.
-Inspect this repository and propose a tracked Forma profile.
-Show the profile structure before writing files.
-Explain each constraint placement and mark unknowns explicitly.
+```bash
+forma verify /tmp/myproject-bundle
 ```
 
-This is also a lightweight path, but the output is versionable profile source,
-not a one-off harness. Review the profile before using it as durable source.
+Verification checks structure and methodology rules. It does not prove the
+profile is a good project decision or that the agent will always obey the
+workflow. See [Verifier](./verifier.md).
 
 ## Next Reads
 
-- [Concepts](./concepts.md): the project rules, workflow harness, and task execution model.
-- [Workflow Contract](./workflow-contract.md): what the generated workflow enforces.
+- [Concepts](./concepts.md): rules, workflow outputs, task contracts, and stage boundaries.
+- [Workflow Contract](./workflow-contract.md): what the generated workflow defines.
+- [Forma Creator](./forma-creator.md): on-the-spot customization and temporary injection.
+- [Profile Schema](./profile-schema.md): durable profile source.
 - [Skill Bundle](./skill-bundle.md): what Forma writes to disk.
-- [Profile Schema](./profile-schema.md): how durable workflow source is structured.
-- [Forma Creator](./forma-creator.md): how one-off generation works.
 - [Verifier](./verifier.md): what `forma verify` checks.
 - [Targets](./targets.md): target install and metadata behavior.
-- [Usage](./usage.md): command reference and install locations.
+- [Usage](./usage.md): full command reference.

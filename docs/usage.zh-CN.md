@@ -2,7 +2,7 @@
 
 英文版：[usage.md](./usage.md)
 
-这页是 Forma 的命令参考。第一次跑通请先看 [快速开始](./quick-start.zh-CN.md)。
+这页是 Forma 的命令参考。第一次跑通不要从命令背起，先看 [快速开始](./quick-start.zh-CN.md)：把 creator 装给 agent，再用自然请求让它挖掘准则、生成 workflow。
 
 ## 命令
 
@@ -11,7 +11,7 @@
 验证生成的 skill bundle、`forma-creator` bundle 或 Codex plugin：
 
 ```bash
-forma verify /tmp/backend-plan-first-codex
+forma verify /tmp/settings-workflow-codex
 ```
 
 安装、提交或分享生成 workflow 产物前，先运行这个命令。
@@ -33,7 +33,7 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 
 可选输入：
 
-- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出通用 Plan-First skills，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
+- `--profile <file>`：顶层 tracked profile。省略时，Forma 会输出通用 skills，技能名是 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
 开发时可选覆盖：
 
@@ -62,11 +62,11 @@ forma create-plugin --target codex --output /tmp/forma-codex-plugin
 
 - `--profile <file>`：顶层 tracked profile。省略时，plugin 会暴露 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
-`--target claude-code` 会明确失败，因为当前不支持 Claude Code plugin 输出。
+`--target claude-code` 会明确报错，因为当前不支持 Claude Code plugin 输出。
 
 ### `forma build-creator`
 
-生成 target 专用的可安装 `forma-creator`：
+生成 target 专用的可安装 `forma-creator`。把它装给 agent 后，就可以用一句自然请求让 agent 临场定制项目 workflow：
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
@@ -81,7 +81,7 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
-每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。Agent 侧生成路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。临场定制路径见 [Forma Creator](./forma-creator.zh-CN.md)。
 
 ### `forma install`
 
@@ -102,19 +102,25 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 
 - 不加 `--replace` 时，如果目标目录已经存在，会拒绝覆盖。
 - 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
-- Codex plugin 安装会明确失败，并提示 Codex marketplace 设置、
+- Codex plugin 安装会明确报错，并提示 Codex marketplace 设置、
   `codex plugin add <plugin>@<marketplace-name>`，以及安装后新开 thread。
 
 ### `forma explain`
 
-输出标准编写指南，让外部 Agent 不需要阅读 Forma 源码：
+输出标准编写指南，让外部 agent 不需要阅读 Forma 源码：
 
 ```bash
 forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-当另一个 Agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。轻量起草 profile 的常用方式是：先运行 `forma explain profile --target codex`，再让 Agent 读仓库、吸收人的补充，并提出 tracked profile YAML。这个路径的产物是 profile 源，不是一次性 harness。
+当另一个 agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。实际使用时可以直接说：
+
+```text
+用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
+```
+
+agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 tracked profile YAML。这个路径的产物是长期 profile 源，不是一次性 workflow。
 
 ## 安装目标
 
@@ -146,13 +152,13 @@ Tracked profile 里，设置 `stages.<stage>`：
 ```yaml
 stages:
   shape:
-    name: backend-plan-first-plan-issue
-    directory: backend-plan-first-plan-issue
-    display_name: Backend Plan-First Plan Issue
+    name: settings-workflow-plan
+    directory: settings-workflow-plan
+    display_name: Settings Workflow Plan
   gauge:
-    name: backend-plan-first-ground-plan
-    directory: backend-plan-first-ground-plan
-    display_name: Backend Plan-First Ground Plan
+    name: settings-workflow-ground
+    directory: settings-workflow-ground
+    display_name: Settings Workflow Ground
 ```
 
 规则：
@@ -166,15 +172,13 @@ stages:
 
 ### 一次性 creator 命名
 
-通过 `forma-creator` 现场生成时，不是让用户给 Agent 一个 JSON 文件。用户应该用自然语言告诉 Agent 命名意图；creator 再分类这条要求，并在内部写 temporary injection。
+通过 `forma-creator` 临场生成时，用户不需要给 agent 一个 JSON 文件。用自然语言告诉 agent 命名意图；creator 再分类这条要求，并在内部写 temporary injection。
 
 示例话术：
 
 ```text
-使用 forma-creator 生成这套 workflow，技能名前缀用 `backend-plan-first`。
-planning skill 命名为 `backend-plan-first-plan-issue`，showhand skill 命名为
-`backend-plan-first-showhand`。其他技能名从前缀推导。
-生成前先展示拟定的名字，然后验证生成 bundle。
+使用 forma-creator 生成这套 workflow，技能名前缀用 `settings-workflow`。
+生成前先展示拟定的技能名；我确认后再生成并验证 bundle。
 ```
 
 规则：
@@ -183,7 +187,7 @@ planning skill 命名为 `backend-plan-first-plan-issue`，showhand skill 命名
 - creator 生成的 injection 只在覆盖单个阶段完整技能名时使用 `rename.stages`；
 - 内部 injection map 使用内部阶段键 `shape`、`gauge`、`seal`、`pour`、`flow`，不要用 `forma-plan` 或 `forma-showhand` 这类对外 skill id 当键；
 - 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
-- creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，现场命名进 `rename`。
+- creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，临场命名进 `rename`。
 - 通过 `forma-creator` 生成 Codex plugin 时，`rename.prefix` 也会成为 plugin id。没有 prefix 时，plugin id 保持 `forma`。
 
 改名后验证生成 bundle：
@@ -206,7 +210,7 @@ git diff --check
 
 ## 源码结构
 
-- `source/methodology/`：生成 task 级 Plan-First 工作流技能的标准方法。
+- `source/methodology/`：生成 task 级 workflow skills 的标准方法。
 - `source/skill-creator/`：自包含的 `forma-creator` 源码，包含 references、creator script 和 verifier。
 - `src/forma/`：Python CLI、profile compiler、runtime asset resolver 和 target emitters。
 - `profiles/forma-self/`：Forma 管理本仓库时使用的 profile。
@@ -231,7 +235,7 @@ git diff --check
 
 - [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、task 契约、门禁、边界和证明。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
-- [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
-- [Forma Creator](./forma-creator.zh-CN.md)：Agent 侧一次性生成。
+- [Profile Schema](./profile-schema.zh-CN.md)：长期工程准则源码格式。
+- [Forma Creator](./forma-creator.zh-CN.md)：让 agent 临场定制 workflow。
 - [Verifier](./verifier.zh-CN.md)：验证检查和限制。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。

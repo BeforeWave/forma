@@ -2,99 +2,147 @@
 
 Chinese version: [examples.zh-CN.md](./examples.zh-CN.md)
 
-This page shows what a Forma workflow harness should make visible during an
-end-to-end development goal.
+This page is grounded in repository evidence. The repository has two useful
+evidence surfaces:
 
-The walkthrough is illustrative. It is not a transcript of a live agent run.
-Use [Quick Start](./quick-start.md) to generate and run the real sample bundle.
+- `examples/profiles/`: sanitized sample profiles derived from real workflow families.
+- `plans/issue-*/`: real Forma development plans, accepted tasks, and run proof.
 
-## Real Sample Source
+## How To Read These Examples
 
-For reader-facing generation, start from the sanitized software sample profile:
+| Material | What to inspect |
+|---|---|
+| Sample profile | How long-term team rules are expressed: evidence priority, boundaries, validation, proof, stop conditions, tools, and source adapters. |
+| Generated baseline | What a compiled skill bundle looks like: skill names, references, scripts, and manifest. |
+| Tracked run | How one concrete task records `plan.md`, `tasks.md`, `runs/task-*.md`, and validation proof. |
+
+## Sample Software Profile
+
+Entry point:
 
 ```text
 examples/profiles/sample-software/sample-software-plan-first.yaml
 ```
 
-The repository also keeps committed generated drift baselines from the backend
-sample profile:
+This sample comes from a sanitized software workflow family. It is not a
+verbatim private project profile, but the rule shape comes from real usage.
+
+It shows rules such as:
+
+- the planning stage stays chat-level: no repository reads, no file writes, no implementation;
+- implementation cannot start until Goal, Scope, Approach, Validation, Plan Strategy, Impact Profile, Impact Boundary, and source-of-truth needs are settled;
+- Impact Profile classifies the primary surface as frontend, backend, fullstack, or generic;
+- grounding reads project rules, source of truth, target surfaces, validation commands, and protected/generated paths read-only;
+- `seal` writes `plan.md` and `tasks.md` only after the decision gate is complete and grounding has been reviewed;
+- `pour` executes only the first incomplete task and stops when plan assumptions, source of truth, or the validation model prove wrong;
+- `flow` continues automatically only when decision, grounding, seal, validation, source-of-truth, and worktree safety gates all pass.
+
+It also distributes stable references by stage, including:
+
+- `software-control-model.md`
+- `software-impact-profiles.md`
+- `software-artifact-evidence-boundary.md`
+- `software-feedback-and-proof.md`
+- `software-review-checks.md`
+
+The point of this sample is to show how a team turns "what makes an agent plan
+acceptable here" into profile source without hard-coding commands for every
+future task.
+
+## Sample Backend Profile
+
+Entry point:
+
+```text
+examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml
+```
+
+This sample comes from a sanitized backend workflow. It composes generic backend
+rules, a development overlay, a Go language overlay, and a GitHub issue source
+adapter.
+
+It shows rules such as:
+
+- backend changes stay scoped to the behavior required by the current issue;
+- prefer root-cause fixes, preserve backward compatibility, and avoid leaking sensitive data through logs, errors, or debug output;
+- planning must decide whether the request changes public API behavior, service behavior, stream payloads, persistence, or data flow;
+- API / stream contract-visible changes are separated from internal logic, storage, queue, or computation changes before proposal-ready;
+- API or stream changes need an approved contract or source handoff before finalizing the plan;
+- implementation stops and replans if API or stream changes appear outside the sealed plan;
+- the Go overlay requires formatting edited Go files, prefers module-local Go tests, and adds or updates tests for behavior changes;
+- the GitHub issue helper is not base capability; this profile explicitly selects it for `shape` and `seal`.
+
+The point of this sample is that "backend rules" are not one blob. API/stream
+impact, source adapters, Go validation, and stop conditions belong in different
+stages.
+
+## Generated Baselines
+
+The backend sample has committed Codex and Claude Code generated baselines:
 
 ```text
 examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
 examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 ```
 
-## Generate The Bundle
+They are used for compiler drift checks, and they are useful for reading the
+compiled output:
+
+- stage skill directories are renamed to `backend-plan-first-*`;
+- `shape` and `seal` include the GitHub issue context script;
+- implementation and showhand stages do not include the GitHub helper unconditionally;
+- references are copied only into the stages that selected them;
+- `.forma-manifest.json` records target, emitted skill names, profile order, and source hashes.
+
+Verify them with:
 
 ```bash
-forma create-bundle --target codex --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-codex
-forma verify /tmp/software-plan-first-codex
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 ```
 
-Install the generated stage skills into the matching target location. See
-[Targets](./targets.md).
+## Real Forma Runs
 
-## Example Request
+Forma's own development process is tracked under `plans/issue-*/`. These are
+not documentation mockups; they are real task contracts and proof records left
+by this project.
 
-```text
-Use forma-plan to plan this issue first.
+Start with:
 
-Issue:
-<paste the current issue, problem context, or task goal here>
-```
-
-A Forma-generated workflow should move the request through a task contract
-instead of jumping straight to implementation.
-
-## Skill Walkthrough
-
-| Skill | Expected movement |
+| Run | What it shows |
 |---|---|
-| `forma-plan` | Clarify goal, scope, approach, validation model, plan strategy, and any artifact/evidence boundary. |
-| `forma-ground` | Inspect only the repository and source material needed for the accepted scope. Separate facts, risks, unknowns, and recommendations. |
-| `forma-lock` | Write `plans/issue-<id>/plan.md` and `tasks.md` with accepted task files, boundaries, commands, gates, and continuation rules. |
-| `forma-execute` | Execute one accepted task, run its exact validation, and record proof for review. |
+| `plans/issue-workflow-injection-contracts/` | The temporary injection classification contract: natural-language rules routed to defaults, stage constraints, or conditional overlays. |
+| `plans/issue-codex-plugin-profile-naming/` | Codex plugin identity, renamed skill propagation, verifier negative proof, and install boundaries. |
+| `plans/issue-bundle-plugin-install-surface/` | `create-bundle`, `create-plugin`, `install`, release surface, dist artifacts, and docs updates. |
 
-`forma-showhand` is the continuous `forma-execute` candy skill, not a separate
-stage. After review is done and the plan is fixed, it continues accepted tasks
-under the locked contract until a blocker stops safe execution.
+Each issue contains:
 
-## What To Inspect
+- `plan.md`: goal, scope, approach, artifact/evidence boundary, constraints, and validation;
+- `tasks.md`: accepted tasks, acceptance, validation, dependencies, and constraints;
+- `runs/task-*.md`: changed files, validation results, and risk notes for each task.
 
-After a real run, inspect:
+For example, `plans/issue-workflow-injection-contracts/plan.md` requires:
 
-- the generated skill bundle and `.forma-manifest.json`;
-- the plan under `plans/issue-<id>/plan.md`;
-- executable tasks under `plans/issue-<id>/tasks.md`;
-- run evidence under `plans/issue-<id>/runs/` when the workflow records it;
-- validation commands, shared checks, gate results, and proof paths;
-- any blocker if `forma-showhand` could not continue.
+- natural-language constraints are classified before temporary injection JSON is written;
+- `constraints.default` stays minimal;
+- planning and materialization rules go into `shape`, `gauge`, or `seal`;
+- execution rules go into `pour` or `flow`;
+- broad docs, generated-baseline, migration, governance, and cross-layer rules go into conditional overlays;
+- source adapters such as GitHub issue fetching must be explicitly selected by a profile or temporary injection.
 
-## What Good Looks Like
+The matching `runs/task-*.md` files record execution proof: changed files,
+passing test / verify commands, and risk notes.
 
-A good run should make these things visible:
+## Common Misreads
 
-- which demand source was treated as authoritative;
-- what evidence the agent read before planning;
-- what scope was accepted;
-- which files and outputs were in or out of bounds for the executed task;
-- which exact command or validation gate proved the result;
-- why continuous execution was allowed or blocked.
-
-## Common Bad Patterns
-
-- `forma-execute` starts implementation before `forma-lock` writes accepted tasks.
-- `forma-ground` writes files or makes final task decisions.
-- Every skill repeats every rule instead of using stage constraints and
-  references.
-- `forma-showhand` continues when validation failed, proof is missing, or the
-  next accepted task cannot be executed under the current plan.
-- The generated bundle verifies structurally, but the profile was never
-  reviewed by the owning project.
+- A sample profile is not a schema tutorial. It is a sanitized shape of real team rules.
+- A generated baseline is not runtime success proof. It proves compiler output structure and drift.
+- `plans/issue-*/runs/` is where this project records real task execution proof.
+- Exact commands and file boundaries in a task contract are not raw profile text; they are the result of applying profile rules to the current task.
 
 ## Related Docs
 
-- [Workflow Contract](./workflow-contract.md): stage gates and proof.
+- [Workflow Contract](./workflow-contract.md): how task contracts organize facts, boundaries, validation, and proof.
+- [Profile Schema](./profile-schema.md): YAML format for sample profiles.
 - [Skill Bundle](./skill-bundle.md): generated output layout.
-- [Profile Schema](./profile-schema.md): source format for the sample profile.
 - [Verifier](./verifier.md): verification boundary.

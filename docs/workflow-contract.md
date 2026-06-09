@@ -2,88 +2,102 @@
 
 Chinese version: [workflow-contract.zh-CN.md](./workflow-contract.zh-CN.md)
 
-A workflow contract is the task-execution shape of a generated Forma workflow.
-It defines how an agent moves from a concrete development goal to evidence,
-plan, ordered tasks, validation gates, proof, and review.
+A workflow contract is the plan contract produced when project rules are applied
+to the current task. It answers: which facts this task relies on, what may
+change, what must not change, how validation proves the result, where proof is
+recorded, and when the agent must stop for review.
 
-Forma compiles static project rules into target-specific skills. When those
-skills run, the contract becomes the harness around the agent's work.
+After a generated workflow is installed, it moves the agent from goal to
+proposal, evidence, task contract, execution, and proof. The point is not only
+"write a plan first"; the plan must expand according to the project's most
+important rules.
 
 ## Practical Effect
 
-Forma does not guarantee perfect agent behavior. It gives the workflow a better
-control surface.
+Many generic workflows ask an agent to explain what it is about to do. A Forma
+contract goes further: the plan becomes a task contract reviewers can inspect
+against project rules.
 
-| Prompt-only workflow | Forma workflow harness |
+| Generic planning flow | Forma workflow contract |
 |---|---|
-| Rules are re-explained in each conversation. | Durable rules live in profiles. |
-| Planning, grounding, and execution can blur together. | Stages separate clarification, grounding, sealing, execution, and continuation. |
-| Validation can be remembered late. | Exact commands, shared checks, and proof expectations are written into task contracts. |
-| Continuation depends on the agent's judgment in the moment. | `forma-showhand` automates accepted tasks under the locked plan. |
+| The plan describes rough steps. | The contract states which project rules apply to this task. |
+| Evidence gathering depends on the agent remembering. | The contract names authoritative sources and facts that must be confirmed. |
+| Boundaries often stay vague. | The contract states what may be touched and what must stop. |
+| Validation may be only a command list. | The contract explains why validation proves the current task. |
+| Continuation depends on momentary judgment. | `forma-showhand` continues only when locked tasks and stop conditions allow it. |
+
+Forma does not guarantee perfect agent behavior. It gives a clearer control
+surface: contract, validation, and proof stay inspectable.
 
 ## Contract Flow
 
-The default Forma methodology uses four core public workflow skills, plus
-`forma-showhand` for continuous execution:
+The default workflow uses four core skills to manage the contract lifecycle and
+one continuous execution entrypoint:
 
 ```text
-goal -> proposal -> evidence -> execution contract -> ordered task -> proof
-        plan        ground     lock                 execute
+goal -> proposal -> evidence -> task contract -> accepted task -> proof
+        plan        ground     lock             execute
 ```
-
-Each core stage has one job:
 
 | Public skill | Job | Handoff |
 |---|---|---|
-| `forma-plan` | Clarify the demand and bound the proposal. | A settled decision gate or explicit blocked/clarifying state. |
-| `forma-ground` | Gather repository, spec, document, and history evidence read-only. | A grounding handoff with facts, risks, and unknowns. |
-| `forma-lock` | Turn the settled proposal and evidence into an execution contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
-| `forma-execute` | Execute one accepted task and record proof. | Review-ready task result with validation evidence. |
+| `forma-plan` | Align the goal with project rules and produce a proposal. | A settled direction, or explicit blocked/clarifying state. |
+| `forma-ground` | Gather evidence read-only according to the rules. | A grounding handoff with facts, risks, and unknowns. |
+| `forma-lock` | Write the accepted approach as a task contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
+| `forma-execute` | Execute one accepted task, run validation, and record proof. | Review-ready task result with validation evidence. |
 
-`forma-showhand` is the continuous `forma-execute` candy skill, not a separate
-stage. After review is done and the plan is fixed, it resumes the locked task
-list until proof, validation, permission, or prerequisite state blocks safe
-continuation.
+`forma-showhand` is the autopilot entrypoint for `forma-execute`. After the
+plan is locked, it continues remaining accepted tasks until blocked, validation
+does not pass, or human input is needed.
 
-The public skill names are defaults. Profiles can rename generated skills while
-keeping the workflow semantics intact.
+These public skill names are defaults. Profiles or creator output can rename
+them, but the stage semantics should stay the same.
 
-## Skill Permissions
+## Skill Boundaries
 
-The contract matters because each public skill has different permissions.
+The contract matters because each stage has different permissions.
 
 | Public skill | Allowed | Not allowed |
 |---|---|---|
 | `forma-plan` | Clarify goal, scope, approach, validation, plan strategy, and boundaries. | Inspect the repository, write plan files, or implement. |
 | `forma-ground` | Read files, inspect repository state, and produce grounding. | Write files, run mutating commands, or decide final execution tasks. |
-| `forma-lock` | Write the accepted plan and task contract after required decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
-| `forma-execute` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue without review gates. |
-| `forma-showhand` | Resume the locked task list and keep applying `forma-execute` task by task. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
+| `forma-lock` | Write the accepted plan and task contract after decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
+| `forma-execute` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue past review gates. |
+| `forma-showhand` | Resume the locked task list and apply `forma-execute` task by task. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
 
-## Small Example
+## Reading A Task Contract
 
 Request:
 
 ```text
-Update the source for a generated schema.
+Update the settings schema source and refresh the generated API docs.
 ```
 
-A Forma workflow should make that request move through the contract:
+If the project cares most about generated-file traceability and API contract
+review, the task contract should apply those rules to the current task:
 
-| Public skill | What happens |
-|---|---|
-| `forma-plan` | Decide whether the task may edit source only, whether generated files are out of bounds, and what proof must exist. |
-| `forma-ground` | Read the source schema, generator entrypoint, nearby tests, and any existing generated output policy. |
-| `forma-lock` | Write accepted tasks with exact boundaries and commands such as `make generate-schema` plus the schema validation gate. |
-| `forma-execute` | Edit only the accepted source/test files, run the task's validation, and record generated diff plus command output as proof. |
+```text
+Focus: confirm schema source and API contract impact before refreshing generated docs.
+Evidence: settings schema source; generator entrypoint; API contract policy; nearby schema tests.
+Tasks:
+  1. impact-check: classify the contract change as none / additive / breaking.
+  2. source-change: edit only schema source and required tests.
+  3. generated-proof: run the generator and record the generated diff source.
+Boundary: do not hand-edit generated docs; do not implement before breaking impact is reviewed.
+Validate: schema test; generator command; generated diff check.
+Proof: write command output and generated diff summary under `plans/issue-<id>/runs/`.
+Stop if: contract impact requires API review;
+         generated docs cannot be reproduced by the generator;
+         shared schema infrastructure outside the task must change.
+```
 
-After review is done and the plan is fixed, `forma-showhand` can continue the
-accepted task list until proof, validation, permission, or prerequisite state
-blocks progress.
+The commands, task order, and stop conditions here are current task contract
+output. The profile or creator rules provide the review standard: evidence
+source, generated-output traceability, API review, and proof requirements.
 
 ## Evidence Policy
 
-A workflow contract should say what evidence the agent must use before it acts.
+A workflow contract should say what evidence the agent must use before acting.
 
 Common evidence rules include:
 
@@ -93,7 +107,7 @@ Common evidence rules include:
 - validation commands and proof requirements;
 - explicit unknowns when required evidence is missing.
 
-Evidence rules belong in the skill that needs them. For example, source reading
+Evidence rules belong in the stage that needs them. For example, source reading
 usually belongs in `forma-ground`; final task validation belongs in
 `forma-lock` and `forma-execute`.
 
@@ -118,32 +132,34 @@ conditional overlays.
 
 Validation is not only a command list. It is the proof path for the task.
 
-`forma-lock` should turn validation expectations into the task contract.
+`forma-lock` should write validation expectations into the task contract.
 `forma-execute` should run the narrowest relevant checks first, then any shared
 gate required by the plan. `forma-showhand` repeats that accepted-task execution
-loop without asking for review after every task.
+loop.
 
 If proof is missing, stale, or outside the accepted task, the contract should
 make the agent stop or ask for correction.
 
 ## Showhand
 
-`forma-showhand` is the candy skill for continuous `forma-execute`. Use it when
-the plan has been reviewed, the approach is fixed, and you want the agent to
-keep driving through the accepted task list.
+`forma-showhand` is the continuous execution entrypoint for `forma-execute`.
+After review is done and the approach is fixed, use it to let the agent continue
+through the accepted task list.
 
-It still stops when the next step cannot be executed under the existing harness:
+It continues only when the existing contract covers the next step. It should
+stop when:
 
 - `plan.md` or `tasks.md` is missing, incomplete, or stale;
 - the next task is not accepted;
 - the current change needs a new decision boundary;
-- validation fails or cannot run;
+- validation does not pass or cannot run;
 - required prerequisites or permissions are unavailable;
-- the user interrupts or asks to review.
+- the user interrupts or asks for review.
 
 ## How Profiles Shape The Contract
 
-Profiles do not replace the contract. They specialize it.
+Profiles do not replace the contract. Profiles maintain durable rules; the
+contract applies those rules to the current task.
 
 Use profiles to add:
 
@@ -154,13 +170,13 @@ Use profiles to add:
 - references and scripts selected by stage;
 - conditional overlays for routes such as docs-only, migration, generated-baseline, governance, backend, or cross-layer work.
 
-Use temporary injection for one-off constraints that should affect only the
-current generated bundle.
+Temporary injection is for on-the-spot rules that should affect only the current
+generated output.
 
 ## Related Docs
 
 - [Concepts](./concepts.md): compiler model and core terminology.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
 - [Skill Bundle](./skill-bundle.md): generated output layout.
-- [Examples](./examples.md): illustrative end-to-end walkthrough.
+- [Examples](./examples.md): sample profiles, generated baselines, and real runs.
 - [Usage](./usage.md): command reference.

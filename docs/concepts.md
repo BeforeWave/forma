@@ -2,173 +2,175 @@
 
 Chinese version: [concepts.zh-CN.md](./concepts.zh-CN.md)
 
-This page expands the README layer model. Read it after the homepage framing
-and before writing a durable profile.
+This page expands the README thesis: Forma turns a project's own engineering
+rules into workflows and task contracts the agent uses every time it works.
 
-Agents do not usually fail because they cannot produce text or change files.
-They fail because the project-specific way of working is implicit.
+## What Forma Solves
 
-Forma compiles that way of working into a workflow harness.
+Many projects already have agent-facing docs and ask agents to plan before
+implementation. That helps, but it still leaves a gap: the plan may not apply
+the team's most important rules to the current task in a way reviewers can rely
+on and verify.
 
-## What Changes
+Forma fills that layer. It helps the agent extract engineering rules from docs,
+code, tests, and conventions, then turns those rules into a workflow. When a
+task starts, the workflow makes the agent produce a task contract: evidence,
+boundaries, validation, proof, and stop conditions.
 
-After AI coding becomes part of everyday work, code is no longer the only
-project output that matters.
+## Customize A Workflow In One Sentence
 
-The spec an agent follows, the evidence it reads, the plan it seals, the task
-boundary it accepts, and the proof it leaves behind all become part of the
-project lifecycle. If those outputs are vague, scattered, or only remembered
-inside a chat, the agent's work style changes from run to run.
+The lightweight entrypoint is `forma-creator`; the team does not need to write
+YAML first:
 
-Projects already express engineering style through architecture, code patterns,
-test habits, and review standards. With agents in the loop, projects also need
-to express how work is delegated: what the agent must clarify, what it must
-read, when it may act, when it must stop, and how it proves the result.
+```text
+Use forma-creator to customize a workflow for this project.
+Read the docs and code, extract the engineering rules, show them to me first;
+after I confirm, generate the workflow and install it from the hints.
+```
 
-Forma treats that agent-working style as source. It compiles static project
-rules into staged skills, then those skills turn each concrete development goal
-into task-level files, boundaries, commands, validation gates, and proof.
+In this path, the rules enter a generated workflow you can try. It is for
+exploration, quick adaptation, and project-specific fit.
 
-## Task Workflow Compilation
+If the team already wants durable source, ask the agent to draft a profile:
 
-Forma starts with AI coding because software work is easy to check: source
-files, generated files, tests, commands, diffs, and review proof.
+```text
+Use Forma to extract engineering rules from this project's docs and code, and
+draft a profile for me.
+```
 
-The same model can fit other repeatable work. If a task has sources,
-boundaries, validation, and proof, it can have a generated workflow.
-
-Different tasks validate different things:
-
-- coding checks tests, generated outputs, and diffs;
-- research checks sources, claims, and citations;
-- analysis checks data assumptions, calculations, and outputs;
-- operations checks runbooks, safety gates, and execution logs.
-
-## Generated Workflow vs Fixed Workflow
-
-A fixed workflow gives every project the same process.
-
-Forma generates the workflow from the project or task rules.
-
-| Fixed workflow | Forma-generated workflow |
-|---|---|
-| Install one preset process. | Compile a workflow from the project's own rules. |
-| Use the same validation model everywhere. | Let validation match the task type. |
-| Treat project rules as extra instructions. | Turn project rules into stages, boundaries, gates, and proof. |
+After review, the profile can be compiled into workflow outputs repeatedly.
 
 ## Three Layers
 
-Forma works in three layers:
+Forma puts project rules into three layers:
 
 | Layer | Meaning |
 |---|---|
-| Layer 0: Project rules | Define standing rules: code conventions, mutation boundaries, validation requirements, review expectations, generated-file policy, risky areas, and evidence sources. |
-| Layer 1: Workflow harness | Forma compiles those rules into a project-specific Plan-First skill bundle or Codex plugin. |
-| Layer 2: Task execution | The installed workflow turns a concrete goal into task-level obligations: files, boundaries, commands, gates, and proof. |
+| Project rules | Team-approved ways of working: authoritative sources, boundaries, required tools, validation depth, proof, and stop conditions. |
+| Workflow output | The installed agent workflow: a Codex / Claude Code skill bundle or Codex plugin. |
+| Task contract | The plan contract the agent writes for one task under `plans/issue-<id>/`. |
 
-Keep these layers separate. A profile is not an installed skill. A generated
-skill bundle is not the source of truth. The workflow harness is not another
-file; it is how the installed workflow constrains the agent while it works.
+With on-the-spot customization, project rules enter this generated workflow
+output. With long-term maintenance, project rules become a tracked profile and
+are compiled by Forma.
+
+## Profile vs Task Contract
+
+A profile should not hard-code every future task's files or commands. It
+describes durable rules: which evidence is authoritative, which boundaries must
+not be crossed, which tools must be used, how deep validation should go, and
+when the agent must stop.
+
+A task contract is the result of applying those rules to the current task. At
+that point, the agent writes current evidence, file boundaries, task order,
+validation commands, proof paths, and stop conditions.
+
+So exact commands and task order in examples are usually task contract output,
+not raw profile text. The profile determines what standards the plan must meet;
+the task contract says how this task will be done.
 
 ## Compiler Model
 
-Forma is a compiler for project-specific Plan-First workflow skills.
+Forma is a compiler that turns project rules into agent workflows.
 
 ```text
-profile  ->  Forma compiler  ->  workflow bundle/plugin  ->  task execution contract
-source       compiler            installed output            files, commands, gates, proof
+profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task contract
+durable / on-the-spot rules         compiler            install output       current task contract
 ```
 
-Codex and Claude Code are targets. The same profile can produce target-specific
-outputs while preserving the workflow contract.
+Codex and Claude Code are the current targets. The same profile can generate
+different target outputs while preserving task-level workflow semantics.
 
-Forma does not execute project tasks directly. It generates the skills an agent
-follows while executing tasks.
-
-## Five Core Concepts
-
-| Concept | Meaning |
-|---|---|
-| Workflow contract | The staged rules for moving from demand to evidence, plan, task execution, proof, and review. |
-| Profile | Durable project-rule source reviewed like project source. |
-| Temporary injection | One-off generation input for scoped rules that should not become durable policy by accident. |
-| Skill bundle | Target-specific compiled output containing stage skills, references, scripts, and a manifest. |
-| Target | The agent environment that loads generated skills, currently Codex or Claude Code. |
-
-See [Workflow Contract](./workflow-contract.md), [Profile Schema](./profile-schema.md),
-and [Skill Bundle](./skill-bundle.md) for the detailed pages.
+Forma does not execute project tasks directly. It generates the workflow an
+agent follows while executing tasks.
 
 ## Default Workflow
 
-The default methodology is plan-first:
+The default workflow has a plan-before-execute shape:
 
 ```text
-clarify -> gather evidence -> lock plan -> execute task
-plan    -> ground         -> lock      -> execute
+goal -> proposal -> evidence -> task contract -> task execution -> proof
 ```
 
-These public skill names are defaults:
+Four core skills manage the task contract lifecycle:
 
-| Default skill | Plain English | Job |
+| Skill | Purpose | Boundary |
 |---|---|---|
-| `forma-plan` | Clarify the request | Turn a loose request into a bounded proposal. |
-| `forma-ground` | Read before acting | Gather repository, spec, docs, and related evidence. |
-| `forma-lock` | Lock the plan | Convert the proposal into an accepted task contract. |
-| `forma-execute` | Execute within bounds | Implement one accepted task and record proof. |
+| `forma-plan` | Align the goal with project rules and produce a proposal. | Do not write files or execute work. |
+| `forma-ground` | Gather the facts required by the rules. | Read-only; do not decide final tasks. |
+| `forma-lock` | Write `plan.md` and `tasks.md`, locking the task contract. | Materialize only the accepted approach. |
+| `forma-execute` | Execute one accepted task, run validation, and record proof. | Do not cross task boundaries or bypass stop conditions. |
 
-`forma-showhand` is the candy skill for continuous `forma-execute`: after the
-plan has been reviewed and fixed, use it to let the agent keep executing the
-accepted task list under the same harness.
+`forma-showhand` is the autopilot entrypoint for `forma-execute`, not a fifth
+planning stage. After the plan is locked, it continues accepted tasks until
+blocked, validation does not pass, or human input is needed.
 
-Not into the public names above? They are defaults, not doctrine. Projects can
-rename generated skills while keeping these stage semantics.
+Projects can rename generated skills, but the stage semantics should remain
+the same.
 
-## Why It Matters
+## Three Paths
 
-Forma's value is not that it writes code. It does not.
+| Path | Best for | Result |
+|---|---|---|
+| `forma-creator` | On-the-spot customization; try a project workflow first. | One-off workflow output you can install and try. |
+| `forma explain profile` + agent | Durable source from the start. | Tracked profile YAML, reviewed before compilation. |
+| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Deterministic workflow bundle or Codex plugin. |
 
-Forma turns project-specific agent discipline into versioned, installable,
-verifiable workflow source. It helps make agent work:
+All three paths end in verified workflow output. The difference is whether the
+rules enter a one-off output first or become a long-term profile first.
 
-- repeatable: durable rules have a source location and lifecycle;
-- staged: clarification, evidence, planning, execution, and proof are not collapsed into one prompt;
-- bounded: implementation stays inside accepted task files and mutation boundaries;
-- concrete: validation is expressed as exact commands, gates, and proof paths instead of vague reminders;
-- reviewable: reviewers can inspect the path from demand to evidence, plan, task execution, and proof;
-- portable: the same profile can be emitted for supported targets.
+## Why Boundaries And Proof Matter
+
+Forma's value is writing project rules into the agent's work path:
+
+- which facts must be confirmed first;
+- which boundaries must not be crossed;
+- which validation can prove the result;
+- where proof is recorded;
+- when the agent must stop for review.
+
+Once these enter the task contract, reviewers inspect more than the patch. They
+can also inspect whether the agent planned, gathered evidence, validated, and
+proved the work according to project-approved rules.
+
+This is still not a behavior guarantee. Models and host environments still
+matter. Forma provides a clearer control surface: workflow, task contract, and
+proof remain inspectable.
 
 ## Fit
 
-Use Forma when a project's standing rules should shape how agents handle
-development goals at task-execution time.
+Use Forma when a project's engineering rules should shape how an agent handles
+specific tasks.
 
-AI coding is the first obvious fit, but it is not the only one. Forma can also
-fit research, analysis, publishing, design review, customer handoff, governance,
-or operations work when the work has repeatable sources, boundaries, stages, and
-proof requirements.
+AI coding is the first fit, but not the only one. Research, analysis,
+operations, governance, release, and customer handoff work can use similar
+workflows when the work has stable sources, boundaries, stages, validation, and
+proof.
 
 You probably do not need Forma when:
 
-- a few local project rules are enough;
+- a few local rules are enough;
 - one reusable capability should be a single custom skill;
-- the main problem is organizing requirements and spec facts;
-- the task has no stable sources, no meaningful boundaries, no acceptance path, and no need for reuse.
+- the main problem is unsettled requirements or source facts;
+- the task has no stable sources, boundaries, acceptance path, or reuse need.
 
 Forma can work beside spec tools, planning docs, project instructions, and
 generic skill creators. Those layers define demand, local context, or
 capabilities. Forma defines how the agent moves through them and what proof it
-must leave behind.
+must leave.
 
 ## First Successful Run
 
-Do not begin by designing a perfect profile. Try one small workflow first.
+Do not start by designing the perfect profile. First use `forma-creator` to
+create a workflow you can try:
 
-1. Install the CLI.
-2. Generate the default Codex plugin or a small target bundle.
-3. Install it into one target.
-4. Trigger one plan-first task.
-5. Inspect the task contract: files, boundaries, commands, validation gates, and proof.
-6. Shape the harness with creator or profile rules only after the workflow proves useful.
+1. Install the CLI and `forma-creator`.
+2. Ask the creator to extract rules from project docs and code.
+3. Review the rules and fill gaps.
+4. Generate and verify the workflow output.
+5. Install it and trigger `forma-plan`.
+6. Inspect the task contract: facts, boundaries, task order, validation, and proof.
+7. Promote useful repeated rules into a tracked profile.
 
 See [Quick Start](./quick-start.md) for the concrete path.
 
@@ -177,8 +179,8 @@ See [Quick Start](./quick-start.md) for the concrete path.
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, evidence, and proof.
 - [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
-- [Forma Creator](./forma-creator.md): one-off workflow generation.
-- [Verifier](./verifier.md): what verification checks and cannot prove.
+- [Forma Creator](./forma-creator.md): on-the-spot generation and temporary injection.
+- [Verifier](./verifier.md): what the verifier checks and cannot prove.
 - [Targets](./targets.md): target install and metadata behavior.
-- [Examples](./examples.md): end-to-end workflow walkthrough.
+- [Examples](./examples.md): sample profiles, generated baselines, and real runs.
 - [Usage](./usage.md): command reference and install locations.

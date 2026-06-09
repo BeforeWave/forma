@@ -2,21 +2,20 @@
 
 Chinese version: [skill-bundle.zh-CN.md](./skill-bundle.zh-CN.md)
 
-A skill bundle is Forma's compiled workflow output.
+A skill bundle is the workflow output Forma compiles and installs for an agent.
 
-The profile is source. The Forma compiler resolves that source with the
-canonical methodology and target adapter, then emits installable skills for
-Codex or Claude Code. Once installed, those skills become the workflow harness
-that turns concrete development goals into task files, boundaries, commands,
-validation gates, and proof.
+Profiles or temporary injection provide project rules. The Forma compiler
+combines those rules with the methodology and target adapter, then emits skills
+for Codex or Claude Code. Once installed, those skills make the agent turn a
+concrete goal into a task contract: facts, boundaries, tasks, validation, proof,
+and stop conditions.
 
-## Profile To Workflow Output
+## From Rules To Workflow Output
 
 ```text
-profile
+profile / temporary injection
 + methodology
 + target adapter
-+ optional temporary injection
         |
         v
 Forma compiler
@@ -25,13 +24,14 @@ Forma compiler
 target-specific workflow skill bundle
 ```
 
-The same workflow profile can be emitted for multiple targets without
-rewriting the workflow rules by hand.
+The same workflow profile can be emitted for multiple targets without writing a
+separate rule set for each tool. One-off creator output lands in the same bundle
+structure.
 
 ## Bundle Layout
 
-A generated Plan-First bundle normally contains four core workflow skill
-directories, the `forma-showhand` candy skill, and one manifest:
+A generated bundle normally contains four core workflow skills,
+`forma-showhand` as the autopilot entrypoint, and one manifest:
 
 ```text
 <bundle>/
@@ -94,7 +94,7 @@ Each generated skill directory is a target-readable unit.
 - stage purpose;
 - workflow instructions;
 - load-as-needed references;
-- profile constraints selected for that stage;
+- project rules selected for that stage;
 - validation gate or proof expectations when applicable.
 
 `references/` contains larger stable guidance that should not be duplicated into
@@ -127,22 +127,23 @@ for which target, and with which emitted skills?
 
 ## Generated Skill Quality
 
-A generated bundle should feel like a task-level workflow harness, not a pile
-of copied policy.
+A generated bundle should distribute project rules to the right stages instead
+of copying a pile of policy into every skill.
 
 Good bundles usually have:
 
 - one clear job per skill;
 - short trigger descriptions;
-- stage-specific standing instructions;
+- stage-specific rules;
 - stable detail in `references/`;
 - scripts only when a stage explicitly owns them;
 - light default constraints;
 - route-specific behavior in conditional overlays;
-- visible validation gates and proof paths for executable stages.
+- visible validation gates, proof paths, and stop conditions for executable stages.
 
-If every skill repeats every rule, the profile is probably too global. Move
-rules into stage constraints, references, resources, or conditional overlays.
+If every skill repeats every rule, the profile or temporary injection is
+probably too global. Move rules into stage constraints, references, resources,
+or conditional overlays.
 
 ## Install Locations
 
@@ -163,9 +164,9 @@ forma verify <generated-bundle-dir>
 ```
 
 Verification checks structure and methodology rules. It does not prove the
-profile is a good project decision or that the generated harness is
-semantically complete. See [Verifier](./verifier.md). Human review still
-matters.
+profile or on-the-spot rules are good project decisions, and it does not prove
+the real task contract will be semantically complete. See
+[Verifier](./verifier.md). Human review still matters.
 
 ## Related Docs
 

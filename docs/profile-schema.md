@@ -2,12 +2,19 @@
 
 Chinese version: [profile-schema.zh-CN.md](./profile-schema.zh-CN.md)
 
-A profile is Layer 0 source: durable project rules and boundaries.
+A profile is source for long-term engineering rules the team accepts.
 
-Profiles describe how Forma should specialize the canonical Plan-First
-methodology for a project, route, language, or target naming convention. They
-are strict YAML files: unknown top-level or nested keys are rejected so mistakes
-do not silently change the generated workflow contract.
+It describes how the project wants agents to work: which sources are
+authoritative, which boundaries must not be crossed, which tools or source
+helpers must be used, how deep validation should go, where proof belongs, and
+when the agent must stop for review.
+
+A profile does not write the current task's concrete plan. Current files,
+commands, review gates, and proof paths are resolved by the workflow in the
+task contract.
+
+Profiles are strict YAML files: unknown top-level or nested keys are rejected so
+mistakes do not silently change the generated workflow contract.
 
 ## Minimal Profile
 
@@ -17,14 +24,18 @@ profile:
   description: Minimal docs workflow profile.
 bundle:
   name: sample-docs-workflow
-  description: Documentation Plan-First skills.
+  description: Documentation workflow skills.
 constraints:
   default:
-    - Keep default rules minimal.
+    - Preserve unrelated user work.
   shape:
     - Clarify the documentation audience and acceptance criteria before planning.
+  gauge:
+    - Use project docs and nearby source files as evidence before proposing doc behavior changes.
+  seal:
+    - Each accepted task must name evidence, boundary, validation, proof, and stop conditions.
   pour:
-    - Run markdown or link checks when docs behavior changes.
+    - Use lightweight markdown or link checks for docs-only changes.
 ```
 
 For a complete composable example, start with:
@@ -44,14 +55,14 @@ private workflow commands.
 | `profile` | Stable profile `id` and optional human description. |
 | `includes` | Relative paths or profile ids resolved before the local file. |
 | `bundle` | Review-facing bundle `name` and `description`. |
-| `org` | Optional owning organization or team name. |
+| `org` | Optional owning organization or project name. |
 | `stages` | Per-stage installable names, directories, display labels, prompts, and `enabled` flags. |
 | `resources` | Stage resources copied into generated skills as `references`, `scripts`, or `files`. |
 | `skills` | Per-stage trigger descriptions without changing stage semantics. |
 | `terminology` | Project vocabulary emitted into generated skill guidance. |
 | `validation_commands` | Default or stage-specific validation commands. |
 | `decision_gate_extras` | Extra dimensions `shape` must settle. |
-| `constraints` | Default or stage-specific workflow requirements. |
+| `constraints` | Default or stage-specific engineering rules. |
 | `conditional_overlays` | Route-specific constraints, resources, and validation activated after the plan records the selected route. |
 
 ## Includes
@@ -60,7 +71,7 @@ Use `includes` to compose project rules from general to specific:
 
 ```yaml
 profile:
-  id: sample-software-plan-first
+  id: sample-software-workflow
 includes:
   - sample-software-base
   - sample-software
@@ -69,8 +80,8 @@ includes:
 Included profiles are resolved before the local profile. Later profiles can
 refine earlier fields according to the merge rules implemented by Forma.
 
-Use includes for stable layers such as project defaults, development policy,
-domain policy, and language policy. Do not use includes to hide one-off user
+Use includes for stable layers such as project defaults, development rules,
+domain rules, and language rules. Do not use includes to hide one-off user
 instructions; use temporary injection for that.
 
 ## Stage Names And Target Display
@@ -80,9 +91,9 @@ Use `stages` when the generated skill names should use project language:
 ```yaml
 stages:
   shape:
-    name: software-plan-first-plan-issue
-    directory: software-plan-first-plan-issue
-    display_name: Software Plan-First Plan Issue
+    name: software-workflow-plan
+    directory: software-workflow-plan
+    display_name: Software Workflow Plan
     short_description: Clarify software work before finalizing a plan.
     default_prompt: Clarify the software task and stop before repository inspection.
 ```
@@ -98,9 +109,9 @@ Keep `constraints.default` light. Put rules in the stage that needs them:
 |---|---|
 | `constraints.shape` | Demand clarification, route selection, scope, plan strategy, and unresolved decisions. |
 | `constraints.gauge` | Read-only grounding and evidence collection. |
-| `constraints.seal` | Plan materialization, accepted tasks, validation contracts, and handoff certification. |
-| `constraints.pour` | Current-task files, commands, validation gates, review gates, and proof. |
-| `constraints.flow` | Safe continuation and stop conditions. |
+| `constraints.seal` | Boundaries, validation, proof, and stop conditions the task contract must include. |
+| `constraints.pour` | Current-task execution, validation gates, review gates, and proof. |
+| `constraints.flow` | Continuation conditions and stop conditions. |
 
 Bad pattern:
 
@@ -132,7 +143,7 @@ Resources copy stage-owned files into generated skills:
 resources:
   shape:
     references:
-      - source: references/backend-plan-first-rules.md
+      - source: references/backend-workflow-rules.md
         dest: backend-rules.md
     scripts:
       - source: ../../../source/methodology/resources/shared/script/github_issue_context.py
@@ -155,8 +166,8 @@ validation_commands:
     - go test ./...
 ```
 
-Validation commands are guidance for the workflow. They do not remove the need
-for task-specific validation in locked plans.
+Validation commands are workflow guidance. They do not replace the proof path
+written into the task contract for the current task.
 
 ## Conditional Overlays
 
@@ -173,10 +184,10 @@ conditional_overlays:
         - git diff --check
 ```
 
-Put heavy or scenario-specific rules here, such as docs-only, migration,
+Put heavier or scenario-specific rules here, such as docs-only, migration,
 generated-baseline, governance, backend, or cross-layer constraints.
 
-## Temporary Injection Vs Profile
+## Temporary Injection And Profile
 
 Use a tracked profile when a rule is durable and should be reviewed as project
 source.
@@ -186,24 +197,25 @@ Use temporary injection when a rule is:
 - one-off;
 - private to the current generation;
 - experimental;
-- not ready to become maintained policy.
+- not ready to become maintained policy;
+- found through `forma-creator` and still needs trial use before becoming durable.
 
-Temporary injection should classify natural-language rules before writing JSON.
-Do not copy large source documents into injection just to preserve context.
+Temporary injection should classify confirmed rules before writing JSON. Do not
+copy large source documents into injection just to preserve context.
 
 ## Common Mistakes
 
 - Putting broad reading rules in `constraints.default`.
 - Renaming semantic stage keys instead of `stages.<stage>.name`.
 - Copying private downstream commands into public examples.
-- Using temporary injection for rules that should be reviewed profiles.
+- Keeping rules in temporary injection long after they should become a reviewed profile.
 - Adding source readers without making a profile or injection own them.
 - Treating `forma verify` as a replacement for human profile review.
 
 ## Related Docs
 
-- [Workflow Contract](./workflow-contract.md): what the profile specializes.
+- [Workflow Contract](./workflow-contract.md): how profile rules reach current task contracts.
 - [Skill Bundle](./skill-bundle.md): generated output layout.
-- [Forma Creator](./forma-creator.md): temporary injection before durable profile promotion.
-- [Examples](./examples.md): sample profile walkthrough.
+- [Forma Creator](./forma-creator.md): how on-the-spot rules enter one-off workflows.
+- [Examples](./examples.md): sample profiles and real run evidence.
 - [Usage](./usage.md): command reference.

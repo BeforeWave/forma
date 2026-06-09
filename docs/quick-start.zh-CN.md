@@ -2,36 +2,36 @@
 
 英文版：[quick-start.md](./quick-start.md)
 
-这页只讲从零跑通一套 Forma workflow。先用默认 Codex plugin 看见一次真实任务如何产出 plan、task 边界、验证 gate 和 proof，再决定要不要塑造项目专属 harness。
+这页只讲从零跑通 Forma：先把 `forma-creator` 装给 agent，再让它从项目文档和代码里挖掘工程准则，生成一套可试用 workflow。确认有用后，再把规则长期化成 profile。
 
-## 安装 Forma
+## 1. 安装 CLI 和 Creator
 
-先安装 CLI：
+先安装 Forma CLI：
 
 ```bash
 pipx install git+https://github.com/BeforeWave/forma.git
 forma --help
 ```
 
-下面的示例都假设 `forma` 已经在 `PATH` 里。
-
-## 第一次跑通：默认 Codex Plugin
-
-生成默认 Plan-First plugin：
+以 Codex 为例，生成并安装 creator skill：
 
 ```bash
-forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma build-creator --target codex --output /tmp/forma-creator
+forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
-这一步写出的是本地 plugin source。Forma 不安装 Codex plugin。按照当前 Codex
-官方文档把这个本地 plugin 加到 Codex marketplace，然后运行
-`codex plugin add forma@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
-Codex thread。
+装好以后，新开 agent thread，直接说：
 
-- [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
-- [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
+```text
+用 forma-creator 给这个项目定制一套 workflow。
+从文档和代码里挖掘工程准则，先整理给我看；我确认后再生成 workflow，并按提示安装。
+```
 
-把当前 issue 或任务背景发给 Codex，并要求先从规划开始：
+Creator 会让 agent 先从项目事实里提炼准则，例如权威资料、修改边界、验证深度、proof 和停手条件。你确认后，它会生成并验证一套可试用 workflow 产物，并报告输出路径和安装提示。
+
+## 2. 试用生成的 Workflow
+
+安装生成产物后，新开 thread：
 
 ```text
 Use forma-plan to plan this issue first.
@@ -40,96 +40,74 @@ Issue:
 <粘贴当前 issue、需求描述、问题背景或任务目标>
 ```
 
-一次有效的首跑不应该从目标直接跳到 patch。首先应该看到 chat-level proposal 或 handoff，而不是计划文件。它应该收敛目标、范围、方案、验证模型，以及是否需要仓库证据。
+第一次有效输出应该是 proposal，不是 patch。它应该先把目标、范围、项目准则和验证方式说清楚。
 
-如果需要仓库证据，让 Codex 使用 `forma-ground`。
+如果需要仓库证据，继续：
 
-proposal 和 grounding 被接受后，再锁定计划：
+```text
+Use forma-ground to gather the evidence needed for this plan.
+```
+
+证据和方案确认后，锁定 task contract：
 
 ```text
 Use forma-lock to write the plan and task contract.
 ```
 
-然后执行下一个已接受任务：
+然后执行一个已接受任务：
 
 ```text
 Use forma-execute to execute the next accepted task.
 ```
 
-## 看什么结果
+## 3. 看产物
 
-跑完一轮 workflow 后，先看可审查产物：
+重点看这些文件：
 
-- `plans/issue-<id>/plan.md`：澄清后的目标、范围、方案、验证策略，以及必要的 artifact/evidence boundary。
-- `plans/issue-<id>/tasks.md`：有顺序的已接受任务，包括交付目标、具体验证命令或共享检查、依赖和约束。
-- `plans/issue-<id>/runs/`：workflow 记录下来的 task proof。
+- `plans/issue-<id>/plan.md`：当前目标、范围、项目准则、证据路径和验证策略。
+- `plans/issue-<id>/tasks.md`：有顺序的已接受任务，包括边界、验证和停手条件。
+- `plans/issue-<id>/runs/`：执行 proof、验证结果和需要 review 的记录。
 
-这个仓库的真实 Forma plans 在 [`../plans/`](../plans/)。
+这个仓库自己的 Forma plans 在 [`../plans/`](../plans/)。
 
-## 用 `forma-creator` 塑造 Harness
+## 4. 长期化成 Profile
 
-当你想让 Agent 先把项目关注点变成一次性 workflow，但还不想写长期 profile YAML 时，用 `forma-creator`。
-
-生成并安装 Codex creator：
-
-```bash
-forma build-creator --target codex --output /tmp/forma-creator
-forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
-```
-
-然后像和协作者沟通一样告诉 Codex：
+如果一开始就想形成长期 profile，也可以直接让 agent 用 Forma 起草：
 
 ```text
-针对这个 repo 定制一套 workflow。
-
-先看仓库结构、验证方式、生成物和项目约定。
-
-我比较在意：
-- 生成结果必须从 source 产出；
-- docs-only 改动用轻量检查；
-- 行为变更前看附近测试；
-- 高风险判断先停下来让我确认。
+用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
+profile 确认后，基于它创建并安装 Codex workflow。
 ```
 
-Creator 应该先分类这些关注点，再生成固定 target contract 允许的 workflow bundle 或 Codex plugin，并在交付前验证输出。
+agent 会用 `forma explain profile --target codex` 读取 profile 编写标准。流程是：先给 profile 草案；你 review；确认后再生成、验证并按提示安装 workflow。
 
-## 两条轻量定制入口
-
-想让 Agent 帮你塑造项目规则，有两条轻量路径。它们都可以对话式完成，区别在产物：
-
-| 路径 | 输入 | 产物 |
-|---|---|---|
-| `forma-creator` | 自然语言项目关注点，creator 分类成 temporary injection。 | 已验证的一次性 harness：skill bundle 或 Codex plugin。 |
-| `forma explain profile` + Agent | CLI 输出 profile 编写标准，Agent 读仓库并吸收人的补充。 | tracked profile YAML；review 后再用 CLI 稳定生成 harness。 |
-
-## 从长期 Profile 生成
-
-当项目规则已经稳定到可以作为源码评审时，用 tracked profile。
-
-生成 Codex skills：
+如果你已经有 review 过的 profile，可以直接确定性生成：
 
 ```bash
-forma create-bundle --target codex --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-codex
-forma verify /tmp/software-plan-first-codex
-```
-
-安装到 Codex：
-
-```bash
-forma install --target codex --scope user /tmp/software-plan-first-codex
+forma create-bundle --target codex --profile myproject.yaml --output /tmp/bundle
+forma verify /tmp/bundle
+forma install --target codex --scope project /tmp/bundle
 ```
 
 同一份 profile 也可以生成 Claude Code skills：
 
 ```bash
-forma create-bundle --target claude-code --profile examples/profiles/sample-software/sample-software-plan-first.yaml --output /tmp/software-plan-first-claude-code
-forma verify /tmp/software-plan-first-claude-code
-forma install --target claude-code --scope user /tmp/software-plan-first-claude-code
+forma create-bundle --target claude-code --profile myproject.yaml --output /tmp/bundle-cc
+forma verify /tmp/bundle-cc
+forma install --target claude-code --scope user /tmp/bundle-cc
 ```
+
+## 怎么选
+
+| 路径 | 适合 | 产物 |
+|---|---|---|
+| `forma-creator` | 临场定制，先试一套项目 workflow。 | 已验证的一次性 skill bundle 或 Codex plugin。 |
+| `forma explain profile` + agent | 一开始就要可 review、可维护的长期源码。 | tracked profile YAML，再编译成 workflow。 |
+| `forma create-bundle` | 已经有 review 过的 profile。 | 从 profile 重复生成的 workflow bundle。 |
 
 ## 安装位置
 
-生成的 workflow 可以安装给当前用户，也可以放进项目：
+生成的 workflow 可以安装给当前用户，也可以安装到项目：
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
@@ -139,29 +117,23 @@ forma install --target claude-code --scope user /tmp/software-plan-first-claude-
 
 信任项目 skills 前先审查内容。生成技能可以包含脚本，也可能带有 target 专用工具行为。
 
-## 用 CLI 对话式起草 Profile
+## 验证产物
 
-在已经安装 Forma 的下游项目里，可以对 Agent 说：
+安装、提交或分享生成 bundle / plugin source 前，始终先验证：
 
-```text
-运行：
-  forma explain profile --target codex
-
-把命令输出当作 profile 编写标准。
-检查当前仓库，并提出一个可长期维护的 Forma profile。
-先展示 profile 结构，不要直接写文件。
-解释每条约束为什么放在那里，并明确标出未知项。
+```bash
+forma verify /tmp/myproject-bundle
 ```
 
-这也是轻量路径，但产物不是一次性 harness，而是可版本化的 profile 源。把 profile 当作长期源码前，需要人工评审。
+验证会检查结构和方法规则。它不证明 profile 是正确的项目决策，也不证明 agent 运行时一定遵守。边界见 [Verifier](./verifier.zh-CN.md)。
 
 ## 继续阅读
 
-- [核心概念](./concepts.zh-CN.md)：项目规则、workflow harness 和 task 执行模型。
+- [核心概念](./concepts.zh-CN.md)：三层模型、定制路径和阶段边界。
 - [Workflow Contract](./workflow-contract.zh-CN.md)：生成工作流具体约束什么。
-- [Skill Bundle](./skill-bundle.zh-CN.md)：Forma 写到磁盘上的产物是什么。
+- [Forma Creator](./forma-creator.zh-CN.md)：临场定制和 temporary injection 如何工作。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源如何组织。
-- [Forma Creator](./forma-creator.zh-CN.md)：一次性生成如何工作。
+- [Skill Bundle](./skill-bundle.zh-CN.md)：Forma 写到磁盘上的产物是什么。
 - [Verifier](./verifier.zh-CN.md)：`forma verify` 检查什么。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。
-- [使用说明](./usage.zh-CN.md)：命令参考和安装位置。
+- [使用说明](./usage.zh-CN.md)：完整命令参考。

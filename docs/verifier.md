@@ -2,12 +2,16 @@
 
 Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 
-`forma verify` checks generated skill bundles, `forma-creator` bundles, and
+`forma verify` checks generated workflow bundles, `forma-creator` bundles, and
 Codex plugin outputs.
 
-It is the engineering boundary that keeps Forma from being only prose:
-generated outputs must have a valid structure, match the target contract, and
-preserve the expected Plan-First workflow shape.
+It is the engineering boundary before installation, commit, or sharing:
+generated outputs must have valid structure, match the target contract, and
+preserve the workflow shape needed to drive task contracts.
+
+Verification checks the output, not the team rules themselves. On-the-spot rules
+extracted by creator, tracked-profile project judgment, and proof sufficiency in
+real tasks still need human review.
 
 ## When To Run It
 
@@ -16,13 +20,14 @@ Run verification:
 - before installing a generated bundle or handing a Codex plugin to Codex;
 - before committing a generated baseline;
 - after changing a profile;
+- after creator on-the-spot generation;
 - after temporary injection;
 - after renaming generated skills;
 - after changing methodology, target adapter, or verifier rules;
 - before sharing a `forma-creator` bundle.
 
 ```bash
-forma verify /tmp/backend-plan-first-codex
+forma verify /tmp/settings-workflow-codex
 forma verify source/skill-creator/
 ```
 
@@ -40,7 +45,7 @@ It checks areas such as:
 - required body sections;
 - referenced `references/*.md` files existing inside the same skill;
 - script/resource paths not borrowing from sibling skill directories;
-- plan-first stage presence and stage identity;
+- workflow stage presence and stage identity;
 - target-specific metadata rules, such as Codex metadata being present for
   Codex bundles and absent from Claude Code bundles when required;
 - methodology-specific expectations for stages such as `shape`, `gauge`,
@@ -51,12 +56,13 @@ with Forma.
 
 ## What It Does Not Check
 
-Verification is not semantic review.
+Verification covers structure and methodology. Semantic review remains outside
+the verifier scope.
 
 It does not prove:
 
-- the profile is a good project decision;
-- the generated workflow is complete for a specific project's task contracts;
+- the profile or on-the-spot rules are good project decisions;
+- the generated workflow covers every important task contract for a project;
 - every validation command, gate, or proof path is sufficient;
 - external source adapters are authenticated or reachable;
 - the agent will always behave correctly;
@@ -65,18 +71,16 @@ It does not prove:
 
 Human review still matters.
 
-## Common Failure Classes
+## Common Verification Errors
 
-Common failures include:
-
-| Failure | Usual cause |
+| Error | Usual cause |
 |---|---|
 | Missing frontmatter keys | A generated or hand-written `SKILL.md` is not target-readable. |
 | Name/directory mismatch | A renamed skill did not update manifest, directory, and frontmatter consistently. |
 | Broken reference path | A skill points to a `references/*.md` file that was not copied into that skill. |
 | Cross-skill borrowing | A generated skill reaches into a sibling skill's `references/` or `scripts/`. |
 | Target metadata mismatch | Codex-only metadata appears in a Claude Code bundle, or Codex output lacks required metadata. |
-| Methodology rule failure | A stage lost core plan-first behavior such as read-only grounding or review-gated execution. |
+| Methodology rule error | A stage lost core workflow behavior such as read-only grounding or review-gated execution. |
 
 ## Manifest And Drift
 
@@ -88,7 +92,7 @@ Verification uses that manifest to understand the bundle. Drift checks compare
 committed generated baselines against what the current compiler should emit.
 
 The manifest is provenance. Verification is conformance. Neither replaces
-review of the profile's intent or the task-level contract it produces.
+review of profile intent, on-the-spot rules, or real task contracts.
 
 ## CI Usage
 
@@ -105,7 +109,7 @@ git diff --check
 
 These checks cover structure, target metadata, local Markdown links, whitespace,
 and generated-bundle conformance. They do not replace review of profile intent,
-temporary injection policy, or runtime agent behavior.
+on-the-spot rules, or runtime agent behavior.
 
 ## Bundled Verifier
 
