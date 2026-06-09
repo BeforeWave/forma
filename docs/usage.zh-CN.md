@@ -16,6 +16,7 @@
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
 | 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
 | 生成 Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`，然后通过 Codex 安装 plugin，不要用 `forma install`。 |
+| handoff 前诊断生成产物 | `forma doctor <dir>` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和下一步。 |
 | 给 agent 提供编写规则 | `forma explain profile --target codex` 或 `forma explain temporary-injection --target codex` | 把输出作为只读指南，再起草 profile 或一次性 creator injection。 |
 
 使用 `create-bundle` 或 `create-plugin`；旧的 `forma create` 命令不再支持。
@@ -37,6 +38,7 @@ install verified 本地产物、verify 产物，还是打印 authoring guidance 
 
 ```bash
 forma verify /tmp/settings-workflow-codex
+forma verify --json /tmp/settings-workflow-codex
 ```
 
 安装、提交或分享生成 workflow 产物前，先运行这个命令。
@@ -45,8 +47,24 @@ forma verify /tmp/settings-workflow-codex
 
 - 如果 skill bundle 或 creator 验证通过，用 `forma install` 安装 verified 本地路径。
 - 如果 Codex plugin 验证通过，通过 Codex 安装，不要用 `forma install`。
+- 如果路径含义不清楚，运行 `forma doctor <path>` 查看安装路线和下一步。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
+
+当其他工具或 agent 需要结构化结果时，使用 `--json`。JSON report 保持同样的退出码契约，并为每条 rule result 提供语义 failure class。
+
+### `forma doctor <path>`
+
+handoff 或安装前诊断一个生成产物：
+
+```bash
+forma doctor /tmp/settings-workflow-codex
+forma doctor --json /tmp/forma-codex-plugin
+```
+
+doctor 输出会说明 artifact kind、target、验证状态、`forma install` 是否支持、当前是否可安装、正确安装路线、blockers 和下一步。
+
+当用户或 agent 不确定当前路径是 skill、skill bundle、Codex plugin、损坏产物还是不支持的目录时，先运行这个命令。
 
 ### `forma create-bundle`
 

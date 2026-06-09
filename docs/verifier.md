@@ -28,6 +28,7 @@ Run verification:
 
 ```bash
 forma verify /tmp/settings-workflow-codex
+forma verify --json /tmp/settings-workflow-codex
 forma verify source/skill-creator/
 ```
 
@@ -53,6 +54,17 @@ It checks areas such as:
 
 The exact rule set lives in the bundled `forma_verifier` package and evolves
 with Forma.
+
+Use `forma verify --json <path>` when an agent, CI job, or handoff tool needs
+machine-readable results. The JSON report includes the artifact path, bundle
+kind, pass/fail summary, rule ids, severities, semantic failure classes, result
+paths, and messages. The default human output is unchanged.
+
+The bundled creator verifier supports the same JSON form:
+
+```bash
+python scripts/verify.py --json <generated-output>
+```
 
 ## What It Does Not Check
 

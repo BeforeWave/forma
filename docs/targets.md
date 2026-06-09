@@ -38,6 +38,10 @@ current Codex docs to add that source to a Codex marketplace, then install and
 enable it through Codex with `codex plugin add <plugin>@<marketplace-name>` or
 the Codex plugin UI. Start a new thread after install.
 
+Run `forma doctor <plugin-root>` when handing a plugin to another user or agent.
+It confirms the artifact is a Codex plugin, verifies the output, and reports
+that installation belongs to Codex rather than `forma install`.
+
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 

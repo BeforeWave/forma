@@ -32,6 +32,9 @@ Codex 项目级 skills 安装到 `.codex/skills`。用户级 skills 安装到 `$
 source 加到 Codex marketplace，然后交给 Codex 安装和启用：运行
 `codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开 thread。
 
+把 plugin 交给其他用户或 agent 前，可以运行 `forma doctor <plugin-root>`。它会确认
+artifact 是 Codex plugin，验证输出，并说明安装应交给 Codex，而不是 `forma install`。
+
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
 

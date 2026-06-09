@@ -91,8 +91,10 @@ conditional_overlays:
         pour:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before changing Forma-owned profiles or generated self-iteration behavior.
           - Verify every affected top-level profile by running forma create and forma verify for at least one target.
+          - After changing profiles/forma-self, regenerate the Forma Codex plugin and reinstall it through Codex before closure.
         flow:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
+          - After automated profiles/forma-self changes, regenerate the Forma Codex plugin and reinstall it through Codex before closure.
       validation_commands:
         pour:
           - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py

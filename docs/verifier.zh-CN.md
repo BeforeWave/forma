@@ -23,6 +23,7 @@
 
 ```bash
 forma verify /tmp/settings-workflow-codex
+forma verify --json /tmp/settings-workflow-codex
 forma verify source/skill-creator/
 ```
 
@@ -44,6 +45,16 @@ forma verify source/skill-creator/
 - `shape`、`gauge`、`seal`、`pour` 等阶段是否保留核心方法要求。
 
 具体规则在随包提供的 `forma_verifier` package 中，后续会随 Forma 演进。
+
+当 agent、CI 或 handoff 工具需要机器可读结果时，使用
+`forma verify --json <path>`。JSON report 会包含 artifact path、bundle kind、
+通过状态摘要、rule id、severity、语义 failure class、结果路径和 message。默认的人类可读输出不变。
+
+creator 随包 verifier 也支持同样的 JSON 形式：
+
+```bash
+python scripts/verify.py --json <generated-output>
+```
 
 ## 不检查什么
 

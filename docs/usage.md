@@ -19,6 +19,7 @@ can start there when it is unsure which command path to use.
 | Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
 | Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
 | Build Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | `forma verify <dir>`, then install the plugin through Codex, not `forma install`. |
+| Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
 | Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
 
 Use `create-bundle` or `create-plugin`; the old `forma create` command is not
@@ -41,6 +42,7 @@ Verifies a generated skill bundle, `forma-creator` bundle, or Codex plugin:
 
 ```bash
 forma verify /tmp/settings-workflow-codex
+forma verify --json /tmp/settings-workflow-codex
 ```
 
 Use it before installing, committing, or sharing generated workflow outputs.
@@ -50,10 +52,32 @@ Next action:
 - If a skill bundle or creator verifies, install the verified local path with
   `forma install`.
 - If a Codex plugin verifies, install it through Codex, not `forma install`.
+- If the path is ambiguous, run `forma doctor <path>` to get the install route
+  and next steps.
 
 `forma verify` checks structure and methodology rules. It does not replace
 profile review or product judgment. See [Verifier](./verifier.md) for the
 verification boundary.
+
+Use `--json` when another tool or agent needs structured output. The JSON report
+keeps the same exit code contract and includes semantic failure classes for each
+reported rule result.
+
+### `forma doctor <path>`
+
+Diagnoses a generated artifact before handoff or installation:
+
+```bash
+forma doctor /tmp/settings-workflow-codex
+forma doctor --json /tmp/forma-codex-plugin
+```
+
+The doctor output identifies the artifact kind, target, verification status,
+whether `forma install` supports the artifact, whether it is installable now,
+the correct install route, blockers, and next steps.
+
+Use it when a user or agent is unsure whether the current path is a skill, skill
+bundle, Codex plugin, broken artifact, or unsupported directory.
 
 ### `forma create-bundle`
 

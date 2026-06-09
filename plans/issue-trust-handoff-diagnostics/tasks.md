@@ -13,7 +13,7 @@ Use-Check: cli-focused
 Depends: verifier-json
 Constraint: keep `forma doctor` out of generated workflow skills and do not imply that `forma install` can install Codex plugin artifacts.
 
-- [ ] [docs-profile-policy] Update public guidance, self-profile policy, and local user-path cleanup
+- [x] [docs-profile-policy] Update public guidance, self-profile policy, and local user-path cleanup
 Accept: Task Type=step; docs describe the new trust/handoff commands, `profiles/forma-self/` records CLI-first development, creator-visible sync, current-developer-home path exclusion, and post-profile-change plugin regeneration plus Codex installation, and current tracked current-developer-home strings are removed
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_docs_links.py tests/test_creator.py
 Validate: ! rg -ni --fixed-strings "$HOME" . --glob '!.git'
