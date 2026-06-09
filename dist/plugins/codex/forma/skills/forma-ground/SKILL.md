@@ -1,11 +1,11 @@
 ---
 name: "forma-ground"
-description: "Inspect code, docs, issues, and evidence before deciding."
+description: "Read Forma repository facts and produce grounding for a self-iteration plan."
 ---
 
 # Forma Ground
 
-Inspect code, docs, issues, and evidence before deciding.
+Read Forma repository facts and produce grounding for a self-iteration plan.
 
 ## Interaction Semantics
 
@@ -22,6 +22,20 @@ Inspect code, docs, issues, and evidence before deciding.
 
 ## Load As Needed
 
+- `references/forma-iteration-boundaries.md`
+- `references/forma-validation-matrix.md`
+- `references/forma-profile-policy.md`
+
+## Conditional References
+
+Use the recorded `Iteration Area` before loading overlay references.
+
+- If `Iteration Area` is `docs-only`, do not load overlay references.
+- If `Iteration Area` is `governance`, do not load overlay references.
+- If `Iteration Area` is `methodology-verifier`, do not load overlay references.
+- If `Iteration Area` is `creator-profile`, do not load overlay references.
+- If `Iteration Area` is `generated-baseline`, do not load overlay references.
+- If `Iteration Area` is `cross-layer`, do not load overlay references.
 
 ## Requirements
 
@@ -33,6 +47,19 @@ Inspect code, docs, issues, and evidence before deciding.
 - Use generic `ground-plan` only when no specialized grounding producer owns the domain. For activity solution work, direct activity requirement-to-solution replaces generic `ground-plan`; for Go refactor planning, direct Go refactor planning replaces generic `ground-plan`.
 - Do not treat a plan draft as the authoritative requirement source. Cite the original source material and any reviewed grounding handoff separately.
 - Do not write `plan.md`, do not write `tasks.md`, and do not start implementation.
+- Treat this profile stack as Forma-owned project source, not a sanitized public example.
+- Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
+- Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
+- Keep changes scoped to the active issue plan and tasks.
+- Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plan/task files, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.
+- Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
+- Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+- Confirm whether profile changes belong under profiles/forma-self, examples/profiles, or a downstream repository.
+- Confirm current generated baselines before recommending any delete/add replacement.
+- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Carry recorded `Iteration Area` in the grounding handoff when it is available.
 
 ## Output
 

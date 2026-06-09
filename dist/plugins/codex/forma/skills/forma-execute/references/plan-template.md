@@ -14,6 +14,16 @@ If Goal, Scope, Approach, Validation, Plan Strategy, or any applicable Artifact/
 - Use `Plan Strategy: hybrid` when iterative batches and deterministic setup/gate/promote tasks are both needed.
 - If omitted in a legacy plan, the default is `Plan Strategy: step-execution`.
 
+## Iteration Area
+
+- Record the selected `Iteration Area` route before finalization. Valid routes:
+  - `docs-only`: Documentation-only changes.
+  - `governance`: Repository governance, AGENTS instructions, workflow policy, or self-management rule changes.
+  - `methodology-verifier`: Canonical methodology or Layer 2 verifier changes.
+  - `creator-profile`: Layer 3 creator, profile schema, or profile stack changes.
+  - `generated-baseline`: Committed generated output replacement or drift baseline update.
+  - `cross-layer`: Coordinated Layer 1, Layer 2, Layer 3, docs, tests, and generated output work.
+
 ## Scope
 
 - State what is in scope for this issue.
