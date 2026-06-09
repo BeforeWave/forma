@@ -16,7 +16,7 @@ execution. The hard part is whether the plan applies project rules to the
 current task: which facts count, what may change, how the result is proved, and
 when the agent must stop.
 
-Forma writes those rules into how the agent works. You can tell the agent:
+That is the gap Forma fills. You can tell the agent:
 
 ```text
 Use the Forma CLI to install forma-creator, then have it read this project's
