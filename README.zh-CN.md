@@ -80,14 +80,14 @@ Codex skill bundle、Claude Code 和安装位置细节见 [Quick Start](./docs/q
 
 ## 同一个目标，不同团队的过关标准
 
-同样是给 settings 增加 rate limiting，普通 plan-first 可能只写：读相关代码、加 limiter、跑测试。Forma 要让计划先回答团队真正会审查的问题：
+同样是给 settings 增加 rate limiting，普通计划可能只写：读相关代码、加 limiter、跑测试。Forma 生成的 workflow 会带着团队原则，让 agent 在计划里先确定这次任务的工作边界和验收标准：
 
 - API contract 稳定性：先判断 API impact、response shape 和 generator proof，不能先改 handler，最后再补 contract。
 - 运行控制稳定性：先复用现有 config、rollout 开关或 limiter path，并覆盖 allowed、limited、disabled、invalid-config，不能顺手加新共享基础设施。
 - 设计系统一致性：先映射到已有 component state，说明文案来源，并留下 responsive 和 accessibility proof，不能临时做一个相似的 warning UI。
 - 运营效率：先确认操作员能处理、表格和筛选不退化，并对齐 runbook、telemetry、audit，不能只展示错误不给操作路径。
 
-如果计划没有回答团队最关切的准则，就还不该进入实现。完整的 contract 例子见 [Workflow Contract](./docs/workflow-contract.zh-CN.md)，更多 profile 和真实运行记录见 [Examples](./docs/examples.zh-CN.md)。
+如果 agent 的计划没有落实这些项目准则，就还不该进入实现。完整的 contract 例子见 [Workflow Contract](./docs/workflow-contract.zh-CN.md)，更多 profile 和真实运行记录见 [Examples](./docs/examples.zh-CN.md)。
 
 ---
 

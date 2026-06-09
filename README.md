@@ -103,16 +103,17 @@ Codex skill bundle, Claude Code, and install-location details are in
 
 ## Same Goal, Different Team Standards
 
-For the same goal, "add rate limiting to settings", a generic plan may say:
-read the code, add the limiter, run tests. Forma pushes the plan to answer what
-the team will actually review:
+For the same goal, "add rate limiting to settings", a plain plan may say:
+read the code, add the limiter, run tests. A Forma-generated workflow carries
+the team's rules into planning, so the agent first fixes this task's work
+boundaries and acceptance standard:
 
 - API contract stability: classify API impact, response shape, and generator proof before changing handlers.
 - Runtime control stability: reuse existing config, rollout switches, or limiter paths, and cover allowed, limited, disabled, and invalid-config cases.
 - Design-system consistency: map to an existing component state, name the copy source, and record responsive and accessibility proof.
 - Operator efficiency: place the state where an operator can act, preserve table and filter flow, and align runbook, telemetry, and audit behavior.
 
-If the plan misses the team's highest-risk standard, implementation has not
+If the agent's plan does not apply those project rules, implementation has not
 earned its start. See [Workflow Contract](./docs/workflow-contract.md) for a
 detailed task-contract example and [Examples](./docs/examples.md) for profiles
 and real tracked runs.
