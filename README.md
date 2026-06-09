@@ -11,36 +11,31 @@ Coding agents usually get into trouble in real projects not because they cannot
 write code, but because they start implementation before the team's delivery
 rules have been applied to the task.
 
-Many teams already have agent-facing docs and generic "plan first, then
-execute" workflows. Those can make an agent read rules and write a staged plan,
-but fixed stages are not the same thing as team standards. The plan can still
-miss task-level constraints the team can rely on and verify.
+Many teams already have agent-facing docs and ask agents to plan before
+execution. The hard part is whether the plan applies project rules to the
+current task: which facts count, what may change, how the result is proved, and
+when the agent must stop.
 
-Forma closes that gap. You can tell the agent:
+Forma writes those rules into how the agent works. You can tell the agent:
 
 ```text
-Use the Forma CLI to customize a workflow for this project. Read the docs and
-code, extract the engineering rules, and generate a workflow I can use.
+Use the Forma CLI to install forma-creator, then have it read this project's
+docs and code, extract the rules, and generate a workflow I can use personally.
 ```
 
-Forma helps the team clarify the practices that matter most, then generates a
-workflow that guards them. The workflow holds the agent to those rules across
-planning, validation, proof, and stop conditions.
+Forma brings those rules out of docs and conventions and into each task run.
+The agent cannot stop at a rough plan; it must explain evidence, boundaries,
+validation, proof, and stop conditions according to project standards.
 
 ---
 
 ## How Forma Works
 
-Forma does not execute the project task itself. It turns project rules into an
-agent workflow. Once installed, that workflow makes the agent write a task
-contract before it edits files, then carries those rules through evidence,
-implementation, validation, and proof.
-
-Those rules move through three layers:
+Forma manages project rules across three layers:
 
 - `profile`: team-approved practices, kept in version control for review and maintenance.
 - `workflow output`: the installed agent workflow, as a Codex / Claude Code skill bundle or a Codex plugin.
-- `task contract`: the plan contract the agent creates for one task, recorded under `plans/issue-<id>/`.
+- `task contract`: the plan contract the agent writes for one task, recorded under `plans/issue-<id>/`.
 
 The default workflow uses four core skills to manage the task contract:
 
@@ -51,9 +46,9 @@ The default workflow uses four core skills to manage the task contract:
 | `forma-lock` | Write the accepted approach into `plan.md` and `tasks.md`, locking the task contract. |
 | `forma-execute` | Execute one accepted task, run validation, record proof, and stop when review is needed. |
 
-`forma-showhand` is the autopilot entrypoint for `forma-execute`: once a plan is
-locked, it continues remaining tasks until blocked, validation does not pass, or
-human input is needed.
+`forma-showhand` is the continuous execution entrypoint: once a plan is locked,
+it continues remaining tasks until blocked, validation does not pass, or human
+input is needed.
 
 When the team updates a profile, it updates which rules the workflow guards.
 Regenerate the bundle or plugin, and the agent plans and executes against the
@@ -65,8 +60,8 @@ new constraints.
 
 `forma-creator` is the lightest entrypoint: use natural language to have the
 agent read the project, extract rules, and generate a workflow for personal use.
-When those rules need team review and ongoing iteration, use `Forma CLI +
-profile`.
+When those rules need team review and ongoing iteration, move them into a
+profile.
 
 For personal use:
 
@@ -96,7 +91,7 @@ Issue:
 The first useful response should be a proposal, not a patch. If the agent edits
 files immediately, the workflow was not loaded or was not triggered.
 
-Codex skill bundle, Claude Code, and install-location details are in
+Codex skill bundle, Claude Code, plugin, and install-location details are in
 [Quick Start](./docs/quick-start.md) and [Usage](./docs/usage.md).
 
 ---
@@ -105,7 +100,7 @@ Codex skill bundle, Claude Code, and install-location details are in
 
 For the same goal, "add rate limiting to settings", a plain plan may say:
 read the code, add the limiter, run tests. A Forma-generated workflow carries
-the team's rules into planning, so the agent first fixes this task's work
+the team's rules into planning, so the agent first sets this task's work
 boundaries and acceptance standard:
 
 - API contract stability: classify API impact, response shape, and generator proof before changing handlers.
@@ -143,13 +138,13 @@ regular custom skill may be enough.
 The repository contains more than concept docs.
 
 `examples/profiles/` contains sanitized profiles derived from real workflow
-families. They show how teams express engineering rules, source adapters,
+families. They show how teams express engineering rules, source-reading rules,
 validation depth, proof, and stop conditions.
 
 `examples/generated/` contains Codex and Claude Code baselines compiled from
 those profiles. They are used to inspect generated output and catch drift.
 
-`plans/issue-*/` is Forma's own workflow track. Each issue records `plan.md`,
+`plans/issue-*/` is Forma's own development record. Each issue records `plan.md`,
 `tasks.md`, and `runs/task-*.md` with real task contracts, validation results,
 and proof from Forma development.
 
@@ -173,8 +168,9 @@ Current focus:
 Committed generated examples are mainly drift checks. Runtime behavior should be
 judged by the contract and proof left by the agent during a real run.
 
-Forma also uses its own plan-first workflow for development; this repository's
-source profile lives in [`profiles/forma-self/`](./profiles/forma-self/).
+Forma also uses its own plan-before-execute workflow for development; this
+repository's profile source lives in
+[`profiles/forma-self/`](./profiles/forma-self/).
 
 ---
 
