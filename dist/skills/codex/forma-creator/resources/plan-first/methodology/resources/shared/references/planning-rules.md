@@ -12,6 +12,7 @@ Use these rules for plan-finalization skills in projects that follow the plan-fi
 - Treat Scope as unconverged unless the current conversation explicitly settles both the in-scope work and the key out-of-scope boundaries.
 - Treat Approach as unconverged unless the current conversation explicitly settles the intended deliverable shape, the concrete surfaces to touch, and whether the work adds new assets or edits existing ones. `finalize-plan` should assume the destination itself is a planning decision: broad directions such as "under the auth module", "write a markdown doc", or "add a file in that area" are not enough if the agent would still need to choose the actual file path, file count, or touched files.
 - Treat Validation as unconverged unless the current conversation explicitly settles the task-local validation contract, any reusable task-safe shared checks, and the issue-level final validation or explicit review-only standard.
+- Treat Final Validation as unconverged if any proposed command line depends on shell state from a previous line. Each final validation line must be a self-contained command; do not accept standalone variable assignments, `cd`, or `export` lines. Fold setup, command execution, and cleanup into one line when a smoke check needs multiple shell operations.
 - Treat Plan Strategy as unconverged for new plans unless the conversation explicitly selects `step-execution`, `loop-exploration`, or `hybrid`; existing plans without this field default to `step-execution`.
 - For `loop-exploration` or `hybrid`, settle baseline metric, target metric or convergence threshold, batch selection, batch size, artifact path/type, stop/skip/retry rules, no-full-rerun guard, write boundary, and final validation before finalization.
 - Treat grounding as unconverged unless the current conversation includes a selected grounding producer still to be run, or a confirmed grounding handoff whose known facts are sufficient for the final plan.
@@ -35,6 +36,7 @@ Use these rules for plan-finalization skills in projects that follow the plan-fi
 - A task is not execution-ready if its `Validate:` line could pass while the main promised behavior is absent.
 - In `plan.md`, use `## Validation` for shared task-safe checks written as `Check:` / `Command:` blocks.
 - In `plan.md`, use `## Final Validation` for fenced `sh` commands that only run when the last task is completed.
+- Each `## Final Validation` command line must be self-contained because the workflow runner executes every line as an independent command. Do not write standalone variable assignment, `cd`, or `export` lines; combine multi-step smoke checks into one command line with explicit setup and cleanup.
 - When writing copyable shell cleanup commands, avoid shell-reserved variable names such as zsh's read-only `status`; prefer portable names such as `exit_status`.
 - Write each new task entry as `- [ ] [<task-id>] ...` or `- [x] [<task-id>] ...`.
 - For new tasks, encode task type in the existing schema, preferably at the start of `Accept:` as `Task Type=<type>; ...`; existing tasks without a task type default to `step`.

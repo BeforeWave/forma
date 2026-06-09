@@ -610,6 +610,18 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     flow_text = (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "SKILL.md"
     ).read_text(encoding="utf-8")
+    seal_planning_rules = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["seal"]
+        / "references"
+        / "planning-rules.md"
+    ).read_text(encoding="utf-8")
+    seal_plan_template = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["seal"]
+        / "references"
+        / "plan-template.md"
+    ).read_text(encoding="utf-8")
     decision_gate = (
         output_dir
         / SAMPLE_STAGE_DIRS["shape"]
@@ -692,6 +704,8 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     ).exists()
     assert "Add or update Go tests" in pour_text
     assert "contract, compatibility, data, or operational risk" in pour_text
+    assert "Each `## Final Validation` command line must be self-contained" in seal_planning_rules
+    assert "standalone variable assignment, `cd`, or `export` lines" in seal_plan_template
     assert "already-finalized plan" in flow_text
     assert "Do not run `scripts/forma-workflow.sh init <issue-id>`" in flow_text
     assert "references/automated-execution.md" in flow_text
