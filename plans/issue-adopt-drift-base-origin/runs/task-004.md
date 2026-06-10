@@ -1,0 +1,88 @@
+# Task Evidence
+
+- Task: [regenerate-release-surfaces] Regenerate and verify affected committed generated artifacts
+- Completed At (UTC): 2026-06-10T08:10:12Z
+- Commit Hash: Recorded in the commit that introduces this evidence file.
+
+## Changed Files
+- dist/plugins/codex/forma/.forma-manifest.json
+- dist/plugins/codex/forma/skills/forma-execute/SKILL.md
+- dist/plugins/codex/forma/skills/forma-ground/SKILL.md
+- dist/plugins/codex/forma/skills/forma-lock/SKILL.md
+- dist/plugins/codex/forma/skills/forma-plan/SKILL.md
+- dist/plugins/codex/forma/skills/forma-showhand/SKILL.md
+- dist/skill-bundles/claude-code/.forma-manifest.json
+- dist/skill-bundles/claude-code/forma-execute/SKILL.md
+- dist/skill-bundles/claude-code/forma-execute/references/forma-iteration-boundaries.md
+- dist/skill-bundles/claude-code/forma-execute/references/forma-profile-policy.md
+- dist/skill-bundles/claude-code/forma-execute/references/forma-validation-matrix.md
+- dist/skill-bundles/claude-code/forma-execute/references/plan-template.md
+- dist/skill-bundles/claude-code/forma-ground/SKILL.md
+- dist/skill-bundles/claude-code/forma-ground/references/forma-iteration-boundaries.md
+- dist/skill-bundles/claude-code/forma-ground/references/forma-profile-policy.md
+- dist/skill-bundles/claude-code/forma-ground/references/forma-validation-matrix.md
+- dist/skill-bundles/claude-code/forma-lock/SKILL.md
+- dist/skill-bundles/claude-code/forma-lock/references/forma-iteration-boundaries.md
+- dist/skill-bundles/claude-code/forma-lock/references/forma-profile-policy.md
+- dist/skill-bundles/claude-code/forma-lock/references/forma-validation-matrix.md
+- dist/skill-bundles/claude-code/forma-lock/references/plan-template.md
+- dist/skill-bundles/claude-code/forma-plan/SKILL.md
+- dist/skill-bundles/claude-code/forma-plan/references/forma-iteration-boundaries.md
+- dist/skill-bundles/claude-code/forma-plan/references/forma-profile-policy.md
+- dist/skill-bundles/claude-code/forma-plan/references/forma-validation-matrix.md
+- dist/skill-bundles/claude-code/forma-showhand/SKILL.md
+- dist/skill-bundles/claude-code/forma-showhand/references/forma-iteration-boundaries.md
+- dist/skill-bundles/claude-code/forma-showhand/references/forma-profile-policy.md
+- dist/skill-bundles/claude-code/forma-showhand/references/forma-validation-matrix.md
+- dist/skill-bundles/codex/.forma-manifest.json
+- dist/skill-bundles/codex/forma-execute/SKILL.md
+- dist/skill-bundles/codex/forma-execute/agents/openai.yaml
+- dist/skill-bundles/codex/forma-execute/references/forma-iteration-boundaries.md
+- dist/skill-bundles/codex/forma-execute/references/forma-profile-policy.md
+- dist/skill-bundles/codex/forma-execute/references/forma-validation-matrix.md
+- dist/skill-bundles/codex/forma-execute/references/plan-template.md
+- dist/skill-bundles/codex/forma-ground/SKILL.md
+- dist/skill-bundles/codex/forma-ground/agents/openai.yaml
+- dist/skill-bundles/codex/forma-ground/references/forma-iteration-boundaries.md
+- dist/skill-bundles/codex/forma-ground/references/forma-profile-policy.md
+- dist/skill-bundles/codex/forma-ground/references/forma-validation-matrix.md
+- dist/skill-bundles/codex/forma-lock/SKILL.md
+- dist/skill-bundles/codex/forma-lock/agents/openai.yaml
+- dist/skill-bundles/codex/forma-lock/references/forma-iteration-boundaries.md
+- dist/skill-bundles/codex/forma-lock/references/forma-profile-policy.md
+- dist/skill-bundles/codex/forma-lock/references/forma-validation-matrix.md
+- dist/skill-bundles/codex/forma-lock/references/plan-template.md
+- dist/skill-bundles/codex/forma-plan/SKILL.md
+- dist/skill-bundles/codex/forma-plan/agents/openai.yaml
+- dist/skill-bundles/codex/forma-plan/references/forma-iteration-boundaries.md
+- dist/skill-bundles/codex/forma-plan/references/forma-profile-policy.md
+- dist/skill-bundles/codex/forma-plan/references/forma-validation-matrix.md
+- dist/skill-bundles/codex/forma-showhand/SKILL.md
+- dist/skill-bundles/codex/forma-showhand/agents/openai.yaml
+- dist/skill-bundles/codex/forma-showhand/references/forma-iteration-boundaries.md
+- dist/skill-bundles/codex/forma-showhand/references/forma-profile-policy.md
+- dist/skill-bundles/codex/forma-showhand/references/forma-validation-matrix.md
+- dist/skills/claude-code/forma-creator/.forma-manifest.json
+- dist/skills/claude-code/forma-creator/scripts/create.py
+- dist/skills/codex/forma-creator/.forma-manifest.json
+- dist/skills/codex/forma-creator/scripts/create.py
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/.forma-manifest.json
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/.forma-manifest.json
+- plans/issue-adopt-drift-base-origin/implement-notes.md
+
+## Validation Results
+- PASS [task, final]: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+- PASS [task, final]: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
+- PASS [task, final]: uv run --extra dev forma verify dist/skills/codex/forma-creator
+- PASS [task, final]: uv run --extra dev forma verify dist/skills/claude-code/forma-creator
+- PASS [task, final]: uv run --extra dev forma verify dist/skill-bundles/codex
+- PASS [task, final]: uv run --extra dev forma verify dist/skill-bundles/claude-code
+- PASS [task, final]: uv run --extra dev forma verify dist/plugins/codex/forma
+- PASS [task, final]: uv run --extra dev forma drift --release-surface
+- PASS [shared-check:focused-adopt-drift-tests]: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py tests/test_creator.py tests/test_creator_builder.py
+- PASS [shared-check:verify-creator-source, final]: uv run --extra dev forma verify source/skill-creator/
+- PASS [shared-check:diff-check, final]: git diff --check
+- PASS [final]: uv run --extra dev python -m pytest -p no:cacheprovider tests/
+
+## Risks / Unresolved Items
+- None recorded.

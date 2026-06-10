@@ -1,4 +1,11 @@
 {
+  "base_origin": {
+    "artifact_kind": "codex-plugin",
+    "base_output_digest": "ebe2e2a00590dd284a1540fe8e9ab612b604664a46fa3b34fca0fc7f448a9a60",
+    "normalization_id": "forma.normalized-output.v1",
+    "schema": "forma.base-origin.v1",
+    "target": "codex"
+  },
   "bundle_kind": "plan-first-workflow",
   "conditional_overlays": {
     "decision": {
@@ -236,14 +243,14 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-09T11:57:55Z",
+  "generated_at": "2026-06-10T08:08:38Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "b65e400",
+  "methodology_source_revision": "e336c8d",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "798f5cd151be71e494f86efcb8288ebf5d1b7075a63d727c77c62535329aab02",
   "methodology_version": "0.1.0",

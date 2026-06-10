@@ -83,13 +83,13 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
 - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
 - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
-- Settle profile decision-gate dimension before proposal-ready: Layer impact
-- Settle profile decision-gate dimension before proposal-ready: Profile ownership
-- Settle profile decision-gate dimension before proposal-ready: Generated baseline policy
-- Settle profile decision-gate dimension before proposal-ready: Documentation update requirement
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
-- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Settle workflow decision-gate dimension before proposal-ready: Layer impact
+- Settle workflow decision-gate dimension before proposal-ready: Profile ownership
+- Settle workflow decision-gate dimension before proposal-ready: Generated baseline policy
+- Settle workflow decision-gate dimension before proposal-ready: Documentation update requirement
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply workflow validation gate when it is relevant to the current task: `git diff --check`
 - Settle `Iteration Area` as part of the Decision Gate before proposal-ready when conditional overlays are present.
 - If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Identify affected docs and whether README.zh-CN.md must stay aligned with README.md.
 - If `Iteration Area` is `governance`, apply `governance` overlay constraint: Identify which governance surface changes: README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, profiles/forma-self, or plan-first workflow policy.

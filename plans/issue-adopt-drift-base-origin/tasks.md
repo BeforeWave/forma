@@ -27,7 +27,7 @@ Constraint: `--release-surface` must check only the known Forma `examples/genera
 Constraint: single-artifact drift without `--profile` or `--creator-source` may report base-origin freshness but must not claim full profile drift proof
 Constraint: do not modify README, README.zh-CN, docs/, STRUCTURE.md, AGENTS.md, or similar documentation files
 
-- [ ] [regenerate-release-surfaces] Regenerate and verify affected committed generated artifacts
+- [x] [regenerate-release-surfaces] Regenerate and verify affected committed generated artifacts
 Accept: Task Type=gate; every committed `examples/generated/` or `dist/` artifact affected by base-origin, rendering, adopt, or drift behavior is regenerated from source, verified, and passes release-surface drift with no unrelated documentation edits
 Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
 Validate: uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/

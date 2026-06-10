@@ -1,4 +1,11 @@
 {
+  "base_origin": {
+    "artifact_kind": "creator",
+    "base_output_digest": "eb61718d182fbf17a44938aa02be036740ec175fcaf1d3727f8d7d8c3b15db32",
+    "normalization_id": "forma.normalized-output.v1",
+    "schema": "forma.base-origin.v1",
+    "target": "codex"
+  },
   "bundle_kind": "creator",
   "creator": {
     "directory": "forma-creator",
@@ -8,8 +15,8 @@
       "references/canonical-plan-first.md": "52d3c767cb61608502e0e8e66a8981e2d182790cc229309eabde98f77fb7d569",
       "references/profile-authoring-principles.md": "248cf00d7205e36b6e10e8eb49f8115ab7d4dadb8bc9fe6d1ffd3d30b01ea7a0",
       "references/temporary-injection-generation.md": "15bd237528bf56a8788f0c90f42775800e39f07f6515f89bf285d043a82731c8",
-      "scripts/__pycache__/create.cpython-313.pyc": "ce93f51ade7dec2dbba360a8fb857c9742905727492f273144867926e3537a12",
-      "scripts/create.py": "5120fc44e3c73fc6f86e740119ac1aa3a215438bf492db859ba55c7ef524f911",
+      "scripts/__pycache__/create.cpython-313.pyc": "161b1f669be328b8343c7246a489d2591b781c4b62e8fe41eb3241d95afb9399",
+      "scripts/create.py": "a76a5b8f35ca6b511196f56a63a9466c441f685bbbae91e4fe8b259aad2e56ef",
       "scripts/forma_verifier/__init__.py": "4167f589bf4c95616d0de944e7c7ac9797b4feb2da553a601065b2c0510fc73a",
       "scripts/forma_verifier/__pycache__/__init__.cpython-311.pyc": "07bd66e65f06c09abe1026ee5962161cbf327edb79f121785a97d3c7865b6e82",
       "scripts/forma_verifier/__pycache__/__init__.cpython-313.pyc": "4d879646279a0f962ccb31b90ed44261e067097d7b5feef336803f2636c7bb81",
@@ -29,19 +36,19 @@
       "scripts/verify.py": "51a9a82ef1f4592d81b335a421d7efbc7d21b5b2e86b1781d49c800d632c178a"
     },
     "name": "forma-creator",
-    "source_revision": "12b6d59",
+    "source_revision": "e336c8d",
     "source_revision_type": "git-short-sha",
-    "source_tree_digest": "945bee7fd5a22daf96800813bafc5d46af660d3e38bc3fa19a9bbe0138dba594"
+    "source_tree_digest": "e5ca5532a30866281bd5f41127bc3856202d107865e8d15cc7eb3f178a10c04f"
   },
   "format": "forma-creator-manifest-v1",
-  "generated_at": "2026-06-10T07:02:44Z",
+  "generated_at": "2026-06-10T08:08:38Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "12b6d59",
+  "methodology_source_revision": "e336c8d",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "798f5cd151be71e494f86efcb8288ebf5d1b7075a63d727c77c62535329aab02",
   "methodology_version": "0.1.0",

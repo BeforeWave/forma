@@ -70,3 +70,25 @@ Deviations From Plan:
 
 Follow-ups:
 - Task 4 should regenerate `dist` surfaces and then require release-surface drift to report fresh.
+
+## Task 4: regenerate-release-surfaces
+
+Outcome:
+- Regenerated the committed `examples/generated` sample bundles and all `dist` creator, skill-bundle, and Codex plugin surfaces from current source/profile inputs.
+- `forma drift --release-surface` now reports `fresh` for every known release-surface artifact.
+
+Decision Notes:
+- Examples were regenerated even though task 3 already reported them fresh, keeping this gate as the single release-surface refresh checkpoint.
+- Dist creator surfaces were regenerated from `source/skill-creator`; dist workflow bundle/plugin surfaces were regenerated from `profiles/forma-self/forma-self-iteration.yaml`.
+
+Plan Gaps Found:
+- None
+
+Classifications:
+- All changed `dist` and `examples/generated` files are generated artifacts, not documentation edits.
+
+Deviations From Plan:
+- None
+
+Follow-ups:
+- None

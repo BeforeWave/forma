@@ -57,9 +57,9 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
 - Confirm whether profile changes belong under profiles/forma-self, examples/profiles, or a downstream repository.
 - Confirm current generated baselines before recommending any delete/add replacement.
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
-- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply workflow validation gate when it is relevant to the current task: `git diff --check`
 - Carry recorded `Iteration Area` in the grounding handoff when it is available.
 
 ## Output

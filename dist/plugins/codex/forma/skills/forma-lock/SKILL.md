@@ -82,9 +82,9 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
 - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
 - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
-- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply workflow validation gate when it is relevant to the current task: `git diff --check`
 - Record finalized `Iteration Area` in `plan.md` so execution skills can read the route without re-deciding it.
 
 ## Output

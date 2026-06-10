@@ -64,9 +64,9 @@ Use the recorded `Iteration Area` before loading overlay references.
 - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
 - Run the narrowest relevant test first, then the shared validation gate before review-ready.
 - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- Apply profile validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
-- Apply profile validation gate when it is relevant to the current task: `git diff --check`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
+- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
+- Apply workflow validation gate when it is relevant to the current task: `git diff --check`
 - Read finalized `plan.md` and use recorded `Iteration Area` before applying conditional overlays; if `Iteration Area` is missing, stop-for-plan-correction.
 - If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before editing Forma documentation.
 - If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Remove stale command examples, deprecated flags, and references to superseded profile locations.
