@@ -15,7 +15,7 @@
 | 安装 creator，让 agent 从项目事实里定制 workflow | `forma build-creator --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>/<target>/forma-creator`，再用 `forma install --target <target> --scope <scope> <creator-path>` 安装，`scope` 填 `user` 或 `project`。 |
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
 | 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | `target` 填 `codex` 或 `claude-code`；运行 `forma verify <dir>`，再用 `forma install --target <target> --scope <scope> <dir>` 安装，`scope` 填 `user` 或 `project`。 |
-| 生成 Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`，然后通过 Codex 安装 plugin，不要用 `forma install`。 |
+| 生成 plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`；Codex plugin 通过 Codex 安装，Claude Code plugin root 用 `forma install --target claude-code` 安装。 |
 | handoff 前诊断生成产物 | `forma doctor <dir>` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和下一步。 |
 | 给 agent 提供编写规则 | `forma explain profile --target codex` 或 `forma explain temporary-injection --target codex` | 把输出作为只读指南，再起草 profile 或一次性 creator injection。 |
 
@@ -28,13 +28,13 @@
 打印根命令指南和命令列表。不带子命令时，`forma` 返回退出码 `0`，并显示
 和 `forma --help` 相同的路由指南。
 
-当 agent 需要判断是 build creator、create skill bundle、create Codex plugin、
+当 agent 需要判断是 build creator、create skill bundle、create plugin、
 install verified 本地产物、verify 产物，还是打印 authoring guidance 时，先用
 这个命令做 discovery。
 
 ### `forma verify <path>`
 
-验证生成的 skill bundle、`forma-creator` bundle 或 Codex plugin：
+验证生成的 skill bundle、`forma-creator` bundle、Codex plugin 或 Claude Code plugin：
 
 ```bash
 forma verify /tmp/settings-workflow-codex
@@ -47,6 +47,7 @@ forma verify --json /tmp/settings-workflow-codex
 
 - 如果 skill bundle 或 creator 验证通过，用 `forma install` 安装 verified 本地路径。
 - 如果 Codex plugin 验证通过，通过 Codex 安装，不要用 `forma install`。
+- 如果 Claude Code plugin 验证通过，用 `forma install --target claude-code` 安装 plugin root。
 - 如果路径含义不清楚，运行 `forma doctor <path>` 查看安装路线和下一步。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
@@ -64,7 +65,7 @@ forma doctor --json /tmp/forma-codex-plugin
 
 doctor 输出会说明 artifact kind、target、验证状态、`forma install` 是否支持、当前是否可安装、正确安装路线、blockers 和下一步。
 
-当用户或 agent 不确定当前路径是 skill、skill bundle、Codex plugin、损坏产物还是不支持的目录时，先运行这个命令。
+当用户或 agent 不确定当前路径是 skill、skill bundle、Codex plugin、Claude Code plugin、损坏产物还是不支持的目录时，先运行这个命令。
 
 ### `forma create-bundle`
 
@@ -93,29 +94,29 @@ Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
 ### `forma create-plugin`
 
-从 profile 生成本地 plugin 产物。当前 plugin 输出只支持 Codex：
+从 profile 生成本地 plugin 产物：
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma create-plugin --target claude-code --output /tmp/forma-claude-code-plugin
 ```
 
-输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
+Codex plugin 输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。Claude Code plugin 使用 `.claude-plugin/plugin.json`，同样带根 manifest 和嵌套 `skills/<skill-id>/`。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
 
 对 tracked profile 来说，Codex plugin id 来自 profile 的 `bundle.name`。plugin 展示名也从这个值派生，`plugin.json` 指向嵌套的 `./skills/` 目录。嵌套 skill 名称跟随 `.forma-manifest.json` 记录的 emitted skill 名称。如果 profile 通过 `stages.<stage>.name` 改了技能名，plugin 也会暴露这些改名后的 skills。
 
+Claude Code plugin 的 plugin name 同样来自 profile 的 `bundle.name`。如果 generated skill 名称以精确的 `<plugin-name>-` 开头，Forma 会在 plugin-local skill 名称里去掉这个前缀。比如 plugin `forma` 中，`forma-plan` 会变成 `plan`。Codex plugin 保持 emitted skill 名称，例如 `forma-plan`；不要依赖 `plugin:skill` 或 `$plugin:skill` 这种冒号触发方式调用 Codex plugin skill。
+
 必需选项：
 
-- `--target codex`
+- `--target codex|claude-code`
 - `--output <dir>`
 
 可选输入：
 
 - `--profile <file>`：顶层 tracked profile。省略时，plugin 会暴露 `forma-plan`、`forma-ground`、`forma-lock`、`forma-execute` 和 `forma-showhand`。
 
-`--target claude-code` 会明确报错，因为当前不支持 Claude Code plugin 输出。
-
-下一步：运行 `forma verify <output-dir>`，然后通过 Codex marketplace/plugin UI 安装
-plugin。不要把 Codex plugin 产物传给 `forma install`。
+下一步：运行 `forma verify <output-dir>`。Codex plugin 通过 Codex marketplace/plugin UI 安装。Claude Code plugin root 用 `forma install --target claude-code --scope user|project <output-dir>` 安装。
 
 ### `forma build-creator`
 
@@ -134,18 +135,19 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 
 - `--source <dir>`：使用指定的 `forma-creator` 源目录，而不是打包内置的运行时资源。
 
-每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle，并且可以在固定 target contract 允许时生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。临场定制路径见 [Forma Creator](./forma-creator.zh-CN.md)。
+每个生成的 `forma-creator` 都固定一个 target。Codex creator 生成 Codex 形态的 skill bundle 和 Codex plugin。Claude Code creator 生成 Claude Code 形态的 skill bundle 和 Claude Code plugin。临场定制路径见 [Forma Creator](./forma-creator.zh-CN.md)。
 
 下一步：运行 `forma verify <output-dir>/<target>/forma-creator`，再用 `forma install`
 安装这个 verified creator 路径。
 
 ### `forma install`
 
-安装已经验证过的本地单个 skill 或 skill bundle：
+安装已经验证过的本地单个 skill、skill bundle 或 Claude Code plugin root：
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
 forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
+forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 ```
 
 必需参数和选项：
@@ -160,8 +162,9 @@ forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 - 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
 - Codex plugin 安装会明确报错，并提示 Codex marketplace 设置、
   `codex plugin add <plugin>@<marketplace-name>`，以及安装后新开 thread。
+- Claude Code plugin root 会安装到项目级 `.claude/skills/<plugin-name>` 或用户级 `$HOME/.claude/skills/<plugin-name>`。
 
-下一步：安装 skill 或 skill bundle 后，新开 agent thread，让新安装的 skills 被发现。
+下一步：安装 skill、skill bundle 或 Claude Code plugin 后，新开 agent thread，让新安装的 skills 被发现。
 
 ### `forma explain`
 
@@ -181,7 +184,7 @@ forma explain temporary-injection --format json --target codex
 agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 tracked profile YAML。这个路径的产物是长期 profile 源，不是一次性 workflow。
 
 下一步：profile review 通过后，用 `forma create-bundle` 生成 skill bundle，或用
-`forma create-plugin` 生成 Codex plugin source。
+`forma create-plugin` 生成 plugin source。
 
 ## 安装目标
 
@@ -189,13 +192,18 @@ Forma 生成 target 专用 skill bundle。`forma install` 会把 verified 本地
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
+
+OpenCode 可以读取 `.agents/skills` 下的 Codex direct skills；因此 OpenCode 兼容路径使用 `--target codex`。Forma 不提供 `--target opencode`，也不生成 OpenCode JS/TS runtime plugin。
 
 Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。按照当前 Codex
 官方文档把生成出的 plugin root 加到 Codex marketplace，然后运行
 `codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
 Codex thread，这样 plugin skills 才会被发现。
+
+Claude Code plugin 输出可以通过 Forma 安装，因为 Claude Code 会从 `.claude/skills/<plugin-name>` 加载 skills-directory plugin。
 
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
@@ -249,7 +257,8 @@ stages:
 - 内部 injection map 使用内部阶段键 `shape`、`gauge`、`seal`、`pour`、`flow`，不要用 `forma-plan` 或 `forma-showhand` 这类对外 skill id 当键；
 - 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
 - creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，临场命名进 `rename`。
-- 通过 `forma-creator` 生成 Codex plugin 时，`rename.prefix` 也会成为 plugin id。没有 prefix 时，plugin id 保持 `forma`。
+- 通过 `forma-creator` 生成 plugin 时，`rename.prefix` 也会成为 plugin id/name。没有 prefix 时，plugin id/name 保持 `forma`。
+- Claude Code plugin-local skill 名会在存在精确 plugin-name 前缀时去掉该前缀；Codex plugin skill 名保持 emitted 名称。
 
 改名后验证生成 bundle：
 

@@ -1,11 +1,11 @@
 ---
 name: "forma-lock"
-description: "Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions."
+description: "Lock the execution plan and task contract."
 ---
 
-# Seal
+# Forma Lock
 
-Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
+Lock the execution plan and task contract.
 
 ## Interaction Semantics
 

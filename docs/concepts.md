@@ -47,7 +47,7 @@ Forma puts project rules into three layers:
 | Layer | Meaning |
 |---|---|
 | Project rules | Team-approved ways of working: authoritative sources, boundaries, required tools, validation depth, proof, and stop conditions. |
-| Workflow output | Installed workflow skills: a Codex / Claude Code skill bundle or Codex plugin. |
+| Workflow output | Installed workflow skills: a Codex / Claude Code skill bundle or plugin. |
 | Task contract | The plan contract the agent writes for one task under `plans/issue-<id>/`. |
 
 With on-the-spot customization, project rules enter this generated workflow
@@ -114,7 +114,7 @@ the same.
 |---|---|---|
 | `forma-creator` | On-the-spot customization; try a project workflow first. | One-off workflow output you can install and try. |
 | `forma explain profile` + agent | Durable source from the start. | Tracked profile YAML, reviewed before compilation. |
-| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Deterministic workflow bundle or Codex plugin. |
+| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Deterministic workflow bundle or plugin. |
 
 All three paths end in verified workflow output. The difference is whether the
 rules enter a one-off output first or become a long-term profile first.

@@ -655,7 +655,7 @@ def _check_claude_code_metadata(skill: SkillFile) -> List[RuleResult]:
     return []
 
 
-# ----- Codex plugin rules (apply when .codex-plugin/plugin.json exists) -----
+# ----- Plugin rules (apply when a plugin manifest exists) -----
 
 def check_codex_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
     if not _is_first_skill(skill, ctx):
@@ -785,6 +785,82 @@ def check_codex_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[Ru
     return results
 
 
+def check_claude_code_plugin_manifest(skill: SkillFile, ctx: BundleContext) -> List[RuleResult]:
+    if not _is_first_skill(skill, ctx):
+        return []
+    plugin_json = ctx.root / ".claude-plugin" / "plugin.json"
+    if not plugin_json.is_file():
+        return []
+    path = ".claude-plugin/plugin.json"
+    try:
+        raw = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [RuleResult(
+            "R204", path, "error", f"plugin.json could not be parsed: {exc}"
+        )]
+    if not isinstance(raw, dict):
+        return [RuleResult("R204", path, "error", "plugin.json must be an object")]
+    results: List[RuleResult] = []
+    plugin_name = raw.get("name")
+    if not isinstance(plugin_name, str) or not plugin_name.strip():
+        results.append(RuleResult(
+            "R204", path, "error", "plugin.json must include non-empty name"
+        ))
+    elif not KEBAB_CASE_RE.match(plugin_name.strip()):
+        results.append(RuleResult(
+            "R204",
+            path,
+            "error",
+            f"plugin.json name is not kebab-case: {plugin_name!r}",
+        ))
+    for field in ("version", "description"):
+        if not isinstance(raw.get(field), str) or not raw.get(field, "").strip():
+            results.append(RuleResult(
+                "R204", path, "error", f"plugin.json must include non-empty {field}"
+            ))
+    raw_skills = raw.get("skills")
+    if _plugin_contract_path(raw_skills) != "skills":
+        results.append(RuleResult(
+            "R204", path, "error", "plugin.json `skills` must resolve to `skills`"
+        ))
+    skills_root = ctx.root / "skills"
+    if not skills_root.is_dir():
+        results.append(RuleResult(
+            "R204", path, "error", "Claude Code plugin root must include skills/"
+        ))
+    elif not any(skill_file.path.is_relative_to(skills_root) for skill_file in ctx.skills):
+        results.append(RuleResult(
+            "R204",
+            path,
+            "error",
+            "Claude Code plugin root must include at least one skills/<name>/SKILL.md",
+        ))
+    emitted = ctx.manifest.get("emitted_skills")
+    if isinstance(emitted, dict):
+        emitted_records = _emitted_skill_records(emitted)
+        for skill_id, skill_dir in emitted_records:
+            skill_file = ctx.root / "skills" / skill_dir / "SKILL.md"
+            if not skill_file.is_file():
+                results.append(RuleResult(
+                    "R204",
+                    path,
+                    "error",
+                    f"emitted plugin skill {skill_id!r} must exist at "
+                    f"skills/{skill_dir}/SKILL.md",
+                ))
+                continue
+            frontmatter, _body = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
+            if frontmatter.get("name") != skill_id:
+                results.append(RuleResult(
+                    "R204",
+                    path,
+                    "error",
+                    f"emitted plugin skill {skill_id!r} must match "
+                    f"skills/{skill_dir}/SKILL.md name",
+                ))
+    return results
+
+
 def _plugin_contract_path(raw_path: object) -> Optional[str]:
     if not isinstance(raw_path, str):
         return None
@@ -838,4 +914,5 @@ ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
     check_conditional_overlays,
     check_target_metadata,
     check_codex_plugin_manifest,
+    check_claude_code_plugin_manifest,
 ]

@@ -244,15 +244,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     injection = _load_injection(args.injection_json)
     creator_manifest = _load_creator_manifest(creator_root)
     if args.artifact == "plugin":
-        if target != "codex":
-            print(
-                "error: plugin artifact is only supported for codex-targeted creators",
-                file=sys.stderr,
-            )
-            return 2
         build_plugin(
             methodology_dir=methodology_dir,
             output_dir=args.output.resolve(),
+            target=target,
             injection=injection,
             creator_manifest=creator_manifest,
         )
@@ -271,9 +266,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
     if args.artifact == "plugin":
         print(f"forma creator build-plugin: wrote {args.output}")
-        print(f"plugin manifest: {output_dir / '.codex-plugin' / 'plugin.json'}")
+        print(f"plugin manifest: {output_dir / _plugin_dir_name(target) / 'plugin.json'}")
         print("install hint:")
-        print(format_codex_plugin_install_hint(output_dir))
+        if target == "codex":
+            print(format_codex_plugin_install_hint(output_dir))
+        else:
+            print(format_claude_code_plugin_install_hint(output_dir))
     else:
         print(f"forma creator build-bundle: wrote {args.output}")
         print(
@@ -324,6 +322,39 @@ def format_codex_plugin_install_hint(plugin_root: Path) -> str:
     )
 
 
+def claude_code_plugin_name(plugin_root: Path) -> str:
+    plugin_json = plugin_root / ".claude-plugin" / "plugin.json"
+    try:
+        data = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return plugin_root.name or "<plugin>"
+    if not isinstance(data, dict):
+        return plugin_root.name or "<plugin>"
+    value = data.get("name")
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return plugin_root.name or "<plugin>"
+
+
+def format_claude_code_plugin_install_hint(plugin_root: Path) -> str:
+    resolved_root = plugin_root.resolve()
+    plugin_name = claude_code_plugin_name(resolved_root)
+    return "\n".join(
+        [
+            "Claude Code plugin generated, not installed.",
+            "",
+            "Plugin:",
+            f"  name: {plugin_name}",
+            f"  root: {resolved_root}",
+            "",
+            "Install with Forma:",
+            f"  forma install --target claude-code --scope user|project {resolved_root}",
+            "",
+            "Start a new Claude Code session so the plugin skills are discovered.",
+        ]
+    )
+
+
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Create a target-fixed Forma Plan-First workflow bundle from one-off injection JSON."
@@ -333,7 +364,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
         "--artifact",
         choices=ARTIFACTS,
         default="bundle",
-        help="Artifact to write. `bundle` is the default; `plugin` is Codex-only.",
+        help="Artifact to write. `bundle` is the default.",
     )
     parser.add_argument(
         "--injection-json",
@@ -547,28 +578,37 @@ def _emit_bundle_payload(
 def build_plugin(
     methodology_dir: Path,
     output_dir: Path,
+    target: str,
     injection: Mapping[str, Any],
     creator_manifest: Mapping[str, Any] | None = None,
 ) -> None:
-    """Build a Codex plugin artifact from the target-fixed creator source."""
+    """Build a target-specific plugin artifact from the target-fixed creator source."""
     methodology_dir = methodology_dir.resolve()
     _require_methodology(methodology_dir)
     output_dir = output_dir.resolve()
     skill_names = _skill_names(injection)
+    plugin_id = _plugin_id(injection)
     _prepare_plugin_output_dir(output_dir)
     skills_dir = output_dir / "skills"
     conditional_overlays = _emit_bundle_payload(
         methodology_dir=methodology_dir,
         output_dir=skills_dir,
-        target="codex",
+        target=target,
         injection=injection,
         skill_names=skill_names,
     )
-    plugin_dir = output_dir / ".codex-plugin"
+    if target == "claude-code":
+        skill_names = _localize_claude_code_plugin_skills(
+            skills_dir=skills_dir,
+            plugin_id=plugin_id,
+            skill_names=skill_names,
+        )
+    plugin_dir = output_dir / _plugin_dir_name(target)
     plugin_dir.mkdir(parents=True, exist_ok=True)
     (plugin_dir / "plugin.json").write_text(
         json.dumps(
             _plugin_manifest(
+                target=target,
                 injection=injection,
                 skill_names=skill_names,
                 descriptions=_skill_descriptions(methodology_dir, injection),
@@ -581,11 +621,11 @@ def build_plugin(
     )
     _write_manifest(
         output_dir,
-        "codex",
+        target,
         skill_names,
         conditional_overlays,
         creator_manifest,
-        _base_origin_for_plugin(methodology_dir),
+        _base_origin_for_plugin(methodology_dir, target),
     )
 
 
@@ -622,11 +662,22 @@ def _skill_descriptions(
 
 
 def _plugin_manifest(
+    target: str,
     injection: Mapping[str, Any],
     skill_names: Mapping[str, str],
     descriptions: Mapping[str, str],
 ) -> dict[str, object]:
     plugin_id = _plugin_id(injection)
+    if target == "claude-code":
+        return {
+            "name": plugin_id,
+            "version": CODEX_PLUGIN_VERSION,
+            "description": CODEX_PLUGIN_DESCRIPTION,
+            "author": {
+                "name": CODEX_PLUGIN_DEVELOPER,
+            },
+            "skills": "./skills/",
+        }
     display_name = _plugin_display_name(plugin_id)
     return {
         "id": plugin_id,
@@ -651,16 +702,88 @@ def _plugin_manifest(
 
 
 def _plugin_id(injection: Mapping[str, Any]) -> str:
+    value = DEFAULT_CODEX_PLUGIN_ID
     rename = injection.get("rename", {})
     if isinstance(rename, Mapping):
         raw_prefix = rename.get("prefix")
         if isinstance(raw_prefix, str) and raw_prefix.strip():
-            return raw_prefix.strip()
-    return DEFAULT_CODEX_PLUGIN_ID
+            value = raw_prefix.strip()
+    if not KEBAB_CASE_RE.fullmatch(value):
+        raise ValueError(f"plugin id must be lower kebab-case: {value!r}")
+    return value
 
 
 def _plugin_display_name(plugin_id: str) -> str:
     return " ".join(part.capitalize() for part in plugin_id.split("-"))
+
+
+def _plugin_dir_name(target: str) -> str:
+    if target == "codex":
+        return ".codex-plugin"
+    if target == "claude-code":
+        return ".claude-plugin"
+    raise ValueError(f"unsupported plugin target: {target}")
+
+
+def _plugin_artifact_kind(target: str) -> str:
+    if target == "codex":
+        return "codex-plugin"
+    if target == "claude-code":
+        return "claude-code-plugin"
+    raise ValueError(f"unsupported plugin target: {target}")
+
+
+def _localize_claude_code_plugin_skills(
+    skills_dir: Path,
+    plugin_id: str,
+    skill_names: Mapping[str, str],
+) -> dict[str, str]:
+    prefix = f"{plugin_id}-"
+    localized: dict[str, str] = {}
+    used_names: set[str] = set()
+    for kind in KINDS:
+        old_name = skill_names[kind]
+        local_name = old_name[len(prefix):] if old_name.startswith(prefix) else old_name
+        if not local_name:
+            raise ValueError(f"Claude Code plugin skill name for {kind} is empty")
+        if not KEBAB_CASE_RE.fullmatch(local_name):
+            raise ValueError(
+                f"Claude Code plugin skill name for {kind} is not kebab-case: "
+                f"{local_name!r}"
+            )
+        if local_name in used_names:
+            raise ValueError(f"duplicate Claude Code plugin skill name: {local_name}")
+        used_names.add(local_name)
+        old_path = skills_dir / old_name
+        new_path = skills_dir / local_name
+        if not old_path.is_dir():
+            raise ValueError(f"emitted skill directory is missing: skills/{old_name}")
+        if old_path != new_path:
+            if new_path.exists():
+                raise ValueError(
+                    f"cannot rename skills/{old_name} to skills/{local_name}; "
+                    "destination already exists"
+                )
+            old_path.rename(new_path)
+        _rewrite_skill_frontmatter_name(new_path / "SKILL.md", local_name)
+        localized[kind] = local_name
+    return localized
+
+
+def _rewrite_skill_frontmatter_name(skill_file: Path, name: str) -> None:
+    text = skill_file.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        raise ValueError(f"{skill_file} has no YAML frontmatter")
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            break
+        key = lines[index].split(":", 1)[0].strip()
+        if key == "name":
+            lines[index] = f"name: {name}"
+            skill_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            return
+    raise ValueError(f"{skill_file} frontmatter has no name")
 
 
 def _default_prompts(_display_name: str) -> list[str]:
@@ -686,7 +809,7 @@ def _base_origin_for_bundle(
         return _base_origin(output_dir, target, "skill-bundle")
 
 
-def _base_origin_for_plugin(methodology_dir: Path) -> dict[str, str]:
+def _base_origin_for_plugin(methodology_dir: Path, target: str) -> dict[str, str]:
     with tempfile.TemporaryDirectory(prefix="forma-base-origin-") as temp_root:
         output_dir = Path(temp_root) / "plugin"
         skills_dir = output_dir / "skills"
@@ -694,15 +817,23 @@ def _base_origin_for_plugin(methodology_dir: Path) -> dict[str, str]:
         _emit_bundle_payload(
             methodology_dir=methodology_dir,
             output_dir=skills_dir,
-            target="codex",
+            target=target,
             injection={},
             skill_names=skill_names,
         )
-        plugin_dir = output_dir / ".codex-plugin"
+        plugin_id = _plugin_id({})
+        if target == "claude-code":
+            skill_names = _localize_claude_code_plugin_skills(
+                skills_dir=skills_dir,
+                plugin_id=plugin_id,
+                skill_names=skill_names,
+            )
+        plugin_dir = output_dir / _plugin_dir_name(target)
         plugin_dir.mkdir(parents=True, exist_ok=True)
         (plugin_dir / "plugin.json").write_text(
             json.dumps(
                 _plugin_manifest(
+                    target=target,
                     injection={},
                     skill_names=skill_names,
                     descriptions=_skill_descriptions(methodology_dir, {}),
@@ -713,7 +844,7 @@ def _base_origin_for_plugin(methodology_dir: Path) -> dict[str, str]:
             + "\n",
             encoding="utf-8",
         )
-        return _base_origin(output_dir, "codex", "codex-plugin")
+        return _base_origin(output_dir, target, _plugin_artifact_kind(target))
 
 
 def _base_origin(root: Path, target: str, artifact_kind: str) -> dict[str, str]:
@@ -1639,14 +1770,18 @@ def _prepare_output_dir(output_dir: Path, skill_names: Mapping[str, str]) -> Non
 
 def _prepare_plugin_output_dir(output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    allowed = {".codex-plugin", ".forma-manifest.json", "skills"}
+    allowed = {".codex-plugin", ".claude-plugin", ".forma-manifest.json", "skills"}
     unexpected = [path.name for path in output_dir.iterdir() if path.name not in allowed]
     if unexpected:
         raise ValueError(
             "plugin output directory contains non-Forma files: "
             f"{', '.join(sorted(unexpected))}; choose an empty directory"
         )
-    for child in (output_dir / ".codex-plugin", output_dir / "skills"):
+    for child in (
+        output_dir / ".codex-plugin",
+        output_dir / ".claude-plugin",
+        output_dir / "skills",
+    ):
         if child.exists():
             shutil.rmtree(child)
     manifest_path = output_dir / ".forma-manifest.json"

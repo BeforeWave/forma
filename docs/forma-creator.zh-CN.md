@@ -17,9 +17,9 @@
 
 | 路径 | 适合 | 输入 | 输出 |
 |---|---|---|---|
-| `forma-creator` | 临场定制，先试一套项目 workflow。 | 项目事实、用户补充、确认后的准则。 | 已验证的一次性 skill bundle 或 Codex plugin。 |
+| `forma-creator` | 临场定制，先试一套项目 workflow。 | 项目事实、用户补充、确认后的准则。 | 已验证的一次性 skill bundle 或 plugin。 |
 | `forma explain profile` + agent | 一开始就要长期维护源码。 | profile 编写标准、项目事实、团队 review。 | tracked profile YAML，再编译成 workflow。 |
-| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 Codex plugin。 |
+| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 plugin。 |
 
 `forma-creator` 走的是“先试用”的路径。反复有用、团队认可的规则，再提升成 profile。`forma explain profile` 走的是“先长期化”的路径，产物是可 review、可维护的 YAML 源码。`forma create-bundle` 和 `forma create-plugin` 是 profile 已经存在后的确定性生成命令。
 
@@ -32,7 +32,7 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
 ```
 
-Codex creator 生成 Codex 形态的 skill bundle；用户要求 plugin 输出时，也可以生成 Codex plugin。Claude Code creator 只生成 Claude Code 形态的 skill bundle。不要用一个 target 的 creator 去生成另一个 target 的产物。
+Codex creator 生成 Codex 形态的 skill bundle；用户要求 plugin 输出时，也可以生成 Codex plugin。Claude Code creator 生成 Claude Code 形态的 skill bundle 和 Claude Code plugin。不要用一个 target 的 creator 去生成另一个 target 的产物。
 
 Creator 会报告生成产物的路径、验证结果和安装提示。它不会替用户直接把产物写进 Codex 或 Claude Code 的 skill roots。
 
@@ -46,7 +46,7 @@ Creator 会报告生成产物的路径、验证结果和安装提示。它不会
 2. agent 读取项目文档、代码、测试和现有约定。
 3. agent 提炼工程准则，拿给用户确认或补充。
 4. Creator 把确认后的准则分类，写成 temporary injection。
-5. Creator 生成固定 target 允许的 skill bundle 或 Codex plugin。
+5. Creator 生成固定 target 允许的 skill bundle 或 plugin。
 6. Creator 运行随包 verifier。
 7. 用户或 agent 按提示安装 verified 产物并试用。
 8. 反复有用、团队认可的规则，再提升成 tracked profile。

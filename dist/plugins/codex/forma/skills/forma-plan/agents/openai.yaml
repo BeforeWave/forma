@@ -1,4 +1,4 @@
 interface:
-  display_name: "Shape"
-  short_description: "Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization."
-  default_prompt: "Use $forma-plan for this plan-first workflow stage."
+  display_name: "Forma Plan"
+  short_description: "Clarify goals, constraints, boundaries, and acceptance criteria."
+  default_prompt: "Use $forma-plan to clarify goals, constraints, boundaries, and acceptance criteria before implementation."

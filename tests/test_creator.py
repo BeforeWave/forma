@@ -14,7 +14,7 @@ from forma.cli import main
 from forma.creator import build_bundle, load_profile
 from forma.creator.composer import load_stage_sources
 from forma.creator.manifest import find_methodology_dir
-from forma.plugins import build_codex_plugin
+from forma.plugins import build_claude_code_plugin, build_codex_plugin
 from forma_verifier import verify
 
 
@@ -899,6 +899,42 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
     assert manifest["emitted_skills"]["hone"]["name"] == "forma-reconcile"
     _assert_base_origin(manifest, "codex", "codex-plugin")
+
+
+def test_forma_self_profile_and_claude_code_plugin_localizes_skill_names(
+    tmp_path: Path,
+) -> None:
+    plugin_dir = tmp_path / "plugin"
+
+    plugin_json = build_claude_code_plugin(
+        profile_file=FORMA_SELF_PROFILE,
+        output_dir=plugin_dir,
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert verify(plugin_dir).passed
+    assert plugin_json == plugin_dir / ".claude-plugin" / "plugin.json"
+    assert not (plugin_dir / ".codex-plugin").exists()
+    assert (plugin_dir / "skills" / "plan" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "showhand" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert not (plugin_dir / "skills" / "forma-plan").exists()
+    assert not (plugin_dir / "skills" / "plan" / "agents" / "openai.yaml").exists()
+    plan_text = (plugin_dir / "skills" / "plan" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    assert "name: plan" in plan_text
+    plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
+    assert plugin["name"] == "forma"
+    assert plugin["skills"] == "./skills/"
+    manifest = json.loads(
+        (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "claude-code"
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
+    assert manifest["emitted_skills"]["hone"]["name"] == "reconcile"
+    _assert_base_origin(manifest, "claude-code", "claude-code-plugin")
 
 
 def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:

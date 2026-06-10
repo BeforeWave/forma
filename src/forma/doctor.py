@@ -79,7 +79,7 @@ def diagnose_artifact(path: Path) -> DoctorReport:
     report = verify(source)
     artifact_kind = _safe_artifact_kind(source)
     target = _artifact_target(source, artifact_kind)
-    forma_supported = artifact_kind in {"skill", "skill-bundle"}
+    forma_supported = artifact_kind in {"skill", "skill-bundle", "claude-code-plugin"}
     blockers = _blockers(report.passed, artifact_kind, forma_supported)
     installable_now = report.passed and forma_supported
     install_route = _install_route(source, artifact_kind, target)
@@ -116,6 +116,8 @@ def _safe_artifact_kind(source: Path) -> str:
 def _artifact_target(source: Path, artifact_kind: str) -> str:
     if artifact_kind == "codex-plugin":
         return "codex"
+    if artifact_kind == "claude-code-plugin":
+        return "claude-code"
     manifest = _load_manifest(source)
     target = manifest.get("target")
     if isinstance(target, str) and target.strip():
@@ -152,6 +154,8 @@ def _blockers(
 def _install_route(source: Path, artifact_kind: str, target: str) -> str:
     if artifact_kind == "codex-plugin":
         return "codex-plugin"
+    if artifact_kind == "claude-code-plugin":
+        return "forma-install:claude-code"
     if artifact_kind in {"skill", "skill-bundle"}:
         if target == "unknown":
             return "forma-install"
@@ -167,7 +171,7 @@ def _next_steps(
 ) -> list[str]:
     if artifact_kind == "unsupported":
         return [
-            "Provide a local skill, skill bundle, or Codex plugin artifact.",
+            "Provide a local skill, skill bundle, Codex plugin artifact, or Claude Code plugin artifact.",
             f"Run `forma verify {source}` after fixing the artifact shape.",
         ]
     if not verification_passed:
@@ -180,6 +184,10 @@ def _next_steps(
             "Install through Codex marketplace/plugin UI, not `forma install`.",
             f"After marketplace registration, run `codex plugin add {plugin_name}@<marketplace-name>`.",
             "Start a new Codex thread after installation.",
+        ]
+    if artifact_kind == "claude-code-plugin":
+        return [
+            f"Run `forma install --target claude-code --scope user|project {source}`.",
         ]
     if artifact_kind in {"skill", "skill-bundle"}:
         target_hint = target if target != "unknown" else "codex|claude-code"

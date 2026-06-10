@@ -1,0 +1,73 @@
+{
+  "base_origin": {
+    "artifact_kind": "claude-code-plugin",
+    "base_output_digest": "abe36f759cd2c3f0c06937efa22150bc49a51477c66ec55c690507488b6ce24b",
+    "normalization_id": "forma.normalized-output.v1",
+    "schema": "forma.base-origin.v1",
+    "target": "claude-code"
+  },
+  "bundle_kind": "plan-first-workflow",
+  "emitted_skills": {
+    "flow": {
+      "directory": "showhand",
+      "display_name": "Forma Showhand",
+      "name": "showhand"
+    },
+    "gauge": {
+      "directory": "ground",
+      "display_name": "Forma Ground",
+      "name": "ground"
+    },
+    "pour": {
+      "directory": "execute",
+      "display_name": "Forma Execute",
+      "name": "execute"
+    },
+    "seal": {
+      "directory": "lock",
+      "display_name": "Forma Lock",
+      "name": "lock"
+    },
+    "shape": {
+      "directory": "plan",
+      "display_name": "Forma Plan",
+      "name": "plan"
+    }
+  },
+  "format": "forma-bundle-manifest-v1",
+  "generated_at": "2026-06-10T16:17:27Z",
+  "generator": {
+    "name": "forma",
+    "repository_url": "https://github.com/BeforeWave/forma",
+    "version": "0.1.1"
+  },
+  "generator_version": "0.1.1",
+  "methodology_source_revision": "2376919",
+  "methodology_source_revision_type": "git-short-sha",
+  "methodology_tree_digest": "798f5cd151be71e494f86efcb8288ebf5d1b7075a63d727c77c62535329aab02",
+  "methodology_version": "0.1.0",
+  "mode": "solo",
+  "profile": {
+    "bundle_name": "forma",
+    "digest": "747d13e09cfd1013d9b8148591ac049d47af6b957b61c0e0c09200bd92b646a5",
+    "file_hashes": {
+      "forma-plan-first.yaml": "ad7b8632c2aebcd1cec8b63a4e04bb4242c3b91f28cf4c21e2dfa9872bce0850"
+    },
+    "org_name": "Forma",
+    "resolved_order": [
+      "forma-plan-first-default"
+    ],
+    "resource_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "resource_hashes": {},
+    "top_level_id": "forma-plan-first-default",
+    "top_level_path": "forma-plan-first.yaml"
+  },
+  "skills": [
+    "shape",
+    "gauge",
+    "seal",
+    "pour",
+    "flow"
+  ],
+  "target": "claude-code"
+}

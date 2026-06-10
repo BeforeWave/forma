@@ -23,7 +23,7 @@ from forma.origin import (
     normalized_payload_digest,
     normalized_payload_file_hashes,
 )
-from forma.plugins import build_codex_plugin
+from forma.plugins import build_plugin
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
@@ -31,6 +31,8 @@ from forma_verifier.rules import parse_frontmatter
 ADOPTION_REPORT_SCHEMA = "forma.profile-adoption.v1"
 ARTIFACT_BUNDLE = "skill-bundle"
 ARTIFACT_PLUGIN = "codex-plugin"
+ARTIFACT_CLAUDE_CODE_PLUGIN = "claude-code-plugin"
+PLUGIN_ARTIFACTS = {ARTIFACT_PLUGIN, ARTIFACT_CLAUDE_CODE_PLUGIN}
 PROFILE_FILE_NAME = "profile.yaml"
 REPORT_FILE_NAME = "adoption-report.json"
 
@@ -92,8 +94,8 @@ def adopt_profile(
             profile_id=selected_profile_id,
         )
         regenerated = temp_root / "regenerated"
-        if info.artifact_kind == ARTIFACT_PLUGIN:
-            build_codex_plugin(profile_file, regenerated)
+        if info.artifact_kind in PLUGIN_ARTIFACTS:
+            build_plugin(profile_file, regenerated, info.target)
         else:
             build_bundle(profile_file, regenerated, info.target)
         _assert_exact_payload_match(info.root, regenerated)
@@ -137,6 +139,21 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
             manifest=manifest,
             target=target,
             artifact_kind=ARTIFACT_PLUGIN,
+            plugin_id=plugin_id,
+            plugin_description=plugin_description,
+        )
+    if (root / ".claude-plugin" / "plugin.json").is_file():
+        if target != "claude-code":
+            raise ValueError("Claude Code plugin adoption requires target claude-code")
+        plugin = _load_json(root / ".claude-plugin" / "plugin.json")
+        plugin_id = _required_string(plugin, "name", "plugin.name")
+        plugin_description = _optional_string(plugin, "description")
+        return ArtifactInfo(
+            root=root,
+            workflow_root=root / "skills",
+            manifest=manifest,
+            target=target,
+            artifact_kind=ARTIFACT_CLAUDE_CODE_PLUGIN,
             plugin_id=plugin_id,
             plugin_description=plugin_description,
         )
@@ -202,7 +219,7 @@ def _generate_creator_baseline(
             "--output",
             str(output_dir),
         ]
-        if artifact_kind == ARTIFACT_PLUGIN:
+        if artifact_kind in PLUGIN_ARTIFACTS:
             args.extend(["--artifact", "plugin"])
         result = subprocess.run(
             args,
@@ -310,7 +327,7 @@ def _write_candidate_profile(
 
 
 def _baseline_workflow_root(baseline: Path, artifact_kind: str) -> Path:
-    if artifact_kind == ARTIFACT_PLUGIN:
+    if artifact_kind in PLUGIN_ARTIFACTS:
         return baseline / "skills"
     return baseline
 

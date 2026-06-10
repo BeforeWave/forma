@@ -1,0 +1,93 @@
+# Task Evidence
+
+- Task: [regenerate-release-surface] Regenerate and verify committed release artifacts
+- Completed At (UTC): 2026-06-10T16:19:05Z
+- Commit Hash: Recorded in the commit that introduces this evidence file.
+
+## Changed Files
+- dist/plugins/claude-code/forma/.claude-plugin/plugin.json
+- dist/plugins/claude-code/forma/.forma-manifest.json
+- dist/plugins/claude-code/forma/skills/execute/SKILL.md
+- dist/plugins/claude-code/forma/skills/execute/references/execution-rules.md
+- dist/plugins/claude-code/forma/skills/execute/references/implement-notes.md
+- dist/plugins/claude-code/forma/skills/execute/references/output-format.md
+- dist/plugins/claude-code/forma/skills/execute/references/plan-template.md
+- dist/plugins/claude-code/forma/skills/execute/references/task-runner.md
+- dist/plugins/claude-code/forma/skills/execute/references/tasks-template.md
+- dist/plugins/claude-code/forma/skills/execute/scripts/forma-workflow.sh
+- dist/plugins/claude-code/forma/skills/ground/SKILL.md
+- dist/plugins/claude-code/forma/skills/ground/references/output-format.md
+- dist/plugins/claude-code/forma/skills/lock/SKILL.md
+- dist/plugins/claude-code/forma/skills/lock/references/finalization-decision-gate.md
+- dist/plugins/claude-code/forma/skills/lock/references/output-format.md
+- dist/plugins/claude-code/forma/skills/lock/references/plan-materialization.md
+- dist/plugins/claude-code/forma/skills/lock/references/plan-template.md
+- dist/plugins/claude-code/forma/skills/lock/references/planning-rules.md
+- dist/plugins/claude-code/forma/skills/lock/references/task-structure.md
+- dist/plugins/claude-code/forma/skills/lock/references/tasks-template.md
+- dist/plugins/claude-code/forma/skills/lock/scripts/forma-workflow.sh
+- dist/plugins/claude-code/forma/skills/plan/SKILL.md
+- dist/plugins/claude-code/forma/skills/plan/references/grounding-handoff.md
+- dist/plugins/claude-code/forma/skills/plan/references/output-format.md
+- dist/plugins/claude-code/forma/skills/plan/references/plan-issue-rules.md
+- dist/plugins/claude-code/forma/skills/plan/references/proposal-decision-gate.md
+- dist/plugins/claude-code/forma/skills/showhand/SKILL.md
+- dist/plugins/claude-code/forma/skills/showhand/references/automated-execution.md
+- dist/plugins/claude-code/forma/skills/showhand/references/execution-rules.md
+- dist/plugins/claude-code/forma/skills/showhand/references/implement-notes.md
+- dist/plugins/claude-code/forma/skills/showhand/references/output-format.md
+- dist/plugins/claude-code/forma/skills/showhand/scripts/forma-workflow.sh
+- dist/plugins/codex/forma/.codex-plugin/plugin.json
+- dist/plugins/codex/forma/.forma-manifest.json
+- dist/plugins/codex/forma/skills/forma-execute/SKILL.md
+- dist/plugins/codex/forma/skills/forma-execute/agents/openai.yaml
+- dist/plugins/codex/forma/skills/forma-ground/SKILL.md
+- dist/plugins/codex/forma/skills/forma-ground/agents/openai.yaml
+- dist/plugins/codex/forma/skills/forma-lock/SKILL.md
+- dist/plugins/codex/forma/skills/forma-lock/agents/openai.yaml
+- dist/plugins/codex/forma/skills/forma-plan/SKILL.md
+- dist/plugins/codex/forma/skills/forma-plan/agents/openai.yaml
+- dist/plugins/codex/forma/skills/forma-showhand/SKILL.md
+- dist/plugins/codex/forma/skills/forma-showhand/agents/openai.yaml
+- dist/skill-bundles/claude-code/.forma-manifest.json
+- dist/skill-bundles/claude-code/forma-execute/SKILL.md
+- dist/skill-bundles/claude-code/forma-ground/SKILL.md
+- dist/skill-bundles/claude-code/forma-lock/SKILL.md
+- dist/skill-bundles/claude-code/forma-plan/SKILL.md
+- dist/skill-bundles/claude-code/forma-showhand/SKILL.md
+- dist/skill-bundles/codex/.forma-manifest.json
+- dist/skill-bundles/codex/forma-execute/SKILL.md
+- dist/skill-bundles/codex/forma-execute/agents/openai.yaml
+- dist/skill-bundles/codex/forma-ground/SKILL.md
+- dist/skill-bundles/codex/forma-ground/agents/openai.yaml
+- dist/skill-bundles/codex/forma-lock/SKILL.md
+- dist/skill-bundles/codex/forma-lock/agents/openai.yaml
+- dist/skill-bundles/codex/forma-plan/SKILL.md
+- dist/skill-bundles/codex/forma-plan/agents/openai.yaml
+- dist/skill-bundles/codex/forma-showhand/SKILL.md
+- dist/skill-bundles/codex/forma-showhand/agents/openai.yaml
+- dist/skills/claude-code/forma-creator/.forma-manifest.json
+- dist/skills/claude-code/forma-creator/references/agent-target.md
+- dist/skills/claude-code/forma-creator/scripts/create.py
+- dist/skills/claude-code/forma-creator/scripts/forma_verifier/rules.py
+- dist/skills/codex/forma-creator/.forma-manifest.json
+- dist/skills/codex/forma-creator/scripts/create.py
+- dist/skills/codex/forma-creator/scripts/forma_verifier/rules.py
+- plans/issue-agent-skill-target-install-surfaces/implement-notes.md
+- src/forma/drift.py
+- tests/test_cli.py
+
+## Validation Results
+- PASS [task, final]: uv run --extra dev forma drift --release-surface
+- PASS [task, final]: uv run --extra dev forma verify dist/plugins/codex/forma
+- PASS [task, final]: uv run --extra dev forma verify dist/plugins/claude-code/forma
+- PASS [final]: uv run --extra dev python -m pytest -p no:cacheprovider tests/
+- PASS [final]: uv run --extra dev forma verify source/skill-creator/
+- PASS [final]: uv run --extra dev forma verify dist/skills/codex/forma-creator
+- PASS [final]: uv run --extra dev forma verify dist/skills/claude-code/forma-creator
+- PASS [final]: uv run --extra dev forma verify dist/skill-bundles/codex
+- PASS [final]: uv run --extra dev forma verify dist/skill-bundles/claude-code
+- PASS [final]: git diff --check
+
+## Risks / Unresolved Items
+- None recorded.

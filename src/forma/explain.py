@@ -125,21 +125,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         else "Targets: `codex`, `claude-code`"
     )
     plugin_lines: list[str]
-    if target_agent in (None, "codex"):
-        plugin_intro = (
-            "Use this only for Codex plugin source output. Install the verified "
-            "plugin through Codex, not `forma install`."
-        )
-        if target_agent is None:
-            plugin_intro = (
-                "Codex plugin output is Codex-only. For Claude Code, generate a "
-                "skill bundle instead. Install the verified plugin through Codex, "
-                "not `forma install`."
-            )
+    if target_agent == "codex":
         plugin_lines = [
             "## Generate a Codex plugin from an already reviewed tracked profile",
             "",
-            plugin_intro,
+            "Install the verified plugin through Codex marketplace/plugin UI, "
+            "not `forma install`.",
             "",
             "```bash",
             "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
@@ -148,12 +139,39 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "```",
             "",
         ]
+    elif target_agent == "claude-code":
+        plugin_lines = [
+            "## Generate a Claude Code plugin from an already reviewed tracked profile",
+            "",
+            "Install the verified plugin root with `forma install --target "
+            "claude-code`.",
+            "",
+            "```bash",
+            "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>",
+            "forma verify <dir>",
+            "forma drift <dir> --profile <profile.yaml>",
+            "forma install --target claude-code --scope project <dir>",
+            "```",
+            "",
+        ]
     else:
         plugin_lines = [
-            "## Plugin output",
+            "## Generate plugin output from an already reviewed tracked profile",
             "",
-            f"`forma create-plugin --target {target}` is not supported. Generate "
-            "a skill bundle instead.",
+            "Codex plugins install through Codex marketplace/plugin UI. Claude "
+            "Code plugin roots can be installed with `forma install --target "
+            "claude-code`.",
+            "",
+            "```bash",
+            "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
+            "forma verify <dir>",
+            "forma drift <dir> --profile <profile.yaml>",
+            "",
+            "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>",
+            "forma verify <dir>",
+            "forma drift <dir> --profile <profile.yaml>",
+            "forma install --target claude-code --scope project <dir>",
+            "```",
             "",
         ]
 
@@ -164,6 +182,10 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "Use this guide to choose the right Forma command path before reading "
         "profile or injection authoring details.",
+        "",
+        "OpenCode compatibility uses Codex direct-skill output installed in "
+        "`.agents/skills`; Forma does not expose `--target opencode` or "
+        "OpenCode JS/TS plugin output.",
         "",
         "## Profile write boundary",
         "",
@@ -183,7 +205,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "## If the artifact type or install route is unclear",
         "",
         "Run `doctor` first. Do this before handoff when you do not know whether "
-        "a directory is a skill, skill bundle, creator, or Codex plugin source.",
+        "a directory is a skill, skill bundle, creator, Codex plugin source, "
+        "or Claude Code plugin source.",
         "",
         "```bash",
         "forma doctor <path>",
@@ -246,8 +269,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "- `drift` checks whether generated output is fresh against its source "
         "profile, creator source, or release surface.",
         "- `doctor` identifies artifact kind and the correct install route.",
-        "- `install` accepts verified local skills and skill bundles only; do "
-        "not pass URLs or Codex plugin sources.",
+        "- `install` accepts verified local skills, skill bundles, and Claude "
+        "Code plugin roots only; do not pass URLs or Codex plugin sources.",
         "- Omitting `--profile` generates generic no-profile workflow output, "
         "not project-specific rules.",
         "- `profile adopt` writes candidate profile packages for review, not "

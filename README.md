@@ -206,7 +206,7 @@ the agent leaves behind.
 Current focus:
 
 - Lower the cost of extracting project rules and generating profiles.
-- Make workflow bundles and Codex plugins easier to install.
+- Make workflow bundles and plugin outputs easier to install.
 - Improve generated bundle verification.
 - Add examples with real task contracts, execution, validation, and proof.
 

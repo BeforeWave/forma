@@ -13,14 +13,16 @@ from typing import Any, Mapping
 from forma.adapters import build_creator
 from forma.adopt import (
     ARTIFACT_BUNDLE,
+    ARTIFACT_CLAUDE_CODE_PLUGIN,
     ARTIFACT_PLUGIN,
+    PLUGIN_ARTIFACTS,
     _assert_base_origin,
     _generate_creator_baseline,
     _load_artifact_info,
 )
 from forma.creator import build_bundle
 from forma.origin import normalized_payload_digest
-from forma.plugins import build_codex_plugin
+from forma.plugins import build_plugin
 from forma_verifier import verify
 
 
@@ -153,6 +155,10 @@ def drift_release_surface(root: Path) -> DriftReport:
             root / "dist/plugins/codex/forma",
             root / "source/skill-creator",
         ),
+        _drift_with_creator_source(
+            root / "dist/plugins/claude-code/forma",
+            root / "source/skill-creator",
+        ),
     ]
     return DriftReport(tuple(results))
 
@@ -164,8 +170,8 @@ def _drift_with_profile(artifact_path: Path, profile_file: Path) -> DriftArtifac
         _assert_verify_passes(artifact)
         with tempfile.TemporaryDirectory(prefix="forma-drift-") as temp_root_text:
             regenerated = Path(temp_root_text) / "regenerated"
-            if info.artifact_kind == ARTIFACT_PLUGIN:
-                build_codex_plugin(profile_file, regenerated)
+            if info.artifact_kind in PLUGIN_ARTIFACTS:
+                build_plugin(profile_file, regenerated, info.target)
             else:
                 build_bundle(profile_file, regenerated, info.target)
             return _compare_payloads(
@@ -324,7 +330,7 @@ def _generate_creator_baseline_from_source(
             "--output",
             str(output_dir),
         ]
-        if artifact_kind == ARTIFACT_PLUGIN:
+        if artifact_kind in PLUGIN_ARTIFACTS:
             args.extend(["--artifact", "plugin"])
         result = subprocess.run(
             args,
@@ -406,6 +412,8 @@ def _safe_manifest_target(manifest: Mapping[str, Any]) -> str:
 def _manifest_artifact_kind(path: Path, manifest: Mapping[str, Any]) -> str:
     if (path / ".codex-plugin" / "plugin.json").is_file():
         return ARTIFACT_PLUGIN
+    if (path / ".claude-plugin" / "plugin.json").is_file():
+        return ARTIFACT_CLAUDE_CODE_PLUGIN
     if manifest.get("format") == "forma-creator-manifest-v1":
         return "creator"
     return ARTIFACT_BUNDLE

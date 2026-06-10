@@ -1,11 +1,11 @@
 ---
 name: "forma-plan"
-description: "Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization."
+description: "Clarify goals, constraints, boundaries, and acceptance criteria."
 ---
 
-# Shape
+# Forma Plan
 
-Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization.
+Clarify goals, constraints, boundaries, and acceptance criteria.
 
 ## Interaction Semantics
 

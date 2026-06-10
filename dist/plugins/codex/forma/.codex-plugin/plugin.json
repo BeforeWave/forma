@@ -2,7 +2,7 @@
   "author": {
     "name": "Forma"
   },
-  "description": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
+  "description": "Generic Plan-First workflow bundle for agents.",
   "id": "forma",
   "interface": {
     "brandColor": "#10A37F",
@@ -17,8 +17,8 @@
     ],
     "developerName": "Forma",
     "displayName": "Forma",
-    "longDescription": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
-    "shortDescription": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
+    "longDescription": "Generic Plan-First workflow bundle for agents.",
+    "shortDescription": "Generic Plan-First workflow bundle for agents."
   },
   "name": "forma",
   "skills": "./skills/",

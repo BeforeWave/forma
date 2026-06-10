@@ -113,7 +113,7 @@ forma install --target claude-code --scope user /tmp/bundle-cc
 
 | Path | Best for | Output |
 |---|---|---|
-| `forma-creator` | On-the-spot customization; try a project workflow first. | Verified one-off skill bundle or Codex plugin. |
+| `forma-creator` | On-the-spot customization; try a project workflow first. | Verified one-off skill bundle or plugin. |
 | `forma explain profile` + agent | Durable, reviewable source from the start. | Tracked profile YAML, then compiled workflow. |
 | `forma create-bundle` | A reviewed profile already exists. | Repeatable workflow bundle from profile source. |
 
@@ -123,9 +123,10 @@ Generated workflows can be installed for one user or into a project:
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
 | Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
 Review project skills before trusting them. Generated skills can include
 scripts and target-specific tool behavior.

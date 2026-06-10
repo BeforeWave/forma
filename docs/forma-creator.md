@@ -24,9 +24,9 @@ them, those rules enter the generated workflow output for this run.
 
 | Path | Best for | Input | Output |
 |---|---|---|---|
-| `forma-creator` | On-the-spot customization; try a project workflow first. | Project facts, user additions, confirmed rules. | Verified one-off skill bundle or Codex plugin. |
+| `forma-creator` | On-the-spot customization; try a project workflow first. | Project facts, user additions, confirmed rules. | Verified one-off skill bundle or plugin. |
 | `forma explain profile` + agent | Durable source from the start. | Profile authoring standard, project facts, team review. | Tracked profile YAML, then compiled workflow. |
-| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or Codex plugin. |
+| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or plugin. |
 
 `forma-creator` is the "try first" path. Rules that keep proving useful and win
 team agreement can be promoted into a profile. `forma explain profile` is the
@@ -42,10 +42,10 @@ forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
 ```
 
-A Codex creator generates Codex-shaped skill bundles and can generate Codex
-plugin output when the user asks for it. A Claude Code creator generates only
-Claude Code-shaped skill bundles. Do not use a creator built for one target to
-generate another target's output.
+A Codex creator generates Codex-shaped skill bundles and Codex plugin output
+when the user asks for it. A Claude Code creator generates Claude Code-shaped
+skill bundles and Claude Code plugin output. Do not use a creator built for one
+target to generate another target's output.
 
 The creator reports generated output paths, verification results, and install
 hints. It does not directly write the generated output into Codex or Claude Code
@@ -63,7 +63,7 @@ Normal lifecycle:
 2. The agent reads project docs, code, tests, and existing conventions.
 3. The agent extracts engineering rules and asks the user to confirm or add to them.
 4. The creator classifies the confirmed rules and writes temporary injection.
-5. The creator generates the skill bundle or Codex plugin allowed by the fixed target.
+5. The creator generates the skill bundle or plugin allowed by the fixed target.
 6. The creator runs the bundled verifier.
 7. The user or agent installs the verified output from the hints and tries it.
 8. Repeated, useful, team-approved rules can be promoted into a tracked profile.

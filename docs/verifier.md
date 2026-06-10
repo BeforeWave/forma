@@ -3,7 +3,7 @@
 Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 
 `forma verify` checks generated workflow bundles, `forma-creator` bundles, and
-Codex plugin outputs.
+Codex / Claude Code plugin outputs.
 
 It is the engineering boundary before installation, commit, or sharing:
 generated outputs must have valid structure, match the target contract, and
@@ -17,7 +17,8 @@ real tasks still need human review.
 
 Run verification:
 
-- before installing a generated bundle or handing a Codex plugin to Codex;
+- before installing a generated bundle, installing a Claude Code plugin, or
+  handing a Codex plugin to Codex;
 - before committing a generated baseline;
 - after changing a profile;
 - after creator on-the-spot generation;
@@ -49,6 +50,8 @@ It checks areas such as:
 - workflow stage presence and stage identity;
 - target-specific metadata rules, such as Codex metadata being present for
   Codex bundles and absent from Claude Code bundles when required;
+- plugin manifest rules, such as `.codex-plugin/plugin.json` or
+  `.claude-plugin/plugin.json` pointing at the nested `skills/` directory;
 - methodology-specific expectations for stages such as `shape`, `gauge`,
   `seal`, and `pour`.
 

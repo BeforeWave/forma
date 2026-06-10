@@ -1,4 +1,4 @@
 interface:
-  display_name: "Seal"
-  short_description: "Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions."
-  default_prompt: "Use $forma-lock for this plan-first workflow stage."
+  display_name: "Forma Lock"
+  short_description: "Lock the execution plan and task contract."
+  default_prompt: "Use $forma-lock to lock the execution plan and task contract."

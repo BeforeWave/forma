@@ -1,4 +1,4 @@
 interface:
-  display_name: "Pour"
-  short_description: "Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains."
-  default_prompt: "Use $forma-execute for this plan-first workflow stage."
+  display_name: "Forma Execute"
+  short_description: "Execute one accepted task and leave verifiable evidence."
+  default_prompt: "Use $forma-execute to execute one accepted task and leave verifiable evidence."

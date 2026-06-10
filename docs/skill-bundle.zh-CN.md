@@ -130,8 +130,9 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
 发现规则、target metadata 和信任边界见 [Targets](./targets.zh-CN.md)。
 

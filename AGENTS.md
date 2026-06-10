@@ -5,7 +5,7 @@ workflows make an agent produce a task contract before implementation: evidence,
 boundaries, validation, proof, and stop conditions for the current task.
 
 This repository is the source workspace for Forma's CLI, compiler, verifier,
-`forma-creator`, generated skill bundles, and Codex plugin output.
+`forma-creator`, generated skill bundles, and Codex / Claude Code plugin output.
 
 ## When This Repository Is Relevant
 
@@ -14,7 +14,7 @@ Use this repository when the task involves:
 - extracting or compiling project engineering rules for agents;
 - profiles, temporary injection, or `forma-creator`;
 - workflow outputs for Codex or Claude Code;
-- Codex plugin generation;
+- Codex and Claude Code plugin generation;
 - task contracts, boundaries, validation gates, proof, or stop conditions;
 - verifier behavior or generated-output drift;
 - Forma's own self-iteration profile and workflow.
@@ -63,13 +63,13 @@ Use this repository when the task involves:
 forma build-creator --target codex|claude-code --output <dir>
 forma install --target codex|claude-code --scope user|project <path>
 
-# Generate a skill bundle or Codex plugin from a tracked profile.
+# Generate a skill bundle or plugin from a tracked profile.
 forma create-bundle --target codex|claude-code --profile <profile.yaml> --output <dir>
-forma create-plugin --target codex --profile <profile.yaml> --output <dir>
+forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>
 
 # Generate default workflow output when no profile is provided.
 forma create-bundle --target codex|claude-code --output <dir>
-forma create-plugin --target codex --output <dir>
+forma create-plugin --target codex|claude-code --output <dir>
 
 # Verify generated artifacts before using them.
 forma verify <path>
@@ -82,10 +82,12 @@ forma explain temporary-injection --format json --target codex
 ## Install And Target Rules
 
 - Use `forma create-bundle --target codex|claude-code --output <dir>` for local skill-bundle output.
-- Use `forma create-plugin --target codex --output <dir>` for Codex plugin output. Claude Code plugin output is not supported.
-- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local skill or skill-bundle artifacts.
+- Use `forma create-plugin --target codex|claude-code --output <dir>` for plugin output.
+- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local skill, skill-bundle, or Claude Code plugin artifacts.
 - Do not imply URL download support or Codex plugin installation inside `forma install`.
 - Install Codex plugin output through Codex itself: add the generated local plugin to a Codex marketplace, then use `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
+- Install Claude Code plugin output through Forma into `.claude/skills/<plugin-name>` or `~/.claude/skills/<plugin-name>`.
+- Codex direct skills install into `.agents/skills` / `~/.agents/skills`; OpenCode compatibility uses that direct-skill path. Do not add `--target opencode` unless a future plan explicitly introduces OpenCode-native output.
 
 ## Workflow State
 
@@ -93,8 +95,8 @@ Each issue's plan, tasks, and execution evidence live under
 `plans/issue-<id>/`. Install target-specific `forma-creator` bundles only after
 generating them with `forma build-creator --target <target>`; each generated
 creator has a fixed target contract. Codex-targeted creators can generate skill
-bundles and Codex plugin artifacts. Claude Code-targeted creators generate
-skill bundles only.
+bundles and Codex plugin artifacts. Claude Code-targeted creators can generate
+skill bundles and Claude Code plugin artifacts.
 
 ## Release Surface
 
@@ -103,6 +105,7 @@ skill bundles only.
 - `dist/skill-bundles/codex/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
 - `dist/skill-bundles/claude-code/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
 - `dist/plugins/codex/forma`
+- `dist/plugins/claude-code/forma`
 
 When handing off to another agent, give it the local path or release URL for one
 of those artifacts, ask it to verify the artifact first, then install the local

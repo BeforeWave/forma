@@ -23,7 +23,7 @@ This document maps the current Forma source tree and the role of each area.
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
 | `examples/` | Composable profile examples and generated Plan-First workflow bundles | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
-| `dist/` | Committed release artifacts for creator skills, skill bundles, and the Codex plugin | present |
+| `dist/` | Committed release artifacts for creator skills, skill bundles, and Codex / Claude Code plugins | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
 ## Source tree
@@ -74,8 +74,8 @@ generated skill resources.
 | `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
 | `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
 | `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
-| `src/forma/install.py` | Verified local artifact installer for single skills and skill bundles; rejects Codex plugin artifacts with Codex marketplace guidance |
-| `src/forma/plugins.py` | Codex plugin artifact builder |
+| `src/forma/install.py` | Verified local artifact installer for single skills, skill bundles, and Claude Code plugin roots; rejects Codex plugin artifacts with Codex marketplace guidance |
+| `src/forma/plugins.py` | Codex and Claude Code plugin artifact builder |
 | `src/forma/creator/manifest.py` | Methodology lookup and provenance manifest helpers |
 | `src/forma/creator/profiles.py` | Strict composable profile schema, include resolver, and merge rules |
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Plan-First skill contents |
@@ -140,6 +140,7 @@ binary, and are not Node.js implementations of Forma.
 | `dist/skill-bundles/codex/` | Default Codex Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/skill-bundles/claude-code/` | Default Claude Code Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/plugins/codex/forma` | Codex plugin artifact exposing the default Plan-First skills |
+| `dist/plugins/claude-code/forma` | Claude Code plugin artifact exposing plugin-local default Plan-First skills |
 
 ## Profiles
 

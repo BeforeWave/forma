@@ -102,7 +102,7 @@ forma install --target claude-code --scope user /tmp/bundle-cc
 
 | 路径 | 适合 | 产物 |
 |---|---|---|
-| `forma-creator` | 临场定制，先试一套项目 workflow。 | 已验证的一次性 skill bundle 或 Codex plugin。 |
+| `forma-creator` | 临场定制，先试一套项目 workflow。 | 已验证的一次性 skill bundle 或 plugin。 |
 | `forma explain profile` + agent | 一开始就要可 review、可维护的长期源码。 | tracked profile YAML，再编译成 workflow。 |
 | `forma create-bundle` | 已经有 review 过的 profile。 | 从 profile 重复生成的 workflow bundle。 |
 
@@ -112,9 +112,10 @@ forma install --target claude-code --scope user /tmp/bundle-cc
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
 | Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
 信任项目 skills 前先审查内容。生成技能可以包含脚本，也可能带有 target 专用工具行为。
 

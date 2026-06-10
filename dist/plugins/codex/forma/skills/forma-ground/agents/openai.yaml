@@ -1,4 +1,4 @@
 interface:
-  display_name: "Gauge"
-  short_description: "Inspect repository facts read-only and produce a grounding handoff before plan files are written."
-  default_prompt: "Use $forma-ground for this plan-first workflow stage."
+  display_name: "Forma Ground"
+  short_description: "Inspect code, docs, issues, and evidence before deciding."
+  default_prompt: "Use $forma-ground to inspect code, docs, issues, and evidence before deciding."

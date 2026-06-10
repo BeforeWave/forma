@@ -69,6 +69,42 @@ def copy_valid_plugin(tmp_path: Path) -> Path:
     return plugin
 
 
+def copy_valid_claude_plugin(tmp_path: Path) -> Path:
+    plugin = tmp_path / "claude-plugin"
+    skills_dir = plugin / "skills"
+    shutil.copytree(VALID_BUNDLE, skills_dir)
+    emitted = {
+        kind: {
+            "name": kind,
+            "directory": kind,
+        }
+        for kind in ("shape", "gauge", "seal", "pour", "flow")
+    }
+    (plugin / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": emitted,
+            }
+        ),
+        encoding="utf-8",
+    )
+    plugin_dir = plugin / ".claude-plugin"
+    plugin_dir.mkdir()
+    (plugin_dir / "plugin.json").write_text(
+        json.dumps(
+            {
+                "name": "fixture",
+                "version": "0.1.0",
+                "description": "Fixture plugin.",
+                "skills": "./skills/",
+            }
+        ),
+        encoding="utf-8",
+    )
+    return plugin
+
+
 def overwrite_skill(bundle: Path, kind: str, text: str) -> None:
     (bundle / kind / "SKILL.md").write_text(text.strip() + "\n", encoding="utf-8")
 
@@ -469,6 +505,27 @@ def test_codex_plugin_manifest_rejects_bad_skills_path(tmp_path: Path) -> None:
     report = verify(plugin)
 
     assert_has_error(report, "R203")
+    assert "must resolve to `skills`" in report.format_human()
+
+
+def test_claude_code_plugin_manifest_matches_skills_path(tmp_path: Path) -> None:
+    plugin = copy_valid_claude_plugin(tmp_path)
+
+    report = verify(plugin)
+
+    assert report.passed, report.format_human()
+
+
+def test_claude_code_plugin_manifest_rejects_bad_skills_path(tmp_path: Path) -> None:
+    plugin = copy_valid_claude_plugin(tmp_path)
+    plugin_json = plugin / ".claude-plugin" / "plugin.json"
+    raw = json.loads(plugin_json.read_text(encoding="utf-8"))
+    raw["skills"] = "./wrong-skills/"
+    plugin_json.write_text(json.dumps(raw), encoding="utf-8")
+
+    report = verify(plugin)
+
+    assert_has_error(report, "R204")
     assert "must resolve to `skills`" in report.format_human()
 
 

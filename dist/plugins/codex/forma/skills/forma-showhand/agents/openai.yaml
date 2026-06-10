@@ -1,4 +1,4 @@
 interface:
-  display_name: "Flow"
-  short_description: "Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops."
-  default_prompt: "Use $forma-showhand for this plan-first workflow stage."
+  display_name: "Forma Showhand"
+  short_description: "Continue remaining tasks, but stop when evidence is insufficient."
+  default_prompt: "Use $forma-showhand to continue remaining tasks, but stop when evidence is insufficient."

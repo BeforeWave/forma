@@ -2,7 +2,7 @@
 
 英文版：[verifier.md](./verifier.md)
 
-`forma verify` 用来检查生成的 workflow bundle、`forma-creator` bundle 和 Codex plugin 产物。
+`forma verify` 用来检查生成的 workflow bundle、`forma-creator` bundle，以及 Codex / Claude Code plugin 产物。
 
 它是安装、提交或分享前的工程边界：生成产物必须结构有效、符合 target 契约，并保留能推动 task contract 的 workflow 形状。
 
@@ -12,7 +12,7 @@
 
 这些时候运行验证：
 
-- 安装生成 bundle 前，或把 Codex plugin 交给 Codex 安装前；
+- 安装生成 bundle、安装 Claude Code plugin，或把 Codex plugin 交给 Codex 安装前；
 - 提交生成基线前；
 - 修改 profile 后；
 - 使用 creator 临场生成后；
@@ -42,6 +42,7 @@ forma verify source/skill-creator/
 - scripts/resources 是否没有跨到相邻 skill 目录取资源；
 - workflow stage 是否存在且身份正确；
 - target metadata 规则，例如 Codex bundle 是否按需带有 Codex metadata，Claude Code bundle 是否没有 Codex-only metadata；
+- plugin manifest 规则，例如 `.codex-plugin/plugin.json` 或 `.claude-plugin/plugin.json` 是否指向嵌套的 `skills/` 目录；
 - `shape`、`gauge`、`seal`、`pour` 等阶段是否保留核心方法要求。
 
 具体规则在随包提供的 `forma_verifier` package 中，后续会随 Forma 演进。

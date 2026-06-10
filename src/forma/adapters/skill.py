@@ -325,8 +325,15 @@ def _claude_output_contract() -> List[str]:
         "`forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, "
         "and `forma-showhand/` by "
         "default, or the exact `rename.stages` names confirmed by the user.",
-        "- Codex plugin output is unsupported by this Claude Code creator; "
-        "present workflow-bundle generation only.",
+        "- If the user asks for Claude Code plugin output, run `python "
+        "scripts/create.py --artifact plugin --output <generated-plugin-path> "
+        "--injection-json <temporary-injection.json>`.",
+        "- Claude Code plugin output must contain `.claude-plugin/plugin.json`, "
+        "root `.forma-manifest.json`, and `skills/<skill-name>/` child skill "
+        "directories; it must not emit sibling `skill-bundles/` output.",
+        "- For plugin output, strip the exact plugin-name prefix from generated "
+        "skill names when present. For plugin `forma`, generated direct skill "
+        "names such as `forma-plan` become plugin-local `plan`.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",

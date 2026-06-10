@@ -18,7 +18,7 @@ can start there when it is unsure which command path to use.
 | Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>/<target>/forma-creator`, then `forma install --target <target> --scope <scope> <creator-path>` with scope `user` or `project`. |
 | Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
 | Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
-| Build Codex plugin source | `forma create-plugin --target codex --profile <profile.yaml> --output <dir>` | `forma verify <dir>`, then install the plugin through Codex, not `forma install`. |
+| Build plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | `forma verify <dir>`; install Codex plugins through Codex, and install Claude Code plugin roots with `forma install --target claude-code`. |
 | Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
 | Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
 
@@ -30,12 +30,13 @@ Prints the root command guide and command list. With no subcommand, `forma`
 returns exit code `0` and shows the same routing guide as `forma --help`.
 
 Use it as the first command when an agent needs to discover whether to build a
-creator, create a skill bundle, create a Codex plugin, install a verified local
+creator, create a skill bundle, create a plugin, install a verified local
 output, verify an output, or print authoring guidance.
 
 ### `forma verify <path>`
 
-Verifies a generated skill bundle, `forma-creator` bundle, or Codex plugin:
+Verifies a generated skill bundle, `forma-creator` bundle, Codex plugin, or
+Claude Code plugin:
 
 ```bash
 forma verify /tmp/settings-workflow-codex
@@ -49,6 +50,8 @@ Next action:
 - If a skill bundle or creator verifies, install the verified local path with
   `forma install`.
 - If a Codex plugin verifies, install it through Codex, not `forma install`.
+- If a Claude Code plugin verifies, install the plugin root with
+  `forma install --target claude-code`.
 - If the path is ambiguous, run `forma doctor <path>` to get the install route
   and next steps.
 
@@ -74,7 +77,8 @@ whether `forma install` supports the artifact, whether it is installable now,
 the correct install route, blockers, and next steps.
 
 Use it when a user or agent is unsure whether the current path is a skill, skill
-bundle, Codex plugin, broken artifact, or unsupported directory.
+bundle, Codex plugin, Claude Code plugin, broken artifact, or unsupported
+directory.
 
 ### `forma create-bundle`
 
@@ -107,15 +111,17 @@ Profile format is documented in [Profile Schema](./profile-schema.md).
 
 ### `forma create-plugin`
 
-Builds a local plugin output from a profile. Currently plugin output is
-Codex-only:
+Builds a local plugin output from a profile:
 
 ```bash
 forma create-plugin --target codex --output /tmp/forma-codex-plugin
+forma create-plugin --target claude-code --output /tmp/forma-claude-code-plugin
 ```
 
-The output root contains `.codex-plugin/plugin.json`, root
-`.forma-manifest.json`, and `skills/<skill-id>/` directories. It does not emit
+Codex plugin output contains `.codex-plugin/plugin.json`, root
+`.forma-manifest.json`, and `skills/<skill-id>/` directories. Claude Code
+plugin output uses `.claude-plugin/plugin.json` with the same root manifest and
+nested `skills/<skill-id>/` layout. Plugin output does not emit
 `dist/skill-bundles` or any sibling bundle output.
 
 For a tracked profile, the Codex plugin id is the profile `bundle.name`. The
@@ -124,9 +130,15 @@ the nested `./skills/` directory. Nested skill names follow the emitted skill
 names in `.forma-manifest.json`. If a profile renames skills with
 `stages.<stage>.name`, the plugin exposes those renamed skills.
 
+For Claude Code plugin output, `plugin.json` uses the profile `bundle.name` as
+the plugin name. Plugin-local skill names strip the exact `<plugin-name>-`
+prefix when present. For plugin `forma`, `forma-plan` becomes `plan`.
+Codex plugin output keeps emitted skill names such as `forma-plan`; do not rely
+on `plugin:skill` or `$plugin:skill` colon triggering for Codex.
+
 Required options:
 
-- `--target codex`
+- `--target codex|claude-code`
 - `--output <dir>`
 
 Optional inputs:
@@ -135,11 +147,9 @@ Optional inputs:
   `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
   `forma-showhand`.
 
-`--target claude-code` reports an error because Claude Code plugin output is not
-supported.
-
-Next action: run `forma verify <output-dir>`, then install the plugin through
-Codex marketplace/plugin UI. Do not pass Codex plugin output to `forma install`.
+Next action: run `forma verify <output-dir>`. Install Codex plugins through
+Codex marketplace/plugin UI. Install Claude Code plugin roots with
+`forma install --target claude-code --scope user|project <output-dir>`.
 
 ### `forma build-creator`
 
@@ -160,21 +170,22 @@ Optional development override:
 - `--source <dir>`: use a source `forma-creator` directory instead of packaged runtime assets.
 
 Each generated `forma-creator` has a fixed target contract. A Codex creator
-generates Codex-shaped skill bundles and can emit Codex plugin outputs when the
-fixed target contract allows it. A Claude Code creator generates Claude
-Code-shaped skill bundles only. See [Forma Creator](./forma-creator.md) for the
-on-the-spot customization path.
+generates Codex-shaped skill bundles and Codex plugin outputs. A Claude Code
+creator generates Claude Code-shaped skill bundles and Claude Code plugin
+outputs. See [Forma Creator](./forma-creator.md) for the on-the-spot
+customization path.
 
 Next action: run `forma verify <output-dir>/<target>/forma-creator`, then install
 that verified creator path with `forma install`.
 
 ### `forma install`
 
-Installs a verified local skill or skill bundle:
+Installs a verified local skill, skill bundle, or Claude Code plugin root:
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
 forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
+forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 ```
 
 Required arguments and options:
@@ -189,9 +200,11 @@ Overwrite behavior:
 - With `--replace`, Forma replaces only the destination outputs selected by the verified source.
 - Codex plugin install attempts report Codex marketplace guidance,
   `codex plugin add <plugin>@<marketplace-name>`, and the need to start a new thread after install.
+- Claude Code plugin roots install under `.claude/skills/<plugin-name>` for
+  project scope or `$HOME/.claude/skills/<plugin-name>` for user scope.
 
-Next action: after installing a skill or skill bundle, start a new agent thread
-so the installed skills are discovered.
+Next action: after installing a skill, skill bundle, or Claude Code plugin,
+start a new agent thread so the installed skills are discovered.
 
 ### `forma explain`
 
@@ -215,8 +228,8 @@ The agent uses `forma explain profile --target codex` to load the authoring
 standard, then combines it with project facts to propose tracked profile YAML.
 This path produces durable profile source, not a one-off workflow.
 
-Next action: after the profile is reviewed, use `forma create-bundle` for a skill
-bundle or `forma create-plugin` for Codex plugin source.
+Next action: after the profile is reviewed, use `forma create-bundle` for a
+skill bundle or `forma create-plugin` for plugin source.
 
 ## Install Targets
 
@@ -225,14 +238,22 @@ skill outputs into the matching target location:
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
+
+OpenCode can read Codex direct skills from `.agents/skills`, so use
+`--target codex` for that compatibility path. Forma does not provide
+`--target opencode` or OpenCode JS/TS runtime plugin output.
 
 Codex plugin outputs are local plugin sources. Forma does not install Codex
 plugins. Follow the current Codex docs to add the generated plugin root to a
 Codex marketplace, then run `codex plugin add <plugin>@<marketplace-name>` or
 install it from the Codex plugin UI. Start a new Codex thread after installing
 so the plugin skills are discovered.
+
+Claude Code plugin outputs are installable through Forma because Claude Code
+loads skills-directory plugins from `.claude/skills/<plugin-name>`.
 
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
@@ -292,7 +313,8 @@ Rules:
 - Internal injection maps use internal stage keys (`shape`, `gauge`, `seal`, `pour`, `flow`), not public skill ids such as `forma-plan` or `forma-showhand`.
 - Names must be unique kebab-case strings and must not be bare stage names like `shape` or `flow`.
 - Creator injections do not accept profile-style `stages.shape.name`. Durable names belong in profiles; one-off names belong in `rename`.
-- For Codex plugin output from `forma-creator`, `rename.prefix` also becomes the plugin id. Without a prefix, the plugin id remains `forma`.
+- For plugin output from `forma-creator`, `rename.prefix` also becomes the plugin id/name. Without a prefix, the plugin id/name remains `forma`.
+- Claude Code plugin-local skill names strip that exact plugin-name prefix when present; Codex plugin skill names keep the emitted names.
 
 After renaming, verify the generated bundle:
 

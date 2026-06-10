@@ -1,11 +1,11 @@
 ---
 name: "forma-ground"
-description: "Inspect repository facts read-only and produce a grounding handoff before plan files are written."
+description: "Inspect code, docs, issues, and evidence before deciding."
 ---
 
-# Gauge
+# Forma Ground
 
-Inspect repository facts read-only and produce a grounding handoff before plan files are written.
+Inspect code, docs, issues, and evidence before deciding.
 
 ## Interaction Semantics
 

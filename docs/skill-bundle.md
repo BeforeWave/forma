@@ -149,8 +149,9 @@ or conditional overlays.
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.codex/skills` | `.codex/skills` |
-| Claude Code | `$HOME/.claude/skills` | `.claude/skills` |
+| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
+| Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
 See [Targets](./targets.md) for discovery rules, target metadata, and trust
 guidance.

@@ -36,7 +36,7 @@ Forma 把项目准则放进三层：
 | 层 | 含义 |
 |---|---|
 | 项目准则 | 团队认可的做事方式：权威资料、修改边界、工具要求、验证深度、proof 和停手条件。 |
-| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex / Claude Code skill bundle，也可以是 Codex plugin。 |
+| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex / Claude Code skill bundle，也可以是 plugin。 |
 | Task contract | agent 面对一个具体任务时写出的计划契约，记录到 `plans/issue-<id>/`。 |
 
 临场定制时，项目准则进入本次生成的 workflow 产物。长期维护时，项目准则沉淀成 tracked profile，再由 Forma 编译成 workflow 产物。
@@ -89,7 +89,7 @@ goal -> proposal -> evidence -> task contract -> task execution -> proof
 |---|---|---|
 | `forma-creator` | 临场定制，先试一套项目 workflow。 | 一次性 workflow 产物，可安装体验。 |
 | `forma explain profile` + agent | 一开始就要长期维护的源码。 | tracked profile YAML，review 后再编译。 |
-| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | 确定性生成 workflow bundle 或 Codex plugin。 |
+| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | 确定性生成 workflow bundle 或 plugin。 |
 
 三条路径都会走到已验证的 workflow 产物。区别在于：准则是临场进入一次性产物，还是长期进入 profile。
 

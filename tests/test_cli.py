@@ -52,6 +52,37 @@ def _creator_artifact(
     return output
 
 
+def _write_minimal_claude_plugin(root: Path, name: str = "sample-plugin") -> Path:
+    plugin_dir = root / ".claude-plugin"
+    skill_dir = root / "skills" / "plan"
+    plugin_dir.mkdir(parents=True)
+    skill_dir.mkdir(parents=True)
+    (plugin_dir / "plugin.json").write_text(
+        json.dumps(
+            {
+                "name": name,
+                "version": "1.0.0",
+                "description": "Reusable sample workflow.",
+                "skills": "./skills/",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (skill_dir / "SKILL.md").write_text(
+        """---
+name: plan
+description: Plan a sample task.
+---
+
+## Workflow
+
+Plan the sample task.
+""",
+        encoding="utf-8",
+    )
+    return root
+
+
 def _assert_profile_drift_fresh(
     runner: CliRunner,
     artifact: Path,
@@ -110,15 +141,16 @@ def test_command_help_includes_agent_next_steps() -> None:
         (
             ["create-plugin", "--help"],
             [
-                "Compile project rules into a Codex plugin source.",
+                "Compile project rules into a target-specific plugin source.",
                 "Verify the plugin source:",
                 "Install Codex plugins through Codex marketplace/plugin UI, not forma install.",
+                "Install Claude Code plugin roots with forma install --target claude-code.",
             ],
         ),
         (
             ["install", "--help"],
             [
-                "Install only verified local skills or skill bundles.",
+                "Install only verified local skills, skill bundles, or Claude Code plugin roots.",
                 "Do not pass URLs.",
                 "Do not pass Codex plugin sources; install plugins through Codex.",
             ],
@@ -127,7 +159,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             ["verify", "--help"],
             [
                 "Verify a generated Forma workflow output at PATH.",
-                "If verification passes for a skill bundle, install it with:",
+                "If verification passes for a skill bundle or Claude Code plugin source, install it with:",
                 "If verification passes for a Codex plugin source, install it through Codex.",
             ],
         ),
@@ -208,13 +240,15 @@ def test_explain_agent_outputs_command_guide() -> None:
         "forma create-bundle --target <target> --profile <profile.yaml> --output <dir>"
         in result.output
     )
+    assert "OpenCode compatibility uses Codex direct-skill output" in result.output
+    assert "Codex plugins install through Codex marketplace/plugin UI" in result.output
+    assert "Claude Code plugin roots can be installed" in result.output
     assert (
-        "Codex plugin output is Codex-only. For Claude Code, generate a "
-        "skill bundle instead."
+        "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
         in result.output
     )
     assert (
-        "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
+        "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>"
         in result.output
     )
     assert "Generate from an already reviewed tracked profile" in result.output
@@ -239,7 +273,8 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert "# Forma Agent Guide" in payload["markdown"]
     assert "## Profile write boundary" in payload["markdown"]
     assert "candidate profile package" in payload["markdown"]
-    assert "`forma create-plugin --target claude-code` is not supported" in payload["markdown"]
+    assert "Generate a Claude Code plugin" in payload["markdown"]
+    assert "forma install --target claude-code --scope project <dir>" in payload["markdown"]
 
 
 def test_old_create_command_is_rejected_with_current_command_names() -> None:
@@ -918,6 +953,7 @@ def test_drift_release_surface_reports_known_paths() -> None:
     assert any(path.endswith("examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex") for path in paths)
     assert any(path.endswith("dist/skills/codex/forma-creator") for path in paths)
     assert any(path.endswith("dist/plugins/codex/forma") for path in paths)
+    assert any(path.endswith("dist/plugins/claude-code/forma") for path in paths)
     assert {item["status"] for item in data["artifacts"]} <= {
         "fresh",
         "stale",
@@ -992,6 +1028,41 @@ def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
     assert any("codex plugin add forma@<marketplace-name>" in step for step in data["next_steps"])
 
 
+def test_doctor_routes_claude_code_plugins_to_forma_install(tmp_path: Path) -> None:
+    output = tmp_path / "plugin"
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "claude-code",
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    human = runner.invoke(main, ["doctor", str(output)])
+    result = runner.invoke(main, ["doctor", "--json", str(output)])
+
+    assert human.exit_code == 0, human.output
+    assert "artifact kind : claude-code-plugin" in human.output
+    assert "forma install : yes" in human.output
+    assert "install route : forma-install:claude-code" in human.output
+    data = json.loads(result.output)
+    assert result.exit_code == 0, result.output
+    assert data["artifact_kind"] == "claude-code-plugin"
+    assert data["target"] == "claude-code"
+    assert data["forma_install_supported"] is True
+    assert data["installable_now"] is True
+    assert data["install_route"] == "forma-install:claude-code"
+    assert data["blockers"] == []
+    assert any("forma install --target claude-code" in step for step in data["next_steps"])
+
+
 def test_doctor_json_reports_invalid_bundle_blockers() -> None:
     runner = CliRunner()
 
@@ -1004,8 +1075,9 @@ def test_doctor_json_reports_invalid_bundle_blockers() -> None:
     assert "verification failed" in data["blockers"]
 
 
-def test_create_plugin_rejects_claude_code_target(tmp_path: Path) -> None:
+def test_create_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:
     runner = CliRunner()
+    output = tmp_path / "plugin"
 
     result = runner.invoke(
         main,
@@ -1014,12 +1086,30 @@ def test_create_plugin_rejects_claude_code_target(tmp_path: Path) -> None:
             "--target",
             "claude-code",
             "--output",
-            str(tmp_path / "plugin"),
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
         ],
     )
 
-    assert result.exit_code != 0
-    assert "only --target codex" in result.output
+    assert result.exit_code == 0, result.output
+    assert "wrote Claude Code plugin" in result.output
+    assert "forma install --target claude-code" in result.output
+    assert (output / ".claude-plugin" / "plugin.json").is_file()
+    assert (output / ".forma-manifest.json").is_file()
+    assert (output / "skills" / "plan" / "SKILL.md").is_file()
+    assert (output / "skills" / "showhand" / "SKILL.md").is_file()
+    assert not (output / ".codex-plugin").exists()
+    assert not (output / "skills" / "forma-plan").exists()
+    plugin = json.loads(
+        (output / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["name"] == "forma"
+    manifest = json.loads(
+        (output / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "claude-code"
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
 
 
 def test_install_codex_bundle_project_scope_and_replace(
@@ -1050,8 +1140,9 @@ def test_install_codex_bundle_project_scope_and_replace(
         ["install", "--target", "codex", "--scope", "project", str(bundle)],
     )
     assert install.exit_code == 0, install.output
-    assert (project / ".codex" / "skills" / "forma-plan").is_dir()
-    assert (project / ".codex" / "skills" / "forma-showhand").is_dir()
+    assert (project / ".agents" / "skills" / "forma-plan").is_dir()
+    assert (project / ".agents" / "skills" / "forma-showhand").is_dir()
+    assert not (project / ".codex" / "skills").exists()
 
     conflict = runner.invoke(
         main,
@@ -1105,6 +1196,69 @@ def test_install_claude_code_bundle_project_scope(
     assert install.exit_code == 0, install.output
     assert (project / ".claude" / "skills" / "forma-plan").is_dir()
     assert (project / ".claude" / "skills" / "forma-showhand").is_dir()
+
+
+def test_install_claude_code_plugin_project_scope_and_replace(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    plugin = _write_minimal_claude_plugin(tmp_path / "plugin")
+    project = tmp_path / "project"
+    project.mkdir()
+    runner = CliRunner()
+
+    monkeypatch.chdir(project)
+    install = runner.invoke(
+        main,
+        ["install", "--target", "claude-code", "--scope", "project", str(plugin)],
+    )
+
+    assert install.exit_code == 0, install.output
+    assert "forma install: installed claude-code-plugin" in install.output
+    destination = project / ".claude" / "skills" / "sample-plugin"
+    assert (destination / ".claude-plugin" / "plugin.json").is_file()
+    assert (destination / "skills" / "plan" / "SKILL.md").is_file()
+
+    conflict = runner.invoke(
+        main,
+        ["install", "--target", "claude-code", "--scope", "project", str(plugin)],
+    )
+    assert conflict.exit_code != 0
+    assert "--replace" in conflict.output
+
+    replace = runner.invoke(
+        main,
+        [
+            "install",
+            "--target",
+            "claude-code",
+            "--scope",
+            "project",
+            "--replace",
+            str(plugin),
+        ],
+    )
+    assert replace.exit_code == 0, replace.output
+
+
+def test_install_rejects_claude_code_plugin_for_codex_target(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    plugin = _write_minimal_claude_plugin(tmp_path / "plugin")
+    project = tmp_path / "project"
+    project.mkdir()
+    runner = CliRunner()
+
+    monkeypatch.chdir(project)
+    install = runner.invoke(
+        main,
+        ["install", "--target", "codex", "--scope", "project", str(plugin)],
+    )
+
+    assert install.exit_code != 0
+    assert "can only be installed with --target claude-code" in install.output
+    assert not (project / ".agents" / "skills" / "sample-plugin").exists()
 
 
 def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> None:

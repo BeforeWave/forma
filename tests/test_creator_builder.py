@@ -216,12 +216,10 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "classification table" in claude_target
     assert "source-context helper scripts" in claude_target
     assert "--artifact bundle" in claude_target
-    assert "--artifact plugin" not in claude_target
-    assert "Codex plugin output is unsupported" in claude_target
+    assert "--artifact plugin" in claude_target
+    assert ".claude-plugin/plugin.json" in claude_target
+    assert "plugin-local `plan`" in claude_target
     assert "Do not install generated outputs from this creator" in claude_target
-    assert "--artifact plugin" not in (claude / "SKILL.md").read_text(
-        encoding="utf-8"
-    )
     assert (claude / "references" / "profile-authoring-principles.md").is_file()
     manifest = json.loads(
         (claude / ".forma-manifest.json").read_text(encoding="utf-8")
@@ -518,12 +516,13 @@ def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
     assert verify(generated).passed
 
 
-def test_installed_claude_creator_script_rejects_plugin_artifact(
+def test_installed_claude_creator_script_can_emit_plugin_artifact(
     tmp_path: Path,
 ) -> None:
     output_root = tmp_path / "creator-dist"
     creator = build_creator(META_SOURCE, output_root, "claude-code")
     generated = tmp_path / "generated-plugin"
+    baseline = tmp_path / "baseline-plugin"
 
     result = subprocess.run(
         [
@@ -538,12 +537,96 @@ def test_installed_claude_creator_script_rejects_plugin_artifact(
         capture_output=True,
         check=False,
     )
-
-    assert result.returncode == 2
-    assert "plugin artifact is only supported for codex-targeted creators" in (
-        result.stderr
+    baseline_result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(baseline),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
     )
-    assert not generated.exists()
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert baseline_result.returncode == 0, baseline_result.stderr + baseline_result.stdout
+    assert "forma creator build-plugin" in result.stdout
+    assert "Claude Code plugin generated, not installed." in result.stdout
+    assert "forma install --target claude-code" in result.stdout
+    assert (generated / ".claude-plugin" / "plugin.json").is_file()
+    assert (generated / ".forma-manifest.json").is_file()
+    assert (generated / "skills" / "plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "showhand" / "SKILL.md").is_file()
+    assert not (generated / "skills" / "forma-plan").exists()
+    assert not (generated / "skills" / "plan" / "agents" / "openai.yaml").exists()
+    plugin = json.loads(
+        (generated / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["name"] == "forma"
+    assert plugin["skills"] == "./skills/"
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "claude-code"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
+    assert manifest["emitted_skills"]["flow"]["name"] == "showhand"
+    baseline_manifest = json.loads(
+        (baseline / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    _assert_origin_matches_baseline(
+        manifest,
+        baseline_manifest,
+        baseline,
+        "claude-code",
+        "claude-code-plugin",
+    )
+    assert verify(generated).passed
+
+
+def test_installed_claude_creator_plugin_prefix_strips_plugin_identity(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "claude-code")
+    injection = tmp_path / "prefix-plugin-injection.json"
+    generated = tmp_path / "generated-plugin"
+    injection.write_text(
+        json.dumps({"rename": {"prefix": "acme-plan-first"}}),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (generated / "skills" / "plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "showhand" / "SKILL.md").is_file()
+    assert not (generated / "skills" / "acme-plan-first-plan").exists()
+    plugin = json.loads(
+        (generated / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["name"] == "acme-plan-first"
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
+    assert verify(generated).passed
 
 
 def test_installed_creator_script_supports_explicit_source_adapter_injection(

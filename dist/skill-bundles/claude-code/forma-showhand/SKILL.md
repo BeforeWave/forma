@@ -1,11 +1,11 @@
 ---
 name: "forma-showhand"
-description: "Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops."
+description: "Continue remaining tasks, but stop when evidence is insufficient."
 ---
 
-# Flow
+# Forma Showhand
 
-Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops.
+Continue remaining tasks, but stop when evidence is insufficient.
 
 ## Interaction Semantics
 

@@ -22,7 +22,7 @@ from forma.drift import drift_artifact, drift_release_surface
 from forma.explain import render_guidance
 from forma.install import install_artifact
 from forma.plugin_guidance import codex_plugin_install_hint
-from forma.plugins import build_codex_plugin
+from forma.plugins import build_plugin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
 
@@ -78,7 +78,7 @@ Agents:
 VERIFY_HELP = """
 Next:
 
-  If verification passes for a skill bundle, install it with:
+  If verification passes for a skill bundle or Claude Code plugin source, install it with:
     forma install --target codex|claude-code --scope user|project <path>
 
   If verification passes for a Codex plugin source, install it through Codex.
@@ -120,14 +120,14 @@ Next:
     forma verify <output-dir>
 
   Install Codex plugins through Codex marketplace/plugin UI, not forma install.
-  Claude Code plugin output is unsupported.
+  Install Claude Code plugin roots with forma install --target claude-code.
 """
 
 
 INSTALL_HELP = """
 Boundaries:
 
-  Install only verified local skills or skill bundles.
+  Install only verified local skills, skill bundles, or Claude Code plugin roots.
   Do not pass URLs.
   Do not pass Codex plugin sources; install plugins through Codex.
   Use --replace only when replacing existing installed artifacts is intended.
@@ -367,7 +367,7 @@ def create_bundle_command(
     "target_agent",
     required=True,
     type=click.Choice(ADAPTER_TARGETS),
-    help="Plugin target for the generated workflow. Currently only codex is supported.",
+    help="Plugin target for the generated workflow.",
 )
 @click.option(
     "--output",
@@ -389,21 +389,27 @@ def create_plugin_command(
     output_dir: Path,
     methodology_dir: Path | None,
 ) -> None:
-    """Compile project rules into a Codex plugin source."""
-    if target_agent != "codex":
-        raise click.ClickException("forma create-plugin currently supports only --target codex")
+    """Compile project rules into a target-specific plugin source."""
     try:
-        plugin_json = build_codex_plugin(
+        plugin_json = build_plugin(
             profile_file=_resolve_profile_file(profile_file),
             output_dir=output_dir,
+            target_agent=target_agent,
             methodology_dir=methodology_dir,
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma create-plugin: wrote Codex plugin: {output_dir}")
+    label = "Codex" if target_agent == "codex" else "Claude Code"
+    click.echo(f"forma create-plugin: wrote {label} plugin: {output_dir}")
     click.echo(f"plugin: {plugin_json}")
     click.echo("install hint:")
-    click.echo(codex_plugin_install_hint(output_dir))
+    if target_agent == "codex":
+        click.echo(codex_plugin_install_hint(output_dir))
+    else:
+        click.echo(
+            "Install with Forma:\n"
+            f"  forma install --target claude-code --scope user|project {output_dir}"
+        )
 
 
 @main.command("install", cls=RawEpilogCommand, epilog=INSTALL_HELP)

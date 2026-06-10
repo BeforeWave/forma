@@ -1,0 +1,53 @@
+# Planning Rules
+
+Use these rules for plan-finalization skills in projects that follow the plan-first workflow.
+
+- Resolve bundled `scripts/*` and `references/*` relative to the current triggered skill package. Never substitute a same-named resource from a sibling skill directory, even if the contents are identical.
+- Use `finalize-plan` only after the current conversation has already converged on an executable plan.
+- Before reading planning references, initializing the workspace, or writing the final plan, confirm from the current user-agent conversation alone that Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer or confirmed grounding handoff, and any applicable Artifact/Evidence Boundary are decision-complete.
+- Fail closed. If any unanswered question could still change the deliverable, module scope, implementation shape, or acceptance criteria, do not read planning references, do not inspect the repository to fill in missing decisions, do not run `scripts/forma-workflow.sh init <issue-id>`, and do not write `plan.md` or `tasks.md`; instead, tell the user what still needs to be clarified.
+- When planning is blocked, answer in the compact `blocked` format from `references/output-format.md`: one sentence stating planning cannot begin yet, a `Missing:` line naming only the unconverged dimensions, and up to 3 short clarifying questions. Do not restate settled context or explain the workflow at length.
+- Do not infer that a task is documentation-only, analysis-only, or eligible for `# no-programmatic-validation: <reason>` unless the current conversation explicitly settles that no code behavior, code-owned definitions, or runtime logic needs to change.
+- Treat Goal as unconverged unless the current conversation explicitly settles the concrete deliverable to produce, not just the high-level topic.
+- Treat Scope as unconverged unless the current conversation explicitly settles both the in-scope work and the key out-of-scope boundaries.
+- Treat Approach as unconverged unless the current conversation explicitly settles the intended deliverable shape, the concrete surfaces to touch, and whether the work adds new assets or edits existing ones. `finalize-plan` should assume the destination itself is a planning decision: broad directions such as "under the auth module", "write a markdown doc", or "add a file in that area" are not enough if the agent would still need to choose the actual file path, file count, or touched files.
+- Treat Validation as unconverged unless the current conversation explicitly settles the task-local validation contract, any reusable task-safe shared checks, and the issue-level final validation or explicit review-only standard.
+- Treat Final Validation as unconverged if any proposed command line depends on shell state from a previous line. Each final validation line must be a self-contained command; do not accept standalone variable assignments, `cd`, or `export` lines. Fold setup, command execution, and cleanup into one line when a smoke check needs multiple shell operations.
+- Treat Plan Strategy as unconverged for new plans unless the conversation explicitly selects `step-execution`, `loop-exploration`, or `hybrid`; existing plans without this field default to `step-execution`.
+- For `loop-exploration` or `hybrid`, settle baseline metric, target metric or convergence threshold, batch selection, batch size, artifact path/type, stop/skip/retry rules, no-full-rerun guard, write boundary, and final validation before finalization.
+- Treat grounding as unconverged unless the current conversation includes a selected grounding producer still to be run, or a confirmed grounding handoff whose known facts are sufficient for the final plan.
+- Treat the Artifact/Evidence Boundary as unconverged for `loop-exploration`, `hybrid`, generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans unless artifact paths, evidence paths, committed/gitignored/transient output policy, source-of-truth status, state or environment assumptions, proof gates, metadata/provenance, write boundaries, and final validation are explicit in the current conversation.
+- When multiple requirement, design, contract, solution, grounding, or conversation inputs are present, treat `Source-of-truth refs` as unconverged unless the current conversation states precedence for the sources actually present.
+- Do not turn a required proof into a weaker surrogate, move it to post-commit/manual, or invent report paths during finalization; block unless that boundary was already settled.
+- The gate fails if repository exploration would still need to choose any planning detail on the user's behalf, including a concrete file path or target file, create-versus-edit behavior, single-versus-multi-file output, touched interfaces, validation mode, source precedence, or whether a specialized grounding producer should replace generic `ground-plan`.
+- After the gate passes, initialize the workspace with `scripts/forma-workflow.sh init <issue-id>` before creating or editing `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md`.
+- Work inside `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md`.
+- Do not create `./plans/issue-<id>/` or its template files by hand.
+- After the gate passes, write only confirmed facts from `plan-issue`, approved grounding handoffs, source material, and the current user confirmation. Do not run repository exploration from `finalize-plan` to invent missing scope, approach, validation, or source precedence.
+- Fill in `plan.md` before writing or changing `tasks.md`.
+- Rewrite `tasks.md` into the final task checklist for the issue; do not leave template guidance, example text, or append tasks below them.
+- `finalize-plan` must commit the current issue's `plan.md` and `tasks.md` before execution begins.
+- The planning commit must contain only the current issue's planning files, not implementation changes.
+- Keep `plan.md` concise and decision-complete.
+- `plan.md` must preserve the execution contract in Scope, Approach, Constraints, Acceptance Criteria, Validation, and task entries instead of leaving concrete paths, target support, artifact state, compatibility policy, mutation boundaries, or non-goals only in chat history.
+- For generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans, `plan.md` must preserve the settled Artifact/Evidence Boundary either as its own section or as explicit Scope, Approach, Constraints, Acceptance Criteria, Validation, and task entries.
+- For behavior-changing work, capture test expectations in acceptance criteria and validation instead of creating separate "implement" and "then test" tasks unless test work is itself the standalone deliverable.
+- For behavior-changing work, each task `Accept:` line must state the concrete success behavior, and each `Validate:` line must prove a primary success path, required failure path, or explicit non-goal.
+- A task is not execution-ready if its `Validate:` line could pass while the main promised behavior is absent.
+- In `plan.md`, use `## Validation` for shared task-safe checks written as `Check:` / `Command:` blocks.
+- In `plan.md`, use `## Final Validation` for fenced `sh` commands that only run when the last task is completed.
+- Each `## Final Validation` command line must be self-contained because the workflow runner executes every line as an independent command. Do not write standalone variable assignment, `cd`, or `export` lines; combine multi-step smoke checks into one command line with explicit setup and cleanup.
+- When writing copyable shell cleanup commands, avoid shell-reserved variable names such as zsh's read-only `status`; prefer portable names such as `exit_status`.
+- Write each new task entry as `- [ ] [<task-id>] ...` or `- [x] [<task-id>] ...`.
+- For new tasks, encode task type in the existing schema, preferably at the start of `Accept:` as `Task Type=<type>; ...`; existing tasks without a task type default to `step`.
+- Put exactly one `Accept:` line directly below each task.
+- Put one or more `Validate:` lines directly below each task.
+- Use optional `Use-Check:` lines only for shared check ids defined in `## Validation`.
+- Use optional `Depends:` lines for prerequisite task ids; omit them when there are no dependencies, or use a single `Depends: none`. `Depends:` must use bare task ids, not bracketed forms.
+- Use `Constraint:` only for execution guardrails such as touched-surface limits, non-goals, or review conditions; for `loop-batch`, include batch limits, selection rules, retry/skip rules, no-full-rerun guards, and write boundaries here.
+- Use `Task Type=gate` for decision-critical proof, promotion, compatibility, or evidence gates that must pass before review-ready closure.
+- Split tasks only when there is a meaningful execution boundary.
+- If the issue is simple, use a single task instead of artificial decomposition.
+- Keep each task independently completable and easy to audit.
+- Make each task's `Validate:` and `Use-Check:` lines sufficient for task completion without forcing unrelated later tasks to be done.
+- When planning the last remaining task, avoid repeating the same command in both that task's `Validate:` lines and `## Final Validation` when a narrower task-local proof is available; reserve `## Final Validation` for issue-level closure checks whenever possible.

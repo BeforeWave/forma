@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Literal
@@ -36,6 +37,16 @@ def install_artifact(
             "forma install does not install Codex plugin artifacts.\n\n"
             + codex_plugin_install_hint(source)
         )
+    if artifact_kind == "claude-code-plugin":
+        if target_agent != "claude-code":
+            raise ValueError(
+                "Claude Code plugin artifacts can only be installed with "
+                "--target claude-code"
+            )
+        _verify_source(source)
+        destination = _skills_root(target_agent, scope) / _claude_code_plugin_name(source)
+        _copy_targets([(source, destination)], replace)
+        return InstallResult(artifact_kind, (destination,))
     if artifact_kind == "skill":
         _verify_source(source)
         name = _skill_name(source)
@@ -60,12 +71,15 @@ def classify_install_artifact(source: Path) -> str:
     """Classify a local artifact by the install surface Forma supports."""
     if (source / ".codex-plugin" / "plugin.json").is_file():
         return "codex-plugin"
+    if (source / ".claude-plugin" / "plugin.json").is_file():
+        return "claude-code-plugin"
     if (source / "SKILL.md").is_file():
         return "skill"
     if _bundle_skill_dirs(source):
         return "skill-bundle"
     raise ValueError(
-        "path is not a supported Forma install artifact: expected a skill or skill bundle"
+        "path is not a supported Forma install artifact: expected a skill, "
+        "skill bundle, or Claude Code plugin"
     )
 
 
@@ -94,12 +108,30 @@ def _skill_name(skill_dir: Path) -> str:
 
 def _skills_root(target_agent: InstallTarget, scope: InstallScope) -> Path:
     if target_agent == "codex":
-        root = Path.home() / ".codex" / "skills" if scope == "user" else Path.cwd() / ".codex" / "skills"
+        root = (
+            Path.home() / ".agents" / "skills"
+            if scope == "user"
+            else Path.cwd() / ".agents" / "skills"
+        )
         return root
     if target_agent == "claude-code":
         root = Path.home() / ".claude" / "skills" if scope == "user" else Path.cwd() / ".claude" / "skills"
         return root
     raise ValueError(f"unsupported install target: {target_agent}")
+
+
+def _claude_code_plugin_name(plugin_root: Path) -> str:
+    plugin_json = plugin_root / ".claude-plugin" / "plugin.json"
+    try:
+        raw = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{plugin_json} could not be parsed: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise ValueError(f"{plugin_json} must be a JSON object")
+    value = raw.get("name")
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{plugin_json} must include non-empty name")
+    return value.strip()
 
 
 def _copy_targets(targets: Iterable[tuple[Path, Path]], replace: bool) -> None:

@@ -14,7 +14,9 @@ This `forma-creator` bundle is fixed to `claude-code`. Its generated plan-first 
 - Convert current-session natural-language injection into a temporary JSON file and run `python scripts/create.py --artifact bundle --output <generated-bundle-path> --injection-json <temporary-injection.json>` for workflow-bundle output; do not use Layer 3 profiles from this installed creator.
 - Copy fixed generated-skill resources from `resources/plan-first/methodology/resources/shared/` and any stage-local resource directory into each generated skill directory according to `references/canonical-plan-first.md`.
 - Generate a Claude Code-ready workflow bundle root containing `forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, and `forma-showhand/` by default, or the exact `rename.stages` names confirmed by the user.
-- Codex plugin output is unsupported by this Claude Code creator; present workflow-bundle generation only.
+- If the user asks for Claude Code plugin output, run `python scripts/create.py --artifact plugin --output <generated-plugin-path> --injection-json <temporary-injection.json>`.
+- Claude Code plugin output must contain `.claude-plugin/plugin.json`, root `.forma-manifest.json`, and `skills/<skill-name>/` child skill directories; it must not emit sibling `skill-bundles/` output.
+- For plugin output, strip the exact plugin-name prefix from generated skill names when present. For plugin `forma`, generated direct skill names such as `forma-plan` become plugin-local `plan`.
 - Keep temporary injection JSON stage keys as `shape`, `gauge`, `seal`, `pour`, and `flow`; do not expose those bare stage keys as installable skill directory names.
 - Do not use generated public skill ids such as `forma-plan` or `forma-showhand` as temporary injection JSON keys.
 - Every generated skill directory must include `SKILL.md` with frontmatter containing only `name` and `description`.

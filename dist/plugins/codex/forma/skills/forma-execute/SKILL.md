@@ -1,11 +1,11 @@
 ---
 name: "forma-execute"
-description: "Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains."
+description: "Execute one accepted task and leave verifiable evidence."
 ---
 
-# Pour
+# Forma Execute
 
-Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
+Execute one accepted task and leave verifiable evidence.
 
 ## Interaction Semantics
 

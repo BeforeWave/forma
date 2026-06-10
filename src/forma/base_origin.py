@@ -42,10 +42,12 @@ def _creator_baseline_digest(
     methodology_dir: Path | None,
     creator_source_dir: Path | None,
 ) -> str:
-    if artifact_kind not in {"skill-bundle", "codex-plugin"}:
+    if artifact_kind not in {"skill-bundle", "codex-plugin", "claude-code-plugin"}:
         raise ValueError(f"unsupported artifact kind for base origin: {artifact_kind}")
     if artifact_kind == "codex-plugin" and target_agent != "codex":
         raise ValueError("Codex plugin base origin requires target codex")
+    if artifact_kind == "claude-code-plugin" and target_agent != "claude-code":
+        raise ValueError("Claude Code plugin base origin requires target claude-code")
 
     from forma.adapters import build_creator
 
@@ -59,7 +61,9 @@ def _creator_baseline_digest(
             "--output",
             str(baseline),
             "--artifact",
-            "plugin" if artifact_kind == "codex-plugin" else "bundle",
+            "plugin"
+            if artifact_kind in {"codex-plugin", "claude-code-plugin"}
+            else "bundle",
         ]
         if methodology_dir is not None:
             args.extend(["--methodology", str(methodology_dir)])
