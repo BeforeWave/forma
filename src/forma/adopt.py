@@ -1,4 +1,4 @@
-"""Exact profile adoption from same-origin workflow artifacts."""
+"""Candidate profile adoption from same-origin workflow artifacts."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ def adopt_profile(
     profile_id: str | None = None,
     replace: bool = False,
 ) -> AdoptionResult:
-    """Adopt a same-origin workflow artifact into tracked profile source."""
+    """Adopt a same-origin workflow artifact into a candidate profile package."""
     info = _load_artifact_info(artifact_path)
     _assert_adoptable_artifact(info)
     base_origin = _assert_base_origin(info)
@@ -776,6 +776,9 @@ def _adoption_report(
     return {
         "schema": ADOPTION_REPORT_SCHEMA,
         "status": "adopted",
+        "profile_state": "candidate",
+        "review_required": True,
+        "promotion_required": True,
         "artifact": str(info.root),
         "artifact_kind": info.artifact_kind,
         "target": info.target,

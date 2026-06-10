@@ -137,7 +137,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
                 "not `forma install`."
             )
         plugin_lines = [
-            "## Generate a Codex plugin from reviewed project rules",
+            "## Generate a Codex plugin from an already reviewed tracked profile",
             "",
             plugin_intro,
             "",
@@ -164,6 +164,21 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "Use this guide to choose the right Forma command path before reading "
         "profile or injection authoring details.",
+        "",
+        "## Profile write boundary",
+        "",
+        "Profiles are durable project source. If no reviewed profile exists yet, "
+        "do not write or modify profile files from the command guide alone.",
+        "",
+        "Run `forma explain profile --target <target>` first, then return both a "
+        "`Profile YAML Proposal` and `Profile Review Packet` for human review. "
+        "Write or promote profile files only after explicit user approval.",
+        "",
+        "Creator and temporary injection outputs are generated workflow "
+        "artifacts, not durable profile source. `forma profile adopt` writes a "
+        "candidate profile package; exact regeneration and drift proof show that "
+        "the candidate can reproduce the artifact, not that it has been reviewed "
+        "as source of truth.",
         "",
         "## If the artifact type or install route is unclear",
         "",
@@ -196,11 +211,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         f"forma install --target {target} --scope project <dir>",
         "```",
         "",
-        "## Generate from reviewed durable project rules",
+        "## Generate from an already reviewed tracked profile",
         "",
-        "Use a tracked profile when project rules should be durable source. "
-        "Verify shape first, then use drift to prove the artifact is fresh "
-        "against the profile.",
+        "Use this only when `<profile.yaml>` already exists as reviewed durable "
+        "project source. If the profile does not exist yet, follow the profile "
+        "write boundary first. Verify shape, then use drift to prove the artifact "
+        "is fresh against the profile.",
         "",
         "```bash",
         f"forma create-bundle --target {target} --profile <profile.yaml> --output <dir>",
@@ -210,11 +226,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "```",
         "",
         *plugin_lines,
-        "## Adopt a same-origin creator artifact into profile source",
+        "## Adopt a same-origin creator artifact into a candidate profile package",
         "",
         "Use this only when the artifact carries same-origin Forma metadata. "
-        "Adoption writes candidate profile source; regenerate from that profile "
-        "and compare before treating it as durable.",
+        "Adoption writes a candidate profile package, not durable source of "
+        "truth. Regenerate from the candidate and compare before presenting it "
+        "for human review; promote it only after explicit approval.",
         "",
         "```bash",
         "forma profile adopt <artifact-dir> --output <profile-dir>",
@@ -233,6 +250,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "not pass URLs or Codex plugin sources.",
         "- Omitting `--profile` generates generic no-profile workflow output, "
         "not project-specific rules.",
+        "- `profile adopt` writes candidate profile packages for review, not "
+        "already-approved tracked profile source.",
         "- Use `forma explain profile --target <target>` for durable profile authoring rules.",
         "- Use `forma explain temporary-injection --target <target>` for "
         "one-off creator injection rules.",

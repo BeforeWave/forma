@@ -26,6 +26,8 @@ from forma.plugins import build_codex_plugin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
 
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+
 
 class RawEpilogMixin:
     """Write Click epilog text without paragraph reflow."""
@@ -42,9 +44,25 @@ class RawEpilogMixin:
 class RawEpilogCommand(RawEpilogMixin, click.Command):
     """Click command that preserves command examples in epilog text."""
 
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        context_settings = dict(CONTEXT_SETTINGS)
+        context_settings.update(
+            kwargs.pop("context_settings", None) or {}  # type: ignore[arg-type]
+        )
+        kwargs["context_settings"] = context_settings
+        super().__init__(*args, **kwargs)
+
 
 class RawEpilogGroup(RawEpilogMixin, click.Group):
     """Click group that preserves command examples in epilog text."""
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        context_settings = dict(CONTEXT_SETTINGS)
+        context_settings.update(
+            kwargs.pop("context_settings", None) or {}  # type: ignore[arg-type]
+        )
+        kwargs["context_settings"] = context_settings
+        super().__init__(*args, **kwargs)
 
 
 ROOT_HELP = """
@@ -54,8 +72,6 @@ Agents:
     forma explain agent
     forma explain agent --target codex
     forma explain agent --target claude-code
-
-Use create-bundle or create-plugin. The old forma create command is not supported.
 """
 
 
@@ -140,13 +156,16 @@ Next:
 
   Read this before choosing between creator, generic no-profile output, tracked
   profile generation, plugin output, profile adoption, drift, doctor, and install.
+  If no reviewed profile exists yet, do not write profile files from this guide;
+  run forma explain profile and return a proposal plus review packet first.
 """
 
 
 EXPLAIN_PROFILE_HELP = """
 Next:
 
-  Combine this guidance with project facts to draft a tracked profile YAML.
+  Combine this guidance with project facts to return a Profile YAML Proposal
+  and Profile Review Packet. Write profile files only after user approval.
   Then generate output with forma create-bundle or forma create-plugin.
 """
 
@@ -162,8 +181,9 @@ Next:
 PROFILE_ADOPT_HELP = """
 Next:
 
-  Generate from the adopted profile and compare with the source artifact before
-  committing it as durable project profile source.
+  Generate from the candidate profile package and compare with the source
+  artifact. Treat the profile as durable project source only after human review
+  and explicit promotion.
 """
 
 
@@ -472,7 +492,7 @@ def build_creator_command(
 
 @main.group("profile", cls=RawEpilogGroup)
 def profile_group() -> None:
-    """Manage durable Forma profile source."""
+    """Manage Forma profile utilities and candidate adoption."""
 
 
 @profile_group.command("adopt", cls=RawEpilogCommand, epilog=PROFILE_ADOPT_HELP)
@@ -481,7 +501,7 @@ def profile_group() -> None:
     "output_dir",
     required=True,
     type=click.Path(file_okay=False, path_type=Path),
-    help="Directory to write the adopted profile package.",
+    help="Directory to write the candidate profile package.",
 )
 @click.option(
     "--profile-id",
@@ -507,7 +527,7 @@ def profile_adopt_command(
     replace: bool,
     json_output: bool,
 ) -> None:
-    """Convert a same-origin creator artifact into tracked profile source."""
+    """Convert a same-origin creator artifact into a candidate profile package."""
     try:
         result = adopt_profile(
             artifact_path=artifact_path,
@@ -520,7 +540,7 @@ def profile_adopt_command(
     if json_output:
         click.echo(result.report_file.read_text(encoding="utf-8"), nl=False)
         return
-    click.echo(f"forma profile adopt: wrote profile: {result.profile_file}")
+    click.echo(f"forma profile adopt: wrote candidate profile: {result.profile_file}")
     click.echo(f"adoption report: {result.report_file}")
 
 

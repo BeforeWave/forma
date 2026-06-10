@@ -22,9 +22,6 @@ can start there when it is unsure which command path to use.
 | Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
 | Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
 
-Use `create-bundle` or `create-plugin`; the old `forma create` command is not
-supported.
-
 ## Commands
 
 ### `forma` / `forma --help`

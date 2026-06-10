@@ -79,14 +79,14 @@ def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
 
     no_args = runner.invoke(main, [])
     help_result = runner.invoke(main, ["--help"])
+    short_help = runner.invoke(main, ["-h"])
 
-    for result in (no_args, help_result):
+    for result in (no_args, help_result, short_help):
         assert result.exit_code == 0, result.output
         assert "Agents:" in result.output
         assert "forma explain agent" in result.output
         assert "forma explain agent --target codex" in result.output
         assert "forma explain agent --target claude-code" in result.output
-        assert "The old forma create command is not supported." in result.output
 
 
 def test_command_help_includes_agent_next_steps() -> None:
@@ -153,13 +153,15 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Explain the agent command path for workflow generation and maintenance.",
                 "creator, generic no-profile output, tracked",
                 "profile generation, plugin output, profile adoption, drift, doctor, and install",
+                "If no reviewed profile exists yet",
             ],
         ),
         (
             ["explain", "profile", "--help"],
             [
                 "Explain durable profile authoring and task-rule placement.",
-                "draft a tracked profile YAML",
+                "Profile YAML Proposal",
+                "Profile Review Packet",
                 "forma create-bundle or forma create-plugin",
             ],
         ),
@@ -169,6 +171,14 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Explain temporary injection classification for one-off workflow rules.",
                 "classify one-off workflow rules",
                 "not durable tracked profile source",
+            ],
+        ),
+        (
+            ["profile", "adopt", "-h"],
+            [
+                "Convert a same-origin creator artifact into a candidate profile package.",
+                "Directory to write the candidate profile package.",
+                "Treat the profile as durable project source only after human review",
             ],
         ),
     ]
@@ -188,6 +198,9 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert result.exit_code == 0, result.output
     assert "# Forma Agent Guide" in result.output
     assert "Targets: `codex`, `claude-code`" in result.output
+    assert "## Profile write boundary" in result.output
+    assert "do not write or modify profile files" in result.output
+    assert "`Profile YAML Proposal` and `Profile Review Packet`" in result.output
     assert "forma doctor <path>" in result.output
     assert "forma verify <dir>/<target>/forma-creator" in result.output
     assert "forma create-bundle --target <target> --output <dir>" in result.output
@@ -204,6 +217,8 @@ def test_explain_agent_outputs_command_guide() -> None:
         "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
         in result.output
     )
+    assert "Generate from an already reviewed tracked profile" in result.output
+    assert "candidate profile package" in result.output
     assert "forma profile adopt <artifact-dir> --output <profile-dir>" in result.output
     assert "`drift` checks whether generated output is fresh" in result.output
     assert "Omitting `--profile` generates generic no-profile workflow output" in result.output
@@ -222,6 +237,8 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert payload["topic"] == "agent"
     assert payload["target"] == "claude-code"
     assert "# Forma Agent Guide" in payload["markdown"]
+    assert "## Profile write boundary" in payload["markdown"]
+    assert "candidate profile package" in payload["markdown"]
     assert "`forma create-plugin --target claude-code` is not supported" in payload["markdown"]
 
 
@@ -415,6 +432,9 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
     data = json.loads(result.output)
     assert data["schema"] == "forma.profile-adoption.v1"
     assert data["status"] == "adopted"
+    assert data["profile_state"] == "candidate"
+    assert data["review_required"] is True
+    assert data["promotion_required"] is True
     assert data["artifact_kind"] == "skill-bundle"
     assert data["target"] == "codex"
     profile_file = output / "profile.yaml"
@@ -486,7 +506,7 @@ def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0, result.output
-    assert "forma profile adopt: wrote profile:" in result.output
+    assert "forma profile adopt: wrote candidate profile:" in result.output
     profile_file = output / "profile.yaml"
     profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
     assert profile["profile"]["id"] == "acme-plan-first"
