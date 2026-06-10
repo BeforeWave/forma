@@ -12,7 +12,7 @@ into a tracked profile.
 Install the Forma CLI:
 
 ```bash
-pipx install git+https://github.com/BeforeWave/forma.git
+pipx install beforewave-forma
 forma --help
 ```
 

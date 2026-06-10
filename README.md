@@ -117,7 +117,7 @@ The lightest path is to install `forma-creator` and let the agent read the
 current project rules to generate a trial workflow:
 
 ```bash
-pipx install git+https://github.com/BeforeWave/forma.git
+pipx install beforewave-forma
 forma build-creator --target codex --output /tmp/forma-creator
 forma verify /tmp/forma-creator/codex/forma-creator
 forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator

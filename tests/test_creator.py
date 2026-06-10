@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from forma import __version__
+from forma import DISTRIBUTION_NAME, __version__
 from forma.cli import main
 from forma.creator import build_bundle, load_profile
 from forma.creator.manifest import find_methodology_dir
@@ -62,7 +62,7 @@ FORMA_SELF_STAGE_DIRS = {
 
 
 def test_forma_version_comes_from_package_metadata() -> None:
-    assert __version__ == package_version("forma")
+    assert __version__ == package_version(DISTRIBUTION_NAME)
 
 
 def test_load_profile_resolves_sample_backend_go() -> None:

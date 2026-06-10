@@ -3,9 +3,12 @@
 from importlib.metadata import PackageNotFoundError, version
 
 
+DISTRIBUTION_NAME = "beforewave-forma"
+
+
 def _package_version() -> str:
     try:
-        return version("forma")
+        return version(DISTRIBUTION_NAME)
     except PackageNotFoundError:
         return "0+unknown"
 

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tarfile
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -94,7 +96,7 @@ def test_sdist_includes_runtime_asset_sources(tmp_path: Path) -> None:
         stderr=subprocess.PIPE,
         check=True,
     )
-    archive = next(sdist_dir.glob("forma-*.tar.gz"))
+    archive = next(sdist_dir.glob(f"{_dist_file_prefix()}-*.tar.gz"))
     with tarfile.open(archive) as tar:
         names = set(tar.getnames())
     assert any(name.endswith("source/methodology/stages/shape.md") for name in names)
@@ -129,7 +131,12 @@ def _build_wheel(tmp_path: Path) -> Path:
         stderr=subprocess.PIPE,
         check=True,
     )
-    return next(wheel_dir.glob("forma-*.whl"))
+    return next(wheel_dir.glob(f"{_dist_file_prefix()}-*.whl"))
+
+
+def _dist_file_prefix() -> str:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
+    return re.sub(r"[-_.]+", "_", pyproject["project"]["name"]).lower()
 
 
 def _assert_wheel_assets(wheel: Path) -> None:

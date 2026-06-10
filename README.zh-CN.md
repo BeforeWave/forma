@@ -98,7 +98,7 @@ Validation:
 最轻入口是先安装 `forma-creator`，让 agent 从当前项目读规则、生成一套可试用 workflow：
 
 ```bash
-pipx install git+https://github.com/BeforeWave/forma.git
+pipx install beforewave-forma
 forma build-creator --target codex --output /tmp/forma-creator
 forma verify /tmp/forma-creator/codex/forma-creator
 forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator

@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "forma"
+name = "beforewave-forma"
 version = "0.1.1"
-description = "Compile project rules into verified Plan-First workflow bundles and Codex plugins."
+description = "Compile project rules into dedicated agent workflows for reviewable planning, validation, and proof."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

@@ -13,6 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import click
+from forma import __version__
 from forma.adapters import ADAPTER_TARGETS, build_creator
 from forma.creator import build_bundle
 from forma.doctor import diagnose_artifact
@@ -153,7 +154,7 @@ Next:
 
 
 @click.group(cls=RawEpilogGroup, invoke_without_command=True, epilog=ROOT_HELP)
-@click.version_option()
+@click.version_option(version=__version__, prog_name="forma")
 @click.pass_context
 def main(ctx: click.Context) -> None:
     """Forma — compile project rules into task-level agent workflows."""
