@@ -82,11 +82,10 @@ def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
 
     for result in (no_args, help_result):
         assert result.exit_code == 0, result.output
-        assert "Agent paths:" in result.output
-        assert "forma build-creator --target codex --output <dir>" in result.output
-        assert "forma create-bundle --target codex --profile <profile.yaml> --output <dir>" in result.output
-        assert "forma create-plugin --target codex --profile <profile.yaml> --output <dir>" in result.output
-        assert "Install plugins through Codex, not forma install." in result.output
+        assert "Agents:" in result.output
+        assert "forma explain agent" in result.output
+        assert "forma explain agent --target codex" in result.output
+        assert "forma explain agent --target claude-code" in result.output
         assert "The old forma create command is not supported." in result.output
 
 
@@ -149,6 +148,14 @@ def test_command_help_includes_agent_next_steps() -> None:
             ],
         ),
         (
+            ["explain", "agent", "--help"],
+            [
+                "Explain the agent command path for workflow generation and maintenance.",
+                "creator, generic no-profile output, tracked",
+                "profile generation, plugin output, profile adoption, drift, doctor, and install",
+            ],
+        ),
+        (
             ["explain", "profile", "--help"],
             [
                 "Explain durable profile authoring and task-rule placement.",
@@ -171,6 +178,51 @@ def test_command_help_includes_agent_next_steps() -> None:
         assert result.exit_code == 0, result.output
         for phrase in expected_phrases:
             assert phrase in result.output
+
+
+def test_explain_agent_outputs_command_guide() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["explain", "agent"])
+
+    assert result.exit_code == 0, result.output
+    assert "# Forma Agent Guide" in result.output
+    assert "Targets: `codex`, `claude-code`" in result.output
+    assert "forma doctor <path>" in result.output
+    assert "forma verify <dir>/<target>/forma-creator" in result.output
+    assert "forma create-bundle --target <target> --output <dir>" in result.output
+    assert (
+        "forma create-bundle --target <target> --profile <profile.yaml> --output <dir>"
+        in result.output
+    )
+    assert (
+        "Codex plugin output is Codex-only. For Claude Code, generate a "
+        "skill bundle instead."
+        in result.output
+    )
+    assert (
+        "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
+        in result.output
+    )
+    assert "forma profile adopt <artifact-dir> --output <profile-dir>" in result.output
+    assert "`drift` checks whether generated output is fresh" in result.output
+    assert "Omitting `--profile` generates generic no-profile workflow output" in result.output
+
+
+def test_explain_agent_json_outputs_command_guide() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        ["explain", "agent", "--format", "json", "--target", "claude-code"],
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["topic"] == "agent"
+    assert payload["target"] == "claude-code"
+    assert "# Forma Agent Guide" in payload["markdown"]
+    assert "`forma create-plugin --target claude-code` is not supported" in payload["markdown"]
 
 
 def test_old_create_command_is_rejected_with_current_command_names() -> None:

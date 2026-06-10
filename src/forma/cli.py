@@ -3,8 +3,8 @@
 `verify` wires through `forma_verifier`, the Python package that ships
 organizationally inside Layer 1's meta skill source at
 `source/skill-creator/scripts/forma_verifier/`. `explain` is a read-only
-stdout surface that formats canonical guidance references instead of keeping a
-second copy of profile and injection rules in CLI code.
+stdout surface for agent command routing plus canonical profile and injection
+guidance.
 
 """
 
@@ -48,25 +48,12 @@ class RawEpilogGroup(RawEpilogMixin, click.Group):
 
 
 ROOT_HELP = """
-Agent paths:
+Agents:
 
-  Start from creator:
-    forma build-creator --target codex --output <dir>
-    forma install --target codex --scope project <dir>/codex/forma-creator
-
-  Build a skill bundle from a reviewed profile:
-    forma create-bundle --target codex --profile <profile.yaml> --output <dir>
-    forma verify <dir>
-    forma install --target codex --scope project <dir>
-
-  Build a Codex plugin source:
-    forma create-plugin --target codex --profile <profile.yaml> --output <dir>
-    forma verify <dir>
-    # Install plugins through Codex, not forma install.
-
-  Ask for authoring guidance:
-    forma explain profile --target codex
-    forma explain temporary-injection --target codex
+  Read the workflow command guide first:
+    forma explain agent
+    forma explain agent --target codex
+    forma explain agent --target claude-code
 
 Use create-bundle or create-plugin. The old forma create command is not supported.
 """
@@ -143,8 +130,16 @@ Next:
 
 
 EXPLAIN_HELP = """
-Use this when an agent needs rules for drafting durable profiles or
-temporary one-off workflow constraints without reading Forma source files.
+Use this when an agent needs command-routing guidance, durable profile rules, or
+temporary one-off workflow rules without reading Forma source files.
+"""
+
+
+EXPLAIN_AGENT_HELP = """
+Next:
+
+  Read this before choosing between creator, generic no-profile output, tracked
+  profile generation, plugin output, profile adoption, drift, doctor, and install.
 """
 
 
@@ -532,6 +527,30 @@ def profile_adopt_command(
 @main.group(cls=RawEpilogGroup, epilog=EXPLAIN_HELP)
 def explain() -> None:
     """Print read-only Forma authoring guidance."""
+
+
+@explain.command("agent", cls=RawEpilogCommand, epilog=EXPLAIN_AGENT_HELP)
+@click.option(
+    "--format",
+    "output_format",
+    default="markdown",
+    type=click.Choice(("markdown", "json")),
+    show_default=True,
+    help="Output format.",
+)
+@click.option(
+    "--target",
+    "target_agent",
+    required=False,
+    type=click.Choice(ADAPTER_TARGETS),
+    help="Optional agent target context.",
+)
+def explain_agent(output_format: str, target_agent: str | None) -> None:
+    """Explain the agent command path for workflow generation and maintenance."""
+    try:
+        click.echo(render_guidance("agent", output_format, target_agent), nl=False)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
 
 
 @explain.command("profile", cls=RawEpilogCommand, epilog=EXPLAIN_PROFILE_HELP)

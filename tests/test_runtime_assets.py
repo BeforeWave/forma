@@ -38,6 +38,16 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     assert "Stage Key Boundary" in profile.stdout
     assert "Generated public skill ids" in profile.stdout
 
+    agent = _run_installed(
+        ["explain", "agent"],
+        cwd=outside_cwd,
+        env=env,
+    )
+    assert "# Forma Agent Guide" in agent.stdout
+    assert "Targets: `codex`, `claude-code`" in agent.stdout
+    assert "forma verify <dir>/<target>/forma-creator" in agent.stdout
+    assert "Omitting `--profile` generates generic no-profile workflow output" in agent.stdout
+
     injection = _run_installed(
         ["explain", "temporary-injection", "--format", "json", "--target", "codex"],
         cwd=outside_cwd,
