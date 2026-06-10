@@ -50,7 +50,7 @@ Use this repository when the task involves:
 - Keep `profiles/forma-self` default constraints lightweight. Heavy root-doc or generated-baseline reads should be conditional, not default.
 - Keep `source/methodology/` and `source/skill-creator/` separate. `forma build-creator` injects the methodology tree into built creator bundles at generation time.
 - Use `forma explain profile` or `forma explain temporary-injection` when an external agent needs authoring guidance without reading Forma source files.
-- Keep pip/pipx installed CLI behavior independent of the source checkout. Runtime guidance, default methodology, and default creator source must be available through packaged `forma.assets`; source paths are development overrides only.
+- Keep `forma-cli` installed CLI behavior independent of the source checkout. Runtime guidance, default methodology, and default creator source must be available through packaged `forma.assets`; source paths are development overrides only.
 - Keep committed examples generic. Real downstream profiles with organization-specific commands, private paths, credentials, or business rules belong in their owning repositories.
 - Do not write non-temporary absolute filesystem paths into tracked files. Only temporary paths under `/tmp`, `/private/tmp`, or `$TMPDIR` may appear when they are necessary evidence; use relative paths or placeholders instead of local home, workspace, private, credential, or organization-sensitive paths.
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.

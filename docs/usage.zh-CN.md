@@ -299,7 +299,7 @@ git diff --check
 - `forma build-creator` 默认使用打包内置的 creator 源，除非提供 `--source`。
 - `forma explain` 从打包内置的 references 渲染编写指南。
 
-因此，通过 pip 或 pipx 安装后的命令不依赖 Forma 源码仓库。
+因此，通过 `forma-cli` 发行包安装后的命令不依赖 Forma 源码仓库。
 
 ## 相关文档
 

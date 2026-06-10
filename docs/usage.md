@@ -357,7 +357,7 @@ paths are development overrides only:
 - `forma build-creator` uses packaged creator source unless `--source` is provided.
 - `forma explain` renders canonical guidance from packaged references.
 
-This keeps pip or pipx installed CLI behavior independent of the source
+This keeps the `forma-cli` installed CLI behavior independent of the source
 checkout.
 
 ## Related Docs
