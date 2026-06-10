@@ -16,6 +16,7 @@ This document maps the current Forma source tree and the role of each area.
 | `setup.py` | Build hook copying canonical runtime assets into wheel package data | present |
 | `MANIFEST.in` | sdist inclusion rules for canonical runtime assets | present |
 | `uv.lock` | uv dependency lockfile for local development | present |
+| `npm/` | Thin npm launcher package; the Python package remains the canonical implementation | present |
 | `plans/issue-<id>/` | Per-issue planning and execution state | present per issue |
 | `source/` | Canonical methodology source and Layer 1 meta skill source | present |
 | `src/forma/` | Developer Python package and CLI | present |
@@ -80,6 +81,18 @@ generated skill resources.
 | `src/forma/creator/composer.py` | Methodology + resolved profile composition into Plan-First skill contents |
 | `src/forma/adapters/skill.py` | Target-specific `forma-creator` builder with fixed output contracts |
 | `src/forma/creator/emitter.py` | Output writer for generated task-level workflow bundles |
+
+## npm launcher
+
+| Path | Role |
+|---|---|
+| `npm/forma/package.json` | Scoped npm package metadata for the lightweight `@beforewave/forma` launcher |
+| `npm/forma/bin/forma-npm.js` | `forma-npm` command that points npm users to the Python CLI |
+| `npm/forma/README.md` | npm registry README explaining that PyPI `beforewave-forma` is canonical |
+
+The npm package is a distribution entrypoint and brand placeholder. It does not
+install Python dependencies automatically, does not expose the `forma` binary,
+and is not a Node.js implementation of Forma.
 
 ## Documentation
 

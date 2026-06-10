@@ -7,3 +7,4 @@ build/
 .venv/
 venv/
 .forma-workflow/
+npm/forma/*.tgz
