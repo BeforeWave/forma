@@ -17,5 +17,6 @@ Profiles are durable behavior source. Treat them like code.
 ## Generated Output Policy
 
 - A top-level profile does not automatically require committed generated baselines.
+- The `dist/` release surface is default no-profile output; self-profile output must stay in transient paths or local installs unless a future issue explicitly changes the release contract.
 - Commit generated baselines only when they are part of the issue's review surface or drift guard.
 - If committed generated baselines change, regenerate them from committed profiles and include both removed old files and added new files in the same review.

@@ -39,8 +39,8 @@ When the baseline should match fresh generation, run the relevant `forma create`
 ## Documentation
 
 ```bash
-rg -n -e "--inject|\\.plan-first" README.md README.zh-CN.md STRUCTURE.md
-git diff --check README.md README.zh-CN.md STRUCTURE.md
+uv run --extra dev python -m pytest -p no:cacheprovider tests/test_docs_links.py
+git diff --check README.md README.zh-CN.md STRUCTURE.md AGENTS.md dist/AGENTS.md docs
 ```
 
 Use this when documentation or public examples change.

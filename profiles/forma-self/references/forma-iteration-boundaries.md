@@ -13,6 +13,8 @@ Use these boundaries when planning or executing changes in the Forma repository.
 ## Artifact Boundaries
 
 - Active issue planning state lives under `plans/issue-<id>/`.
+- Committed release artifacts under `dist/` are default Forma outputs with no tracked profile and no temporary injection unless a future issue explicitly changes the release contract.
+- `profiles/forma-self/` output is for temporary self-iteration checks or local installation only; do not commit it into `dist/`.
 - Committed generated drift baselines currently live under `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` and `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/`.
 - Profile-only examples should be documented as profile-only unless the plan explicitly adds committed generated baselines for them.
 - Temporary generated suites should go under `/tmp` or another transient output path and should not be committed.
