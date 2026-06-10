@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
+import yaml
 from click.testing import CliRunner
 
+from forma.adapters import build_creator
 from forma.cli import main
+from forma.origin import normalized_payload_digest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +24,32 @@ SAMPLE_PROFILE = (
     / "sample-backend-go-github-issue-tracked.yaml"
 )
 INVALID_BUNDLE = ROOT / "tests" / "fixtures" / "invalid-bundle"
+META_SOURCE = ROOT / "source" / "skill-creator"
+
+
+def _creator_artifact(
+    tmp_path: Path,
+    target: str = "codex",
+    artifact: str = "bundle",
+    injection: dict[str, object] | None = None,
+) -> Path:
+    creator = build_creator(META_SOURCE, tmp_path / f"creator-{target}", target)
+    output = tmp_path / f"generated-{target}-{artifact}"
+    args = [
+        sys.executable,
+        str(creator / "scripts" / "create.py"),
+        "--output",
+        str(output),
+    ]
+    if artifact == "plugin":
+        args.extend(["--artifact", "plugin"])
+    if injection:
+        injection_path = tmp_path / f"{target}-{artifact}-injection.json"
+        injection_path.write_text(json.dumps(injection, indent=2), encoding="utf-8")
+        args.extend(["--injection-json", str(injection_path)])
+    result = subprocess.run(args, text=True, capture_output=True, check=False)
+    assert result.returncode == 0, result.stderr + result.stdout
+    return output
 
 
 def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
@@ -237,6 +268,204 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     assert plugin["id"] == "forma"
     assert plugin["name"] == "forma"
     assert plugin["skills"] == "./skills/"
+
+
+def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
+    artifact = _creator_artifact(
+        tmp_path,
+        injection={
+            "rename": {"prefix": "acme-plan-first"},
+            "stages": {
+                "shape": {
+                    "display_name": "Acme Plan",
+                    "short_description": "Clarify Acme work before planning.",
+                    "default_prompt": "Use $acme-plan-first-plan for Acme planning.",
+                }
+            },
+            "skills": {
+                "shape": {
+                    "description": "Clarify Acme goals and boundaries before planning."
+                }
+            },
+            "constraints": {
+                "shape": ["Confirm Acme source material before proposal-ready."],
+            },
+            "validation_commands": {
+                "pour": ["pytest tests/acme"],
+            },
+            "decision_gate_extras": ["External dependency impact"],
+        },
+    )
+    output = tmp_path / "adopted-profile"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+            "--profile-id",
+            "acme-plan-first",
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["schema"] == "forma.profile-adoption.v1"
+    assert data["status"] == "adopted"
+    assert data["artifact_kind"] == "skill-bundle"
+    assert data["target"] == "codex"
+    profile_file = output / "profile.yaml"
+    assert profile_file.is_file()
+    assert (output / "adoption-report.json").is_file()
+    profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
+    assert profile["profile"]["id"] == "acme-plan-first"
+    assert profile["stages"]["shape"]["name"] == "acme-plan-first-plan"
+    assert profile["skills"]["shape"]["description"].startswith("Clarify Acme")
+    assert profile["constraints"]["shape"] == [
+        "Confirm Acme source material before proposal-ready."
+    ]
+    assert profile["validation_commands"]["pour"] == ["pytest tests/acme"]
+    assert profile["decision_gate_extras"] == ["External dependency impact"]
+
+    regenerated = tmp_path / "regenerated"
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(regenerated),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+
+
+def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
+    artifact = _creator_artifact(
+        tmp_path,
+        artifact="plugin",
+        injection={
+            "rename": {"prefix": "acme-plan-first"},
+            "skills": {
+                "flow": {
+                    "description": "Execute accepted Acme work until the plan is complete."
+                }
+            },
+        },
+    )
+    output = tmp_path / "adopted-plugin-profile"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "forma profile adopt: wrote profile:" in result.output
+    profile_file = output / "profile.yaml"
+    profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
+    assert profile["profile"]["id"] == "acme-plan-first"
+    assert profile["bundle"]["name"] == "acme-plan-first"
+    assert profile["stages"]["flow"]["name"] == "acme-plan-first-showhand"
+
+    regenerated = tmp_path / "regenerated-plugin"
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(regenerated),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+
+
+def test_profile_adopt_fails_without_base_origin(tmp_path: Path) -> None:
+    artifact = _creator_artifact(tmp_path)
+    manifest_path = artifact / ".forma-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest.pop("base_origin")
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        ["profile", "adopt", str(artifact), "--output", str(tmp_path / "profile")],
+    )
+
+    assert result.exit_code != 0
+    assert "missing base_origin" in result.output
+
+
+def test_profile_adopt_fails_on_base_origin_mismatch(tmp_path: Path) -> None:
+    artifact = _creator_artifact(tmp_path)
+    manifest_path = artifact / ".forma-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["base_origin"]["base_output_digest"] = "0" * 64
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        ["profile", "adopt", str(artifact), "--output", str(tmp_path / "profile")],
+    )
+
+    assert result.exit_code != 0
+    assert "base_origin digest does not match" in result.output
+
+
+def test_profile_adopt_fails_on_unrepresentable_residual_diff(tmp_path: Path) -> None:
+    artifact = _creator_artifact(tmp_path)
+    metadata = artifact / "forma-plan" / "agents" / "openai.yaml"
+    metadata.write_text(
+        metadata.read_text(encoding="utf-8").replace(
+            'display_name: "Shape"',
+            'display_name: "Different Metadata Name"',
+        ),
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        ["profile", "adopt", str(artifact), "--output", str(tmp_path / "profile")],
+    )
+
+    assert result.exit_code != 0
+    assert "display_name differs" in result.output
 
 
 def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> None:

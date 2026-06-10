@@ -7,7 +7,7 @@ Depends: none
 Constraint: do not modify README, README.zh-CN, docs/, STRUCTURE.md, AGENTS.md, or similar documentation files
 Constraint: normalized payload digests must exclude `.forma-manifest.json` and include runtime payload files such as `SKILL.md`, resources, target metadata, scripts, and Codex plugin metadata
 
-- [ ] [exact-profile-adopt] Implement exact-only `forma profile adopt`
+- [x] [exact-profile-adopt] Implement exact-only `forma profile adopt`
 Accept: Task Type=step; `forma profile adopt <artifact-path> --output <dir> [--profile-id <id>] [--replace] [--json]` converts same-origin creator-generated bundles and Codex plugins into profile source, copies required resources, writes `adoption-report.json`, regenerates from the candidate profile, and succeeds only when normalized payloads match exactly
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py tests/test_creator.py tests/test_creator_builder.py
 Use-Check: verify-creator-source

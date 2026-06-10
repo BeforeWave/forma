@@ -15,6 +15,7 @@ from pathlib import Path
 import click
 from forma import __version__
 from forma.adapters import ADAPTER_TARGETS, build_creator
+from forma.adopt import adopt_profile
 from forma.creator import build_bundle
 from forma.doctor import diagnose_artifact
 from forma.explain import render_guidance
@@ -150,6 +151,14 @@ Next:
 
   Use this guidance inside forma-creator to classify one-off workflow rules.
   Temporary injection is not durable tracked profile source.
+"""
+
+
+PROFILE_ADOPT_HELP = """
+Next:
+
+  Generate from the adopted profile and compare with the source artifact before
+  committing it as durable project profile source.
 """
 
 
@@ -388,6 +397,60 @@ def build_creator_command(
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"forma build-creator: wrote creator bundle: {output}")
+
+
+@main.group("profile", cls=RawEpilogGroup)
+def profile_group() -> None:
+    """Manage durable Forma profile source."""
+
+
+@profile_group.command("adopt", cls=RawEpilogCommand, epilog=PROFILE_ADOPT_HELP)
+@click.option(
+    "--output",
+    "output_dir",
+    required=True,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Directory to write the adopted profile package.",
+)
+@click.option(
+    "--profile-id",
+    required=False,
+    help="Profile id to write into profile.yaml.",
+)
+@click.option(
+    "--replace",
+    is_flag=True,
+    help="Replace an existing output directory.",
+)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Emit the machine-readable adoption report.",
+)
+@click.argument("artifact_path", type=click.Path(exists=True, path_type=Path))
+def profile_adopt_command(
+    artifact_path: Path,
+    output_dir: Path,
+    profile_id: str | None,
+    replace: bool,
+    json_output: bool,
+) -> None:
+    """Convert a same-origin creator artifact into tracked profile source."""
+    try:
+        result = adopt_profile(
+            artifact_path=artifact_path,
+            output_dir=output_dir,
+            profile_id=profile_id,
+            replace=replace,
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    if json_output:
+        click.echo(result.report_file.read_text(encoding="utf-8"), nl=False)
+        return
+    click.echo(f"forma profile adopt: wrote profile: {result.profile_file}")
+    click.echo(f"adoption report: {result.report_file}")
 
 
 @main.group(cls=RawEpilogGroup, epilog=EXPLAIN_HELP)
