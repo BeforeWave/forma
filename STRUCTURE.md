@@ -82,17 +82,29 @@ generated skill resources.
 | `src/forma/adapters/skill.py` | Target-specific `forma-creator` builder with fixed output contracts |
 | `src/forma/creator/emitter.py` | Output writer for generated task-level workflow bundles |
 
+## PyPI packages
+
+| Path | Role |
+|---|---|
+| `pyproject.toml` | Development package metadata and canonical `forma-cli` distribution metadata |
+| `packaging/pypi/packages.toml` | Configured PyPI distribution names built from the same Forma source tree |
+| `packaging/pypi/README.beforewave-forma.md` | PyPI README for the `beforewave-forma` compatibility package |
+| `scripts/build-pypi-package.py` | Builds one configured PyPI distribution from a temporary copy of the source tree |
+| `scripts/publish-pypi.sh` | Validates, builds, smokes, twine-checks, and publishes configured PyPI packages |
+
 ## npm launcher
 
 | Path | Role |
 |---|---|
-| `npm/forma/package.json` | Scoped npm package metadata for the lightweight `@beforewave/forma` launcher |
-| `npm/forma/bin/forma-npm.js` | `forma-npm` command that points npm users to the Python CLI |
-| `npm/forma/README.md` | npm registry README explaining that PyPI `beforewave-forma` is canonical |
+| `npm/launcher/bin/forma-npm.js` | Shared npm launcher command that points npm users to the Python CLI |
+| `packaging/npm/packages.toml` | Configured npm package name built from the shared launcher source |
+| `packaging/npm/README.beforewave-forma.md` | npm README for the scoped `@beforewave/forma` launcher package |
+| `scripts/build-npm-package.py` | Builds one configured npm package source from the shared launcher |
+| `scripts/publish-npm.sh` | Builds, packs, smokes, dry-runs, and publishes configured npm packages |
 
-The npm package is a distribution entrypoint and brand placeholder. It does not
-install Python dependencies automatically, does not expose the `forma` binary,
-and is not a Node.js implementation of Forma.
+The npm packages are distribution entrypoints and discovery placeholders. They
+do not install Python dependencies automatically, do not expose the `forma`
+binary, and are not Node.js implementations of Forma.
 
 ## Documentation
 

@@ -1,0 +1,13 @@
+# PyPI distribution packages built from the same Forma source tree.
+#
+# The import package, console command, runtime assets, and tests all remain
+# rooted in src/forma. The first entry is the primary package; later entries
+# are compatibility install-name packages.
+
+[[packages]]
+name = "forma-cli"
+readme = "README.md"
+
+[[packages]]
+name = "beforewave-forma"
+readme = "packaging/pypi/README.beforewave-forma.md"

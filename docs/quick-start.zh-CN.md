@@ -9,7 +9,7 @@
 先安装 Forma CLI：
 
 ```bash
-pipx install beforewave-forma
+pipx install forma-cli
 forma --help
 ```
 

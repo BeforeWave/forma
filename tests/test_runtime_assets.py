@@ -124,6 +124,41 @@ def test_sdist_includes_runtime_asset_sources(tmp_path: Path) -> None:
     )
 
 
+def test_beforewave_forma_distribution_builds_same_runtime_assets(
+    tmp_path: Path,
+) -> None:
+    wheel_dir = tmp_path / "beforewave-forma-wheelhouse"
+    wheel_dir.mkdir()
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/build-pypi-package.py",
+            "--package",
+            "beforewave-forma",
+            "--wheel",
+            "--out-dir",
+            str(wheel_dir),
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    wheel = next(wheel_dir.glob("beforewave_forma-*.whl"))
+    _assert_wheel_metadata_name(wheel, "beforewave-forma")
+    _assert_wheel_assets(wheel)
+
+    outside_cwd = tmp_path / "outside-beforewave-forma"
+    outside_cwd.mkdir()
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(wheel)
+    result = _run_installed(["--version"], cwd=outside_cwd, env=env)
+
+    assert "0+unknown" not in result.stdout
+    assert "forma, version" in result.stdout
+
+
 def _build_wheel(tmp_path: Path) -> Path:
     wheel_dir = tmp_path / "wheelhouse"
     wheel_dir.mkdir()
@@ -161,6 +196,15 @@ def _assert_wheel_assets(wheel: Path) -> None:
         "forma/assets/source/skill-creator/references/temporary-injection-generation.md"
         in names
     )
+
+
+def _assert_wheel_metadata_name(wheel: Path, distribution_name: str) -> None:
+    with zipfile.ZipFile(wheel) as archive:
+        metadata_name = next(
+            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+        )
+        metadata = archive.read(metadata_name).decode()
+    assert f"Name: {distribution_name}\n" in metadata
 
 
 def _run_installed(

@@ -1,0 +1,8 @@
+# npm package built from the lightweight launcher source.
+
+[[packages]]
+name = "@beforewave/forma"
+description = "npm launcher for Forma, the Python-based agent workflow compiler."
+readme = "packaging/npm/README.beforewave-forma.md"
+repository_directory = "packaging/npm"
+bin = { "forma-npm" = "bin/forma-npm.js" }
