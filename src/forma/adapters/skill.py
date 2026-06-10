@@ -11,6 +11,7 @@ from typing import Iterator, List, Mapping
 from forma.creator.composer import load_stage_sources
 from forma.creator.manifest import build_creator_manifest
 from forma.creator.profiles import DEFAULT_ENABLED_KINDS
+from forma.origin import manifest_with_base_origin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
@@ -139,6 +140,12 @@ def _write_creator_manifest(
         methodology_dir=_methodology_source(source_dir),
         target_agent=target_agent,
         skill_name=skill_name,
+    )
+    manifest = manifest_with_base_origin(
+        manifest,
+        target_dir,
+        target_agent,
+        "creator",
     )
     (target_dir / ".forma-manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",

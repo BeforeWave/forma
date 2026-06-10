@@ -1,4 +1,11 @@
 {
+  "base_origin": {
+    "artifact_kind": "skill-bundle",
+    "base_output_digest": "64898c4963993a312ea4c45ae06ada489edeedd12977c7cca563f302389fa8ee",
+    "normalization_id": "forma.normalized-output.v1",
+    "schema": "forma.base-origin.v1",
+    "target": "claude-code"
+  },
   "bundle_kind": "plan-first-workflow",
   "emitted_skills": {
     "flow": {
@@ -28,14 +35,14 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-09T10:33:38Z",
+  "generated_at": "2026-06-10T07:54:18Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "cfa5a1c",
+  "methodology_source_revision": "7a063c0",
   "methodology_source_revision_type": "git-short-sha",
   "methodology_tree_digest": "798f5cd151be71e494f86efcb8288ebf5d1b7075a63d727c77c62535329aab02",
   "methodology_version": "0.1.0",

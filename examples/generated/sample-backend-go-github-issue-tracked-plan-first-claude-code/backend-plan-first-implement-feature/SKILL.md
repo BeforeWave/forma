@@ -59,8 +59,8 @@ Read these files first:
 - Stop and re-plan if implementation requires API or stream changes missing from the sealed plan.
 - Call out contract, compatibility, data, or operational risk in the task summary when behavior changes.
 - Add or update Go tests when changing Go behavior.
-- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
-- Apply profile validation gate when it is relevant to the current task: `go test ./...`
+- Apply workflow validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply workflow validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

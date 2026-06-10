@@ -57,8 +57,8 @@ Read these files first:
 - Prefer module-local Go tests when available.
 - This sample demonstrates tracked profile composition without organization-specific workflow details.
 - Do not let automated execution bypass developer clarification, contract/source handoff, or plan correction when API or stream impact is unclear.
-- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
-- Apply profile validation gate when it is relevant to the current task: `go test ./...`
+- Apply workflow validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply workflow validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

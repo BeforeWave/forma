@@ -13,6 +13,7 @@ from forma.cli import main
 from forma.creator import build_bundle, load_profile
 from forma.creator.composer import load_stage_sources
 from forma.creator.manifest import find_methodology_dir
+from forma.origin import normalized_payload_digest
 from forma.plugins import build_codex_plugin
 from forma_verifier import verify
 
@@ -61,6 +62,21 @@ FORMA_SELF_STAGE_DIRS = {
     "flow": "forma-showhand",
     "hone": "forma-reconcile",
 }
+
+
+def _assert_base_origin(
+    manifest: dict[str, object],
+    root: Path,
+    target: str,
+    artifact_kind: str,
+) -> None:
+    base_origin = manifest["base_origin"]
+    assert isinstance(base_origin, dict)
+    assert base_origin["schema"] == "forma.base-origin.v1"
+    assert base_origin["target"] == target
+    assert base_origin["artifact_kind"] == artifact_kind
+    assert base_origin["normalization_id"] == "forma.normalized-output.v1"
+    assert base_origin["base_output_digest"] == normalized_payload_digest(root)
 
 
 def test_forma_version_comes_from_package_metadata() -> None:
@@ -748,6 +764,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert manifest["methodology_source_revision_type"] == "git-short-sha"
     assert manifest["methodology_source_revision"]
     assert manifest["methodology_tree_digest"]
+    _assert_base_origin(manifest, output_dir, "codex", "skill-bundle")
     generated_at = _parse_generated_at(manifest["generated_at"])
     assert generated_at <= datetime.now(timezone.utc) + timedelta(minutes=1)
     assert manifest["profile"]["top_level_id"] == "sample-backend-go-github-issue-tracked"
@@ -790,6 +807,7 @@ def test_creator_pipeline_emits_valid_claude_code_bundle(tmp_path: Path) -> None
     assert report.passed, report.format_human()
     manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
     assert manifest["target"] == "claude-code"
+    _assert_base_origin(manifest, output_dir, "claude-code", "skill-bundle")
 
 
 def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
@@ -832,6 +850,14 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert plugin["interface"]["displayName"] == "Forma"
     assert "Plan-First" in plugin["description"]
     assert plugin["skills"] == "./skills/"
+    bundle_manifest = json.loads(
+        (bundle_dir / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    plugin_manifest = json.loads(
+        (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    _assert_base_origin(bundle_manifest, bundle_dir, "codex", "skill-bundle")
+    _assert_base_origin(plugin_manifest, plugin_dir, "codex", "codex-plugin")
 
 
 def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
@@ -869,6 +895,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert manifest["profile"]["bundle_name"] == "forma"
     assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
     assert manifest["emitted_skills"]["hone"]["name"] == "forma-reconcile"
+    _assert_base_origin(manifest, plugin_dir, "codex", "codex-plugin")
 
 
 def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:

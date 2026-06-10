@@ -596,12 +596,12 @@ def _requirements_for_kind(
     )
     if profile.decision_gate_extras and kind == "shape":
         requirements.extend(
-            f"Settle profile decision-gate dimension before proposal-ready: {item}"
+            f"Settle workflow decision-gate dimension before proposal-ready: {item}"
             for item in profile.decision_gate_extras
         )
     validation_commands = _commands_for_kind(kind, profile.validation_commands)
     requirements.extend(
-            f"Apply profile validation gate when it is relevant to the current task: `{command}`"
+            f"Apply workflow validation gate when it is relevant to the current task: `{command}`"
         for command in validation_commands
     )
     requirements.extend(_conditional_requirements(kind, profile.conditional_overlays))

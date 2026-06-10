@@ -10,6 +10,7 @@ from typing import Any, Mapping
 
 from forma.creator import build_bundle
 from forma.creator.profiles import ProfileConfig, load_profile
+from forma.origin import manifest_with_base_origin
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
@@ -40,10 +41,6 @@ def build_codex_plugin(
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest_path.unlink()
-    (output_dir / ".forma-manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
     plugin_dir = output_dir / ".codex-plugin"
     plugin_dir.mkdir(parents=True, exist_ok=True)
     profile = load_profile(profile_file)
@@ -55,6 +52,16 @@ def build_codex_plugin(
             sort_keys=True,
         )
         + "\n",
+        encoding="utf-8",
+    )
+    manifest_with_origin = manifest_with_base_origin(
+        manifest,
+        output_dir,
+        "codex",
+        "codex-plugin",
+    )
+    (output_dir / ".forma-manifest.json").write_text(
+        json.dumps(manifest_with_origin, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     report = verify(output_dir)

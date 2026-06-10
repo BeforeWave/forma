@@ -13,6 +13,7 @@ from forma.creator.manifest import (
     methodology_dir_context,
 )
 from forma.creator.profiles import ProfileConfig, ResourceSpec, load_profile
+from forma.origin import manifest_with_base_origin
 from forma_verifier import verify
 
 TARGETS = ("codex", "claude-code")
@@ -76,8 +77,14 @@ def emit_bundle(
                 _openai_yaml(skill, profile),
                 encoding="utf-8",
             )
+    manifest_with_origin = manifest_with_base_origin(
+        manifest,
+        output_dir,
+        target_agent,
+        "skill-bundle",
+    )
     (output_dir / ".forma-manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        json.dumps(manifest_with_origin, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 

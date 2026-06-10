@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from forma import __version__
 from forma.adapters import build_creator
 from forma.cli import main
+from forma.origin import normalized_payload_digest
 from forma_verifier import verify
 
 
@@ -22,6 +23,32 @@ FORMA_GENERATOR = {
     "version": __version__,
     "repository_url": "https://github.com/BeforeWave/forma",
 }
+
+
+def _assert_base_origin(
+    manifest: dict[str, object],
+    root: Path,
+    target: str,
+    artifact_kind: str,
+) -> None:
+    base_origin = manifest["base_origin"]
+    assert isinstance(base_origin, dict)
+    assert base_origin["schema"] == "forma.base-origin.v1"
+    assert base_origin["target"] == target
+    assert base_origin["artifact_kind"] == artifact_kind
+    assert base_origin["normalization_id"] == "forma.normalized-output.v1"
+    assert base_origin["base_output_digest"] == normalized_payload_digest(root)
+
+
+def _assert_origin_matches_baseline(
+    manifest: dict[str, object],
+    baseline_manifest: dict[str, object],
+    baseline_root: Path,
+    target: str,
+    artifact_kind: str,
+) -> None:
+    _assert_base_origin(baseline_manifest, baseline_root, target, artifact_kind)
+    assert manifest["base_origin"] == baseline_manifest["base_origin"]
 
 
 def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
@@ -46,6 +73,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert manifest["creator"]["name"] == SKILL_NAME
     assert manifest["creator"]["directory"] == SKILL_NAME
     assert manifest["methodology_tree_digest"]
+    _assert_base_origin(manifest, codex, "codex", "creator")
     assert (codex / "references" / "temporary-injection-generation.md").is_file()
     assert (
         codex / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
@@ -195,6 +223,10 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
         encoding="utf-8"
     )
     assert (claude / "references" / "profile-authoring-principles.md").is_file()
+    manifest = json.loads(
+        (claude / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    _assert_base_origin(manifest, claude, "claude-code", "creator")
     assert verify(claude).passed
 
 
@@ -203,6 +235,7 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     creator = build_creator(META_SOURCE, output_root, "codex")
     injection = tmp_path / "injection.json"
     generated = tmp_path / "generated"
+    baseline = tmp_path / "baseline"
     injection.write_text(
         json.dumps(
             {
@@ -256,6 +289,18 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
+    baseline_result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--output",
+            str(baseline),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert baseline_result.returncode == 0, baseline_result.stderr + baseline_result.stdout
     assert (generated / "forma-plan" / "SKILL.md").is_file()
     assert (generated / "forma-showhand" / "SKILL.md").is_file()
     assert not (generated / "shape").exists()
@@ -287,6 +332,19 @@ def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) 
     assert manifest["creator_bundle"]["format"] == "forma-creator-manifest-v1"
     assert manifest["creator_bundle"]["generator"] == FORMA_GENERATOR
     assert manifest["creator_bundle"]["creator"]["name"] == SKILL_NAME
+    baseline_manifest = json.loads(
+        (baseline / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    _assert_origin_matches_baseline(
+        manifest,
+        baseline_manifest,
+        baseline,
+        "codex",
+        "skill-bundle",
+    )
+    assert manifest["base_origin"]["base_output_digest"] != normalized_payload_digest(
+        generated
+    )
     assert verify(generated).passed
 
 
@@ -297,6 +355,7 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     creator = build_creator(META_SOURCE, output_root, "codex")
     injection = tmp_path / "plugin-injection.json"
     generated = tmp_path / "generated-plugin"
+    baseline = tmp_path / "baseline-plugin"
     injection.write_text(
         json.dumps(
             {
@@ -349,6 +408,20 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
+    baseline_result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(baseline),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert baseline_result.returncode == 0, baseline_result.stderr + baseline_result.stdout
     assert "forma creator build-plugin" in result.stdout
     assert "install hint:" in result.stdout
     assert "Codex plugin generated, not installed." in result.stdout
@@ -384,6 +457,19 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     )
     assert manifest["target"] == "codex"
     assert manifest["emitted_skills"]["shape"]["directory"] == "forma-plan"
+    baseline_manifest = json.loads(
+        (baseline / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    _assert_origin_matches_baseline(
+        manifest,
+        baseline_manifest,
+        baseline,
+        "codex",
+        "codex-plugin",
+    )
+    assert manifest["base_origin"]["base_output_digest"] != normalized_payload_digest(
+        generated
+    )
     assert verify(generated).passed
 
 

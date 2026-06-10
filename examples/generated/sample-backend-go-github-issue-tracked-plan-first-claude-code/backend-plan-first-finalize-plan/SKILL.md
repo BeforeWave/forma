@@ -73,8 +73,8 @@ Materialize an already-settled plan into plan.md and task-level execution contra
 - Include task-local validation for behavior-changing backend work.
 - Require an approved contract or source handoff before finalizing API- or stream-changing backend work.
 - When the planning handoff depends on GitHub issue refs, load and follow `references/script-resource-adapter.md`, then run `python3 scripts/github_issue_context.py <issue-url-or-user-text>` before finalization if issue body and key comments are not already confirmed.
-- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
-- Apply profile validation gate when it is relevant to the current task: `go test ./...`
+- Apply workflow validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply workflow validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

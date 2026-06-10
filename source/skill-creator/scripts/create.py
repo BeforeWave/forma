@@ -10,10 +10,12 @@ the fixed target workflow bundle from bundled methodology resources and verifies
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -43,6 +45,10 @@ STAGE_KEYS = ("default", *KINDS)
 TARGETS = ("codex", "claude-code")
 ARTIFACTS = ("bundle", "plugin")
 DEFAULT_CODEX_PLUGIN_ID = "forma"
+BASE_ORIGIN_SCHEMA = "forma.base-origin.v1"
+NORMALIZATION_ID = "forma.normalized-output.v1"
+MANIFEST_NAME = ".forma-manifest.json"
+LOCAL_ADOPTION_REPORTS = frozenset({"adoption-report.json"})
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
@@ -464,12 +470,37 @@ def build_bundle(
         raise ValueError(f"unsupported target: {target}")
     methodology_dir = methodology_dir.resolve()
     _require_methodology(methodology_dir)
+    output_dir = output_dir.resolve()
+    skill_names = _skill_names(injection)
+    _prepare_output_dir(output_dir, skill_names)
+    conditional_overlays = _emit_bundle_payload(
+        methodology_dir=methodology_dir,
+        output_dir=output_dir,
+        target=target,
+        injection=injection,
+        skill_names=skill_names,
+    )
+    _write_manifest(
+        output_dir,
+        target,
+        skill_names,
+        conditional_overlays,
+        creator_manifest,
+        _base_origin_for_bundle(methodology_dir, target),
+    )
+
+
+def _emit_bundle_payload(
+    methodology_dir: Path,
+    output_dir: Path,
+    target: str,
+    injection: Mapping[str, Any],
+    skill_names: Mapping[str, str],
+) -> ConditionalOverlays | None:
     stage_sources = {
         kind: _load_stage_source(kind, methodology_dir)
         for kind in KINDS
     }
-    skill_names = _skill_names(injection)
-    _prepare_output_dir(output_dir, skill_names)
     injected_resources = _load_injected_resources(injection.get("resources", {}), None)
     conditional_overlays = _load_conditional_overlays(
         injection.get("conditional_overlays"),
@@ -510,13 +541,7 @@ def build_bundle(
                 _openai_yaml(kind, description, injection, skill_names),
                 encoding="utf-8",
             )
-    _write_manifest(
-        output_dir,
-        target,
-        skill_names,
-        conditional_overlays,
-        creator_manifest,
-    )
+    return conditional_overlays
 
 
 def build_plugin(
@@ -532,19 +557,12 @@ def build_plugin(
     skill_names = _skill_names(injection)
     _prepare_plugin_output_dir(output_dir)
     skills_dir = output_dir / "skills"
-    build_bundle(
+    conditional_overlays = _emit_bundle_payload(
         methodology_dir=methodology_dir,
         output_dir=skills_dir,
         target="codex",
         injection=injection,
-        creator_manifest=creator_manifest,
-    )
-    nested_manifest = skills_dir / ".forma-manifest.json"
-    manifest = json.loads(nested_manifest.read_text(encoding="utf-8"))
-    nested_manifest.unlink()
-    (output_dir / ".forma-manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        skill_names=skill_names,
     )
     plugin_dir = output_dir / ".codex-plugin"
     plugin_dir.mkdir(parents=True, exist_ok=True)
@@ -560,6 +578,14 @@ def build_plugin(
         )
         + "\n",
         encoding="utf-8",
+    )
+    _write_manifest(
+        output_dir,
+        "codex",
+        skill_names,
+        conditional_overlays,
+        creator_manifest,
+        _base_origin_for_plugin(methodology_dir),
     )
 
 
@@ -644,12 +670,91 @@ def _default_prompts(_display_name: str) -> list[str]:
     ]
 
 
+def _base_origin_for_bundle(
+    methodology_dir: Path,
+    target: str,
+) -> dict[str, str]:
+    with tempfile.TemporaryDirectory(prefix="forma-base-origin-") as temp_root:
+        output_dir = Path(temp_root) / "bundle"
+        _emit_bundle_payload(
+            methodology_dir=methodology_dir,
+            output_dir=output_dir,
+            target=target,
+            injection={},
+            skill_names=_skill_names({}),
+        )
+        return _base_origin(output_dir, target, "skill-bundle")
+
+
+def _base_origin_for_plugin(methodology_dir: Path) -> dict[str, str]:
+    with tempfile.TemporaryDirectory(prefix="forma-base-origin-") as temp_root:
+        output_dir = Path(temp_root) / "plugin"
+        skills_dir = output_dir / "skills"
+        skill_names = _skill_names({})
+        _emit_bundle_payload(
+            methodology_dir=methodology_dir,
+            output_dir=skills_dir,
+            target="codex",
+            injection={},
+            skill_names=skill_names,
+        )
+        plugin_dir = output_dir / ".codex-plugin"
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+        (plugin_dir / "plugin.json").write_text(
+            json.dumps(
+                _plugin_manifest(
+                    injection={},
+                    skill_names=skill_names,
+                    descriptions=_skill_descriptions(methodology_dir, {}),
+                ),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return _base_origin(output_dir, "codex", "codex-plugin")
+
+
+def _base_origin(root: Path, target: str, artifact_kind: str) -> dict[str, str]:
+    return {
+        "schema": BASE_ORIGIN_SCHEMA,
+        "target": target,
+        "artifact_kind": artifact_kind,
+        "normalization_id": NORMALIZATION_ID,
+        "base_output_digest": _normalized_payload_digest(root),
+    }
+
+
+def _normalized_payload_digest(root: Path) -> str:
+    payload = json.dumps(
+        _normalized_payload_file_hashes(root),
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _normalized_payload_file_hashes(root: Path) -> dict[str, str]:
+    root = root.resolve()
+    hashes: dict[str, str] = {}
+    for path in sorted(root.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(root).as_posix()
+        if rel == MANIFEST_NAME or rel in LOCAL_ADOPTION_REPORTS:
+            continue
+        hashes[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
+
+
 def _write_manifest(
     output_dir: Path,
     target: str,
     skill_names: Mapping[str, str],
     conditional_overlays: ConditionalOverlays | None,
     creator_manifest: Mapping[str, Any] | None,
+    base_origin: Mapping[str, str],
 ) -> None:
     emitted = {
         kind: {
@@ -672,6 +777,7 @@ def _write_manifest(
     creator_bundle = _creator_bundle_metadata(creator_manifest)
     if creator_bundle:
         manifest["creator_bundle"] = creator_bundle
+    manifest["base_origin"] = dict(base_origin)
     if conditional_overlays is not None:
         manifest["conditional_overlays"] = _conditional_manifest(conditional_overlays)
     (output_dir / ".forma-manifest.json").write_text(
@@ -1004,7 +1110,7 @@ def _requirements(
             result.append(item)
     if kind == "shape":
         for item in injection.get("decision_gate_extras", []) or []:
-            result.append(f"Settle injected decision-gate dimension before proposal-ready: {item}")
+            result.append(f"Settle workflow decision-gate dimension before proposal-ready: {item}")
     for command in _stage_items(injection.get("validation_commands", {}), kind):
         result.append(
             f"Apply workflow validation gate when it is relevant to the current task: `{command}`"

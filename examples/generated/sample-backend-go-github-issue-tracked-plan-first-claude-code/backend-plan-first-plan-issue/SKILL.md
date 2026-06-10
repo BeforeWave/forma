@@ -73,10 +73,10 @@ Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Valida
 - Settle whether the request changes public API behavior, service behavior, stream payloads, persistence, or data flow.
 - Distinguish API or stream contract-visible changes from internal logic, storage, queue, or computation changes before proposal-ready.
 - When GitHub issue URLs are source-of-truth refs, load and follow `references/script-resource-adapter.md`, then run `python3 scripts/github_issue_context.py <issue-url-or-user-text>` before deciding planning context is incomplete.
-- Settle profile decision-gate dimension before proposal-ready: API or stream impact
-- Settle profile decision-gate dimension before proposal-ready: Data migration or persistence impact
-- Apply profile validation gate when it is relevant to the current task: `python -m pytest tests/`
-- Apply profile validation gate when it is relevant to the current task: `go test ./...`
+- Settle workflow decision-gate dimension before proposal-ready: API or stream impact
+- Settle workflow decision-gate dimension before proposal-ready: Data migration or persistence impact
+- Apply workflow validation gate when it is relevant to the current task: `python -m pytest tests/`
+- Apply workflow validation gate when it is relevant to the current task: `go test ./...`
 
 ## Output
 

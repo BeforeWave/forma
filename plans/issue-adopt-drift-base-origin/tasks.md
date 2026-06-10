@@ -1,4 +1,4 @@
-- [ ] [base-origin-render-contract] Add normalized payload digests, base-origin manifest metadata, and neutral shared rendering
+- [x] [base-origin-render-contract] Add normalized payload digests, base-origin manifest metadata, and neutral shared rendering
 Accept: Task Type=step; generated bundle, Codex plugin, and creator artifacts record stable `base_origin` metadata where applicable, and creator/profile shared fields render with neutral workflow wording that can support exact adoption
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
 Validate: uv run --extra dev forma verify source/skill-creator/
