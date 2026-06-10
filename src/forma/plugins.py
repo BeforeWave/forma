@@ -8,9 +8,10 @@ import shutil
 from pathlib import Path
 from typing import Any, Mapping
 
+from forma.base_origin import creator_base_origin
 from forma.creator import build_bundle
+from forma.creator.manifest import methodology_dir_context
 from forma.creator.profiles import ProfileConfig, load_profile
-from forma.origin import manifest_with_base_origin
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
@@ -54,12 +55,14 @@ def build_codex_plugin(
         + "\n",
         encoding="utf-8",
     )
-    manifest_with_origin = manifest_with_base_origin(
-        manifest,
-        output_dir,
-        "codex",
-        "codex-plugin",
-    )
+    with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
+        base_origin = creator_base_origin(
+            "codex",
+            "codex-plugin",
+            methodology_dir=resolved_methodology_dir,
+        )
+    manifest_with_origin = dict(manifest)
+    manifest_with_origin["base_origin"] = base_origin
     (output_dir / ".forma-manifest.json").write_text(
         json.dumps(manifest_with_origin, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

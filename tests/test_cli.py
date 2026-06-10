@@ -52,6 +52,28 @@ def _creator_artifact(
     return output
 
 
+def _assert_profile_drift_fresh(
+    runner: CliRunner,
+    artifact: Path,
+    profile_file: Path,
+) -> None:
+    result = runner.invoke(
+        main,
+        [
+            "drift",
+            str(artifact),
+            "--profile",
+            str(profile_file),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "fresh"
+    assert data["artifacts"][0]["message"] == "artifact matches regenerated output"
+
+
 def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
     runner = CliRunner()
 
@@ -279,6 +301,10 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
 
 
 def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
+    refs = tmp_path / "refs"
+    refs.mkdir()
+    for name in ("zeta.md", "alpha.md", "middle.md"):
+        (refs / name).write_text(f"# {name}\n", encoding="utf-8")
     artifact = _creator_artifact(
         tmp_path,
         injection={
@@ -302,8 +328,20 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
                 "pour": ["pytest tests/acme"],
             },
             "decision_gate_extras": ["External dependency impact"],
+            "resources": {
+                "shape": {
+                    "references": [
+                        {"source": str(refs / "zeta.md"), "dest": "zeta.md"},
+                        {"source": str(refs / "alpha.md"), "dest": "alpha.md"},
+                        {"source": str(refs / "middle.md"), "dest": "middle.md"},
+                    ]
+                }
+            },
         },
     )
+    manifest = json.loads((artifact / ".forma-manifest.json").read_text(encoding="utf-8"))
+    assert "profile" not in manifest
+    assert manifest["creator_bundle"]["bundle_kind"] == "creator"
     output = tmp_path / "adopted-profile"
     runner = CliRunner()
 
@@ -339,6 +377,10 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
     ]
     assert profile["validation_commands"]["pour"] == ["pytest tests/acme"]
     assert profile["decision_gate_extras"] == ["External dependency impact"]
+    assert [
+        item["dest"]
+        for item in profile["resources"]["shape"]["references"]
+    ] == ["zeta.md", "alpha.md", "middle.md"]
 
     regenerated = tmp_path / "regenerated"
     create = runner.invoke(
@@ -358,6 +400,7 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
 
     assert create.exit_code == 0, create.output
     assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+    _assert_profile_drift_fresh(runner, artifact, profile_file)
 
 
 def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
@@ -373,6 +416,9 @@ def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
             },
         },
     )
+    manifest = json.loads((artifact / ".forma-manifest.json").read_text(encoding="utf-8"))
+    assert "profile" not in manifest
+    assert manifest["creator_bundle"]["bundle_kind"] == "creator"
     output = tmp_path / "adopted-plugin-profile"
     runner = CliRunner()
 
@@ -408,6 +454,234 @@ def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
             str(regenerated),
             "--methodology",
             str(METHODOLOGY),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+    _assert_profile_drift_fresh(runner, artifact, profile_file)
+
+
+def test_profile_adopt_round_trips_profile_codex_plugin(tmp_path: Path) -> None:
+    artifact = tmp_path / "profile-plugin"
+    output = tmp_path / "adopted-profile-plugin"
+    runner = CliRunner()
+
+    create_artifact = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(SAMPLE_PROFILE),
+            "--output",
+            str(artifact),
+        ],
+    )
+    assert create_artifact.exit_code == 0, create_artifact.output
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    profile_file = output / "profile.yaml"
+    profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
+    assert profile["profile"]["id"] == "sample-backend-go-github-issue-tracked"
+    assert profile["bundle"]["name"] == "sample-backend-go-github-issue-tracked"
+    assert profile["bundle"]["description"] == (
+        "Sanitized sample Go backend plan-first workflow bundle for GitHub issue tracked development."
+    )
+    assert profile["org"]["name"] == "Example Team"
+
+    regenerated = tmp_path / "regenerated-profile-plugin"
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(regenerated),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+
+
+def test_profile_adopt_round_trips_plugin_with_disabled_stage(tmp_path: Path) -> None:
+    source_profile = tmp_path / "four-stage.yaml"
+    source_profile.write_text(
+        """profile:
+  id: acme-four-stage-plan-first
+bundle:
+  name: acme-four-stage
+stages:
+  pour:
+    enabled: false
+""",
+        encoding="utf-8",
+    )
+    artifact = tmp_path / "four-stage-plugin"
+    output = tmp_path / "adopted-four-stage-profile"
+    runner = CliRunner()
+
+    create_artifact = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(source_profile),
+            "--output",
+            str(artifact),
+        ],
+    )
+
+    assert create_artifact.exit_code == 0, create_artifact.output
+    manifest = json.loads(
+        (artifact / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert "pour" not in manifest["emitted_skills"]
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    profile_file = output / "profile.yaml"
+    profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
+    assert profile["stages"]["pour"] == {"enabled": False}
+    assert "pour" not in profile["skills"]
+
+    regenerated = tmp_path / "regenerated-four-stage-plugin"
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(regenerated),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+
+
+def test_profile_adopt_round_trips_plugin_with_conditional_overlays(
+    tmp_path: Path,
+) -> None:
+    backend_ref = tmp_path / "backend-rules.md"
+    backend_ref.write_text("Backend overlay rules.\n", encoding="utf-8")
+    source_profile = tmp_path / "conditional.yaml"
+    source_profile.write_text(
+        """profile:
+  id: acme-conditional-plan-first
+bundle:
+  name: acme-conditional
+conditional_overlays:
+  decision:
+    name: Plan Type
+    must_record_in_plan: true
+    missing_during_execution: stop-for-plan-correction
+  routes:
+    - id: generic-dev
+      description: Generic development work.
+      overlays: []
+    - id: backend
+      description: Backend work.
+      overlays: [backend]
+  overlays:
+    backend:
+      description: Backend-specific planning and execution rules.
+      constraints:
+        shape:
+          - Confirm backend-visible behavior before proposal-ready.
+      resources:
+        default:
+          references:
+            - source: backend-rules.md
+              dest: backend-rules.md
+""",
+        encoding="utf-8",
+    )
+    artifact = tmp_path / "conditional-plugin"
+    output = tmp_path / "adopted-conditional-profile"
+    runner = CliRunner()
+
+    create_artifact = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(source_profile),
+            "--output",
+            str(artifact),
+        ],
+    )
+
+    assert create_artifact.exit_code == 0, create_artifact.output
+    manifest = json.loads(
+        (artifact / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["conditional_overlays"]["routes"][1]["references"]["shape"] == [
+        "references/backend-rules.md"
+    ]
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    profile_file = output / "profile.yaml"
+    profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
+    routes = profile["conditional_overlays"]["routes"]
+    assert "references" not in routes[1]
+    assert routes[1]["overlays"] == ["backend"]
+
+    regenerated = tmp_path / "regenerated-conditional-plugin"
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(regenerated),
         ],
     )
 

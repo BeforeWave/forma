@@ -1,4 +1,4 @@
 interface:
-  display_name: "Forma Showhand"
-  short_description: "Complete remaining finalized Forma tasks when boundaries and gates are clear."
-  default_prompt: "$forma-showhand: 在 Layer、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。"
+  display_name: "Flow"
+  short_description: "Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops."
+  default_prompt: "Use $forma-showhand for this plan-first workflow stage."

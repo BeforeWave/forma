@@ -2,7 +2,7 @@
   "author": {
     "name": "Forma"
   },
-  "description": "Workflows for Forma development, from scoped planning through verified execution.",
+  "description": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
   "id": "forma",
   "interface": {
     "brandColor": "#10A37F",
@@ -17,8 +17,8 @@
     ],
     "developerName": "Forma",
     "displayName": "Forma",
-    "longDescription": "Workflows for Forma development, from scoped planning through verified execution.",
-    "shortDescription": "Workflows for Forma development, from scoped planning through verified execution."
+    "longDescription": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution.",
+    "shortDescription": "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
   },
   "name": "forma",
   "skills": "./skills/",

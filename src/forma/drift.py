@@ -141,17 +141,17 @@ def drift_release_surface(root: Path) -> DriftReport:
             root / "dist/skills/claude-code/forma-creator",
             root / "source/skill-creator",
         ),
-        _drift_with_profile(
+        _drift_with_creator_source(
             root / "dist/skill-bundles/codex",
-            root / "profiles/forma-self/forma-self-iteration.yaml",
+            root / "source/skill-creator",
         ),
-        _drift_with_profile(
+        _drift_with_creator_source(
             root / "dist/skill-bundles/claude-code",
-            root / "profiles/forma-self/forma-self-iteration.yaml",
+            root / "source/skill-creator",
         ),
-        _drift_with_profile(
+        _drift_with_creator_source(
             root / "dist/plugins/codex/forma",
-            root / "profiles/forma-self/forma-self-iteration.yaml",
+            root / "source/skill-creator",
         ),
     ]
     return DriftReport(tuple(results))
@@ -339,13 +339,6 @@ def _generate_creator_baseline_from_source(
 
 def _current_base_origin_status(info) -> str | None:
     try:
-        if not isinstance(info.manifest.get("creator_bundle"), Mapping):
-            base_origin = _assert_base_origin(info)
-            return (
-                STATUS_FRESH
-                if base_origin["base_output_digest"] == normalized_payload_digest(info.root)
-                else STATUS_STALE
-            )
         with tempfile.TemporaryDirectory(prefix="forma-drift-") as temp_root_text:
             baseline = _generate_creator_baseline(
                 Path(temp_root_text) / "baseline",

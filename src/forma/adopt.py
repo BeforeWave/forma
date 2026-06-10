@@ -1,4 +1,4 @@
-"""Exact profile adoption from same-origin creator artifacts."""
+"""Exact profile adoption from same-origin workflow artifacts."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ import yaml
 from forma.adapters import build_creator
 from forma.creator import build_bundle
 from forma.creator.composer import KINDS
+from forma.creator.profiles import STAGE_KEYS
 from forma.origin import (
     BASE_ORIGIN_SCHEMA,
     NORMALIZATION_ID,
@@ -64,9 +65,9 @@ def adopt_profile(
     profile_id: str | None = None,
     replace: bool = False,
 ) -> AdoptionResult:
-    """Adopt a same-origin creator-generated artifact into tracked profile source."""
+    """Adopt a same-origin workflow artifact into tracked profile source."""
     info = _load_artifact_info(artifact_path)
-    _assert_creator_generated(info)
+    _assert_adoptable_artifact(info)
     base_origin = _assert_base_origin(info)
     with tempfile.TemporaryDirectory(prefix="forma-adopt-") as temp_root_text:
         temp_root = Path(temp_root_text)
@@ -163,12 +164,10 @@ def _load_json(path: Path) -> Mapping[str, Any]:
     return raw
 
 
-def _assert_creator_generated(info: ArtifactInfo) -> None:
+def _assert_adoptable_artifact(info: ArtifactInfo) -> None:
     report = verify(info.root)
     if not report.passed:
         raise ValueError(report.format_human())
-    if not isinstance(info.manifest.get("creator_bundle"), Mapping):
-        raise ValueError("artifact is not creator-generated; creator_bundle is missing")
 
 
 def _assert_base_origin(info: ArtifactInfo) -> Mapping[str, str]:
@@ -223,17 +222,25 @@ def _write_candidate_profile(
     profile_id: str,
 ) -> Path:
     profile_root.mkdir(parents=True, exist_ok=True)
+    bundle: dict[str, Any] = {
+        "name": info.plugin_id
+        or _manifest_profile_string(info, "bundle_name")
+        or profile_id
+    }
+    if info.plugin_description:
+        bundle["description"] = info.plugin_description
     profile: dict[str, Any] = {
         "profile": {
             "id": profile_id,
-            "description": "Adopted from a same-origin Forma creator artifact.",
+            "description": "Adopted from a same-origin Forma workflow artifact.",
         },
-        "bundle": {"name": info.plugin_id or profile_id},
-        "stages": {},
-        "skills": {},
+        "bundle": bundle,
     }
-    if info.plugin_description:
-        profile["bundle"]["description"] = info.plugin_description
+    org_name = _manifest_profile_string(info, "org_name")
+    if org_name:
+        profile["org"] = {"name": org_name}
+    profile["stages"] = {}
+    profile["skills"] = {}
 
     artifact_emitted = _emitted_skills(info.manifest)
     baseline_manifest = _load_manifest(baseline)
@@ -251,6 +258,11 @@ def _write_candidate_profile(
     decision_gate_extras: list[str] = []
 
     for kind in KINDS:
+        if kind not in artifact_emitted:
+            profile["stages"][kind] = {"enabled": False}
+            continue
+        if kind not in baseline_emitted:
+            raise ValueError(f"baseline manifest is missing emitted_skills.{kind}")
         artifact_skill_dir = info.workflow_root / artifact_emitted[kind]["directory"]
         baseline_skill_dir = _baseline_workflow_root(baseline, info.artifact_kind) / baseline_emitted[kind]["directory"]
         stage_config, skill_description = _extract_stage_config(
@@ -258,6 +270,8 @@ def _write_candidate_profile(
             artifact_skill_dir,
             info.target,
         )
+        if stage_config.get("short_description") == skill_description:
+            stage_config.pop("short_description")
         profile["stages"][kind] = stage_config
         profile["skills"][kind] = {"description": skill_description}
         _extract_requirement_delta(
@@ -306,8 +320,9 @@ def _emitted_skills(manifest: Mapping[str, Any]) -> dict[str, dict[str, str]]:
     if not isinstance(raw, Mapping):
         raise ValueError("manifest.emitted_skills is required")
     result: dict[str, dict[str, str]] = {}
-    for kind in KINDS:
-        item = raw.get(kind)
+    for kind, item in raw.items():
+        if not isinstance(kind, str) or kind not in KINDS:
+            raise ValueError(f"manifest.emitted_skills has unknown stage: {kind}")
         if not isinstance(item, Mapping):
             raise ValueError(f"manifest.emitted_skills.{kind} is required")
         name = _required_string(item, "name", f"manifest.emitted_skills.{kind}.name")
@@ -317,6 +332,8 @@ def _emitted_skills(manifest: Mapping[str, Any]) -> dict[str, dict[str, str]]:
             f"manifest.emitted_skills.{kind}.directory",
         )
         result[kind] = {"name": name, "directory": directory}
+    if not result:
+        raise ValueError("manifest.emitted_skills must not be empty")
     return result
 
 
@@ -449,7 +466,8 @@ def _extract_resource_delta(
     for rel in baseline_hashes:
         if rel not in artifact_hashes and not _target_metadata_path(rel):
             raise ValueError(f"{kind} removes baseline runtime file: {rel}")
-    for rel, digest in artifact_hashes.items():
+    for rel in _ordered_resource_paths(artifact_skill_dir, artifact_hashes):
+        digest = artifact_hashes[rel]
         if _target_metadata_path(rel):
             continue
         if baseline_hashes.get(rel) == digest:
@@ -473,6 +491,37 @@ def _skill_payload_hashes(skill_dir: Path) -> dict[str, str]:
             rel = path.relative_to(skill_dir).as_posix()
             result[rel] = normalized_payload_file_hashes(skill_dir).get(rel, "")
     return result
+
+
+def _ordered_resource_paths(
+    skill_dir: Path,
+    hashes: Mapping[str, str],
+) -> list[str]:
+    ordered: list[str] = []
+    skill_file = skill_dir / "SKILL.md"
+    if skill_file.is_file():
+        text = skill_file.read_text(encoding="utf-8")
+        references = []
+        for rel in hashes:
+            marker = f"`{rel}`"
+            index = text.find(marker)
+            if rel.startswith("references/") and index >= 0:
+                references.append((index, rel))
+        ordered.extend(rel for _index, rel in sorted(references))
+    ordered.extend(
+        rel
+        for rel in hashes
+        if rel.startswith("scripts/") and rel not in ordered
+    )
+    ordered.extend(
+        rel
+        for rel in hashes
+        if not rel.startswith("references/")
+        and not rel.startswith("scripts/")
+        and rel not in ordered
+    )
+    ordered.extend(rel for rel in hashes if rel not in ordered)
+    return ordered
 
 
 def _target_metadata_path(rel: str) -> bool:
@@ -541,29 +590,108 @@ def _apply_conditional_overlays(
         raw_resources = overlay.get("resources")
         if isinstance(raw_resources, Mapping):
             for kind, dests in raw_resources.items():
-                if kind not in KINDS or not isinstance(dests, list):
+                if kind not in STAGE_KEYS or not isinstance(dests, list):
                     raise ValueError("conditional overlay resources are malformed")
                 for dest in dests:
                     if not isinstance(dest, str):
                         raise ValueError("conditional overlay resource dest is malformed")
-                    skill_dir = info.workflow_root / artifact_emitted[kind]["directory"]
+                    source = _conditional_resource_source(
+                        info=info,
+                        artifact_emitted=artifact_emitted,
+                        kind=kind,
+                        dest=dest,
+                    )
+                    if source is None:
+                        raise ValueError(
+                            f"conditional overlay resource references disabled stage: {kind}"
+                        )
                     spec = _copy_resource(
                         profile_root=profile_root,
                         kind=f"conditional/{overlay_id}/{kind}",
-                        source=skill_dir / dest,
+                        source=source,
                         dest=dest,
                     )
                     bucket = _resource_bucket(dest)
                     resource_specs.setdefault(kind, {}).setdefault(bucket, []).append(spec)
-                    conditional_resource_dests.add((kind, dest))
+                    for emitted_kind in _conditional_resource_emitted_kinds(
+                        info=info,
+                        artifact_emitted=artifact_emitted,
+                        kind=kind,
+                        dest=dest,
+                    ):
+                        conditional_resource_dests.add((emitted_kind, dest))
         if resource_specs:
             overlay_profile["resources"] = resource_specs
         profile_overlays[overlay_id] = overlay_profile
     profile["conditional_overlays"] = {
         "decision": decision,
-        "routes": routes,
+        "routes": _profile_conditional_routes(routes),
         "overlays": profile_overlays,
     }
+
+
+def _conditional_resource_source(
+    info: ArtifactInfo,
+    artifact_emitted: Mapping[str, Mapping[str, str]],
+    kind: str,
+    dest: str,
+) -> Path | None:
+    if kind == "default":
+        for emitted_kind in KINDS:
+            source = _conditional_resource_source(
+                info=info,
+                artifact_emitted=artifact_emitted,
+                kind=emitted_kind,
+                dest=dest,
+            )
+            if source is not None:
+                return source
+        return None
+    emitted = artifact_emitted.get(kind)
+    if emitted is None:
+        return None
+    source = info.workflow_root / emitted["directory"] / dest
+    if not source.is_file():
+        raise ValueError(f"conditional overlay resource is missing: {kind}:{dest}")
+    return source
+
+
+def _conditional_resource_emitted_kinds(
+    info: ArtifactInfo,
+    artifact_emitted: Mapping[str, Mapping[str, str]],
+    kind: str,
+    dest: str,
+) -> list[str]:
+    if kind != "default":
+        return [kind] if kind in artifact_emitted else []
+    result: list[str] = []
+    for emitted_kind, emitted in artifact_emitted.items():
+        if (info.workflow_root / emitted["directory"] / dest).is_file():
+            result.append(emitted_kind)
+    return result
+
+
+def _profile_conditional_routes(routes: list[object]) -> list[dict[str, object]]:
+    profile_routes: list[dict[str, object]] = []
+    for index, raw_route in enumerate(routes):
+        field = f"conditional_overlays.routes[{index}]"
+        if not isinstance(raw_route, Mapping):
+            raise ValueError(f"{field} must be a mapping")
+        route_id = _required_string(raw_route, "id", f"{field}.id")
+        route: dict[str, object] = {"id": route_id}
+        description = raw_route.get("description")
+        if description is not None:
+            if not isinstance(description, str):
+                raise ValueError(f"{field}.description must be a string")
+            route["description"] = description
+        overlays = raw_route.get("overlays", [])
+        if not isinstance(overlays, list) or not all(
+            isinstance(item, str) and item.strip() for item in overlays
+        ):
+            raise ValueError(f"{field}.overlays must be a list of strings")
+        route["overlays"] = [item.strip() for item in overlays]
+        profile_routes.append(route)
+    return profile_routes
 
 
 def _conditional_resource_dests(manifest: Mapping[str, Any]) -> set[tuple[str, str]]:
@@ -574,6 +702,7 @@ def _conditional_resource_dests(manifest: Mapping[str, Any]) -> set[tuple[str, s
     overlays = raw.get("overlays")
     if not isinstance(overlays, Mapping):
         return result
+    emitted = _emitted_skills(manifest)
     for overlay in overlays.values():
         if not isinstance(overlay, Mapping):
             continue
@@ -581,10 +710,15 @@ def _conditional_resource_dests(manifest: Mapping[str, Any]) -> set[tuple[str, s
         if not isinstance(resources, Mapping):
             continue
         for kind, dests in resources.items():
-            if kind not in KINDS or not isinstance(dests, list):
+            if kind not in STAGE_KEYS or not isinstance(dests, list):
                 continue
             for dest in dests:
-                if isinstance(dest, str):
+                if not isinstance(dest, str):
+                    continue
+                if kind == "default":
+                    for emitted_kind in emitted:
+                        result.add((emitted_kind, dest))
+                else:
                     result.add((kind, dest))
     return result
 
@@ -654,6 +788,9 @@ def _adoption_report(
 
 
 def _default_profile_id(info: ArtifactInfo) -> str:
+    manifest_profile_id = _manifest_profile_string(info, "top_level_id")
+    if manifest_profile_id:
+        return manifest_profile_id
     if info.plugin_id:
         return info.plugin_id
     name = info.root.name.strip().lower()
@@ -661,6 +798,16 @@ def _default_profile_id(info: ArtifactInfo) -> str:
     while "--" in cleaned:
         cleaned = cleaned.replace("--", "-")
     return cleaned.strip("-") or "adopted-forma-profile"
+
+
+def _manifest_profile_string(info: ArtifactInfo, key: str) -> str | None:
+    profile = info.manifest.get("profile")
+    if not isinstance(profile, Mapping):
+        return None
+    value = profile.get(key)
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
 
 
 def _required_string(mapping: Mapping[str, Any], key: str, field: str) -> str:

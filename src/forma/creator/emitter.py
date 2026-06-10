@@ -7,13 +7,13 @@ import shutil
 from pathlib import Path
 from typing import Iterable, Mapping, Set
 
+from forma.base_origin import creator_base_origin
 from forma.creator.composer import ComposedSkill, KINDS, compose_bundle
 from forma.creator.manifest import (
     build_manifest,
     methodology_dir_context,
 )
 from forma.creator.profiles import ProfileConfig, ResourceSpec, load_profile
-from forma.origin import manifest_with_base_origin
 from forma_verifier import verify
 
 TARGETS = ("codex", "claude-code")
@@ -41,6 +41,7 @@ def build_bundle(
             manifest=manifest,
             profile=profile,
             target_agent=target_agent,
+            methodology_dir=resolved_methodology_dir,
         )
     report = verify(output_dir)
     if not report.passed:
@@ -54,6 +55,7 @@ def emit_bundle(
     manifest: Mapping[str, object],
     profile: ProfileConfig,
     target_agent: str,
+    methodology_dir: Path,
 ) -> None:
     """Write a generated workflow bundle, replacing only known Forma output paths."""
     _assert_target(target_agent)
@@ -77,11 +79,11 @@ def emit_bundle(
                 _openai_yaml(skill, profile),
                 encoding="utf-8",
             )
-    manifest_with_origin = manifest_with_base_origin(
-        manifest,
-        output_dir,
+    manifest_with_origin = dict(manifest)
+    manifest_with_origin["base_origin"] = creator_base_origin(
         target_agent,
         "skill-bundle",
+        methodology_dir=methodology_dir,
     )
     (output_dir / ".forma-manifest.json").write_text(
         json.dumps(manifest_with_origin, indent=2, sort_keys=True) + "\n",

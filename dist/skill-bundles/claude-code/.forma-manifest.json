@@ -1,291 +1,67 @@
 {
   "base_origin": {
     "artifact_kind": "skill-bundle",
-    "base_output_digest": "5044927d9b91c035359a33883cc1f54e0923e49ec2f72bf8195741a5cdcfdce3",
+    "base_output_digest": "c8ec5590d257e068f1aed54b1fb8d9de48fb3b6d90474c2d135668557de1bd07",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "claude-code"
   },
   "bundle_kind": "plan-first-workflow",
-  "conditional_overlays": {
-    "decision": {
-      "missing_during_execution": "stop-for-plan-correction",
-      "must_record_in_plan": true,
-      "name": "Iteration Area"
+  "creator_bundle": {
+    "bundle_kind": "creator",
+    "creator": {
+      "directory": "forma-creator",
+      "name": "forma-creator",
+      "source_revision": "d568469",
+      "source_revision_type": "git-short-sha",
+      "source_tree_digest": "a1541d0a527dcd1f14c9669038c99e440f2afefaddcdd31c970bad73f72ba33b"
     },
-    "overlays": {
-      "creator": {
-        "constraints": {
-          "pour": [
-            "Keep generated skill bodies deterministic except for generated_at unless a plan explicitly changes that contract."
-          ],
-          "shape": [
-            "Identify whether the change affects profile loading, composition, target emission, manifest provenance, output replacement, or creator builder behavior."
-          ]
-        },
-        "description": "Layer 3 composer, emitter, manifest, adapter, and CLI rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py"
-          ]
-        }
-      },
-      "docs": {
-        "constraints": {
-          "flow": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated documentation edits."
-          ],
-          "pour": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before editing Forma documentation.",
-            "Remove stale command examples, deprecated flags, and references to superseded profile locations."
-          ],
-          "shape": [
-            "Identify affected docs and whether README.zh-CN.md must stay aligned with README.md."
-          ]
-        },
-        "description": "Documentation update rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "rg -n -e \"--inject|\\\\.plan-first\" README.md README.zh-CN.md STRUCTURE.md",
-            "git diff --check README.md README.zh-CN.md STRUCTURE.md"
-          ]
-        }
-      },
-      "generated": {
-        "constraints": {
-          "flow": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated generated baseline replacement."
-          ],
-          "pour": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before replacing generated baselines that affect documented workflow behavior.",
-            "Regenerate committed outputs from committed profiles and stage removed old directories plus new generated directories together."
-          ],
-          "shape": [
-            "State which committed generated output paths are drift baselines and why they must change."
-          ]
-        },
-        "description": "Committed generated output baseline rules.",
-        "resources": {},
-        "validation_commands": {
-          "flow": [
-            "uv run --extra dev python -m pytest -p no:cacheprovider tests/"
-          ],
-          "pour": [
-            "uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/",
-            "uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/"
-          ]
-        }
-      },
-      "governance": {
-        "constraints": {
-          "flow": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plan files before automated governance or self-management policy changes."
-          ],
-          "pour": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and active plan files before changing governance or self-management policy."
-          ],
-          "shape": [
-            "Identify which governance surface changes: README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, profiles/forma-self, or plan-first workflow policy."
-          ]
-        },
-        "description": "Repository governance and self-management policy rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "git diff --check README.md README.zh-CN.md STRUCTURE.md AGENTS.md profiles/forma-self"
-          ]
-        }
-      },
-      "methodology": {
-        "constraints": {
-          "pour": [
-            "Keep source/methodology as the canonical source and do not duplicate methodology truth inside source/skill-creator."
-          ],
-          "shape": [
-            "State which canonical methodology stage, fragment, or fixed resource changes and how it affects generated skills."
-          ]
-        },
-        "description": "Methodology source and generated skill body rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py",
-            "uv run --extra dev forma verify source/skill-creator/"
-          ]
-        }
-      },
-      "profiles": {
-        "constraints": {
-          "flow": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.",
-            "After automated profiles/forma-self changes, regenerate the Forma Codex plugin and reinstall it through Codex before closure."
-          ],
-          "pour": [
-            "Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before changing Forma-owned profiles or generated self-iteration behavior.",
-            "Verify every affected top-level profile by running forma create and forma verify for at least one target.",
-            "After changing profiles/forma-self, regenerate the Forma Codex plugin and reinstall it through Codex before closure."
-          ],
-          "shape": [
-            "Decide whether a profile is Forma-owned under profiles/, sanitized example content under examples/profiles/, or downstream-owned outside this repository."
-          ]
-        },
-        "description": "Tracked profile stack rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py"
-          ]
-        }
-      },
-      "verifier": {
-        "constraints": {
-          "pour": [
-            "Add paired positive and negative verifier coverage for rule changes."
-          ],
-          "shape": [
-            "Define the rule being added, relaxed, or tightened and the target suite shape it protects."
-          ]
-        },
-        "description": "Layer 2 verifier rules.",
-        "resources": {},
-        "validation_commands": {
-          "pour": [
-            "uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py"
-          ]
-        }
-      }
+    "format": "forma-creator-manifest-v1",
+    "generated_at": "2026-06-10T10:05:21Z",
+    "generator": {
+      "name": "forma",
+      "repository_url": "https://github.com/BeforeWave/forma",
+      "version": "0.1.1"
     },
-    "routes": [
-      {
-        "description": "Documentation-only changes.",
-        "id": "docs-only",
-        "overlays": [
-          "docs"
-        ],
-        "references": {}
-      },
-      {
-        "description": "Repository governance, AGENTS instructions, workflow policy, or self-management rule changes.",
-        "id": "governance",
-        "overlays": [
-          "governance"
-        ],
-        "references": {}
-      },
-      {
-        "description": "Canonical methodology or Layer 2 verifier changes.",
-        "id": "methodology-verifier",
-        "overlays": [
-          "methodology",
-          "verifier"
-        ],
-        "references": {}
-      },
-      {
-        "description": "Layer 3 creator, profile schema, or profile stack changes.",
-        "id": "creator-profile",
-        "overlays": [
-          "creator",
-          "profiles"
-        ],
-        "references": {}
-      },
-      {
-        "description": "Committed generated output replacement or drift baseline update.",
-        "id": "generated-baseline",
-        "overlays": [
-          "generated"
-        ],
-        "references": {}
-      },
-      {
-        "description": "Coordinated Layer 1, Layer 2, Layer 3, docs, tests, and generated output work.",
-        "id": "cross-layer",
-        "overlays": [
-          "methodology",
-          "verifier",
-          "creator",
-          "profiles",
-          "generated",
-          "docs"
-        ],
-        "references": {}
-      }
-    ]
+    "generator_version": "0.1.1",
+    "target": "claude-code"
   },
-  "emitted_skills": {
-    "flow": {
-      "directory": "forma-showhand",
-      "display_name": "Forma Showhand",
-      "name": "forma-showhand"
-    },
-    "gauge": {
-      "directory": "forma-ground",
-      "display_name": "Forma Ground",
-      "name": "forma-ground"
-    },
-    "pour": {
-      "directory": "forma-execute",
-      "display_name": "Forma Execute",
-      "name": "forma-execute"
-    },
-    "seal": {
-      "directory": "forma-lock",
-      "display_name": "Forma Lock",
-      "name": "forma-lock"
-    },
-    "shape": {
-      "directory": "forma-plan",
-      "display_name": "Forma Plan",
-      "name": "forma-plan"
-    }
-  },
-  "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-10T08:08:38Z",
-  "generator": {
-    "name": "forma",
-    "repository_url": "https://github.com/BeforeWave/forma",
-    "version": "0.1.1"
-  },
-  "generator_version": "0.1.1",
-  "methodology_source_revision": "e336c8d",
-  "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "798f5cd151be71e494f86efcb8288ebf5d1b7075a63d727c77c62535329aab02",
-  "methodology_version": "0.1.0",
-  "mode": "solo",
-  "profile": {
-    "bundle_name": "forma",
-    "digest": "c8dcfae04ee98323c2bbd6ab54b92e8a69f5e31189810d3e176781fbf8f8cb47",
-    "file_hashes": {
-      "base.yaml": "c78fe6f576a4c07ffe052120c6e306e47fed16d0801ea3dab64bcc7860725dca",
-      "forma-self-iteration.yaml": "bef47687bd478e85fb9dd4ff35c1c43af69361e899dc958821b9e5d0e2939a44",
-      "iteration-overlays.yaml": "c340be5e38bb86e9cf6ed18a17d483121b0a8dc3a4e4cfade1fed4ada78a0d2c",
-      "project.yaml": "360880125ea04af3462f81914cde3e2946b7718742329d990cc28754ecacc3c6"
-    },
-    "org_name": "Forma Maintainers",
-    "resolved_order": [
-      "forma-self-base",
-      "forma-self-project",
-      "forma-self-iteration-overlays",
-      "forma-self-iteration"
-    ],
-    "resource_digest": "e33195e3f7fa296a43d1a4d4770c25a003a0a2002014e22f9f7fb3fc3a83c690",
-    "resource_hashes": {
-      "default:references/forma-iteration-boundaries.md": "a0800a832c9307cae4229bb66eb7050280edc25eb7a551f1c8376883e9ca2946",
-      "default:references/forma-profile-policy.md": "6da86f9558389651b2e00ca2cdcba1e8fd2eb63df9364f6ec7e40817f8bfa869",
-      "default:references/forma-validation-matrix.md": "96c0e84308183ec14fcfccc41bd04bb0e32981a1d352ee911ce8c07fb73007bb"
-    },
-    "top_level_id": "forma-self-iteration",
-    "top_level_path": "forma-self-iteration.yaml"
-  },
-  "skills": [
+  "emitted_order": [
     "shape",
     "gauge",
     "seal",
     "pour",
     "flow"
   ],
+  "emitted_skills": {
+    "flow": {
+      "directory": "forma-showhand",
+      "name": "forma-showhand"
+    },
+    "gauge": {
+      "directory": "forma-ground",
+      "name": "forma-ground"
+    },
+    "pour": {
+      "directory": "forma-execute",
+      "name": "forma-execute"
+    },
+    "seal": {
+      "directory": "forma-lock",
+      "name": "forma-lock"
+    },
+    "shape": {
+      "directory": "forma-plan",
+      "name": "forma-plan"
+    }
+  },
+  "format": "forma-bundle-manifest-v1",
+  "generator": {
+    "name": "forma",
+    "repository_url": "https://github.com/BeforeWave/forma",
+    "version": "0.1.1"
+  },
+  "generator_version": "0.1.1",
+  "mode": "solo",
   "target": "claude-code"
 }
