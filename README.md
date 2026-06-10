@@ -18,6 +18,7 @@ from the current project.
 
 > **Good fit:** repositories with many rules, boundaries, validation needs, and
 > reviewable planning or execution records.
+>
 > **Not a good fit:** lightweight cases that only need a few personal agent
 > preferences.
 
