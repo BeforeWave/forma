@@ -18,6 +18,7 @@ from forma.adapters import ADAPTER_TARGETS, build_creator
 from forma.adopt import adopt_profile
 from forma.creator import build_bundle
 from forma.doctor import diagnose_artifact
+from forma.drift import drift_artifact, drift_release_surface
 from forma.explain import render_guidance
 from forma.install import install_artifact
 from forma.plugin_guidance import codex_plugin_install_hint
@@ -86,6 +87,15 @@ Next:
 
   Use this before handoff when you need to know what an artifact is, whether
   Forma can install it, and which install route is correct.
+"""
+
+
+DRIFT_HELP = """
+Sources:
+
+  Use --profile when an artifact should still match tracked profile source.
+  Use --creator-source for creator bundles or no-injection creator output.
+  Without a source, drift reports base-origin freshness only.
 """
 
 
@@ -210,6 +220,72 @@ def doctor(ctx: click.Context, json_output: bool, path: Path) -> None:
     else:
         click.echo(report.format_human())
     if report.blockers:
+        ctx.exit(1)
+
+
+@main.command("drift", cls=RawEpilogCommand, epilog=DRIFT_HELP)
+@click.option(
+    "--profile",
+    "profile_file",
+    required=False,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Tracked profile source used to regenerate the artifact.",
+)
+@click.option(
+    "--creator-source",
+    required=False,
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    help="Creator source used to regenerate creator artifacts.",
+)
+@click.option(
+    "--release-surface",
+    is_flag=True,
+    help="Check Forma's committed examples/generated and dist release surface.",
+)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Emit a machine-readable drift report.",
+)
+@click.argument(
+    "artifact_path",
+    required=False,
+    type=click.Path(exists=True, path_type=Path),
+)
+@click.pass_context
+def drift_command(
+    ctx: click.Context,
+    profile_file: Path | None,
+    creator_source: Path | None,
+    release_surface: bool,
+    json_output: bool,
+    artifact_path: Path | None,
+) -> None:
+    """Check whether generated Forma artifacts are fresh."""
+    if release_surface and artifact_path is not None:
+        raise click.ClickException("--release-surface does not accept an artifact path")
+    if release_surface and (profile_file is not None or creator_source is not None):
+        raise click.ClickException("--release-surface uses Forma's fixed source map")
+    if not release_surface and artifact_path is None:
+        raise click.ClickException("provide an artifact path or --release-surface")
+    try:
+        report = (
+            drift_release_surface(Path.cwd())
+            if release_surface
+            else drift_artifact(
+                artifact_path=artifact_path or Path(),
+                profile_file=profile_file,
+                creator_source=creator_source,
+            )
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    if json_output:
+        click.echo(report.format_json())
+    else:
+        click.echo(report.format_human())
+    if report.status == "invalid":
         ctx.exit(1)
 
 

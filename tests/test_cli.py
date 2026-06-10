@@ -119,6 +119,14 @@ def test_command_help_includes_agent_next_steps() -> None:
             ],
         ),
         (
+            ["drift", "--help"],
+            [
+                "Check whether generated Forma artifacts are fresh.",
+                "Use --profile when an artifact should still match tracked profile source.",
+                "Without a source, drift reports base-origin freshness only.",
+            ],
+        ),
+        (
             ["explain", "profile", "--help"],
             [
                 "Explain durable profile authoring and task-rule placement.",
@@ -466,6 +474,110 @@ def test_profile_adopt_fails_on_unrepresentable_residual_diff(tmp_path: Path) ->
 
     assert result.exit_code != 0
     assert "display_name differs" in result.output
+
+
+def test_drift_with_profile_reports_fresh_and_stale(tmp_path: Path) -> None:
+    artifact = tmp_path / "bundle"
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "codex",
+            "--profile",
+            str(SAMPLE_PROFILE),
+            "--output",
+            str(artifact),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    fresh = runner.invoke(
+        main,
+        ["drift", str(artifact), "--profile", str(SAMPLE_PROFILE), "--json"],
+    )
+
+    assert fresh.exit_code == 0, fresh.output
+    fresh_data = json.loads(fresh.output)
+    assert fresh_data["status"] == "fresh"
+    assert fresh_data["artifacts"][0]["source_kind"] == "profile"
+
+    skill = artifact / "backend-plan-first-ground-plan" / "SKILL.md"
+    skill.write_text(
+        skill.read_text(encoding="utf-8") + "\n<!-- stale marker -->\n",
+        encoding="utf-8",
+    )
+    stale = runner.invoke(
+        main,
+        ["drift", str(artifact), "--profile", str(SAMPLE_PROFILE), "--json"],
+    )
+
+    assert stale.exit_code == 0, stale.output
+    stale_data = json.loads(stale.output)
+    assert stale_data["status"] == "stale"
+    assert stale_data["artifacts"][0]["status"] == "stale"
+
+
+def test_drift_without_source_reports_unknown_source_base_origin(
+    tmp_path: Path,
+) -> None:
+    artifact = _creator_artifact(
+        tmp_path,
+        injection={"constraints": {"shape": ["Confirm source context."]}},
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["drift", str(artifact), "--json"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "unknown-source"
+    item = data["artifacts"][0]
+    assert item["status"] == "unknown-source"
+    assert item["source_kind"] == "none"
+    assert item["base_origin_status"] == "fresh"
+
+
+def test_drift_creator_source_reports_unknown_for_injected_artifact(
+    tmp_path: Path,
+) -> None:
+    artifact = _creator_artifact(
+        tmp_path,
+        injection={"constraints": {"shape": ["Confirm source context."]}},
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        ["drift", str(artifact), "--creator-source", str(META_SOURCE), "--json"],
+    )
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "unknown-source"
+    assert data["artifacts"][0]["base_origin_status"] == "fresh"
+
+
+def test_drift_release_surface_reports_known_paths() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["drift", "--release-surface", "--json"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    paths = {item["path"] for item in data["artifacts"]}
+    assert any(path.endswith("examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex") for path in paths)
+    assert any(path.endswith("dist/skills/codex/forma-creator") for path in paths)
+    assert any(path.endswith("dist/plugins/codex/forma") for path in paths)
+    assert {item["status"] for item in data["artifacts"]} <= {
+        "fresh",
+        "stale",
+        "invalid",
+        "unknown-source",
+    }
 
 
 def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> None:

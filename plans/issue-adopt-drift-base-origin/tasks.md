@@ -17,7 +17,7 @@ Constraint: fail closed when `base_origin` is missing, base digest mismatches, a
 Constraint: support creator-generated `codex` and `claude-code` skill bundles plus creator-generated Codex plugins; Claude Code plugin adoption is unsupported
 Constraint: do not modify README, README.zh-CN, docs/, STRUCTURE.md, AGENTS.md, or similar documentation files
 
-- [ ] [drift-cli] Implement `forma drift` for artifacts and release surface
+- [x] [drift-cli] Implement `forma drift` for artifacts and release surface
 Accept: Task Type=step; `forma drift <artifact-path> [--profile <profile.yaml>] [--creator-source <dir>] [--json]` and `forma drift --release-surface [--json]` verify artifacts, regenerate from the declared source, compare normalized payloads, and report `fresh`, `stale`, `invalid`, or `unknown-source`
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py tests/test_creator.py tests/test_creator_builder.py
 Validate: uv run --extra dev forma drift --release-surface

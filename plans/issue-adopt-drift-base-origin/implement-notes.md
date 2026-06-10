@@ -46,3 +46,27 @@ Deviations From Plan:
 
 Follow-ups:
 - `drift` should reuse the same baseline and normalized payload comparison helpers where possible.
+
+## Task 3: drift-cli
+
+Outcome:
+- Added `forma drift <artifact-path> [--profile <profile.yaml>] [--creator-source <dir>] [--json]`.
+- Added `forma drift --release-surface [--json]` for the fixed Forma `examples/generated` and `dist` generated surface map.
+
+Decision Notes:
+- Drift reports `fresh`, `stale`, `invalid`, or `unknown-source` and exits nonzero only for `invalid`; stale is a successful check result so task 3 can validate reporting before task 4 regenerates stale release surfaces.
+- `--profile` performs full regeneration and normalized payload equality for workflow bundles and Codex plugins.
+- `--creator-source` fully regenerates creator bundles. For injected creator-generated workflow artifacts, it can prove the no-injection base origin is fresh but returns `unknown-source` unless a profile is supplied.
+- Single-artifact drift without source never claims full freshness; it reports `unknown-source` plus base-origin freshness when available.
+
+Plan Gaps Found:
+- None
+
+Classifications:
+- Current `forma drift --release-surface` reports stale `dist` artifacts and fresh `examples/generated` artifacts before task 4 regeneration.
+
+Deviations From Plan:
+- None
+
+Follow-ups:
+- Task 4 should regenerate `dist` surfaces and then require release-surface drift to report fresh.
