@@ -2,20 +2,20 @@
 
 Chinese version: [concepts.zh-CN.md](./concepts.zh-CN.md)
 
-This page expands the README thesis: Forma turns a project's own engineering
-rules into workflows and task contracts the agent uses every time it works.
+This page expands the README thesis: Forma compiles project rules into a
+dedicated agent workflow, then uses workflow skills to apply those rules to each
+task contract.
 
 ## What Forma Solves
 
-Many projects already have agent-facing docs and ask agents to plan before
-implementation. That helps, but it still leaves a gap: the plan may not apply
-the team's most important rules to the current task in a way reviewers can rely
-on and verify.
+AGENTS.md, custom skills, and Superpowers can give an agent rules and process.
+That helps, but it still leaves a gap: the plan may not apply the team's most
+important rules to the current task in a way reviewers can rely on and verify.
 
 Forma fills that layer. It helps the agent extract engineering rules from docs,
-code, tests, and conventions, then turns those rules into a workflow. When a
-task starts, the workflow makes the agent produce a task contract: evidence,
-boundaries, validation, proof, and stop conditions.
+code, tests, and conventions, then compiles those rules into workflow skills.
+When a task starts, those skills make the agent produce a task contract:
+evidence, boundaries, validation, proof, and stop conditions.
 
 ## Customize A Workflow In One Sentence
 
@@ -47,7 +47,7 @@ Forma puts project rules into three layers:
 | Layer | Meaning |
 |---|---|
 | Project rules | Team-approved ways of working: authoritative sources, boundaries, required tools, validation depth, proof, and stop conditions. |
-| Workflow output | The installed agent workflow: a Codex / Claude Code skill bundle or Codex plugin. |
+| Workflow output | Installed workflow skills: a Codex / Claude Code skill bundle or Codex plugin. |
 | Task contract | The plan contract the agent writes for one task under `plans/issue-<id>/`. |
 
 With on-the-spot customization, project rules enter this generated workflow
@@ -71,7 +71,7 @@ the task contract says how this task will be done.
 
 ## Compiler Model
 
-Forma is a compiler that turns project rules into agent workflows.
+Forma is a compiler that turns project rules into a dedicated agent workflow.
 
 ```text
 profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task contract
@@ -81,8 +81,8 @@ durable / on-the-spot rules         compiler            install output       cur
 Codex and Claude Code are the current targets. The same profile can generate
 different target outputs while preserving task-level workflow semantics.
 
-Forma does not execute project tasks directly. It generates the workflow an
-agent follows while executing tasks.
+Forma does not execute project tasks directly. It generates the workflow skills
+an agent follows while executing tasks.
 
 ## Default Workflow
 

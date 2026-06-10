@@ -2,13 +2,13 @@
 
 英文版：[concepts.md](./concepts.md)
 
-这页展开 README 的主线：Forma 把项目自己的工程准则变成 agent 每次执行都会用到的 workflow 和 task contract。
+这页展开 README 的主线：Forma 把项目规则编译成专属 agent workflow，并通过 workflow skills 把规则落到每次任务的 task contract。
 
 ## Forma 解决什么
 
-很多项目已经有 agent-facing docs，也会要求 agent 先写计划再实现。这个做法能减少直接开写，但仍然有缺口：计划可能没有把团队最关切的准则落到当前任务里。
+AGENTS.md、custom skill 或 Superpowers 可以给 agent 规则和流程。这个做法能减少直接开写，但仍然有缺口：计划可能没有把团队最关切的准则落到当前任务里。
 
-Forma 补的是这一层。它让 agent 从项目文档、代码、测试和约定里梳理工程准则，再把这些准则变成 workflow。任务开始后，workflow 要求 agent 先产出 task contract，把事实依据、修改边界、验证方式、proof 和停手条件写清楚。
+Forma 补的是这一层。它让 agent 从项目文档、代码、测试和约定里梳理工程准则，再把这些准则编译成一组 workflow skills。任务开始后，这些 skills 要求 agent 先产出 task contract，把事实依据、修改边界、验证方式、proof 和停手条件写清楚。
 
 ## 一句话定制 Workflow
 
@@ -36,7 +36,7 @@ Forma 把项目准则放进三层：
 | 层 | 含义 |
 |---|---|
 | 项目准则 | 团队认可的做事方式：权威资料、修改边界、工具要求、验证深度、proof 和停手条件。 |
-| Workflow 产物 | 安装给 agent 的工作流，可以是 Codex / Claude Code skill bundle，也可以是 Codex plugin。 |
+| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex / Claude Code skill bundle，也可以是 Codex plugin。 |
 | Task contract | agent 面对一个具体任务时写出的计划契约，记录到 `plans/issue-<id>/`。 |
 
 临场定制时，项目准则进入本次生成的 workflow 产物。长期维护时，项目准则沉淀成 tracked profile，再由 Forma 编译成 workflow 产物。
@@ -51,7 +51,7 @@ Task contract 是这些准则落到当前任务后的结果。到了这个阶段
 
 ## 编译模型
 
-Forma 是把项目准则变成 agent workflow 的编译器。
+Forma 是把项目准则变成专属 agent workflow 的编译器。
 
 ```text
 profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task contract
@@ -60,7 +60,7 @@ profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task
 
 Codex 和 Claude Code 是当前支持的 target。同一份 profile 可以生成不同 target 的产物，同时保持 task 级 workflow 语义不变。
 
-Forma 不直接执行项目任务。它生成 agent 执行任务时遵守的 workflow。
+Forma 不直接执行项目任务。它生成 agent 执行任务时遵守的 workflow skills。
 
 ## 默认 Workflow
 

@@ -17,6 +17,7 @@ forma --help
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator
+forma verify /tmp/forma-creator/codex/forma-creator
 forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
@@ -76,7 +77,7 @@ Use forma-execute to execute the next accepted task.
 
 ```text
 用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
-profile 确认后，基于它创建并安装 Codex workflow。
+profile 确认后，基于它生成、验证并安装 Codex workflow。
 ```
 
 agent 会用 `forma explain profile --target codex` 读取 profile 编写标准。流程是：先给 profile 草案；你 review；确认后再生成、验证并按提示安装 workflow。

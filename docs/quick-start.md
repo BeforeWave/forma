@@ -20,6 +20,7 @@ For Codex, build and install the creator skill:
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator
+forma verify /tmp/forma-creator/codex/forma-creator
 forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
@@ -84,8 +85,8 @@ If you want durable profile source from the start, ask the agent:
 
 ```text
 Use Forma to extract engineering rules from this project's docs and code, and
-draft a profile for me. After I approve the profile, create and install the
-Codex workflow from it.
+draft a profile for me. After I approve the profile, generate, verify, and
+install the Codex workflow from it.
 ```
 
 The agent uses `forma explain profile --target codex` to load the profile
