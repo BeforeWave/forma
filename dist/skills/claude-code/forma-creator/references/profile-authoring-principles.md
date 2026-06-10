@@ -14,6 +14,67 @@ decide whether a one-off request should remain a temporary injection.
   repository that owns those workflow constraints. Keep Forma examples
   sanitized.
 
+## Durable Profile Proposal Review
+
+When proposing a durable tracked profile from repository rules, do not answer
+with only YAML. Include both:
+
+1. `Profile YAML Proposal`
+2. `Profile Review Packet`
+
+The review packet lets the user review source coverage, classification, and
+placement decisions without rereading the whole repository.
+
+### Write Boundary
+
+Do not write or modify profile files during the proposal step unless the user
+explicitly asks you to persist the profile. First return the `Profile YAML
+Proposal` and `Profile Review Packet` for review.
+
+After the user confirms the proposal, write the profile YAML into the owning
+repository's profile path. If preserving the review packet is requested, write
+it as a review artifact such as `profiles/<profile-name>/REVIEW.md`; it is not
+compiled profile source.
+
+### Profile Review Packet: Included Rules
+
+For every meaningful profile rule, list:
+
+- profile path, such as `constraints.shape` or
+  `validation.shared_checks`;
+- source file, section, and line number when available;
+- source wording summary, not a long quote;
+- strength: `MUST`, `SHOULD`, or `MAY`;
+- why this profile section is the narrowest correct placement;
+- durability: durable, task-specific, or uncertain.
+
+### Profile Review Packet: Omitted Source Rules
+
+List important repository instructions that were considered but not placed in
+the profile, especially `MUST` and `SHOULD` rules from `AGENTS.md`, governance
+docs, CI docs, or validation docs.
+
+For each omitted rule, include:
+
+- source file, section, and line number when available;
+- source wording summary;
+- reason omitted, such as task-specific, already covered by a broader rule,
+  too local for this profile, needs user decision, or not workflow policy.
+
+### Profile Review Packet: Validation Command Mapping
+
+For every validation command candidate, explain whether it was kept, rewritten,
+or omitted:
+
+- source command;
+- profile command or omitted;
+- required working directory or target surface;
+- reason for the mapping.
+
+Do not invent profile rules without a source or an explicit user decision. If a
+rule is useful but source support is weak, mark it as an open question instead
+of silently promoting it into the profile.
+
 ## Stage Key Boundary
 
 Profiles and temporary injection use internal stage keys as schema keys:
