@@ -12,4 +12,5 @@
 - For behavior-changing tasks, do not treat the task as complete unless the changed behavior is covered by the current task's validation contract or the plan explicitly declares `# no-programmatic-validation: <reason>`.
 - For each automated task, treat `plans/issue-<id>/implement-notes.md` as the same execution decision journal used by `implement-feature`; update it when decisions, plan gaps, classifications, deviations, or intentional follow-ups matter to later tasks or review.
 - Use `references/implement-notes.md` for the notes format; do not turn notes into a command log or duplicate routine validation output.
+- In the final automated execution summary, include `Recorded Decisions` only when this invocation recorded autonomous execution choices in `implement-notes.md`; summarize the selected options and point to the notes without duplicating routine validation output.
 - Do not edit `tasks.md`, create evidence, or create the task commit outside `scripts/forma-workflow.sh complete <issue-id>`.

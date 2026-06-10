@@ -118,6 +118,7 @@ def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
         assert "forma explain agent" in result.output
         assert "forma explain agent --target codex" in result.output
         assert "forma explain agent --target claude-code" in result.output
+        assert "forma explain agent --target opencode" in result.output
 
 
 def test_command_help_includes_agent_next_steps() -> None:
@@ -127,7 +128,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             ["build-creator", "--help"],
             [
                 "Verify the generated creator skill:",
-                "forma install --target codex|claude-code --scope user|project <creator-path>",
+                "forma install --target codex|claude-code|opencode --scope user|project <creator-path>",
             ],
         ),
         (
@@ -135,7 +136,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             [
                 "Compile project rules into a target-specific skill bundle.",
                 "Verify before installing:",
-                "forma install --target codex|claude-code --scope user|project <output-dir>",
+                "forma install --target codex|claude-code|opencode --scope user|project <output-dir>",
             ],
         ),
         (
@@ -229,18 +230,22 @@ def test_explain_agent_outputs_command_guide() -> None:
 
     assert result.exit_code == 0, result.output
     assert "# Forma Agent Guide" in result.output
-    assert "Targets: `codex`, `claude-code`" in result.output
+    assert "Generation targets: `codex`, `claude-code`, `opencode`" in result.output
+    assert "plugin targets: `codex`, `claude-code`" in result.output
+    assert "install targets: `codex`, `claude-code`, `opencode`" in result.output
     assert "## Profile write boundary" in result.output
     assert "do not write or modify profile files" in result.output
     assert "`Profile YAML Proposal` and `Profile Review Packet`" in result.output
     assert "forma doctor <path>" in result.output
-    assert "forma verify <dir>/<target>/forma-creator" in result.output
-    assert "forma create-bundle --target <target> --output <dir>" in result.output
+    assert "forma verify <dir>/<generation-target>/forma-creator" in result.output
+    assert "forma create-bundle --target <generation-target> --output <dir>" in result.output
     assert (
-        "forma create-bundle --target <target> --profile <profile.yaml> --output <dir>"
+        "forma create-bundle --target <generation-target> --profile <profile.yaml> --output <dir>"
         in result.output
     )
-    assert "OpenCode compatibility uses Codex direct-skill output" in result.output
+    assert "forma create-bundle --target opencode" in result.output
+    assert "forma install --target opencode" in result.output
+    assert ".opencode/skills" in result.output
     assert "Codex plugins install through Codex marketplace/plugin UI" in result.output
     assert "Claude Code plugin roots can be installed" in result.output
     assert (
@@ -326,6 +331,39 @@ def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> N
     assert manifest["format"] == "forma-bundle-manifest-v1"
     assert manifest["bundle_kind"] == "plan-first-workflow"
     assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
+
+
+def test_create_bundle_opencode_emits_native_skill_frontmatter(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "opencode-bundle"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "opencode",
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    skill_md = (output / "forma-plan" / "SKILL.md").read_text(encoding="utf-8")
+    assert 'name: "forma-plan"' in skill_md
+    assert "compatibility: opencode" in skill_md
+    assert 'forma.stage: "shape"' in skill_md
+    assert 'forma.target: "opencode"' in skill_md
+    assert not (output / "forma-plan" / "agents" / "openai.yaml").exists()
+    assert not (output / ".codex-plugin").exists()
+    assert not (output / ".claude-plugin").exists()
+    manifest = json.loads((output / ".forma-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["target"] == "opencode"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "forma-plan"
 
 
 def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
@@ -952,6 +990,8 @@ def test_drift_release_surface_reports_known_paths() -> None:
     paths = {item["path"] for item in data["artifacts"]}
     assert any(path.endswith("examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex") for path in paths)
     assert any(path.endswith("dist/skills/codex/forma-creator") for path in paths)
+    assert any(path.endswith("dist/skills/opencode/forma-creator") for path in paths)
+    assert any(path.endswith("dist/skill-bundles/opencode") for path in paths)
     assert any(path.endswith("dist/plugins/codex/forma") for path in paths)
     assert any(path.endswith("dist/plugins/claude-code/forma") for path in paths)
     assert {item["status"] for item in data["artifacts"]} <= {
@@ -1164,6 +1204,108 @@ def test_install_codex_bundle_project_scope_and_replace(
         ],
     )
     assert replace.exit_code == 0, replace.output
+
+
+def test_install_codex_bundle_user_scope_uses_codex_home(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    bundle = tmp_path / "bundle"
+    home = tmp_path / "home"
+    home.mkdir()
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "codex",
+            "--output",
+            str(bundle),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    monkeypatch.setenv("HOME", str(home))
+    install = runner.invoke(
+        main,
+        ["install", "--target", "codex", "--scope", "user", str(bundle)],
+    )
+
+    assert install.exit_code == 0, install.output
+    assert (home / ".codex" / "skills" / "forma-plan").is_dir()
+    assert (home / ".codex" / "skills" / "forma-showhand").is_dir()
+    assert not (home / ".agents" / "skills").exists()
+
+
+def test_install_opencode_bundle_project_scope(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    bundle = tmp_path / "bundle"
+    project = tmp_path / "project"
+    project.mkdir()
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "opencode",
+            "--output",
+            str(bundle),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    monkeypatch.chdir(project)
+    install = runner.invoke(
+        main,
+        ["install", "--target", "opencode", "--scope", "project", str(bundle)],
+    )
+
+    assert install.exit_code == 0, install.output
+    assert (project / ".opencode" / "skills" / "forma-plan").is_dir()
+    assert (project / ".opencode" / "skills" / "forma-showhand").is_dir()
+    assert not (project / ".agents" / "skills").exists()
+
+
+def test_install_opencode_bundle_user_scope(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    bundle = tmp_path / "bundle"
+    home = tmp_path / "home"
+    home.mkdir()
+    runner = CliRunner()
+    create = runner.invoke(
+        main,
+        [
+            "create-bundle",
+            "--target",
+            "opencode",
+            "--output",
+            str(bundle),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+    assert create.exit_code == 0, create.output
+
+    monkeypatch.setenv("HOME", str(home))
+    install = runner.invoke(
+        main,
+        ["install", "--target", "opencode", "--scope", "user", str(bundle)],
+    )
+
+    assert install.exit_code == 0, install.output
+    assert (home / ".config" / "opencode" / "skills" / "forma-plan").is_dir()
+    assert (home / ".config" / "opencode" / "skills" / "forma-showhand").is_dir()
+    assert not (home / ".agents" / "skills").exists()
 
 
 def test_install_claude_code_bundle_project_scope(

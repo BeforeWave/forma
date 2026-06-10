@@ -2,7 +2,9 @@
 
 英文版：[verifier.md](./verifier.md)
 
-`forma verify` 用来检查生成的 workflow bundle、`forma-creator` bundle，以及 Codex / Claude Code plugin 产物。
+`forma verify` 用来检查生成的 workflow bundle、`forma-creator` bundle，以及
+Codex / Claude Code plugin 产物。Workflow bundle target 包括 Codex、Claude
+Code 和 OpenCode。
 
 它是安装、提交或分享前的工程边界：生成产物必须结构有效、符合 target 契约，并保留能推动 task contract 的 workflow 形状。
 

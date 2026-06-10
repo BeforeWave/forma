@@ -42,7 +42,7 @@ FORMA_GENERATOR_NAME = "forma"
 FORMA_GENERATOR_VERSION_FALLBACK = "0+unknown"
 FORMA_GENERATOR_REPOSITORY_URL = "https://github.com/BeforeWave/forma"
 STAGE_KEYS = ("default", *KINDS)
-TARGETS = ("codex", "claude-code")
+TARGETS = ("codex", "claude-code", "opencode")
 ARTIFACTS = ("bundle", "plugin")
 DEFAULT_CODEX_PLUGIN_ID = "forma"
 BASE_ORIGIN_SCHEMA = "forma.base-origin.v1"
@@ -236,6 +236,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv)
     creator_root = Path(__file__).resolve().parents[1]
     target = args.target or _detect_fixed_target(creator_root)
+    if args.artifact == "plugin" and target == "opencode":
+        raise ValueError(
+            "OpenCode target supports bundle output only; "
+            "OpenCode runtime plugins are .opencode/plugins/*.js|ts"
+        )
     methodology_dir = (
         args.methodology.resolve()
         if args.methodology
@@ -557,6 +562,7 @@ def _emit_bundle_payload(
                 skill_name=skill_name,
                 stage_source=stage_sources[kind],
                 description=description,
+                target=target,
                 injection=injection,
                 resources=normal_resources,
                 requirement_refs=requirement_refs,
@@ -583,6 +589,11 @@ def build_plugin(
     creator_manifest: Mapping[str, Any] | None = None,
 ) -> None:
     """Build a target-specific plugin artifact from the target-fixed creator source."""
+    if target == "opencode":
+        raise ValueError(
+            "OpenCode target supports bundle output only; "
+            "OpenCode runtime plugins are .opencode/plugins/*.js|ts"
+        )
     methodology_dir = methodology_dir.resolve()
     _require_methodology(methodology_dir)
     output_dir = output_dir.resolve()
@@ -1162,6 +1173,7 @@ def _render_skill(
     skill_name: str,
     stage_source: StageSource,
     description: str,
+    target: str,
     injection: Mapping[str, Any],
     resources: Sequence[Resource],
     requirement_refs: Sequence[RequirementReference],
@@ -1169,12 +1181,28 @@ def _render_skill(
 ) -> str:
     stage_config = _stage_config(kind, injection)
     display_name = str(stage_config.get("display_name") or kind.replace("-", " ").title())
-    lines = [
+    frontmatter = [
         "---",
         f'name: "{skill_name}"',
         f'description: "{description}"',
-        "---",
-        "",
+    ]
+    if target == "opencode":
+        frontmatter.extend(
+            [
+                "compatibility: opencode",
+                "metadata:",
+                f'  forma.stage: "{kind}"',
+                '  forma.target: "opencode"',
+            ]
+        )
+    frontmatter.extend(
+        [
+            "---",
+            "",
+        ]
+    )
+    lines = [
+        *frontmatter,
         f"# {display_name}",
         "",
         description,

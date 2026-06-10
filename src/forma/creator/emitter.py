@@ -16,7 +16,7 @@ from forma.creator.manifest import (
 from forma.creator.profiles import ProfileConfig, ResourceSpec, load_profile
 from forma_verifier import verify
 
-TARGETS = ("codex", "claude-code")
+TARGETS = ("codex", "claude-code", "opencode")
 
 
 def build_bundle(
@@ -70,7 +70,10 @@ def emit_bundle(
         stage = profile.stages[kind]
         skill_dir = output_dir / stage.directory
         skill_dir.mkdir(parents=True, exist_ok=True)
-        (skill_dir / "SKILL.md").write_text(skill.skill_md, encoding="utf-8")
+        (skill_dir / "SKILL.md").write_text(
+            _skill_md_for_target(skill.skill_md, kind, target_agent),
+            encoding="utf-8",
+        )
         _copy_resources(skill_dir, skill.resources)
         if target_agent == "codex":
             agents_dir = skill_dir / "agents"
@@ -95,6 +98,23 @@ def _assert_target(target_agent: str) -> None:
     if target_agent not in TARGETS:
         allowed = ", ".join(TARGETS)
         raise ValueError(f"unsupported target {target_agent!r}; use {allowed}")
+
+
+def _skill_md_for_target(text: str, kind: str, target_agent: str) -> str:
+    if target_agent != "opencode":
+        return text
+    marker = "---\n\n"
+    metadata = "\n".join(
+        [
+            "compatibility: opencode",
+            "metadata:",
+            f'  forma.stage: "{kind}"',
+            '  forma.target: "opencode"',
+        ]
+    )
+    if marker not in text:
+        raise ValueError("generated SKILL.md is missing YAML frontmatter")
+    return text.replace(marker, f"{metadata}\n---\n\n", 1)
 
 
 def _openai_yaml(skill: ComposedSkill, profile: ProfileConfig) -> str:

@@ -1,0 +1,73 @@
+{
+  "base_origin": {
+    "artifact_kind": "skill-bundle",
+    "base_output_digest": "b27a0000bba1d205e86751587515faa762892b608bf938861cfe7e01732d0156",
+    "normalization_id": "forma.normalized-output.v1",
+    "schema": "forma.base-origin.v1",
+    "target": "opencode"
+  },
+  "bundle_kind": "plan-first-workflow",
+  "emitted_skills": {
+    "flow": {
+      "directory": "forma-showhand",
+      "display_name": "Forma Showhand",
+      "name": "forma-showhand"
+    },
+    "gauge": {
+      "directory": "forma-ground",
+      "display_name": "Forma Ground",
+      "name": "forma-ground"
+    },
+    "pour": {
+      "directory": "forma-execute",
+      "display_name": "Forma Execute",
+      "name": "forma-execute"
+    },
+    "seal": {
+      "directory": "forma-lock",
+      "display_name": "Forma Lock",
+      "name": "forma-lock"
+    },
+    "shape": {
+      "directory": "forma-plan",
+      "display_name": "Forma Plan",
+      "name": "forma-plan"
+    }
+  },
+  "format": "forma-bundle-manifest-v1",
+  "generated_at": "2026-06-10T18:00:47Z",
+  "generator": {
+    "name": "forma",
+    "repository_url": "https://github.com/BeforeWave/forma",
+    "version": "0.1.1"
+  },
+  "generator_version": "0.1.1",
+  "methodology_source_revision": "0af735f",
+  "methodology_source_revision_type": "git-short-sha",
+  "methodology_tree_digest": "9131f7ad137d63827f68283f263b10a649add1d5dee91148bb09402c60e37625",
+  "methodology_version": "0.1.0",
+  "mode": "solo",
+  "profile": {
+    "bundle_name": "forma",
+    "digest": "747d13e09cfd1013d9b8148591ac049d47af6b957b61c0e0c09200bd92b646a5",
+    "file_hashes": {
+      "forma-plan-first.yaml": "ad7b8632c2aebcd1cec8b63a4e04bb4242c3b91f28cf4c21e2dfa9872bce0850"
+    },
+    "org_name": "Forma",
+    "resolved_order": [
+      "forma-plan-first-default"
+    ],
+    "resource_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "resource_hashes": {},
+    "top_level_id": "forma-plan-first-default",
+    "top_level_path": "forma-plan-first.yaml"
+  },
+  "skills": [
+    "shape",
+    "gauge",
+    "seal",
+    "pour",
+    "flow"
+  ],
+  "target": "opencode"
+}

@@ -118,11 +118,12 @@ def render_agent_guidance(
 
 
 def _render_agent_markdown(target_agent: str | None) -> str:
-    target = target_agent or "<target>"
+    generation_target = target_agent or "<generation-target>"
+    install_target = target_agent or "<install-target>"
     target_line = (
         f"Target: `{target_agent}`"
         if target_agent is not None
-        else "Targets: `codex`, `claude-code`"
+        else "Generation targets: `codex`, `claude-code`, `opencode`; plugin targets: `codex`, `claude-code`; install targets: `codex`, `claude-code`, `opencode`"
     )
     plugin_lines: list[str]
     if target_agent == "codex":
@@ -154,6 +155,15 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "```",
             "",
         ]
+    elif target_agent == "opencode":
+        plugin_lines = [
+            "## OpenCode plugin output",
+            "",
+            "Forma does not generate OpenCode JS/TS runtime plugins. Use "
+            "`forma create-bundle --target opencode` for native OpenCode "
+            "direct skill output.",
+            "",
+        ]
     else:
         plugin_lines = [
             "## Generate plugin output from an already reviewed tracked profile",
@@ -183,9 +193,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "Use this guide to choose the right Forma command path before reading "
         "profile or injection authoring details.",
         "",
-        "OpenCode compatibility uses Codex direct-skill output installed in "
-        "`.agents/skills`; Forma does not expose `--target opencode` or "
-        "OpenCode JS/TS plugin output.",
+        "OpenCode uses native direct skill output. Generate an OpenCode bundle "
+        "with `forma create-bundle --target opencode`, verify it, then install "
+        "it with `forma install --target opencode`; project installs land in "
+        "`.opencode/skills` and user installs land in "
+        "`$HOME/.config/opencode/skills`. Forma does not generate OpenCode "
+        "JS/TS runtime plugins.",
         "",
         "## Profile write boundary",
         "",
@@ -218,9 +231,9 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "creator before installing it.",
         "",
         "```bash",
-        f"forma build-creator --target {target} --output <dir>",
-        f"forma verify <dir>/{target}/forma-creator",
-        f"forma install --target {target} --scope project <dir>/{target}/forma-creator",
+        f"forma build-creator --target {generation_target} --output <dir>",
+        f"forma verify <dir>/{generation_target}/forma-creator",
+        f"forma install --target {install_target} --scope project <dir>/{generation_target}/forma-creator",
         "```",
         "",
         "## Generate a generic no-profile workflow",
@@ -229,9 +242,9 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "output does not contain project-specific rules.",
         "",
         "```bash",
-        f"forma create-bundle --target {target} --output <dir>",
+        f"forma create-bundle --target {generation_target} --output <dir>",
         "forma verify <dir>",
-        f"forma install --target {target} --scope project <dir>",
+        f"forma install --target {install_target} --scope project <dir>",
         "```",
         "",
         "## Generate from an already reviewed tracked profile",
@@ -242,10 +255,10 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "is fresh against the profile.",
         "",
         "```bash",
-        f"forma create-bundle --target {target} --profile <profile.yaml> --output <dir>",
+        f"forma create-bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
         "forma verify <dir>",
         "forma drift <dir> --profile <profile.yaml>",
-        f"forma install --target {target} --scope project <dir>",
+        f"forma install --target {install_target} --scope project <dir>",
         "```",
         "",
         *plugin_lines,
@@ -258,7 +271,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "```bash",
         "forma profile adopt <artifact-dir> --output <profile-dir>",
-        f"forma create-bundle --target {target} --profile <profile-dir>/profile.yaml --output <dir>",
+        f"forma create-bundle --target {generation_target} --profile <profile-dir>/profile.yaml --output <dir>",
         "forma verify <dir>",
         "forma drift <dir> --profile <profile-dir>/profile.yaml",
         "```",
@@ -270,7 +283,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "profile, creator source, or release surface.",
         "- `doctor` identifies artifact kind and the correct install route.",
         "- `install` accepts verified local skills, skill bundles, and Claude "
-        "Code plugin roots only; do not pass URLs or Codex plugin sources.",
+        "Code plugin roots only; do not pass URLs, Codex plugin sources, or "
+        "OpenCode JS/TS runtime plugins.",
         "- Omitting `--profile` generates generic no-profile workflow output, "
         "not project-specific rules.",
         "- `profile adopt` writes candidate profile packages for review, not "

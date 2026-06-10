@@ -20,13 +20,14 @@ from forma.creator import build_bundle
 from forma.doctor import diagnose_artifact
 from forma.drift import drift_artifact, drift_release_surface
 from forma.explain import render_guidance
-from forma.install import install_artifact
+from forma.install import INSTALL_TARGETS, install_artifact
 from forma.plugin_guidance import codex_plugin_install_hint
 from forma.plugins import build_plugin
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify as verify_bundle
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+PLUGIN_TARGETS = ("codex", "claude-code")
 
 
 class RawEpilogMixin:
@@ -72,6 +73,7 @@ Agents:
     forma explain agent
     forma explain agent --target codex
     forma explain agent --target claude-code
+    forma explain agent --target opencode
 """
 
 
@@ -79,7 +81,7 @@ VERIFY_HELP = """
 Next:
 
   If verification passes for a skill bundle or Claude Code plugin source, install it with:
-    forma install --target codex|claude-code --scope user|project <path>
+    forma install --target codex|claude-code|opencode --scope user|project <path>
 
   If verification passes for a Codex plugin source, install it through Codex.
 """
@@ -109,7 +111,7 @@ Next:
     forma verify <output-dir>
 
   Install verified local skill bundles with:
-    forma install --target codex|claude-code --scope user|project <output-dir>
+    forma install --target codex|claude-code|opencode --scope user|project <output-dir>
 """
 
 
@@ -141,7 +143,7 @@ Next:
     forma verify <output-dir>/<target>/forma-creator
 
   Install the verified creator for the target:
-    forma install --target codex|claude-code --scope user|project <creator-path>
+    forma install --target codex|claude-code|opencode --scope user|project <creator-path>
 """
 
 
@@ -366,7 +368,7 @@ def create_bundle_command(
     "--target",
     "target_agent",
     required=True,
-    type=click.Choice(ADAPTER_TARGETS),
+    type=click.Choice(PLUGIN_TARGETS),
     help="Plugin target for the generated workflow.",
 )
 @click.option(
@@ -417,7 +419,7 @@ def create_plugin_command(
     "--target",
     "target_agent",
     required=True,
-    type=click.Choice(ADAPTER_TARGETS),
+    type=click.Choice(INSTALL_TARGETS),
     help="Agent target to install into.",
 )
 @click.option(

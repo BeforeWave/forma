@@ -144,11 +144,19 @@ def drift_release_surface(root: Path) -> DriftReport:
             root / "source/skill-creator",
         ),
         _drift_with_creator_source(
+            root / "dist/skills/opencode/forma-creator",
+            root / "source/skill-creator",
+        ),
+        _drift_with_creator_source(
             root / "dist/skill-bundles/codex",
             root / "source/skill-creator",
         ),
         _drift_with_creator_source(
             root / "dist/skill-bundles/claude-code",
+            root / "source/skill-creator",
+        ),
+        _drift_with_creator_source(
+            root / "dist/skill-bundles/opencode",
             root / "source/skill-creator",
         ),
         _drift_with_creator_source(
@@ -397,7 +405,7 @@ def _manifest_target(manifest: Mapping[str, Any]) -> str:
     target = manifest.get("target")
     if not isinstance(target, str) or not target.strip():
         raise ValueError("manifest.target is missing")
-    if target not in {"codex", "claude-code"}:
+    if target not in {"codex", "claude-code", "opencode"}:
         raise ValueError(f"unsupported target: {target}")
     return target
 

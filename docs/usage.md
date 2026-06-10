@@ -15,9 +15,9 @@ can start there when it is unsure which command path to use.
 
 | Goal | Command path | Next action |
 |---|---|---|
-| Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>/<target>/forma-creator`, then `forma install --target <target> --scope <scope> <creator-path>` with scope `user` or `project`. |
-| Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
-| Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use `target` as `codex` or `claude-code`; run `forma verify <dir>`, then `forma install --target <target> --scope <scope> <dir>` with scope `user` or `project`. |
+| Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
+| Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
+| Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
 | Build plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | `forma verify <dir>`; install Codex plugins through Codex, and install Claude Code plugin roots with `forma install --target claude-code`. |
 | Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
 | Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
@@ -91,7 +91,7 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 
 Required options:
 
-- `--target codex|claude-code`
+- `--target codex|claude-code|opencode`
 - `--output <dir>`
 
 Optional inputs:
@@ -158,11 +158,12 @@ the agent, use one natural-language request to customize a project workflow:
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
+forma build-creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 Required options:
 
-- `--target codex|claude-code`
+- `--target codex|claude-code|opencode`
 - `--output <dir>`
 
 Optional development override:
@@ -172,8 +173,9 @@ Optional development override:
 Each generated `forma-creator` has a fixed target contract. A Codex creator
 generates Codex-shaped skill bundles and Codex plugin outputs. A Claude Code
 creator generates Claude Code-shaped skill bundles and Claude Code plugin
-outputs. See [Forma Creator](./forma-creator.md) for the on-the-spot
-customization path.
+outputs. An OpenCode creator generates OpenCode-native skill bundles and does
+not generate OpenCode JS/TS runtime plugins. See
+[Forma Creator](./forma-creator.md) for the on-the-spot customization path.
 
 Next action: run `forma verify <output-dir>/<target>/forma-creator`, then install
 that verified creator path with `forma install`.
@@ -184,6 +186,7 @@ Installs a verified local skill, skill bundle, or Claude Code plugin root:
 
 ```bash
 forma install --target codex --scope project /tmp/forma-codex-bundle
+forma install --target opencode --scope project /tmp/forma-opencode-bundle
 forma install --target claude-code --scope user /tmp/forma-claude-code-bundle
 forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 ```
@@ -191,7 +194,7 @@ forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 Required arguments and options:
 
 - `PATH`: local output path; URL download is intentionally not part of this command.
-- `--target codex|claude-code`
+- `--target codex|claude-code|opencode`
 - `--scope user|project`
 
 Overwrite behavior:
@@ -238,13 +241,15 @@ skill outputs into the matching target location:
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
-OpenCode can read Codex direct skills from `.agents/skills`, so use
-`--target codex` for that compatibility path. Forma does not provide
-`--target opencode` or OpenCode JS/TS runtime plugin output.
+OpenCode uses direct skill bundles. Generate an OpenCode bundle with
+`forma create-bundle --target opencode`, verify it, then install it with
+`forma install --target opencode`. Forma does not emit OpenCode JS/TS runtime
+plugin output.
 
 Codex plugin outputs are local plugin sources. Forma does not install Codex
 plugins. Follow the current Codex docs to add the generated plugin root to a

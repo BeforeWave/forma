@@ -53,7 +53,7 @@ Forma produces three things:
 | Output | Meaning |
 |---|---|
 | `profile` | Team-approved practices kept in version control for review and maintenance. |
-| `workflow bundle / plugin` | Agent workflow installed into Codex or Claude Code. |
+| `workflow bundle / plugin` | Agent workflow installed into Codex, Claude Code, or OpenCode. |
 | `task contract` | The plan contract the agent writes for one task, recorded under `plans/issue-<id>/`. |
 
 The default workflow uses four stage skills to manage the task contract
@@ -150,7 +150,7 @@ For shared or long-lived team rules, use the tracked profile path:
 ```text
 Use Forma to extract engineering rules from this project's docs and code,
 and draft a profile for review.
-After I confirm the profile, generate, verify, and install the Codex workflow
+After I confirm the profile, generate, verify, and install the target workflow
 from it.
 ```
 
@@ -185,9 +185,9 @@ The repository contains more than concept docs.
 families. They show how teams express engineering rules, source-reading rules,
 validation depth, proof, and stop conditions.
 
-`examples/generated/` contains Codex and Claude Code baselines compiled from
-those profiles. They are used to inspect generated output and catch drift; they
-do not prove that a real agent will always execute correctly.
+`examples/generated/` contains committed baselines compiled from those profiles.
+They are used to inspect generated output and catch drift; they do not prove
+that a real agent will always execute correctly.
 
 `plans/issue-*/` is Forma's own development record. Each issue records `plan.md`,
 `tasks.md`, and `runs/task-*.md` with real task contracts, validation results,
@@ -197,21 +197,14 @@ and proof. Judge a run by those records.
 
 ## Status
 
-Forma is still early.
+Forma is still early. It supports skill bundles for Codex, Claude Code, and
+OpenCode today. Plugin source is supported for Codex and Claude Code.
 
-Forma writes team rules into workflow and task contracts, but it does not make
-the model perfectly obedient. Judge each run by the actual contract and proof
-the agent leaves behind.
+It helps agents plan before they act and leave evidence after they act. Each run
+still needs to be judged by the contract and proof it leaves behind.
 
-Current focus:
-
-- Lower the cost of extracting project rules and generating profiles.
-- Make workflow bundles and plugin outputs easier to install.
-- Improve generated bundle verification.
-- Add examples with real task contracts, execution, validation, and proof.
-
-Committed generated examples are mainly drift checks. Runtime behavior should be
-judged by the contract and proof left by the agent during a real run.
+Current focus: easier profile generation, smoother bundle/plugin installation,
+stronger verification, and more real runs.
 
 Forma also uses its own plan-before-execute workflow for development; this
 repository's profile source lives in
@@ -237,7 +230,7 @@ repository's profile source lives in
 | [Forma Creator](./docs/forma-creator.md) | Conversational workflow generation and temporary injection. |
 | [Skill Bundle](./docs/skill-bundle.md) | Generated output layout. |
 | [Verifier](./docs/verifier.md) | What verification checks and cannot prove. |
-| [Targets](./docs/targets.md) | Codex and Claude Code target behavior. |
+| [Targets](./docs/targets.md) | Codex, Claude Code, and OpenCode target behavior. |
 | [Examples](./docs/examples.md) | Sanitized sample profiles, generated baselines, and real tracked runs. |
 | [Usage](./docs/usage.md) | Command reference. |
 

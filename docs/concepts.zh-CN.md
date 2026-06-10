@@ -36,7 +36,7 @@ Forma 把项目准则放进三层：
 | 层 | 含义 |
 |---|---|
 | 项目准则 | 团队认可的做事方式：权威资料、修改边界、工具要求、验证深度、proof 和停手条件。 |
-| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex / Claude Code skill bundle，也可以是 plugin。 |
+| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex、Claude Code 或 OpenCode skill bundle；Codex 和 Claude Code 也可以使用 plugin 产物。 |
 | Task contract | agent 面对一个具体任务时写出的计划契约，记录到 `plans/issue-<id>/`。 |
 
 临场定制时，项目准则进入本次生成的 workflow 产物。长期维护时，项目准则沉淀成 tracked profile，再由 Forma 编译成 workflow 产物。
@@ -58,7 +58,7 @@ profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task
 长期规则 / 临场规则                  编译器              安装产物              当前任务契约
 ```
 
-Codex 和 Claude Code 是当前支持的 target。同一份 profile 可以生成不同 target 的产物，同时保持 task 级 workflow 语义不变。
+Codex、Claude Code 和 OpenCode 是当前支持的 skill-bundle target。同一份 profile 可以生成不同 target 的产物，同时保持 task 级 workflow 语义不变。
 
 Forma 不直接执行项目任务。它生成 agent 执行任务时遵守的 workflow skills。
 

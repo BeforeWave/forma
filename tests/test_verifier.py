@@ -434,7 +434,7 @@ def test_manifest_emitted_skill_mapping_supports_hone(tmp_path: Path) -> None:
             """
 ## Workflow
 
-Run read-only reconciliation using the stage evaluation frame, recent Forma skill trigger context, delivery-revision routing, and implement-notes.md requirements.
+Run read-only reconciliation using the stage evaluation frame, recent Forma skill trigger context, delivery-revision routing, implement-notes.md requirements, and runs/task-*.md evidence.
 
 ## Load As Needed
 
@@ -665,6 +665,80 @@ policy:
     )
 
     assert_has_error(verify(bundle), "R202")
+
+
+def test_opencode_target_accepts_native_frontmatter(tmp_path: Path) -> None:
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps({"target": "opencode"}),
+        encoding="utf-8",
+    )
+    for skill_md in bundle.glob("*/SKILL.md"):
+        name = skill_md.parent.name
+        text = skill_md.read_text(encoding="utf-8")
+        text = text.replace(
+            "---\n\n",
+            "\n".join(
+                [
+                    "compatibility: opencode",
+                    "metadata:",
+                    f'  forma.stage: "{name}"',
+                    '  forma.target: "opencode"',
+                    "---",
+                    "",
+                ]
+            ),
+            1,
+        )
+        skill_md.write_text(text, encoding="utf-8")
+
+    report = verify(bundle)
+
+    assert report.passed, report.format_human()
+
+
+def test_opencode_target_requires_native_frontmatter(tmp_path: Path) -> None:
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps({"target": "opencode"}),
+        encoding="utf-8",
+    )
+
+    report = verify(bundle)
+
+    assert_has_error(report, "R203")
+    assert "compatibility: opencode" in report.format_human()
+
+
+def test_opencode_target_rejects_codex_metadata(tmp_path: Path) -> None:
+    bundle = copy_valid_bundle(tmp_path)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps({"target": "opencode"}),
+        encoding="utf-8",
+    )
+    for skill_md in bundle.glob("*/SKILL.md"):
+        name = skill_md.parent.name
+        text = skill_md.read_text(encoding="utf-8")
+        text = text.replace(
+            "---\n\n",
+            "\n".join(
+                [
+                    "compatibility: opencode",
+                    "metadata:",
+                    f'  forma.stage: "{name}"',
+                    '  forma.target: "opencode"',
+                    "---",
+                    "",
+                ]
+            ),
+            1,
+        )
+        skill_md.write_text(text, encoding="utf-8")
+    agents_dir = bundle / "shape" / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "openai.yaml").write_text("interface: {}\n", encoding="utf-8")
+
+    assert_has_error(verify(bundle), "R204")
 
 
 @pytest.mark.parametrize(

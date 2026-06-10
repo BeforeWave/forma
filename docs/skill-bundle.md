@@ -6,7 +6,7 @@ A skill bundle is the workflow output Forma compiles and installs for an agent.
 
 Profiles or temporary injection provide project rules. The Forma compiler
 combines those rules with the methodology and target adapter, then emits skills
-for Codex or Claude Code. Once installed, those skills make the agent turn a
+for Codex, Claude Code, or OpenCode. Once installed, those skills make the agent turn a
 concrete goal into a task contract: facts, boundaries, tasks, validation, proof,
 and stop conditions.
 
@@ -145,11 +145,22 @@ If every skill repeats every rule, the profile or temporary injection is
 probably too global. Move rules into stage constraints, references, resources,
 or conditional overlays.
 
+## Target Metadata
+
+Generated bundles keep the same workflow stages, but target metadata differs:
+
+- Codex bundles may include `agents/openai.yaml` in each skill.
+- Claude Code bundles use direct skill frontmatter without Codex metadata.
+- OpenCode bundles use native direct skill frontmatter with
+  `compatibility: opencode` and string-to-string `metadata`; they do not emit
+  Codex or Claude Code plugin metadata.
+
 ## Install Locations
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 

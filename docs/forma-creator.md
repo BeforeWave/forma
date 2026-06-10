@@ -40,16 +40,19 @@ Each creator is built for one target:
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
+forma build-creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 A Codex creator generates Codex-shaped skill bundles and Codex plugin output
 when the user asks for it. A Claude Code creator generates Claude Code-shaped
-skill bundles and Claude Code plugin output. Do not use a creator built for one
-target to generate another target's output.
+skill bundles and Claude Code plugin output. An OpenCode creator generates
+OpenCode-native skill bundles and does not generate OpenCode JS/TS runtime
+plugins. Do not use a creator built for one target to generate another target's
+output.
 
 The creator reports generated output paths, verification results, and install
-hints. It does not directly write the generated output into Codex or Claude Code
-skill roots for the user.
+hints. It does not directly write the generated output into Codex, Claude Code,
+or OpenCode skill roots for the user.
 
 ## What Temporary Injection Is
 
@@ -125,5 +128,5 @@ See [Verifier](./verifier.md) for the boundary.
 
 - [Quick Start](./quick-start.md): run creator first, then promote durable rules.
 - [Profile Schema](./profile-schema.md): durable profile source format.
-- [Targets](./targets.md): Codex and Claude Code install behavior.
+- [Targets](./targets.md): Codex, Claude Code, and OpenCode install behavior.
 - [Verifier](./verifier.md): what verification checks.

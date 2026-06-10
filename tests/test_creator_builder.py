@@ -228,6 +228,70 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert verify(claude).passed
 
 
+def test_build_creator_emits_opencode_target(tmp_path: Path) -> None:
+    output_root = tmp_path / "creator-dist"
+
+    output = build_creator(META_SOURCE, output_root, "opencode")
+
+    opencode = output_root / "opencode" / SKILL_NAME
+    assert output == opencode
+    assert (opencode / "SKILL.md").is_file()
+    assert (opencode / "scripts" / "create.py").is_file()
+    assert (opencode / "references" / "agent-target.md").is_file()
+    assert not (opencode / "agents").exists()
+    skill_md = (opencode / "SKILL.md").read_text(encoding="utf-8")
+    assert "compatibility: opencode" in skill_md
+    assert 'forma.kind: "creator"' in skill_md
+    assert 'forma.target: "opencode"' in skill_md
+    opencode_target = (opencode / "references" / "agent-target.md").read_text(
+        encoding="utf-8"
+    )
+    assert "fixed to `opencode`" in opencode_target
+    assert "OpenCode-native workflow bundle" in opencode_target
+    assert "compatibility: opencode" in opencode_target
+    assert "Do not generate plugin output for OpenCode" in opencode_target
+    assert "agents/openai.yaml" in opencode_target
+    assert ".codex-plugin" in opencode_target
+    assert ".claude-plugin" in opencode_target
+    manifest = json.loads(
+        (opencode / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "opencode"
+    _assert_base_origin(manifest, opencode, "opencode", "creator")
+    assert verify(opencode).passed
+
+
+def test_installed_opencode_creator_emits_native_bundle(tmp_path: Path) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "opencode")
+    generated = tmp_path / "generated-opencode"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--output",
+            str(generated),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    skill_md = (generated / "forma-plan" / "SKILL.md").read_text(encoding="utf-8")
+    assert "compatibility: opencode" in skill_md
+    assert 'forma.stage: "shape"' in skill_md
+    assert 'forma.target: "opencode"' in skill_md
+    assert not (generated / "forma-plan" / "agents" / "openai.yaml").exists()
+    manifest = json.loads(
+        (generated / ".forma-manifest.json").read_text(encoding="utf-8")
+    )
+    assert manifest["target"] == "opencode"
+    _assert_base_origin(manifest, generated, "opencode", "skill-bundle")
+    assert verify(generated).passed
+
+
 def test_installed_creator_script_uses_temporary_injection_json(tmp_path: Path) -> None:
     output_root = tmp_path / "creator-dist"
     creator = build_creator(META_SOURCE, output_root, "codex")

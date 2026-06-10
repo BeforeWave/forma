@@ -2,7 +2,7 @@
 
 英文版：[targets.md](./targets.md)
 
-Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 task 级 skills 的 Codex 安装形态。这里的 target 指加载这套技能的 agent 环境，例如 Codex 或 Claude Code。
+Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 task 级 skills 的 Codex 安装形态。这里的 target 指加载这套技能的 agent 环境，例如 Codex、Claude Code 或 OpenCode。
 
 同一份 tracked profile 可以生成到不同 target；`forma-creator` 生成的一次性 workflow 则由 creator 固定 target。无论哪条路径，生成产物都必须匹配实际加载它的 agent。
 
@@ -10,7 +10,8 @@ Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 tas
 
 | 产物 | CLI target | 个人安装 | 项目安装 |
 |---|---|---|---|
-| Codex skills | `codex` | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `codex` | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `opencode` | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Codex plugins | `codex` | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `claude-code` | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `claude-code` | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
@@ -20,15 +21,20 @@ Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 tas
 ```bash
 forma create-bundle --target codex --profile <profile.yaml> --output <dir>
 forma create-bundle --target claude-code --profile <profile.yaml> --output <dir>
+forma create-bundle --target opencode --profile <profile.yaml> --output <dir>
 forma create-plugin --target codex --profile <profile.yaml> --output <dir>
 forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>
 ```
+
+OpenCode 使用 direct skill 形态。Forma 生成 OpenCode 原生 skill bundle，不生成
+OpenCode JS/TS runtime plugin。
 
 ## Codex
 
 Codex 会从 repository、user、admin 和 bundled system 等位置读取 skills。
 
-Codex 项目级 skills 安装到 `.agents/skills`。用户级 skills 安装到 `$HOME/.agents/skills`。这也是 OpenCode 兼容读取的直接 skill 路径；Forma 不提供 `--target opencode`，也不生成 OpenCode JS/TS runtime plugin。
+Codex 项目级 skills 安装到 `.agents/skills`。用户级 skills 安装到
+`$HOME/.codex/skills`，与 Codex UI / installer 的本地 skill 安装面一致。
 
 对 Codex plugins，Forma 只生成本地 plugin source。按照当前 Codex 官方文档把这个
 source 加到 Codex marketplace，然后交给 Codex 安装和启用：运行
@@ -48,6 +54,19 @@ Codex target bundle 可以包含 `agents/openai.yaml`，用于界面信息、调
 
 官方文档见：
 <https://developers.openai.com/codex/skills>。
+
+## OpenCode
+
+OpenCode 使用 direct skill 目录。Forma 把 OpenCode 项目级 skills 安装到
+`.opencode/skills`，把用户级 skills 安装到
+`$HOME/.config/opencode/skills`。OpenCode 也可以读取 `.agents/skills` 和
+`.claude/skills` 里的兼容 direct skills，但 Forma 的 `opencode` install
+target 使用 OpenCode 原生 skill 根目录。
+
+Forma 不生成 OpenCode JS/TS runtime plugin。
+
+官方文档见：
+<https://opencode.ai/docs/skills>。
 
 ## Claude Code
 
@@ -70,6 +89,9 @@ Target adapter 会影响生成的 metadata 和安装行为，但不应该改变 
 
 - Codex 输出可以包含 `agents/openai.yaml`。
 - Claude Code 输出不应该包含 Codex-only metadata。
+- OpenCode 输出使用原生 direct skill frontmatter，包含
+  `compatibility: opencode` 和 string-to-string `metadata`；不应该包含
+  `agents/openai.yaml`、`.codex-plugin` 或 `.claude-plugin` metadata。
 - Codex plugin 输出包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和嵌套 `skills/`。
 - Codex plugin 的 `plugin.json` 使用 profile 的 `bundle.name` 或 creator 的 `rename.prefix` 作为 plugin id，并且其中的 `skills` 路径必须指向嵌套 `skills/` 目录。
 - Claude Code plugin 输出包含 `.claude-plugin/plugin.json`、根 `.forma-manifest.json` 和嵌套 `skills/`。

@@ -4,7 +4,10 @@
 
 Skill bundle 是 Forma 编译出来、安装给 agent 的 workflow 产物。
 
-Profile 或 temporary injection 提供项目准则；Forma compiler 再结合标准方法和 target adapter，生成可以安装到 Codex 或 Claude Code 的 skills。安装后，这些 skills 会推动 agent 把具体目标落成 task contract：事实、边界、任务、验证、proof 和停手条件。
+Profile 或 temporary injection 提供项目准则；Forma compiler 再结合标准方法和
+target adapter，生成可以安装到 Codex、Claude Code 或 OpenCode 的 skills。
+安装后，这些 skills 会推动 agent 把具体目标落成 task contract：事实、边界、
+任务、验证、proof 和停手条件。
 
 ## 从 Profile 到 Workflow 产物
 
@@ -126,11 +129,22 @@ Manifest 让评审者和工具能回答：这个 bundle 由什么来源生成、
 
 如果每个 skill 都重复每条准则，通常说明 profile 或 temporary injection 太全局。应把准则移到阶段约束、references、resources 或 conditional overlays。
 
+## Target Metadata
+
+生成 bundle 保留同一套 workflow 阶段，但 target metadata 不同：
+
+- Codex bundle 可以在每个 skill 里包含 `agents/openai.yaml`。
+- Claude Code bundle 使用 direct skill frontmatter，不包含 Codex metadata。
+- OpenCode bundle 使用原生 direct skill frontmatter，包含
+  `compatibility: opencode` 和 string-to-string `metadata`；不生成 Codex 或
+  Claude Code plugin metadata。
+
 ## 安装位置
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
-| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 

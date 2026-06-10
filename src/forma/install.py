@@ -13,7 +13,8 @@ from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
 
-InstallTarget = Literal["codex", "claude-code"]
+INSTALL_TARGETS = ("codex", "claude-code", "opencode")
+InstallTarget = Literal["codex", "claude-code", "opencode"]
 InstallScope = Literal["user", "project"]
 
 
@@ -109,13 +110,20 @@ def _skill_name(skill_dir: Path) -> str:
 def _skills_root(target_agent: InstallTarget, scope: InstallScope) -> Path:
     if target_agent == "codex":
         root = (
-            Path.home() / ".agents" / "skills"
+            Path.home() / ".codex" / "skills"
             if scope == "user"
             else Path.cwd() / ".agents" / "skills"
         )
         return root
     if target_agent == "claude-code":
         root = Path.home() / ".claude" / "skills" if scope == "user" else Path.cwd() / ".claude" / "skills"
+        return root
+    if target_agent == "opencode":
+        root = (
+            Path.home() / ".config" / "opencode" / "skills"
+            if scope == "user"
+            else Path.cwd() / ".opencode" / "skills"
+        )
         return root
     raise ValueError(f"unsupported install target: {target_agent}")
 

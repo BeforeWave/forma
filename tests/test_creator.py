@@ -583,6 +583,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert 'name: "forma-reconcile"' in hone_text
     assert "references/reconcile-rules.md" in hone_text
     assert "stage evaluation frame" in hone_text.lower()
+    assert "issue plan/tasks/notes/runs" in hone_text
     assert "delivery-revision" in hone_text
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
@@ -642,6 +643,12 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8")
     flow_text = (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    automated_execution = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["flow"]
+        / "references"
+        / "automated-execution.md"
     ).read_text(encoding="utf-8")
     seal_planning_rules = (
         output_dir
@@ -742,6 +749,8 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "already-finalized plan" in flow_text
     assert "Do not run `scripts/forma-workflow.sh init <issue-id>`" in flow_text
     assert "references/automated-execution.md" in flow_text
+    assert "record the options, selected best choice, and rationale" in flow_text
+    assert "include `Recorded Decisions` only when this invocation recorded autonomous execution choices" in automated_execution
     assert "references/showhand-automation.md" not in flow_text
     assert not (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "plan-template.md"
@@ -1074,6 +1083,8 @@ def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
     assert any("delivery-revision" in line for line in hone.workflow_lines)
     assert "## Target Resolution" in rules
     assert "## Stage Evaluation Frame" in rules
+    assert "`plans/issue-<id>/implement-notes.md`" in rules
+    assert "`plans/issue-<id>/runs/task-*.md`" in rules
     assert "`delivery-revision`" in rules
 
 

@@ -5,7 +5,8 @@ workflows make an agent produce a task contract before implementation: evidence,
 boundaries, validation, proof, and stop conditions for the current task.
 
 This repository is the source workspace for Forma's CLI, compiler, verifier,
-`forma-creator`, generated skill bundles, and Codex / Claude Code plugin output.
+`forma-creator`, generated skill bundles, OpenCode skill output, and Codex /
+Claude Code plugin output.
 
 ## When This Repository Is Relevant
 
@@ -13,7 +14,7 @@ Use this repository when the task involves:
 
 - extracting or compiling project engineering rules for agents;
 - profiles, temporary injection, or `forma-creator`;
-- workflow outputs for Codex or Claude Code;
+- workflow outputs for Codex, Claude Code, or OpenCode;
 - Codex and Claude Code plugin generation;
 - task contracts, boundaries, validation gates, proof, or stop conditions;
 - verifier behavior or generated-output drift;
@@ -60,15 +61,15 @@ Use this repository when the task involves:
 
 ```bash
 # Build and install a forma-creator for agent-side workflow generation.
-forma build-creator --target codex|claude-code --output <dir>
-forma install --target codex|claude-code --scope user|project <path>
+forma build-creator --target codex|claude-code|opencode --output <dir>
+forma install --target codex|claude-code|opencode --scope user|project <path>
 
 # Generate a skill bundle or plugin from a tracked profile.
-forma create-bundle --target codex|claude-code --profile <profile.yaml> --output <dir>
+forma create-bundle --target codex|claude-code|opencode --profile <profile.yaml> --output <dir>
 forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>
 
 # Generate default workflow output when no profile is provided.
-forma create-bundle --target codex|claude-code --output <dir>
+forma create-bundle --target codex|claude-code|opencode --output <dir>
 forma create-plugin --target codex|claude-code --output <dir>
 
 # Verify generated artifacts before using them.
@@ -81,13 +82,14 @@ forma explain temporary-injection --format json --target codex
 
 ## Install And Target Rules
 
-- Use `forma create-bundle --target codex|claude-code --output <dir>` for local skill-bundle output.
+- Use `forma create-bundle --target codex|claude-code|opencode --output <dir>` for local skill-bundle output.
 - Use `forma create-plugin --target codex|claude-code --output <dir>` for plugin output.
-- Use `forma install --target codex|claude-code --scope user|project <path> [--replace]` only for verified local skill, skill-bundle, or Claude Code plugin artifacts.
+- Use `forma install --target codex|claude-code|opencode --scope user|project <path> [--replace]` only for verified local skill, skill-bundle, or Claude Code plugin artifacts.
 - Do not imply URL download support or Codex plugin installation inside `forma install`.
 - Install Codex plugin output through Codex itself: add the generated local plugin to a Codex marketplace, then use `codex plugin add <plugin>@<marketplace>` or the Codex plugin UI.
 - Install Claude Code plugin output through Forma into `.claude/skills/<plugin-name>` or `~/.claude/skills/<plugin-name>`.
-- Codex direct skills install into `.agents/skills` / `~/.agents/skills`; OpenCode compatibility uses that direct-skill path. Do not add `--target opencode` unless a future plan explicitly introduces OpenCode-native output.
+- Codex direct skills install into project `.agents/skills` and user `~/.codex/skills`.
+- OpenCode direct skills install into project `.opencode/skills` and user `~/.config/opencode/skills`; OpenCode-compatible direct skills can also be read from `.agents/skills`, but Forma's `opencode` install target uses OpenCode-native skill roots.
 
 ## Workflow State
 
@@ -96,14 +98,17 @@ Each issue's plan, tasks, and execution evidence live under
 generating them with `forma build-creator --target <target>`; each generated
 creator has a fixed target contract. Codex-targeted creators can generate skill
 bundles and Codex plugin artifacts. Claude Code-targeted creators can generate
-skill bundles and Claude Code plugin artifacts.
+skill bundles and Claude Code plugin artifacts. OpenCode-targeted creators
+generate native OpenCode skill bundles only.
 
 ## Release Surface
 
 - `dist/skills/codex/forma-creator`
 - `dist/skills/claude-code/forma-creator`
+- `dist/skills/opencode/forma-creator`
 - `dist/skill-bundles/codex/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
 - `dist/skill-bundles/claude-code/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
+- `dist/skill-bundles/opencode/{forma-plan,forma-ground,forma-lock,forma-execute,forma-showhand}`
 - `dist/plugins/codex/forma`
 - `dist/plugins/claude-code/forma`
 

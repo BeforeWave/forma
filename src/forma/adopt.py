@@ -125,7 +125,7 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
     if not manifest:
         raise ValueError("artifact is missing .forma-manifest.json")
     target = _required_string(manifest, "target", "manifest.target")
-    if target not in {"codex", "claude-code"}:
+    if target not in {"codex", "claude-code", "opencode"}:
         raise ValueError(f"unsupported artifact target: {target}")
     if (root / ".codex-plugin" / "plugin.json").is_file():
         if target != "codex":

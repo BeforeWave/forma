@@ -3,7 +3,8 @@
 Chinese version: [verifier.zh-CN.md](./verifier.zh-CN.md)
 
 `forma verify` checks generated workflow bundles, `forma-creator` bundles, and
-Codex / Claude Code plugin outputs.
+Codex / Claude Code plugin outputs. Workflow bundle targets include Codex,
+Claude Code, and OpenCode.
 
 It is the engineering boundary before installation, commit, or sharing:
 generated outputs must have valid structure, match the target contract, and

@@ -30,11 +30,12 @@
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
 forma build-creator --target claude-code --output /tmp/forma-creator-dist
+forma build-creator --target opencode --output /tmp/forma-creator-dist
 ```
 
-Codex creator 生成 Codex 形态的 skill bundle；用户要求 plugin 输出时，也可以生成 Codex plugin。Claude Code creator 生成 Claude Code 形态的 skill bundle 和 Claude Code plugin。不要用一个 target 的 creator 去生成另一个 target 的产物。
+Codex creator 生成 Codex 形态的 skill bundle；用户要求 plugin 输出时，也可以生成 Codex plugin。Claude Code creator 生成 Claude Code 形态的 skill bundle 和 Claude Code plugin。OpenCode creator 生成 OpenCode 原生 skill bundle，不生成 OpenCode JS/TS runtime plugin。不要用一个 target 的 creator 去生成另一个 target 的产物。
 
-Creator 会报告生成产物的路径、验证结果和安装提示。它不会替用户直接把产物写进 Codex 或 Claude Code 的 skill roots。
+Creator 会报告生成产物的路径、验证结果和安装提示。它不会替用户直接把产物写进 Codex、Claude Code 或 OpenCode 的 skill roots。
 
 ## Temporary Injection 是什么
 
@@ -99,5 +100,5 @@ Source adapter 不是 Forma 基础能力。只有 profile 或 temporary injectio
 
 - [快速开始](./quick-start.zh-CN.md)：从 creator 跑通临场定制，再长期化成 profile。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期 profile 格式。
-- [Targets](./targets.zh-CN.md)：Codex 和 Claude Code 安装行为。
+- [Targets](./targets.zh-CN.md)：Codex、Claude Code 和 OpenCode 安装行为。
 - [Verifier](./verifier.zh-CN.md)：验证会检查什么。

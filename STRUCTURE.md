@@ -23,7 +23,7 @@ This document maps the current Forma source tree and the role of each area.
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
 | `examples/` | Composable profile examples and generated Plan-First workflow bundles | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
-| `dist/` | Committed release artifacts for creator skills, skill bundles, and Codex / Claude Code plugins | present |
+| `dist/` | Committed release artifacts for creator skills, skill bundles, OpenCode skill output, and Codex / Claude Code plugins | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
 ## Source tree
@@ -124,7 +124,7 @@ binary, and are not Node.js implementations of Forma.
 | `docs/forma-creator.zh-CN.md` | Chinese forma-creator guide |
 | `docs/verifier.md` | English verifier checks, non-goals, common failures, manifest/drift relationship, CI usage, and bundled verifier boundary |
 | `docs/verifier.zh-CN.md` | Chinese verifier guide |
-| `docs/targets.md` | English Codex and Claude Code target values, install locations, target-specific metadata, and trust guidance |
+| `docs/targets.md` | English Codex, Claude Code, and OpenCode target values, install locations, target-specific metadata, and trust guidance |
 | `docs/targets.zh-CN.md` | Chinese targets guide |
 | `docs/examples.md` | English illustrative end-to-end workflow walkthrough using committed sample sources |
 | `docs/examples.zh-CN.md` | Chinese examples guide |
@@ -137,8 +137,10 @@ binary, and are not Node.js implementations of Forma.
 |---|---|
 | `dist/skills/codex/forma-creator` | Codex-targeted creator skill |
 | `dist/skills/claude-code/forma-creator` | Claude Code-targeted creator skill |
+| `dist/skills/opencode/forma-creator` | OpenCode-targeted creator skill |
 | `dist/skill-bundles/codex/` | Default Codex Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/skill-bundles/claude-code/` | Default Claude Code Plan-First skill bundle with `forma-plan` through `forma-showhand` |
+| `dist/skill-bundles/opencode/` | Default OpenCode-native Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/plugins/codex/forma` | Codex plugin artifact exposing the default Plan-First skills |
 | `dist/plugins/claude-code/forma` | Claude Code plugin artifact exposing plugin-local default Plan-First skills |
 
@@ -186,7 +188,7 @@ Code bundles.
 |---|---|
 | `tests/test_verifier.py` | Structural and methodology-rule coverage for Layer 2 |
 | `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained Layer 1 meta source |
-| `tests/test_creator_builder.py` | Codex/Claude Code creator builder coverage |
+| `tests/test_creator_builder.py` | Codex, Claude Code, and OpenCode creator builder coverage |
 | `tests/test_creator.py` | Layer 3 integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |
 | `tests/fixtures/valid-bundle/` | Minimal valid plan-first bundle fixture |

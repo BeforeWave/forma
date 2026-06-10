@@ -86,7 +86,7 @@ If you want durable profile source from the start, ask the agent:
 ```text
 Use Forma to extract engineering rules from this project's docs and code, and
 draft a profile for me. After I approve the profile, generate, verify, and
-install the Codex workflow from it.
+install the target workflow from it.
 ```
 
 The agent uses `forma explain profile --target codex` to load the profile
@@ -109,6 +109,14 @@ forma verify /tmp/bundle-cc
 forma install --target claude-code --scope user /tmp/bundle-cc
 ```
 
+Or OpenCode:
+
+```bash
+forma create-bundle --target opencode --profile myproject.yaml --output /tmp/bundle-opencode
+forma verify /tmp/bundle-opencode
+forma install --target opencode --scope project /tmp/bundle-opencode
+```
+
 ## Choose A Path
 
 | Path | Best for | Output |
@@ -123,7 +131,8 @@ Generated workflows can be installed for one user or into a project:
 
 | Target | Personal install | Project install |
 |---|---|---|
-| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |

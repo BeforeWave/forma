@@ -1,0 +1,8 @@
+- If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` instead of creating the files by hand.
+- Commit only `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` before leaving the planning phase.
+- Fill in `plan.md` completely before finalizing `tasks.md`.
+- Replace the `tasks.md` template with the final task checklist for the issue instead of keeping template guidance or appending below it.
+- Write only confirmed facts from `plan-issue`, approved grounding handoffs, source material, and the current user confirmation. Do not promote the plan itself into the authoritative requirement source.
+- You may reason about execution sequencing while planning, but do not split one natural planned task into multiple plan tasks unless the issue actually has a meaningful execution boundary.
+- Keep the plan concise, specific, and implementation-ready.
+- After the gate passes, commentary may report initialization or minimal grounding, but must not read like renewed brainstorming or hidden decision-making.

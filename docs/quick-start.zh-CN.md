@@ -77,7 +77,7 @@ Use forma-execute to execute the next accepted task.
 
 ```text
 用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
-profile 确认后，基于它生成、验证并安装 Codex workflow。
+profile 确认后，基于它生成、验证并安装目标 workflow。
 ```
 
 agent 会用 `forma explain profile --target codex` 读取 profile 编写标准。流程是：先给 profile 草案；你 review；确认后再生成、验证并按提示安装 workflow。
@@ -98,6 +98,14 @@ forma verify /tmp/bundle-cc
 forma install --target claude-code --scope user /tmp/bundle-cc
 ```
 
+也可以生成 OpenCode skills：
+
+```bash
+forma create-bundle --target opencode --profile myproject.yaml --output /tmp/bundle-opencode
+forma verify /tmp/bundle-opencode
+forma install --target opencode --scope project /tmp/bundle-opencode
+```
+
 ## 怎么选
 
 | 路径 | 适合 | 产物 |
@@ -112,7 +120,8 @@ forma install --target claude-code --scope user /tmp/bundle-cc
 
 | 目标 | 个人安装 | 项目安装 |
 |---|---|---|
-| Codex skills | `$HOME/.agents/skills` | `.agents/skills` |
+| Codex skills | `$HOME/.codex/skills` | `.agents/skills` |
+| OpenCode skills | `$HOME/.config/opencode/skills` | `.opencode/skills` |
 | Codex plugins | Codex marketplace / plugin UI | Codex marketplace / plugin UI |
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |

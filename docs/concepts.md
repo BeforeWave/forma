@@ -47,7 +47,7 @@ Forma puts project rules into three layers:
 | Layer | Meaning |
 |---|---|
 | Project rules | Team-approved ways of working: authoritative sources, boundaries, required tools, validation depth, proof, and stop conditions. |
-| Workflow output | Installed workflow skills: a Codex / Claude Code skill bundle or plugin. |
+| Workflow output | Installed workflow skills: a Codex, Claude Code, or OpenCode skill bundle; Codex and Claude Code can also use plugin output. |
 | Task contract | The plan contract the agent writes for one task under `plans/issue-<id>/`. |
 
 With on-the-spot customization, project rules enter this generated workflow
@@ -78,8 +78,9 @@ profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task
 durable / on-the-spot rules         compiler            install output       current task contract
 ```
 
-Codex and Claude Code are the current targets. The same profile can generate
-different target outputs while preserving task-level workflow semantics.
+Codex, Claude Code, and OpenCode are the current skill-bundle targets. The same
+profile can generate different target outputs while preserving task-level
+workflow semantics.
 
 Forma does not execute project tasks directly. It generates the workflow skills
 an agent follows while executing tasks.

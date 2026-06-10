@@ -190,7 +190,9 @@ def _next_steps(
             f"Run `forma install --target claude-code --scope user|project {source}`.",
         ]
     if artifact_kind in {"skill", "skill-bundle"}:
-        target_hint = target if target != "unknown" else "codex|claude-code"
+        target_hint = target if target != "unknown" else "codex|claude-code|opencode"
+        if target_hint == "codex":
+            target_hint = "codex|opencode"
         return [
             f"Run `forma install --target {target_hint} --scope user|project {source}`.",
         ]

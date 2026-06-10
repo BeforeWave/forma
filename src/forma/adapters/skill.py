@@ -17,7 +17,7 @@ from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
 
 
-ADAPTER_TARGETS = ("codex", "claude-code")
+ADAPTER_TARGETS = ("codex", "claude-code", "opencode")
 CREATOR_COMMON_ENTRIES = ("SKILL.md", "references", "scripts")
 CREATOR_SKILL_NAMES = {
     "shape": "forma-plan",
@@ -155,8 +155,25 @@ def _write_creator_manifest(
 
 def _copy_skill_md_with_target(src: Path, dst: Path, target_agent: str) -> None:
     text = src.read_text(encoding="utf-8")
+    if target_agent == "opencode":
+        text = _opencode_creator_skill_md(text)
     text = text.rstrip() + "\n\n" + _target_section(target_agent)
     dst.write_text(text, encoding="utf-8")
+
+
+def _opencode_creator_skill_md(text: str) -> str:
+    marker = "---\n\n"
+    metadata = "\n".join(
+        [
+            "compatibility: opencode",
+            "metadata:",
+            '  forma.kind: "creator"',
+            '  forma.target: "opencode"',
+        ]
+    )
+    if marker not in text:
+        raise ValueError("creator SKILL.md is missing YAML frontmatter")
+    return text.replace(marker, f"{metadata}\n---\n\n", 1)
 
 
 def _target_section(target_agent: str) -> str:
@@ -228,6 +245,8 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
         lines.extend(_codex_output_contract())
     elif target_agent == "claude-code":
         lines.extend(_claude_output_contract())
+    elif target_agent == "opencode":
+        lines.extend(_opencode_output_contract())
     else:
         raise ValueError(f"unsupported adapter target {target_agent!r}")
     return "\n".join(lines) + "\n"
@@ -351,11 +370,42 @@ def _claude_output_contract() -> List[str]:
     return lines
 
 
+def _opencode_output_contract() -> List[str]:
+    lines = [
+        "- Generate an OpenCode-native workflow bundle root containing "
+        "`forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, "
+        "and `forma-showhand/` by default, or the exact `rename.stages` names "
+        "confirmed by the user.",
+        "- Do not generate plugin output for OpenCode. OpenCode runtime plugins "
+        "are `.opencode/plugins/*.js|ts`, not Forma skill workflow bundles.",
+        "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
+        "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
+        "installable skill directory names.",
+        "- Do not use generated public skill ids such as `forma-plan` or "
+        "`forma-showhand` as temporary injection JSON keys.",
+        "- Every generated skill directory must include `SKILL.md` with "
+        "frontmatter containing `name`, `description`, `compatibility: "
+        "opencode`, and string-to-string `metadata`.",
+        "- Every generated skill directory's frontmatter `name` must match its "
+        "directory name, use lowercase alphanumeric hyphen-separated form, and "
+        "have a 1-1024 character `description`.",
+        "- Keep bundled references inside each generated skill's own "
+        "`references/` directory.",
+        "- Do not emit Codex `agents/openai.yaml` files, `.codex-plugin`, or "
+        "`.claude-plugin` metadata from this OpenCode creator.",
+        "- `scripts/create.py` runs the verifier before reporting success.",
+    ]
+    lines.extend(_interactive_constraint_contract())
+    return lines
+
+
 def _target_label(target_agent: str) -> str:
     if target_agent == "codex":
         return "Codex"
     if target_agent == "claude-code":
         return "Claude Code"
+    if target_agent == "opencode":
+        return "OpenCode"
     raise ValueError(f"unsupported adapter target {target_agent!r}")
 
 

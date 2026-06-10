@@ -82,3 +82,30 @@ Deviations From Plan:
 
 Follow-ups:
 - None
+
+Closed Prior Follow-ups:
+- Task 3 follow-up closed by this task: regenerated committed release artifacts so `dist/` reflects the updated creator, plugin, verifier, docs, and install semantics.
+
+## Follow-up: opencode-native-skill-target
+
+Outcome:
+- OpenCode is now a native direct-skill generation and install target for skill bundles and `forma-creator`; Forma still does not generate OpenCode JS/TS runtime plugins.
+- OpenCode project installs target `.opencode/skills`; OpenCode user installs target `$HOME/.config/opencode/skills`.
+- Codex user installs target `$HOME/.codex/skills`; Codex project installs remain `.agents/skills`.
+- Added committed OpenCode release artifacts under `dist/skills/opencode/forma-creator` and `dist/skill-bundles/opencode`.
+
+Decision Notes:
+- Earlier OpenCode compatibility wording through `.agents/skills` was too weak for Forma's install target. OpenCode can read compatible direct skills from `.agents/skills`, but `forma install --target opencode` should write OpenCode-native roots.
+- Kept plugin targets limited to Codex and Claude Code because OpenCode plugins are `.opencode/plugins/*.js|ts` runtime hooks, not the same skill-bundle manifest shape.
+
+Validation:
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator_builder.py`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_runtime_assets.py`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_docs_links.py`
+- `uv run --extra dev forma drift --release-surface`
+
+Follow-ups:
+- None

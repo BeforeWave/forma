@@ -143,6 +143,7 @@ def skill_kind(skill: SkillFile, ctx: BundleContext | None = None) -> Optional[s
 # ----- Regular expressions used by structural rules -----
 
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+OPENCODE_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 SECTION_H2_RE = re.compile(r"^##\s+\S", re.MULTILINE)
 SECTION_H2_TITLE_RE = re.compile(r"^##\s+(.+?)\s*$")
 # Match a backtick-quoted reference path like `references/decision-gate.md`.
@@ -172,12 +173,23 @@ def check_frontmatter_valid(skill: SkillFile, ctx: BundleContext) -> List[RuleRe
                 "R001", skill.relative_path, "error",
                 f"frontmatter missing required key `{key}`"
             ))
-    extra_keys = sorted(set(skill.frontmatter) - {"name", "description"})
+    allowed_keys = {"name", "description"}
+    if ctx.manifest.get("target") == "opencode":
+        allowed_keys = {
+            "name",
+            "description",
+            "license",
+            "compatibility",
+            "metadata",
+        }
+    extra_keys = sorted(set(skill.frontmatter) - allowed_keys)
     if extra_keys:
         results.append(RuleResult(
             "R001", skill.relative_path, "error",
             f"frontmatter has unsupported keys: {extra_keys}"
         ))
+    if ctx.manifest.get("target") == "opencode":
+        results.extend(_check_opencode_frontmatter_fields(skill))
     return results
 
 
@@ -185,10 +197,16 @@ def check_name_kebab_case(skill: SkillFile, ctx: BundleContext) -> List[RuleResu
     name = skill.frontmatter.get("name", "")
     if not isinstance(name, str) or not name:
         return []  # R001 will have caught this already
-    if not KEBAB_CASE_RE.match(name):
+    pattern = OPENCODE_NAME_RE if ctx.manifest.get("target") == "opencode" else KEBAB_CASE_RE
+    if not pattern.match(name):
         return [RuleResult(
             "R002", skill.relative_path, "error",
             f"frontmatter `name` is not kebab-case: {name!r}"
+        )]
+    if ctx.manifest.get("target") == "opencode" and len(name) > 64:
+        return [RuleResult(
+            "R002", skill.relative_path, "error",
+            "OpenCode frontmatter `name` must be 1-64 characters"
         )]
     return []
 
@@ -360,6 +378,7 @@ check_hone_methodology = _make_keyword_rule(
         "recent Forma skill trigger",
         "delivery-revision",
         "implement-notes.md",
+        "runs/task-*.md",
     ],
     "hone skill must cite read-only stage-aware reconciliation and delivery revision routing",
 )
@@ -612,6 +631,8 @@ def check_target_metadata(skill: SkillFile, ctx: BundleContext) -> List[RuleResu
         return _check_codex_metadata(skill)
     if target == "claude-code":
         return _check_claude_code_metadata(skill)
+    if target == "opencode":
+        return _check_opencode_metadata(skill, kind)
     return [RuleResult(
         "R201", skill.relative_path, "error",
         f"manifest target is unsupported: {target!r}"
@@ -653,6 +674,70 @@ def _check_claude_code_metadata(skill: SkillFile) -> List[RuleResult]:
             f"claude-code target must not include Codex metadata: {forbidden}"
         )]
     return []
+
+
+def _check_opencode_frontmatter_fields(skill: SkillFile) -> List[RuleResult]:
+    results: List[RuleResult] = []
+    description = skill.frontmatter.get("description")
+    if isinstance(description, str) and len(description) > 1024:
+        results.append(RuleResult(
+            "R203", skill.relative_path, "error",
+            "OpenCode frontmatter `description` must be 1-1024 characters",
+        ))
+    compatibility = skill.frontmatter.get("compatibility")
+    if compatibility != "opencode":
+        results.append(RuleResult(
+            "R203", skill.relative_path, "error",
+            "OpenCode target requires frontmatter `compatibility: opencode`",
+        ))
+    metadata = skill.frontmatter.get("metadata")
+    if not isinstance(metadata, dict):
+        results.append(RuleResult(
+            "R203", skill.relative_path, "error",
+            "OpenCode target requires string-to-string frontmatter `metadata`",
+        ))
+        return results
+    for key, value in metadata.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            results.append(RuleResult(
+                "R203", skill.relative_path, "error",
+                "OpenCode frontmatter `metadata` must be string-to-string",
+            ))
+            break
+    if metadata.get("forma.target") != "opencode":
+        results.append(RuleResult(
+            "R203", skill.relative_path, "error",
+            "OpenCode frontmatter metadata must include `forma.target: opencode`",
+        ))
+    if "forma.stage" not in metadata and "forma.kind" not in metadata:
+        results.append(RuleResult(
+            "R203", skill.relative_path, "error",
+            "OpenCode frontmatter metadata must include `forma.stage` or `forma.kind`",
+        ))
+    return results
+
+
+def _check_opencode_metadata(skill: SkillFile, kind: str) -> List[RuleResult]:
+    results: List[RuleResult] = []
+    forbidden = []
+    if (skill.path.parent / "agents" / "openai.yaml").exists():
+        forbidden.append("agents/openai.yaml")
+    if (skill.path.parent / ".codex-plugin").exists():
+        forbidden.append(".codex-plugin")
+    if (skill.path.parent / ".claude-plugin").exists():
+        forbidden.append(".claude-plugin")
+    if forbidden:
+        results.append(RuleResult(
+            "R204", skill.relative_path, "error",
+            f"opencode target must not include Codex or Claude metadata: {forbidden}",
+        ))
+    metadata = skill.frontmatter.get("metadata")
+    if isinstance(metadata, dict) and metadata.get("forma.stage") != kind:
+        results.append(RuleResult(
+            "R204", skill.relative_path, "error",
+            f"OpenCode frontmatter metadata forma.stage must be {kind!r}",
+        ))
+    return results
 
 
 # ----- Plugin rules (apply when a plugin manifest exists) -----
