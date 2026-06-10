@@ -18,7 +18,14 @@ from forma.creator.composer import (
     METHODOLOGY_RESOURCES,
     STAGE_SOURCE_DIR,
 )
-from forma.creator.profiles import ConditionalOverlays, ConditionalRoute, ProfileConfig, ResourceSpec
+from forma.creator.profiles import (
+    ConditionalOverlays,
+    ConditionalRoute,
+    DEFAULT_ENABLED_KINDS,
+    OPTIONAL_KINDS,
+    ProfileConfig,
+    ResourceSpec,
+)
 from forma.runtime_assets import runtime_asset_path
 
 
@@ -56,7 +63,10 @@ def build_manifest(
     target_agent: str,
 ) -> Dict[str, object]:
     """Build provenance metadata for generated workflow bundles."""
-    methodology_hashes = _file_hashes(methodology_dir)
+    enabled_kinds = tuple(
+        kind for kind, stage in profile.stages.items() if stage.enabled
+    )
+    methodology_hashes = _methodology_hashes(methodology_dir, enabled_kinds)
     profile_hashes = _file_hashes_for_paths(profile.profile_root, profile.resolved_paths)
     methodology_tree_digest = _tree_digest(methodology_hashes)
     profile_digest = _tree_digest(profile_hashes)
@@ -144,15 +154,15 @@ def forma_generator_metadata() -> Dict[str, str]:
 
 
 def _assert_methodology_dir(path: Path) -> None:
-    required = [f"{STAGE_SOURCE_DIR}/{kind}.md" for kind in KINDS]
+    required = [f"{STAGE_SOURCE_DIR}/{kind}.md" for kind in DEFAULT_ENABLED_KINDS]
     required.extend(
         source_rel
-        for kind in KINDS
+        for kind in DEFAULT_ENABLED_KINDS
         for source_rel, _dest, _executable in METHODOLOGY_RESOURCES[kind]
     )
     required.extend(
         spec.source_rel
-        for kind in KINDS
+        for kind in DEFAULT_ENABLED_KINDS
         for spec in METHODOLOGY_REQUIREMENT_REFERENCES[kind]
     )
     missing = [rel for rel in required if not (path / rel).is_file()]
@@ -170,6 +180,29 @@ def _file_hashes(root: Path) -> Dict[str, str]:
         rel = path.relative_to(root).as_posix()
         hashes[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
     return hashes
+
+
+def _methodology_hashes(root: Path, enabled_kinds: Sequence[str]) -> Dict[str, str]:
+    hashes = _file_hashes(root)
+    disabled_optional = set(OPTIONAL_KINDS) - set(enabled_kinds)
+    if not disabled_optional:
+        return hashes
+    return {
+        rel: digest
+        for rel, digest in hashes.items()
+        if not _belongs_to_stage(rel, disabled_optional)
+    }
+
+
+def _belongs_to_stage(rel: str, kinds: set[str]) -> bool:
+    for kind in kinds:
+        if rel == f"{STAGE_SOURCE_DIR}/{kind}.md":
+            return True
+        if rel.startswith(f"resources/{kind}/"):
+            return True
+        if rel.startswith(f"fragments/{kind}/"):
+            return True
+    return False
 
 
 def _file_hashes_for_paths(root: Path, paths: Sequence[Path]) -> Dict[str, str]:

@@ -19,7 +19,7 @@ CODEX_PLUGIN_DESCRIPTION = (
 )
 CODEX_PLUGIN_VERSION = "0.1.1"
 CODEX_PLUGIN_DEVELOPER = "Forma"
-STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow")
+STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow", "hone")
 PLUGIN_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 

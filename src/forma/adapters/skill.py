@@ -8,8 +8,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, List, Mapping
 
-from forma.creator.composer import KINDS, load_stage_sources
+from forma.creator.composer import load_stage_sources
 from forma.creator.manifest import build_creator_manifest
+from forma.creator.profiles import DEFAULT_ENABLED_KINDS
 from forma.runtime_assets import runtime_asset_path
 from forma_verifier import verify
 from forma_verifier.rules import parse_frontmatter
@@ -194,7 +195,7 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
         "directories. Defaults are:",
         "",
     ]
-    for kind in KINDS:
+    for kind in DEFAULT_ENABLED_KINDS:
         lines.append(f"- `{_creator_skill_name(kind)}/` - {descriptions[kind]}")
     lines.extend(["", "## Output Contract", ""])
     lines.extend(

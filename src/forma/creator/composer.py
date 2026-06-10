@@ -9,12 +9,13 @@ from typing import Dict, Iterable, List, Mapping, Sequence, Tuple
 from forma.creator.profiles import (
     ConditionalOverlays,
     ConditionalRoute,
+    DEFAULT_ENABLED_KINDS,
+    KINDS,
     ProfileConfig,
     ResourceSpec,
 )
 
 
-KINDS = ("shape", "gauge", "seal", "pour", "flow")
 STAGE_SOURCE_DIR = "stages"
 RUNNER_REFERENCE_NAMES = {"plan-template.md", "tasks-template.md"}
 METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
@@ -49,6 +50,10 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
         ("resources/shared/references/implement-notes.md", "references/implement-notes.md", False),
         ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
+    ),
+    "hone": (
+        ("resources/hone/references/reconcile-rules.md", "references/reconcile-rules.md", False),
+        ("resources/shared/references/output-format.md", "references/output-format.md", False),
     ),
 }
 
@@ -125,6 +130,7 @@ METHODOLOGY_REQUIREMENT_REFERENCES: Mapping[
             "automated execution",
         ),
     ),
+    "hone": (),
 }
 
 
@@ -156,10 +162,11 @@ class ComposedBundle:
 def compose_bundle(methodology_dir: Path, profile: ProfileConfig) -> ComposedBundle:
     """Return generated plan-first skill contents without writing files."""
     methodology_dir = methodology_dir.resolve()
-    _require_methodology_files(methodology_dir)
-    stage_sources = load_stage_sources(methodology_dir)
+    enabled_kinds = tuple(kind for kind in KINDS if profile.stages[kind].enabled)
+    _require_methodology_files(methodology_dir, enabled_kinds)
+    stage_sources = load_stage_sources(methodology_dir, enabled_kinds)
     skills: Dict[str, ComposedSkill] = {}
-    for kind in KINDS:
+    for kind in enabled_kinds:
         stage_source = stage_sources[kind]
         requirement_references = _requirement_references(methodology_dir, kind)
         methodology_resources = (
@@ -191,9 +198,9 @@ def compose_bundle(methodology_dir: Path, profile: ProfileConfig) -> ComposedBun
     return ComposedBundle(skills=skills)
 
 
-def _require_methodology_files(methodology_dir: Path) -> None:
+def _require_methodology_files(methodology_dir: Path, kinds: Iterable[str]) -> None:
     missing: List[str] = []
-    for kind in KINDS:
+    for kind in kinds:
         stage_rel = f"{STAGE_SOURCE_DIR}/{kind}.md"
         if not (methodology_dir / stage_rel).is_file():
             missing.append(stage_rel)
@@ -211,11 +218,14 @@ def _require_methodology_files(methodology_dir: Path) -> None:
         )
 
 
-def load_stage_sources(methodology_dir: Path) -> Mapping[str, StageSource]:
+def load_stage_sources(
+    methodology_dir: Path,
+    kinds: Iterable[str] = DEFAULT_ENABLED_KINDS,
+) -> Mapping[str, StageSource]:
     """Load canonical stage body sources from `source/methodology/stages`."""
     methodology_dir = methodology_dir.resolve()
     sources: Dict[str, StageSource] = {}
-    for kind in KINDS:
+    for kind in kinds:
         sources[kind] = _load_stage_source(kind, methodology_dir)
     return sources
 

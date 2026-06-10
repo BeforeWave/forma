@@ -44,3 +44,11 @@ stages:
     short_description: Complete remaining finalized Forma tasks when boundaries and gates are clear.
     default_prompt: >-
       $forma-showhand: 在 Layer、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。
+  hone:
+    enabled: true
+    name: forma-reconcile
+    directory: forma-reconcile
+    display_name: Forma Reconcile
+    short_description: Reconcile Forma delivery feedback against stage contracts and issue evidence.
+    default_prompt: >-
+      $forma-reconcile: 对 Forma 交付反馈做只读对齐评价，结合最近触发的 workflow 阶段、当前 stage 约束、issue evidence、验证记录和用户反馈，输出下一步路由。

@@ -14,7 +14,9 @@ from typing import Any, Dict, List, Mapping, Sequence, Tuple
 import yaml
 
 
-KINDS = ("shape", "gauge", "seal", "pour", "flow")
+DEFAULT_ENABLED_KINDS = ("shape", "gauge", "seal", "pour", "flow")
+OPTIONAL_KINDS = ("hone",)
+KINDS = (*DEFAULT_ENABLED_KINDS, *OPTIONAL_KINDS)
 STAGE_KEYS = ("default", *KINDS)
 
 ALLOWED_TOP_LEVEL_KEYS = {
@@ -954,11 +956,12 @@ def _build_stage_configs(raw: Mapping[str, Mapping[str, object]]) -> Dict[str, S
     stages: Dict[str, StageConfig] = {}
     for kind in KINDS:
         item = dict(raw.get(kind, {}))
+        enabled_default = kind in DEFAULT_ENABLED_KINDS
         name = str(item.get("name") or kind)
         directory = str(item.get("directory") or name)
         display_name = str(item.get("display_name") or name.replace("-", " ").title())
         stages[kind] = StageConfig(
-            enabled=bool(item.get("enabled", True)),
+            enabled=bool(item.get("enabled", enabled_default)),
             name=name,
             directory=directory,
             display_name=display_name,

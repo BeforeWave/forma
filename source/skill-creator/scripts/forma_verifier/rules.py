@@ -93,7 +93,7 @@ class BundleContext:
     manifest: Mapping[str, object]
 
 
-PLAN_FIRST_KINDS = ["shape", "gauge", "seal", "pour", "flow"]
+PLAN_FIRST_KINDS = ["shape", "gauge", "seal", "pour", "flow", "hone"]
 FORMA_STAGE_PREFIX = "forma"
 FORMA_PUBLIC_STAGE_NAMES = {
     "forma-plan": "shape",
@@ -101,6 +101,7 @@ FORMA_PUBLIC_STAGE_NAMES = {
     "forma-lock": "seal",
     "forma-execute": "pour",
     "forma-showhand": "flow",
+    "forma-reconcile": "hone",
 }
 
 
@@ -349,6 +350,18 @@ check_pour_methodology = _make_keyword_rule(
     "R104", "pour",
     ["review-ready", "complete"],
     "pour skill must cite review-ready / complete workflow steps",
+)
+
+check_hone_methodology = _make_keyword_rule(
+    "R106", "hone",
+    [
+        "read-only",
+        "stage evaluation frame",
+        "recent Forma skill trigger",
+        "delivery-revision",
+        "implement-notes.md",
+    ],
+    "hone skill must cite read-only stage-aware reconciliation and delivery revision routing",
 )
 
 
@@ -821,6 +834,7 @@ ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
     check_gauge_methodology,
     check_seal_methodology,
     check_pour_methodology,
+    check_hone_methodology,
     check_conditional_overlays,
     check_target_metadata,
     check_codex_plugin_manifest,

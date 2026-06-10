@@ -11,6 +11,7 @@ from click.testing import CliRunner
 from forma import DISTRIBUTION_NAME, __version__
 from forma.cli import main
 from forma.creator import build_bundle, load_profile
+from forma.creator.composer import load_stage_sources
 from forma.creator.manifest import find_methodology_dir
 from forma.plugins import build_codex_plugin
 from forma_verifier import verify
@@ -58,6 +59,7 @@ FORMA_SELF_STAGE_DIRS = {
     "seal": "forma-lock",
     "pour": "forma-execute",
     "flow": "forma-showhand",
+    "hone": "forma-reconcile",
 }
 
 
@@ -167,6 +169,9 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert profile.stages["shape"].name == "forma-plan"
     assert profile.stages["flow"].directory == "forma-showhand"
     assert "$forma-showhand" in profile.stages["flow"].default_prompt
+    assert profile.stages["hone"].enabled is True
+    assert profile.stages["hone"].directory == "forma-reconcile"
+    assert "$forma-reconcile" in profile.stages["hone"].default_prompt
     assert "Layer impact" in profile.decision_gate_extras
     assert not any("README.md" in item for item in profile.constraints["default"])
     assert any("dirty worktree" in item for item in profile.constraints["default"])
@@ -179,6 +184,7 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert any("profiles/forma-self" in item for item in profile.constraints["gauge"])
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["pour"])
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["flow"])
+    assert any("recent Forma skill trigger context" in item for item in profile.constraints["hone"])
     assert profile.conditional_overlays is not None
     assert profile.conditional_overlays.decision.name == "Iteration Area"
     assert [route.id for route in profile.conditional_overlays.routes] == [
@@ -542,6 +548,9 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     flow_agent = (
         codex_dir / FORMA_SELF_STAGE_DIRS["flow"] / "agents" / "openai.yaml"
     ).read_text(encoding="utf-8")
+    hone_text = (
+        codex_dir / FORMA_SELF_STAGE_DIRS["hone"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
 
     assert 'name: "forma-plan"' in shape_text
     assert "references/forma-iteration-boundaries.md" in shape_text
@@ -552,6 +561,10 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md" in pour_text
     assert "If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md" in pour_text
     assert "$forma-showhand" in flow_agent
+    assert 'name: "forma-reconcile"' in hone_text
+    assert "references/reconcile-rules.md" in hone_text
+    assert "stage evaluation frame" in hone_text.lower()
+    assert "delivery-revision" in hone_text
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
     assert manifest["profile"]["top_level_id"] == "forma-self-iteration"
@@ -565,6 +578,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
         manifest["emitted_skills"]["shape"]["directory"]
         == "forma-plan"
     )
+    assert manifest["emitted_skills"]["hone"]["directory"] == "forma-reconcile"
     assert manifest["conditional_overlays"]["decision"]["name"] == "Iteration Area"
     assert manifest["conditional_overlays"]["routes"][5]["overlays"] == [
         "methodology",
@@ -800,6 +814,7 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert (bundle_dir / "forma-lock" / "SKILL.md").is_file()
     assert (bundle_dir / "forma-execute" / "SKILL.md").is_file()
     assert (bundle_dir / "forma-showhand" / "SKILL.md").is_file()
+    assert not (bundle_dir / "forma-reconcile").exists()
     default_plan_template = (
         bundle_dir / "forma-lock" / "references" / "plan-template.md"
     ).read_text(encoding="utf-8")
@@ -807,6 +822,7 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert "## Conditional Decision" not in default_plan_template
     assert verify(bundle_dir).passed
     assert verify(plugin_dir).passed
+    assert not (plugin_dir / "skills" / "forma-reconcile").exists()
 
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
@@ -830,6 +846,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert verify(plugin_dir).passed
     assert (plugin_dir / "skills" / "forma-plan" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "forma-showhand" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "forma-reconcile" / "SKILL.md").is_file()
     plan_template = (
         plugin_dir / "skills" / "forma-lock" / "references" / "plan-template.md"
     ).read_text(encoding="utf-8")
@@ -851,6 +868,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     )
     assert manifest["profile"]["bundle_name"] == "forma"
     assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
+    assert manifest["emitted_skills"]["hone"]["name"] == "forma-reconcile"
 
 
 def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:
@@ -931,6 +949,66 @@ stages:
     assert manifest["skills"] == ["shape"]
     assert manifest["emitted_skills"]["shape"]["directory"] == "custom-plan-issue"
     assert verify(output_dir).passed
+
+
+def test_optional_hone_stage_is_known_but_disabled_by_default(tmp_path: Path) -> None:
+    profile_file = tmp_path / "optional-hone.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: optional-hone
+stages:
+  hone:
+    name: custom-reconcile
+    directory: custom-reconcile
+    display_name: Custom Reconcile
+constraints:
+  hone:
+    - Evaluate delivery feedback against the current stage contract.
+skills:
+  hone:
+    description: Reconcile delivery feedback.
+""".lstrip(),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "optional-hone-output"
+
+    profile = load_profile(profile_file)
+    assert profile.stages["hone"].enabled is False
+    assert profile.stages["hone"].name == "custom-reconcile"
+    assert profile.constraints["hone"] == [
+        "Evaluate delivery feedback against the current stage contract."
+    ]
+    assert profile.skill_descriptions["hone"] == "Reconcile delivery feedback."
+
+    build_bundle(
+        profile_file=profile_file,
+        output_dir=output_dir,
+        target_agent="codex",
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert not (output_dir / "custom-reconcile").exists()
+    manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["skills"] == list(KINDS)
+    assert "hone" not in manifest["emitted_skills"]
+    assert verify(output_dir).passed
+
+
+def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
+    sources = load_stage_sources(METHODOLOGY, ("hone",))
+    hone = sources["hone"]
+    rules = (
+        METHODOLOGY / "resources" / "hone" / "references" / "reconcile-rules.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Reconcile delivered workflow results" in hone.description
+    assert any("recent Forma skill trigger context" in line for line in hone.workflow_lines)
+    assert any("stage evaluation frame" in line.lower() for line in hone.workflow_lines)
+    assert any("delivery-revision" in line for line in hone.workflow_lines)
+    assert "## Target Resolution" in rules
+    assert "## Stage Evaluation Frame" in rules
+    assert "`delivery-revision`" in rules
 
 
 def test_creator_profile_supports_conditional_overlays(tmp_path: Path) -> None:

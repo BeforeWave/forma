@@ -28,6 +28,11 @@ constraints:
     - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
     - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
     - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
+  hone:
+    - Resolve the reconciliation target from explicit feedback first, then recent Forma skill trigger context, review cache, task run evidence, and current diff or commit evidence.
+    - Evaluate feedback against the current stage constraints and bundled references before deciding whether it is implementation rework, delivery revision, plan rework, source rework, aligned, acceptable deviation, or blocked.
+    - For task implementation rework, require `plans/issue-<id>/implement-notes.md` to record how feedback changed implementation, validation, generated artifacts, or commit/history.
+    - For plan-level feedback, return to planning without recording the finding as implementation notes.
 resources:
   default:
     references:
@@ -48,6 +53,8 @@ skills:
     description: Execute one Forma self-iteration task through focused validation and review.
   flow:
     description: Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
+  hone:
+    description: Reconcile Forma delivery feedback against stage contracts, issue evidence, and workflow boundaries.
 decision_gate_extras:
   - Layer impact
   - Profile ownership

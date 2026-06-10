@@ -369,6 +369,88 @@ chat-only Decision Gate Goal Scope Approach Validation Plan Strategy.
     assert report.passed, report.format_human()
 
 
+def test_manifest_emitted_skill_mapping_supports_hone(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    skill_dir = bundle / "forma-reconcile"
+    references_dir = skill_dir / "references"
+    references_dir.mkdir(parents=True)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": {
+                    "hone": {
+                        "name": "forma-reconcile",
+                        "directory": "forma-reconcile",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (references_dir / "reconcile-rules.md").write_text(
+        "# Reconcile Rules\n", encoding="utf-8"
+    )
+    (skill_dir / "SKILL.md").write_text(
+        skill_text(
+            "forma-reconcile",
+            "Reconcile delivery feedback.",
+            """
+## Workflow
+
+Run read-only reconciliation using the stage evaluation frame, recent Forma skill trigger context, delivery-revision routing, and implement-notes.md requirements.
+
+## Load As Needed
+
+- `references/reconcile-rules.md`
+
+## Output
+
+- Use `## reconcile-result`.
+""",
+        ),
+        encoding="utf-8",
+    )
+
+    report = verify(bundle)
+
+    assert report.passed, report.format_human()
+
+
+def test_hone_methodology_requires_reconcile_markers(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    skill_dir = bundle / "forma-reconcile"
+    skill_dir.mkdir(parents=True)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": {
+                    "hone": {
+                        "name": "forma-reconcile",
+                        "directory": "forma-reconcile",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (skill_dir / "SKILL.md").write_text(
+        skill_text(
+            "forma-reconcile",
+            "Incomplete reconcile stage.",
+            """
+## Workflow
+
+Review feedback and recommend next steps.
+""",
+        ),
+        encoding="utf-8",
+    )
+
+    assert_has_error(verify(bundle), "R106")
+
+
 def test_codex_plugin_manifest_matches_emitted_skills(tmp_path: Path) -> None:
     plugin = copy_valid_plugin(tmp_path)
 
