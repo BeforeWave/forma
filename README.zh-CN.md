@@ -18,20 +18,21 @@ Forma 把项目规则编译成一组 workflow skills，让 agent 在实现前先
 
 ---
 
-## 同一个目标，不同团队的过关标准
+## 同一个目标，不同计划写法
 
-同样是给 settings 增加 rate limiting，普通计划可能只写：读相关代码、加 limiter、跑测试。
+同样是“给设置模块增加限流”，普通计划可能只写：看代码、加限流器、跑测试。
 
-但不同团队对“合格计划”的定义不一样。Forma 生成的 workflow skills 会把各自的标准带进计划阶段，让 agent 在动代码前先按本团队的准则说清楚边界和验收条件。
+Forma 的区别是：不同 profile 会让 agent 写出不同的计划重点。
+这些偏向不用你每次提醒 agent；profile 会把它们带进 workflow。
 
-| 团队关注点 | 进入 task contract 的约束 |
+| Profile 偏向 | 计划重点会变成 |
 |---|---|
-| API contract 稳定性 | 先判断 API impact、response shape 和 generator proof；不能先改 handler，最后再补 contract。 |
-| 运行控制稳定性 | 复用现有 config、rollout 开关或 limiter path；覆盖 allowed、limited、disabled、invalid-config。 |
-| 设计系统一致性 | 映射到已有 component state，说明文案来源，留下 responsive 和 accessibility proof。 |
-| 运营效率 | 确认操作员能处理这个状态，表格和筛选不退化，并对齐 runbook、telemetry、audit。 |
+| 接口兼容优先 | 哪些接口、字段、生成文件受影响，是否需要 API review。 |
+| 灰度发布优先 | 用哪个开关，怎么关闭、回滚，异常配置怎么测。 |
+| 用户体验优先 | 限流状态怎么展示，文案、组件状态、无障碍怎么验。 |
+| 运营处理优先 | 谁会看到这个状态，怎么判断、处理、追踪。 |
 
-这四个团队的 agent 拿到同一个 issue，会写出四份不同的 task contract。Forma 不决定哪种标准是对的，它编译的是你团队已经认可的那套标准。
+这不是一张必做清单。它说明同一个需求，在不同项目规则下，会写出不同的计划边界和验收方式。
 
 ---
 

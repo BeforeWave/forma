@@ -24,25 +24,26 @@ from the current project.
 
 ---
 
-## Same Goal, Different Standards
+## Same Goal, Different Plan Shapes
 
 For the same goal, "add rate limiting to settings", a plain plan may say: read
 the code, add the limiter, run tests.
 
-Different teams define an acceptable plan differently. Forma-generated workflow
-skills bring those standards into planning, so the agent must state boundaries
-and acceptance criteria before it edits code.
+Forma's difference is that different profiles make the agent write different
+planning priorities.
+You do not have to remind the agent every time; the profile carries those
+priorities into the workflow.
 
-| Team concern | Constraint in the task contract |
+| Profile bias | Planning priority becomes |
 |---|---|
-| API contract stability | Classify API impact, response shape, and generator proof before changing handlers. |
-| Runtime control stability | Reuse existing config, rollout switches, or limiter paths; cover allowed, limited, disabled, and invalid-config cases. |
-| Design-system consistency | Map to an existing component state, name the copy source, and record responsive and accessibility proof. |
-| Operator efficiency | Put the state where an operator can act, preserve table and filter flow, and align runbook, telemetry, and audit behavior. |
+| API compatibility first | Which endpoints, fields, and generated files are affected, and whether API review is needed. |
+| Rollout first | Which switch to use, how to disable or roll back, and how to test invalid config. |
+| User experience first | How rate limiting appears, and how copy, component state, and accessibility are checked. |
+| Operations first | Who sees the state, and how they decide, handle, and trace it. |
 
-Four teams receiving the same issue can produce four different task contracts.
-Forma does not decide which standard is right; it compiles the standard your
-team already trusts.
+This is not a required checklist. It shows how the same request can produce
+different planning boundaries and acceptance checks under different project
+rules.
 
 ---
 
