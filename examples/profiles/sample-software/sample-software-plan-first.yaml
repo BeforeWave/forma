@@ -9,33 +9,33 @@ bundle:
   description: Sanitized sample software plan-first workflow bundle.
 stages:
   shape:
-    name: software-plan-first-plan-issue
-    directory: software-plan-first-plan-issue
-    display_name: Software Plan-First Plan Issue
+    name: software-plan-first-plan
+    directory: software-plan-first-plan
+    display_name: Software Plan-First Plan
     short_description: Converge a Chinese implementation plan in chat without repo reads or coding.
     default_prompt: >-
-      $software-plan-first-plan-issue: 收敛这个软件需求的目标、范围、方案、验证和影响边界，不读仓库也不写代码。
+      $software-plan-first-plan: 收敛这个软件需求的目标、范围、方案、验证和影响边界，不读仓库也不写代码。
   gauge:
-    name: software-plan-first-ground-plan
-    directory: software-plan-first-ground-plan
-    display_name: Software Plan-First Ground Plan
+    name: software-plan-first-ground
+    directory: software-plan-first-ground
+    display_name: Software Plan-First Ground
     short_description: Read-only grounding for project facts, contracts, rules, paths, and validation.
     default_prompt: >-
-      $software-plan-first-ground-plan: 只读确认这个计划需要的仓库事实、source of truth、项目规则和验证命令。
+      $software-plan-first-ground: 只读确认这个计划需要的仓库事实、source of truth、项目规则和验证命令。
   seal:
-    name: software-plan-first-finalize-plan
-    directory: software-plan-first-finalize-plan
-    display_name: Software Plan-First Finalize Plan
-    short_description: Write Chinese plan.md/tasks.md, validate task structure, and seal the workflow.
+    name: software-plan-first-lock
+    directory: software-plan-first-lock
+    display_name: Software Plan-First Lock
+    short_description: Write Chinese plan.md/tasks.md, validate task structure, and lock the workflow.
     default_prompt: >-
-      $software-plan-first-finalize-plan: 把已收敛并 grounding 过的计划写入 plan.md/tasks.md，然后 seal workflow。
+      $software-plan-first-lock: 把已收敛并 grounding 过的计划写入 plan.md/tasks.md，经用户确认后锁定 workflow。
   pour:
-    name: software-plan-first-implement-feature
-    directory: software-plan-first-implement-feature
-    display_name: Software Plan-First Implement Feature
+    name: software-plan-first-execute
+    directory: software-plan-first-execute
+    display_name: Software Plan-First Execute
     short_description: Execute exactly one current task, validate it, and stop for review.
     default_prompt: >-
-      $software-plan-first-implement-feature: 按 sealed tasks.md 执行第一个未完成 task，验证后进入 review-ready。
+      $software-plan-first-execute: 按 sealed tasks.md 执行第一个未完成 task，验证后进入 review-ready。
   flow:
     name: software-plan-first-showhand
     directory: software-plan-first-showhand

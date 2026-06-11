@@ -6,7 +6,7 @@ This `forma-creator` bundle is fixed to `claude-code`. Its generated plan-first 
 - `ground` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
 - `lock` - Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
 - `execute` - Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
-- `showhand` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops.
+- `showhand` - Execute all remaining tasks from an already-locked issue plan automatically with preflight, validation gates, proof recording, and safety stops.
 
 ## Output Contract
 

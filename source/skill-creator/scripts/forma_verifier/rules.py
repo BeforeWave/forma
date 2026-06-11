@@ -354,7 +354,7 @@ check_shape_methodology = _make_keyword_rule(
 
 check_gauge_methodology = _make_keyword_rule(
     "R102", "gauge",
-    ["read-only", "grounding handoff", ("seal", "finalize-plan")],
+    ["read-only", "grounding handoff", ("seal", "lock stage")],
     "gauge skill must cite read-only inspection and grounding handoff for seal",
 )
 
@@ -430,7 +430,8 @@ def check_conditional_overlays(skill: SkillFile, ctx: BundleContext) -> List[Rul
             ))
     sections = _h2_sections(skill.body)
     conditional_section = sections.get("Conditional References", "")
-    if "Conditional References" not in sections:
+    conditional_refs = list(_conditional_reference_paths_for_kind(raw, kind))
+    if conditional_refs and "Conditional References" not in sections:
         results.append(RuleResult(
             "R301", skill.relative_path, "error",
             "conditional overlay bundle skills must include `## Conditional References`"
@@ -439,7 +440,7 @@ def check_conditional_overlays(skill: SkillFile, ctx: BundleContext) -> List[Rul
         sections.get(title, "")
         for title in ("Always Load", "Read After Gate", "Load As Needed")
     )
-    for ref_path in _conditional_reference_paths_for_kind(raw, kind):
+    for ref_path in conditional_refs:
         if ref_path in unconditional_text:
             results.append(RuleResult(
                 "R301", skill.relative_path, "error",

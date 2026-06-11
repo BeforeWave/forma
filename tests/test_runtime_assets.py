@@ -73,7 +73,7 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
         cwd=outside_cwd,
         env=env,
     )
-    assert (generated / "backend-plan-first-plan-issue" / "SKILL.md").is_file()
+    assert (generated / "backend-plan-first-plan" / "SKILL.md").is_file()
     _run_installed(["verify", str(generated)], cwd=outside_cwd, env=env)
 
     creator_dist = tmp_path / "creator-dist"

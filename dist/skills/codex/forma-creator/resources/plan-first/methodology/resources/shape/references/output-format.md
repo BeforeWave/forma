@@ -4,14 +4,14 @@ Keep user-facing output compact. Prefer 6 to 10 lines and use only sections that
 
 ## Status Types
 
-`plan-issue` may output only these statuses:
+The plan stage may output only these statuses:
 
 - `blocked`: the skill cannot continue until missing mode, planning, or execution-boundary inputs are clarified.
 - `clarifying`: the skill is still collecting missing Goal, Scope, Approach, Validation, Plan Strategy, or applicable Artifact/Evidence Boundary context before a reviewable proposal can be finalized.
 - `proposal-ready`: all blocking decisions are resolved and the skill has enough information to present a reviewable plan proposal in chat, but final plan files have not been written.
-- `handoff`: the current skill should stop and recommend `finalize-plan` or another workflow.
+- `handoff`: the current skill should stop and recommend the lock stage or another workflow.
 
-Do not use `success` for `plan-issue`. This skill does not write files, so it must not output `Files Changed`, `Validation Commands` as completed work, `Evidence Path`, or a planning success report.
+Do not use `success` for the plan stage. This skill does not write files, so it must not output `Files Changed`, `Validation Commands` as completed work, `Evidence Path`, or a planning success report.
 
 ## Default Rules
 

@@ -68,6 +68,18 @@ issue_paths() {
   REVIEW_VALIDATION_LOG="$REVIEW_STATE_DIR/validation.log"
 }
 
+repo_relative_path() {
+  local path="$1"
+  case "$path" in
+    "$REPO_ROOT"/*)
+      printf '%s\n' "${path#"$REPO_ROOT"/}"
+      ;;
+    *)
+      printf '%s\n' "$path"
+      ;;
+  esac
+}
+
 ensure_issue_files_exist() {
   [ -f "$PLAN_FILE" ] || die "plan.md not found: $PLAN_FILE"
   [ -f "$TASK_FILE" ] || die "tasks.md not found: $TASK_FILE"
@@ -139,17 +151,20 @@ mark_task_complete() {
 }
 
 plan_clean_status() {
-  if ! git -C "$REPO_ROOT" ls-files --error-unmatch "$PLAN_FILE" >/dev/null 2>&1; then
+  local plan_rel
+  plan_rel=$(repo_relative_path "$PLAN_FILE")
+
+  if ! git -C "$REPO_ROOT" ls-files --error-unmatch -- "$plan_rel" >/dev/null 2>&1; then
     echo "untracked"
     return
   fi
 
-  if ! git -C "$REPO_ROOT" diff --quiet -- "$PLAN_FILE"; then
+  if ! git -C "$REPO_ROOT" diff --quiet -- "$plan_rel"; then
     echo "modified"
     return
   fi
 
-  if ! git -C "$REPO_ROOT" diff --cached --quiet -- "$PLAN_FILE"; then
+  if ! git -C "$REPO_ROOT" diff --cached --quiet -- "$plan_rel"; then
     echo "staged"
     return
   fi
@@ -158,17 +173,20 @@ plan_clean_status() {
 }
 
 tasks_clean_status() {
-  if ! git -C "$REPO_ROOT" ls-files --error-unmatch "$TASK_FILE" >/dev/null 2>&1; then
+  local task_rel
+  task_rel=$(repo_relative_path "$TASK_FILE")
+
+  if ! git -C "$REPO_ROOT" ls-files --error-unmatch -- "$task_rel" >/dev/null 2>&1; then
     echo "untracked"
     return
   fi
 
-  if ! git -C "$REPO_ROOT" diff --quiet -- "$TASK_FILE"; then
+  if ! git -C "$REPO_ROOT" diff --quiet -- "$task_rel"; then
     echo "modified"
     return
   fi
 
-  if ! git -C "$REPO_ROOT" diff --cached --quiet -- "$TASK_FILE"; then
+  if ! git -C "$REPO_ROOT" diff --cached --quiet -- "$task_rel"; then
     echo "staged"
     return
   fi
@@ -771,8 +789,8 @@ ensure_no_staged_changes() {
 }
 
 ensure_planning_files_clean() {
-  [ "$(plan_clean_status)" = "clean" ] || die "plan.md must be committed and unchanged before execution."
-  [ "$(tasks_clean_status)" = "clean" ] || die "tasks.md must be committed and unchanged before execution."
+  [ "$(plan_clean_status)" = "clean" ] || die "plan.md must be locked before execution: committed and unchanged after explicit user permission. Stop showhand and return to the lock stage."
+  [ "$(tasks_clean_status)" = "clean" ] || die "tasks.md must be locked before execution: committed and unchanged after explicit user permission. Stop showhand and return to the lock stage."
 }
 
 ensure_task_exists() {
@@ -827,6 +845,70 @@ ensure_notes_format_if_changed() {
   grep -qx '# Implement Notes' "$notes_file" || die "implement-notes.md must contain a '# Implement Notes' title."
   grep -q "^## Task $CURRENT_TASK_NUMBER: " "$notes_file" || die "implement-notes.md must contain a section for the current task: ## Task $CURRENT_TASK_NUMBER: $(current_task_id_or_number)"
   grep -qx 'Outcome:' "$notes_file" || die "implement-notes.md current task section must include an Outcome: field."
+  ensure_notes_decisions_do_not_bypass_process_gates "$notes_file"
+}
+
+ensure_notes_decisions_do_not_bypass_process_gates() {
+  local notes_file="$1"
+
+  python3 - "$notes_file" "$CURRENT_TASK_NUMBER" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+notes_file = Path(sys.argv[1])
+task_number = sys.argv[2]
+lines = notes_file.read_text(encoding="utf-8").splitlines()
+
+section: list[str] = []
+inside = False
+for line in lines:
+    if re.match(rf"^## Task {re.escape(task_number)}: ", line):
+        inside = True
+        section = [line]
+        continue
+    if inside and line.startswith("## Task "):
+        break
+    if inside:
+        section.append(line)
+
+decision_lines: list[str] = []
+inside_decisions = False
+for line in section:
+    if line == "Decision Notes:":
+        inside_decisions = True
+        continue
+    if inside_decisions and re.match(r"^[A-Za-z][A-Za-z /-]*:$", line):
+        break
+    if inside_decisions:
+        decision_lines.append(line)
+
+decision_text = "\n".join(decision_lines).lower()
+if not decision_text.strip():
+    sys.exit(0)
+
+gate_pattern = re.compile(
+    r"\b(workflow|runner|approval|permission|validation|safety|review-ready|complete)\b"
+    r"|plan[- ]?(lock|correction)"
+)
+bypass_pattern = re.compile(
+    r"\b(bypass(?:ed|es|ing)?|skip(?:ped|s|ping)?|ignore(?:d|s|ing)?|"
+    r"override(?:d|s|ing)?|without(?:\s+(?:approval|permission|validation|review|runner))?|"
+    r"did\s+not\s+run|not\s+run)\b"
+)
+
+if gate_pattern.search(decision_text) and bypass_pattern.search(decision_text):
+    print(
+        "implement-notes.md Decision Notes must not record bypassing workflow, "
+        "runner, approval, validation, safety, plan-lock, or plan-correction gates. "
+        "Stop and return to the required gate instead.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+PY
 }
 
 write_changed_files_file() {
@@ -1270,7 +1352,7 @@ clear_review_staging_for_current_task() {
 
 cmd_init() {
   if [ "$ISSUE_WORKFLOW_INIT_DISABLED" = "1" ]; then
-    die "showhand is execution-only for an already-finalized plan; use finalize-plan to initialize or edit plan.md and tasks.md."
+    die "showhand is execution-only for an already-locked plan; use the lock stage to initialize or edit plan.md and tasks.md."
   fi
 
   require_templates
@@ -1288,7 +1370,7 @@ Initialized plan workspace:
 - $TASK_FILE
 
 Next:
-1. Use the finalize-plan skill to fill in and commit plan.md and tasks.md.
+1. Use the lock stage to fill in plan.md and tasks.md, stage only those files, show the staged diff for user confirmation, and commit that snapshot only after explicit user permission.
 2. Use the execution skill to implement the current task and present it for review.
 3. After user approval, use the same execution skill again to run scripts/forma-workflow.sh complete $1
 EOF
@@ -1337,6 +1419,7 @@ EOF
 cmd_next() {
   issue_paths "$1"
   ensure_issue_files_exist
+  ensure_planning_files_clean
   ensure_task_exists
   current_task_info
   echo "$CURRENT_TASK_TEXT"

@@ -1,15 +1,15 @@
 ---
 name: showhand
-description: "Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass."
+description: "Continue remaining tasks, but stop when evidence is insufficient."
 ---
 
 # Forma Showhand
 
-Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
+Continue remaining tasks, but stop when evidence is insufficient.
 
 ## Interaction Semantics
 
-- Use this skill as an automated execution workflow for an already-finalized plan, not as a planning or plan-finalization skill.
+- Use this skill as an automated execution workflow for an already-locked plan, not as a planning or plan-finalization skill.
 - Proceed task by task sequentially. For each task, automatically implement, validate, and record proof through the workflow runner.
 - Before each task's implementation starts, preflight likely tools, runtime needs, workspace permissions, and validation commands; request expected permission grants up front.
 - When ordinary execution choices need a decision, record the viable options and selected best choice, then proceed without waiting for user approval.
@@ -18,10 +18,11 @@ Execute a finalized Forma self-iteration plan automatically when all layer and v
 
 ## Workflow
 
-- Read `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md`; if either file is missing or still a template, stop and hand off to `finalize-plan` instead of creating or editing plan files.
+- Read `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md`; if either file is missing or still a template, stop and hand off to the lock stage instead of creating or editing plan files.
 - Do not run `scripts/forma-workflow.sh init <issue-id>`, do not write `plan.md`, do not write `tasks.md`, and do not commit plan files from `showhand`.
+- The workflow runner is mandatory for task selection, review staging, task completion, evidence recording, and task commits. If `next`, `review-ready`, or `complete` fails, stop and report the runner failure; do not recover by parsing `tasks.md` manually, editing checkboxes, creating run evidence, or committing outside the runner.
 - Loop through all remaining unchecked tasks sequentially. For each task:
-  1. Read `scripts/forma-workflow.sh next <issue-id>` to get the source of truth for the current task.
+  1. Run `scripts/forma-workflow.sh next <issue-id>` to get the source of truth for the current task. If `next` reports that `plan.md` or `tasks.md` is missing, templated, untracked, modified, staged, or otherwise not locked, stop and hand off to the lock stage for user-confirmed plan commit.
   2. Before implementation, preflight the likely tools, runtimes, connectors, network/filesystem/process permissions, validation commands, and whether the current workspace can grant them; request expected permission grants before starting task execution.
   3. Execute only the current task contract: accepted files/surfaces, validation commands, gates, and proof requirements. Update `plans/issue-<id>/implement-notes.md` when decisions, plan gaps, classifications, deviations, or intentional follow-ups matter.
   4. For ordinary execution choices that would otherwise require user decision, record the options, selected best choice, and rationale in `implement-notes.md`, then execute directly without waiting.
@@ -39,48 +40,10 @@ Read these files first:
 - `references/execution-rules.md`
 - `references/implement-notes.md`
 - `references/automated-execution.md`
-- `references/forma-iteration-boundaries.md`
-- `references/forma-validation-matrix.md`
-- `references/forma-profile-policy.md`
-
-## Conditional References
-
-Use the recorded `Iteration Area` before loading overlay references.
-
-- If `Iteration Area` is `docs-only`, do not load overlay references.
-- If `Iteration Area` is `governance`, do not load overlay references.
-- If `Iteration Area` is `methodology-verifier`, do not load overlay references.
-- If `Iteration Area` is `creator-profile`, do not load overlay references.
-- If `Iteration Area` is `generated-baseline`, do not load overlay references.
-- If `Iteration Area` is `cross-layer`, do not load overlay references.
 
 ## Requirements
 
 - Load and follow `references/automated-execution.md` for automated execution.
-- Treat this profile stack as Forma-owned project source, not a sanitized public example.
-- Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
-- Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
-- Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
-- Keep changes scoped to the active issue plan and tasks.
-- Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
-- Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
-- Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
-- Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
-- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- Apply workflow validation gate when it is relevant to the current task: `uv run --extra dev forma verify source/skill-creator/`
-- Apply workflow validation gate when it is relevant to the current task: `git diff --check`
-- Read finalized `plan.md` and use recorded `Iteration Area` before applying conditional overlays; if `Iteration Area` is missing, stop-for-plan-correction.
-- If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md when release-surface documentation is in scope before automated documentation edits.
-- If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, dist/AGENTS.md when release artifacts are in scope, and active plan files before automated governance or self-management policy changes.
-- If `Iteration Area` is `creator-profile`, apply `profiles` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
-- If `Iteration Area` is `creator-profile`, apply `profiles` overlay constraint: After automated profiles/forma-self changes, generate self-profile output only into a transient path and verify it; install through Codex only when the issue explicitly requires refreshing the local self-iteration workflow.
-- If `Iteration Area` is `generated-baseline`, apply `generated` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md before automated generated baseline or release-artifact replacement.
-- If `Iteration Area` is `generated-baseline`, apply `generated` overlay validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- If `Iteration Area` is `cross-layer`, apply `profiles` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before automated Forma-owned profile changes.
-- If `Iteration Area` is `cross-layer`, apply `profiles` overlay constraint: After automated profiles/forma-self changes, generate self-profile output only into a transient path and verify it; install through Codex only when the issue explicitly requires refreshing the local self-iteration workflow.
-- If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md before automated generated baseline or release-artifact replacement.
-- If `Iteration Area` is `cross-layer`, apply `generated` overlay validation gate when it is relevant to the current task: `uv run --extra dev python -m pytest -p no:cacheprovider tests/`
-- If `Iteration Area` is `cross-layer`, apply `docs` overlay constraint: Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md when release-surface documentation is in scope before automated documentation edits.
 
 ## Output
 

@@ -7,6 +7,7 @@ Use these rules for plan-first task execution skills.
 - Use `scripts/forma-workflow.sh next <issue-id>` to get the current task text.
 - Use `scripts/forma-workflow.sh` from the current triggered skill package only; do not substitute a same-named script from another installed skill directory.
 - Treat the output of `scripts/forma-workflow.sh next <issue-id>` as the source of truth for the current task.
+- If `scripts/forma-workflow.sh next <issue-id>` fails, stop on that workflow error. Do not select a task by parsing `tasks.md` manually or continue execution outside the runner.
 - `scripts/forma-workflow.sh` auto-detects legacy and structured task files. Legacy checklist lines still work for backward compatibility, but new tasks must use the structured task contract.
 - Use `tasks.md` only for surrounding context; do not choose a different task by re-parsing the checklist yourself.
 - Do not modify `plan.md`.
@@ -33,6 +34,7 @@ Use these rules for plan-first task execution skills.
 - For non-showhand execution skills, after user approval, run `scripts/forma-workflow.sh complete <issue-id>`.
 - `scripts/forma-workflow.sh review-ready <issue-id>` must validate dependencies before review readiness; if a task depends on unfinished task ids, it must stay open.
 - `scripts/forma-workflow.sh complete <issue-id>` must see the same staged snapshot that `review-ready` prepared and must fail if there are unstaged post-review edits.
+- If `review-ready` or `complete` fails, fix the failure and rerun the workflow command; do not manually stage the task snapshot, mark the task complete, write run evidence, or create the task commit.
 - For non-showhand execution skills, after `scripts/forma-workflow.sh complete <issue-id>` succeeds, immediately run `scripts/forma-workflow.sh next <issue-id>`.
 - If `next` returns another unchecked task, treat it as the current task and start executing it in the same invocation instead of waiting for a new user request.
 - If `next` reports no unchecked tasks remain, stop and report the completed issue state.

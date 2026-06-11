@@ -45,6 +45,6 @@ resources:
         dest: backend-review-checks.md
 skills:
   shape:
-    description: Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary for backend work without assuming a specific language stack before finalize-plan.
+    description: Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary for backend work without assuming a specific language stack before lock.
   gauge:
     description: Inspect backend repository facts read-only and produce a grounding handoff.

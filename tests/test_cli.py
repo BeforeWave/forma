@@ -519,7 +519,12 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
     profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
     assert profile["profile"]["id"] == "acme-plan-first"
     assert profile["stages"]["shape"]["name"] == "acme-plan-first-plan"
-    assert profile["skills"]["shape"]["description"].startswith("Clarify Acme")
+    assert profile["stages"]["shape"]["short_description"] == (
+        "Clarify Acme work before planning."
+    )
+    assert profile["skills"]["shape"]["description"] == (
+        "Clarify Acme goals and boundaries before planning."
+    )
     assert profile["constraints"]["shape"] == [
         "Confirm Acme source material before proposal-ready."
     ]
@@ -649,6 +654,12 @@ def test_profile_adopt_round_trips_profile_codex_plugin(tmp_path: Path) -> None:
         "Sanitized sample Go backend plan-first workflow bundle for GitHub issue tracked development."
     )
     assert profile["org"]["name"] == "Example Team"
+    assert profile["stages"]["shape"]["short_description"].startswith(
+        "Use only in Plan mode"
+    )
+    assert profile["skills"]["shape"]["description"].startswith(
+        "Use only in plan-oriented collaboration"
+    )
 
     regenerated = tmp_path / "regenerated-profile-plugin"
     create = runner.invoke(
@@ -927,7 +938,7 @@ def test_drift_with_profile_reports_fresh_and_stale(tmp_path: Path) -> None:
     assert fresh_data["status"] == "fresh"
     assert fresh_data["artifacts"][0]["source_kind"] == "profile"
 
-    skill = artifact / "backend-plan-first-ground-plan" / "SKILL.md"
+    skill = artifact / "backend-plan-first-ground" / "SKILL.md"
     skill.write_text(
         skill.read_text(encoding="utf-8") + "\n<!-- stale marker -->\n",
         encoding="utf-8",

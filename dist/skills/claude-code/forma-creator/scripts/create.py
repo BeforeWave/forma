@@ -99,7 +99,7 @@ ALLOWED_CONDITIONAL_OVERLAY_KEYS = {
 METHODOLOGY_RESOURCES: Mapping[str, tuple[tuple[str, str, bool], ...]] = {
     "shape": (
         ("resources/shape/references/output-format.md", "references/output-format.md", False),
-        ("resources/shape/references/plan-issue-rules.md", "references/plan-issue-rules.md", False),
+        ("resources/shape/references/plan-stage-rules.md", "references/plan-stage-rules.md", False),
     ),
     "gauge": (
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
@@ -555,13 +555,15 @@ def _emit_bundle_payload(
         ]
         conditional_resources = _conditional_resources_for_kind(kind, conditional_overlays)
         resources = [*normal_resources, *conditional_resources]
-        description = _stage_description(kind, stage_sources[kind], injection)
+        body_description = _stage_body_description(kind, stage_sources[kind], injection)
+        trigger_description = _stage_trigger_description(kind, stage_sources[kind], injection)
         (stage_dir / "SKILL.md").write_text(
             _render_skill(
                 kind=kind,
                 skill_name=skill_name,
                 stage_source=stage_sources[kind],
-                description=description,
+                trigger_description=trigger_description,
+                body_description=body_description,
                 target=target,
                 injection=injection,
                 resources=normal_resources,
@@ -575,7 +577,7 @@ def _emit_bundle_payload(
             agents_dir = stage_dir / "agents"
             agents_dir.mkdir(parents=True, exist_ok=True)
             (agents_dir / "openai.yaml").write_text(
-                _openai_yaml(kind, description, injection, skill_names),
+                _openai_yaml(kind, trigger_description, injection, skill_names),
                 encoding="utf-8",
             )
     return conditional_overlays
@@ -676,7 +678,7 @@ def _skill_descriptions(
     injection: Mapping[str, Any],
 ) -> dict[str, str]:
     return {
-        kind: _stage_description(kind, _load_stage_source(kind, methodology_dir), injection)
+        kind: _stage_trigger_description(kind, _load_stage_source(kind, methodology_dir), injection)
         for kind in KINDS
     }
 
@@ -867,7 +869,7 @@ def _rewrite_skill_frontmatter_name(skill_file: Path, name: str) -> None:
 def _default_prompts(_display_name: str) -> list[str]:
     return [
         "Draft a scoped plan for this change.",
-        "Execute the finalized task plan.",
+        "Execute the locked task plan.",
     ]
 
 
@@ -1228,13 +1230,21 @@ def _requirement_references(methodology_dir: Path, kind: str) -> list[Requiremen
     return refs
 
 
-def _stage_description(kind: str, stage_source: StageSource, injection: Mapping[str, Any]) -> str:
+def _stage_body_description(kind: str, stage_source: StageSource, injection: Mapping[str, Any]) -> str:
     skills = injection.get("skills", {})
     if isinstance(skills, dict):
         config = skills.get(kind, {})
         if isinstance(config, dict) and config.get("description"):
             return str(config["description"])
     return stage_source.description
+
+
+def _stage_trigger_description(kind: str, stage_source: StageSource, injection: Mapping[str, Any]) -> str:
+    stage_config = _stage_config(kind, injection)
+    short_description = stage_config.get("short_description")
+    if isinstance(short_description, str) and short_description.strip():
+        return short_description.strip()
+    return _stage_body_description(kind, stage_source, injection)
 
 
 def _stage_config(kind: str, injection: Mapping[str, Any]) -> Mapping[str, str]:
@@ -1248,7 +1258,8 @@ def _render_skill(
     kind: str,
     skill_name: str,
     stage_source: StageSource,
-    description: str,
+    trigger_description: str,
+    body_description: str,
     target: str,
     injection: Mapping[str, Any],
     resources: Sequence[Resource],
@@ -1260,7 +1271,7 @@ def _render_skill(
     frontmatter = [
         "---",
         f'name: "{skill_name}"',
-        f'description: "{description}"',
+        f'description: "{trigger_description}"',
     ]
     if target == "opencode":
         frontmatter.extend(
@@ -1281,7 +1292,7 @@ def _render_skill(
         *frontmatter,
         f"# {display_name}",
         "",
-        description,
+        body_description,
         "",
         "## Interaction Semantics",
         "",
@@ -1359,20 +1370,21 @@ def _conditional_reference_section(
     conditional_overlays: ConditionalOverlays,
 ) -> list[str]:
     decision_name = conditional_overlays.decision.name
+    route_refs = [
+        (route.id, _conditional_route_reference_paths(kind, route, conditional_overlays))
+        for route in conditional_overlays.routes
+    ]
+    route_refs = [(route_id, refs) for route_id, refs in route_refs if refs]
+    if not route_refs:
+        return []
     lines = [
         "## Conditional References",
         "",
         f"Use the recorded `{decision_name}` before loading overlay references.",
         "",
     ]
-    for route in conditional_overlays.routes:
-        refs = _conditional_route_reference_paths(kind, route, conditional_overlays)
-        if not refs:
-            lines.append(
-                f"- If `{decision_name}` is `{route.id}`, do not load overlay references."
-            )
-            continue
-        lines.append(f"- If `{decision_name}` is `{route.id}`, load:")
+    for route_id, refs in route_refs:
+        lines.append(f"- If `{decision_name}` is `{route_id}`, load:")
         lines.extend(f"  - `{ref}`" for ref in refs)
     lines.append("")
     return lines
@@ -1418,7 +1430,7 @@ def _conditional_requirements(
 def _shape_reference_sections(resources: Sequence[Resource]) -> list[str]:
     always_names = {
         "output-format.md",
-        "plan-issue-rules.md",
+        "plan-stage-rules.md",
         "proposal-decision-gate.md",
         "grounding-handoff.md",
     }

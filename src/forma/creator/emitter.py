@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 from typing import Iterable, Mapping, Set
 
+from forma.adapters.workflow import assert_workflow_target, workflow_adapter
 from forma.base_origin import creator_base_origin
 from forma.creator.composer import ComposedSkill, KINDS, compose_bundle
 from forma.creator.manifest import (
@@ -16,8 +17,6 @@ from forma.creator.manifest import (
 from forma.creator.profiles import ProfileConfig, ResourceSpec, load_profile
 from forma_verifier import verify
 
-TARGETS = ("codex", "claude-code", "opencode")
-
 
 def build_bundle(
     profile_file: Path,
@@ -26,7 +25,7 @@ def build_bundle(
     methodology_dir: Path | None = None,
 ) -> Path:
     """Create a task-level workflow bundle on disk and return the manifest path."""
-    _assert_target(target_agent)
+    assert_workflow_target(target_agent)
     with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
         profile = load_profile(profile_file)
         bundle = compose_bundle(resolved_methodology_dir, profile)
@@ -58,7 +57,7 @@ def emit_bundle(
     methodology_dir: Path,
 ) -> None:
     """Write a generated workflow bundle, replacing only known Forma output paths."""
-    _assert_target(target_agent)
+    adapter = workflow_adapter(target_agent)
     output_dir = output_dir.resolve()
     enabled_kinds = [kind for kind in KINDS if profile.stages[kind].enabled]
     _prepare_output_dir(
@@ -71,68 +70,20 @@ def emit_bundle(
         skill_dir = output_dir / stage.directory
         skill_dir.mkdir(parents=True, exist_ok=True)
         (skill_dir / "SKILL.md").write_text(
-            _skill_md_for_target(skill.skill_md, kind, target_agent),
+            adapter.decorate_skill_md(skill.skill_md, kind),
             encoding="utf-8",
         )
         _copy_resources(skill_dir, skill.resources)
-        if target_agent == "codex":
-            agents_dir = skill_dir / "agents"
-            agents_dir.mkdir(parents=True, exist_ok=True)
-            (agents_dir / "openai.yaml").write_text(
-                _openai_yaml(skill, profile),
-                encoding="utf-8",
-            )
+        adapter.write_skill_interface(skill_dir, skill, profile)
     manifest_with_origin = dict(manifest)
     manifest_with_origin["base_origin"] = creator_base_origin(
         target_agent,
-        "skill-bundle",
+        adapter.skill_bundle_artifact_kind(),
         methodology_dir=methodology_dir,
     )
     (output_dir / ".forma-manifest.json").write_text(
         json.dumps(manifest_with_origin, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
-    )
-
-
-def _assert_target(target_agent: str) -> None:
-    if target_agent not in TARGETS:
-        allowed = ", ".join(TARGETS)
-        raise ValueError(f"unsupported target {target_agent!r}; use {allowed}")
-
-
-def _skill_md_for_target(text: str, kind: str, target_agent: str) -> str:
-    if target_agent != "opencode":
-        return text
-    marker = "---\n\n"
-    metadata = "\n".join(
-        [
-            "compatibility: opencode",
-            "metadata:",
-            f'  forma.stage: "{kind}"',
-            '  forma.target: "opencode"',
-        ]
-    )
-    if marker not in text:
-        raise ValueError("generated SKILL.md is missing YAML frontmatter")
-    return text.replace(marker, f"{metadata}\n---\n\n", 1)
-
-
-def _openai_yaml(skill: ComposedSkill, profile: ProfileConfig) -> str:
-    stage = profile.stages[skill.kind]
-    description = skill.description
-    short_description = stage.short_description or description
-    default_prompt = (
-        stage.default_prompt
-        or f"Use ${stage.name} for this plan-first workflow stage."
-    )
-    return "\n".join(
-        [
-            "interface:",
-            f'  display_name: "{stage.display_name}"',
-            f'  short_description: "{short_description}"',
-            f'  default_prompt: "{default_prompt}"',
-            "",
-        ]
     )
 
 

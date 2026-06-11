@@ -2,7 +2,7 @@
   "author": {
     "name": "Forma"
   },
-  "description": "Workflows for Forma development, from scoped planning through verified execution.",
+  "description": "Generic Plan-First workflow bundle for agents.",
   "id": "forma",
   "interface": {
     "brandColor": "#10A37F",
@@ -13,12 +13,12 @@
     "category": "Productivity",
     "defaultPrompt": [
       "Draft a scoped plan for this change.",
-      "Execute the finalized task plan."
+      "Execute the locked task plan."
     ],
     "developerName": "Forma",
     "displayName": "Forma",
-    "longDescription": "Workflows for Forma development, from scoped planning through verified execution.",
-    "shortDescription": "Workflows for Forma development, from scoped planning through verified execution."
+    "longDescription": "Generic Plan-First workflow bundle for agents.",
+    "shortDescription": "Generic Plan-First workflow bundle for agents."
   },
   "name": "forma",
   "skills": "./skills/",

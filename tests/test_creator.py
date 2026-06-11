@@ -9,6 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from forma import DISTRIBUTION_NAME, __version__
+from forma.adapters import workflow_adapter
 from forma.base_origin import creator_base_origin
 from forma.cli import main
 from forma.creator import build_bundle, load_profile
@@ -41,17 +42,17 @@ FORMA_GENERATOR = {
 }
 KINDS = ("shape", "gauge", "seal", "pour", "flow")
 SAMPLE_STAGE_DIRS = {
-    "shape": "backend-plan-first-plan-issue",
-    "gauge": "backend-plan-first-ground-plan",
-    "seal": "backend-plan-first-finalize-plan",
-    "pour": "backend-plan-first-implement-feature",
+    "shape": "backend-plan-first-plan",
+    "gauge": "backend-plan-first-ground",
+    "seal": "backend-plan-first-lock",
+    "pour": "backend-plan-first-execute",
     "flow": "backend-plan-first-showhand",
 }
 SOFTWARE_STAGE_DIRS = {
-    "shape": "software-plan-first-plan-issue",
-    "gauge": "software-plan-first-ground-plan",
-    "seal": "software-plan-first-finalize-plan",
-    "pour": "software-plan-first-implement-feature",
+    "shape": "software-plan-first-plan",
+    "gauge": "software-plan-first-ground",
+    "seal": "software-plan-first-lock",
+    "pour": "software-plan-first-execute",
     "flow": "software-plan-first-showhand",
 }
 FORMA_SELF_STAGE_DIRS = {
@@ -115,7 +116,7 @@ def test_load_profile_resolves_sample_backend_go() -> None:
         "user-provided special constraints" in item
         for item in profile.constraints["pour"]
     )
-    assert profile.stages["shape"].name == "backend-plan-first-plan-issue"
+    assert profile.stages["shape"].name == "backend-plan-first-plan"
     assert profile.stages["flow"].directory == "backend-plan-first-showhand"
     assert {
         resource.dest
@@ -148,7 +149,7 @@ def test_load_profile_resolves_sample_software_plan_first() -> None:
         "sample-software",
         "sample-software-plan-first",
     )
-    assert profile.stages["shape"].name == "software-plan-first-plan-issue"
+    assert profile.stages["shape"].name == "software-plan-first-plan"
     assert profile.stages["flow"].directory == "software-plan-first-showhand"
     assert "$software-plan-first-showhand" in profile.stages["flow"].default_prompt
     assert "Impact Profile" in profile.decision_gate_extras
@@ -434,7 +435,6 @@ def test_sample_conditional_overlay_profile_emits_valid_bundle(tmp_path: Path) -
     assert (output_dir / "forma-shape" / "references" / "go-rules.md").is_file()
     assert 'name: "forma-shape"' in shape_text
     assert "Use the recorded `Plan Type`" in shape_text
-    assert "If `Plan Type` is `generic-dev`, do not load overlay references." in shape_text
     assert "If `Plan Type` is `backend-non-go`, load:" in shape_text
     assert "If `Plan Type` is `backend-go`, load:" in shape_text
     assert "references/backend-rules.md" not in shape_text.split(
@@ -503,7 +503,7 @@ def test_sample_software_plan_first_profile_emits_valid_bundle(tmp_path: Path) -
         output_dir / SOFTWARE_STAGE_DIRS["flow"] / "agents" / "openai.yaml"
     ).read_text(encoding="utf-8")
 
-    assert 'name: "software-plan-first-plan-issue"' in shape_text
+    assert 'name: "software-plan-first-plan"' in shape_text
     assert "references/software-impact-profiles.md" in shape_text
     assert "frontend, backend, fullstack, or generic" in shape_text
     assert "review-ready after validation" in pour_text
@@ -521,7 +521,7 @@ def test_sample_software_plan_first_profile_emits_valid_bundle(tmp_path: Path) -
     ]
     assert (
         manifest["emitted_skills"]["shape"]["directory"]
-        == "software-plan-first-plan-issue"
+        == "software-plan-first-plan"
     )
     assert (
         "sample-software-plan-first.yaml"
@@ -638,6 +638,9 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     shape_text = (
         output_dir / SAMPLE_STAGE_DIRS["shape"] / "SKILL.md"
     ).read_text(encoding="utf-8")
+    seal_text = (
+        output_dir / SAMPLE_STAGE_DIRS["seal"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
     pour_text = (
         output_dir / SAMPLE_STAGE_DIRS["pour"] / "SKILL.md"
     ).read_text(encoding="utf-8")
@@ -670,7 +673,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8")
     assert "## Requirements" in shape_text
     assert "public API behavior" in shape_text
-    assert 'name: "backend-plan-first-plan-issue"' in shape_text
+    assert 'name: "backend-plan-first-plan"' in shape_text
     assert "references/backend-rules.md" in shape_text
     assert "references/backend-review-checks.md" in shape_text
     assert "references/script-resource-adapter.md" in shape_text
@@ -711,6 +714,8 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "stage-local helper script" in adapter_text
     assert "gh issue view" not in adapter_text
     assert "GitHub issue URLs are source-of-truth refs" in shape_text
+    assert "Stage only the finalized `plan.md` and `tasks.md`" in seal_text
+    assert "show the staged diff to the user" in seal_text
     assert "Mandatory Decision Gate" in decision_gate
     assert (
         output_dir / SAMPLE_STAGE_DIRS["seal"] / "references" / "task-structure.md"
@@ -733,6 +738,12 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert (
         output_dir / SAMPLE_STAGE_DIRS["pour"] / "references" / "implement-notes.md"
     ).is_file()
+    implement_notes = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["pour"]
+        / "references"
+        / "implement-notes.md"
+    ).read_text(encoding="utf-8")
     assert (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "execution-rules.md"
     ).is_file()
@@ -744,12 +755,20 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     ).exists()
     assert "Add or update Go tests" in pour_text
     assert "contract, compatibility, data, or operational risk" in pour_text
+    assert "Do not record a process-gate exception as an execution decision" in implement_notes
+    assert "show the staged diff to the user before leaving planning" in seal_planning_rules
+    assert "Commit only that staged plan/task snapshot" in seal_planning_rules
     assert "Each `## Final Validation` command line must be self-contained" in seal_planning_rules
     assert "standalone variable assignment, `cd`, or `export` lines" in seal_plan_template
-    assert "already-finalized plan" in flow_text
+    assert "already-locked plan" in flow_text
     assert "Do not run `scripts/forma-workflow.sh init <issue-id>`" in flow_text
+    assert "The workflow runner is mandatory for task selection" in flow_text
+    assert "do not recover by parsing `tasks.md` manually" in flow_text
+    assert "If `next` reports that `plan.md` or `tasks.md` is missing" in flow_text
     assert "references/automated-execution.md" in flow_text
     assert "record the options, selected best choice, and rationale" in flow_text
+    assert "Treat `scripts/forma-workflow.sh next <issue-id>` as the only task selector" in automated_execution
+    assert "Do not compensate for a failed `review-ready` or `complete`" in automated_execution
     assert "include `Recorded Decisions` only when this invocation recorded autonomous execution choices" in automated_execution
     assert "references/showhand-automation.md" not in flow_text
     assert not (
@@ -758,7 +777,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert not (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "tasks-template.md"
     ).exists()
-    assert "showhand is execution-only for an already-finalized plan" in (
+    assert "showhand is execution-only for an already-locked plan" in (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "scripts" / "forma-workflow.sh"
     ).read_text(encoding="utf-8")
 
@@ -780,7 +799,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     generated_at = _parse_generated_at(manifest["generated_at"])
     assert generated_at <= datetime.now(timezone.utc) + timedelta(minutes=1)
     assert manifest["profile"]["top_level_id"] == "sample-backend-go-github-issue-tracked"
-    assert manifest["emitted_skills"]["shape"]["name"] == "backend-plan-first-plan-issue"
+    assert manifest["emitted_skills"]["shape"]["name"] == "backend-plan-first-plan"
     assert (
         manifest["emitted_skills"]["flow"]["directory"]
         == "backend-plan-first-showhand"
@@ -899,7 +918,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert "scoped planning" in plugin["description"]
     assert plugin["interface"]["defaultPrompt"] == [
         "Draft a scoped plan for this change.",
-        "Execute the finalized task plan.",
+        "Execute the locked task plan.",
     ]
     assert plugin["skills"] == "./skills/"
     manifest = json.loads(
@@ -994,6 +1013,11 @@ bundle:
         )
 
 
+def test_workflow_adapter_rejects_opencode_plugin_target() -> None:
+    with pytest.raises(ValueError, match="unsupported plugin target: opencode"):
+        workflow_adapter("opencode").assert_plugin_supported()
+
+
 def test_creator_honors_custom_stage_names_and_enabled_matrix(tmp_path: Path) -> None:
     profile_file = tmp_path / "custom.yaml"
     profile_file.write_text(
@@ -1002,8 +1026,8 @@ profile:
   id: custom
 stages:
   shape:
-    name: custom-plan-issue
-    directory: custom-plan-issue
+    name: custom-plan
+    directory: custom-plan
     display_name: Custom Plan Issue
   gauge:
     enabled: false
@@ -1025,15 +1049,15 @@ stages:
         methodology_dir=METHODOLOGY,
     )
 
-    assert (output_dir / "custom-plan-issue" / "SKILL.md").is_file()
+    assert (output_dir / "custom-plan" / "SKILL.md").is_file()
     assert not (output_dir / "shape").exists()
-    skill_text = (output_dir / "custom-plan-issue" / "SKILL.md").read_text(
+    skill_text = (output_dir / "custom-plan" / "SKILL.md").read_text(
         encoding="utf-8"
     )
-    assert 'name: "custom-plan-issue"' in skill_text
+    assert 'name: "custom-plan"' in skill_text
     manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
     assert manifest["skills"] == ["shape"]
-    assert manifest["emitted_skills"]["shape"]["directory"] == "custom-plan-issue"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "custom-plan"
     assert verify(output_dir).passed
 
 
@@ -1161,7 +1185,6 @@ conditional_overlays:
     assert "## Plan Type" in plan_template
     assert "`backend-non-go`: Backend work outside the Go stack." in plan_template
     assert "{{ conditional_decision_section }}" not in plan_template
-    assert "If `Plan Type` is `generic-dev`, do not load overlay references." in shape_text
     assert "If `Plan Type` is `backend-non-go`, load:" in shape_text
     assert "references/backend-rules.md" not in shape_text.split(
         "## Conditional References",

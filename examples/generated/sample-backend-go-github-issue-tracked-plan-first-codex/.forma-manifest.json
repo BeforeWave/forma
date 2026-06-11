@@ -1,7 +1,7 @@
 {
   "base_origin": {
     "artifact_kind": "skill-bundle",
-    "base_output_digest": "752e4e13e4db5025312d394e79e6b77e571060a22547576f05a340334cbc42f4",
+    "base_output_digest": "fb13df5048c6eca0639c47a0c5f78fa9614e3a632dfbd24e68781fbc731dbd3b",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "codex"
@@ -14,48 +14,48 @@
       "name": "backend-plan-first-showhand"
     },
     "gauge": {
-      "directory": "backend-plan-first-ground-plan",
-      "display_name": "Backend Plan-First Ground Plan",
-      "name": "backend-plan-first-ground-plan"
+      "directory": "backend-plan-first-ground",
+      "display_name": "Backend Plan-First Ground",
+      "name": "backend-plan-first-ground"
     },
     "pour": {
-      "directory": "backend-plan-first-implement-feature",
-      "display_name": "Backend Plan-First Implement Feature",
-      "name": "backend-plan-first-implement-feature"
+      "directory": "backend-plan-first-execute",
+      "display_name": "Backend Plan-First Execute",
+      "name": "backend-plan-first-execute"
     },
     "seal": {
-      "directory": "backend-plan-first-finalize-plan",
-      "display_name": "Backend Plan-First Finalize Plan",
-      "name": "backend-plan-first-finalize-plan"
+      "directory": "backend-plan-first-lock",
+      "display_name": "Backend Plan-First Lock",
+      "name": "backend-plan-first-lock"
     },
     "shape": {
-      "directory": "backend-plan-first-plan-issue",
-      "display_name": "Backend Plan-First Plan Issue",
-      "name": "backend-plan-first-plan-issue"
+      "directory": "backend-plan-first-plan",
+      "display_name": "Backend Plan-First Plan",
+      "name": "backend-plan-first-plan"
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-10T17:16:25Z",
+  "generated_at": "2026-06-11T08:09:57Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "0af735f",
+  "methodology_source_revision": "fce6d0b",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "9131f7ad137d63827f68283f263b10a649add1d5dee91148bb09402c60e37625",
+  "methodology_tree_digest": "325f2f010a8ec99f71dc2eb1518b4ea41321508f4b1833ce4bc6367118a22683",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {
     "bundle_name": "sample-backend-go-github-issue-tracked",
-    "digest": "aebf72d2111ce00569c2f88634e06f2591ed9ec0b4be68e4a2445745fa0ca689",
+    "digest": "3a14e2fd04621c400af9a770d444dcdffd33ffa9733abc5a01aa09756d22767a",
     "file_hashes": {
-      "backend.yaml": "ff29abea7a1b416e743cbb9b372d9e237a833d249b7ec98e1c71f333c1b89f71",
+      "backend.yaml": "ad08f04644114e2835aa54b7b7ecafeb71b9dccbffc75875377f6032b50cd3ce",
       "base.yaml": "625b1c6f0bc0b45015dfda4e83a9c970e87b45e4e132a4cd2d90c74cba9e16a2",
       "dev.yaml": "79291318ce8c112729345e2ea3889b029294e97600bf37a23900279353918d4a",
       "languages/go.yaml": "3db36bd1558cd6c7c63af129296d83f140ac595ee92df63b7af726ff669a9a3e",
-      "sample-backend-go-github-issue-tracked.yaml": "7b3f6644ee72a5eb2796f485f2032a4aa280f019b2662f7f9df22cd070fb8a0c"
+      "sample-backend-go-github-issue-tracked.yaml": "c854070440e2f728f5b8b49de7bcf377843a057c4b3f9d39653d9dace94df00b"
     },
     "org_name": "Example Team",
     "resolved_order": [

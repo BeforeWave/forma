@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backend Plan-First Plan Issue"
-  short_description: "Use only in Plan mode to clarify Goal/Scope/Approach/Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary for backend work without assuming a specific language stack before finalize-plan. Chat-only: do not inspect repo; do not write plan.md/tasks.md; return clarifying/blocked when decisions remain open."
-  default_prompt: "In Plan mode only, converge Goal/Scope/Approach/Validation, Plan Strategy, selected grounding producer, and any applicable Artifact/Evidence Boundary for backend work without assuming a specific language stack before finalize-plan. Stay chat-only, require clarifying/blocked while decisions remain open, do not inspect the repo from plan-issue, and do not write plan.md or tasks.md. Keep the interaction in convergence mode until the user confirms the plan is ready for finalization."

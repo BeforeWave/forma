@@ -371,7 +371,7 @@ Run `scripts/forma-workflow.sh init 1` before writing plan.md and tasks.md.
 
 def test_manifest_emitted_skill_mapping_supports_custom_names(tmp_path: Path) -> None:
     bundle = tmp_path / "bundle"
-    skill_dir = bundle / "custom-plan-issue"
+    skill_dir = bundle / "custom-plan"
     skill_dir.mkdir(parents=True)
     (bundle / ".forma-manifest.json").write_text(
         json.dumps(
@@ -380,8 +380,8 @@ def test_manifest_emitted_skill_mapping_supports_custom_names(tmp_path: Path) ->
                 "target": "claude-code",
                 "emitted_skills": {
                     "shape": {
-                        "name": "custom-plan-issue",
-                        "directory": "custom-plan-issue",
+                        "name": "custom-plan",
+                        "directory": "custom-plan",
                     }
                 },
             }
@@ -390,7 +390,7 @@ def test_manifest_emitted_skill_mapping_supports_custom_names(tmp_path: Path) ->
     )
     (skill_dir / "SKILL.md").write_text(
         skill_text(
-            "custom-plan-issue",
+            "custom-plan",
             "Custom stage.",
             """
 ## Workflow

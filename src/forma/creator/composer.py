@@ -22,8 +22,8 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
     "shape": (
         ("resources/shape/references/output-format.md", "references/output-format.md", False),
         (
-            "resources/shape/references/plan-issue-rules.md",
-            "references/plan-issue-rules.md",
+            "resources/shape/references/plan-stage-rules.md",
+            "references/plan-stage-rules.md",
             False,
         ),
     ),
@@ -180,14 +180,16 @@ def compose_bundle(methodology_dir: Path, profile: ProfileConfig) -> ComposedBun
             profile.conditional_overlays,
         )
         resources = (*normal_resources, *conditional_resources)
-        description = profile.skill_descriptions.get(kind, stage_source.description)
+        body_description = profile.skill_descriptions.get(kind, stage_source.description)
+        trigger_description = profile.stages[kind].short_description or body_description
         skills[kind] = ComposedSkill(
             kind=kind,
-            description=description,
+            description=trigger_description,
             skill_md=_render_skill(
                 kind=kind,
                 stage_source=stage_source,
-                description=description,
+                trigger_description=trigger_description,
+                body_description=body_description,
                 profile=profile,
                 resources=normal_resources,
                 requirement_references=requirement_references,
@@ -427,7 +429,8 @@ def _ensure_trailing_newline(text: str) -> str:
 def _render_skill(
     kind: str,
     stage_source: StageSource,
-    description: str,
+    trigger_description: str,
+    body_description: str,
     profile: ProfileConfig,
     resources: Sequence[ResourceSpec],
     requirement_references: Sequence[ResolvedRequirementReference],
@@ -442,12 +445,12 @@ def _render_skill(
     lines = [
         "---",
         f'name: "{stage.name}"',
-        f'description: "{description}"',
+        f'description: "{trigger_description}"',
         "---",
         "",
         f"# {stage.display_name}",
         "",
-        description,
+        body_description,
         "",
         "## Interaction Semantics",
         "",
@@ -500,7 +503,7 @@ def _render_skill(
 def _shape_reference_sections(resources: Sequence[ResourceSpec]) -> List[str]:
     always_names = {
         "output-format.md",
-        "plan-issue-rules.md",
+        "plan-stage-rules.md",
         "proposal-decision-gate.md",
         "grounding-handoff.md",
     }
@@ -550,20 +553,21 @@ def _conditional_reference_section(
     conditional_overlays: ConditionalOverlays,
 ) -> List[str]:
     decision_name = conditional_overlays.decision.name
+    route_refs = [
+        (route.id, _conditional_route_reference_paths(kind, route, conditional_overlays))
+        for route in conditional_overlays.routes
+    ]
+    route_refs = [(route_id, refs) for route_id, refs in route_refs if refs]
+    if not route_refs:
+        return []
     lines = [
         "## Conditional References",
         "",
         f"Use the recorded `{decision_name}` before loading overlay references.",
         "",
     ]
-    for route in conditional_overlays.routes:
-        refs = _conditional_route_reference_paths(kind, route, conditional_overlays)
-        if not refs:
-            lines.append(
-                f"- If `{decision_name}` is `{route.id}`, do not load overlay references."
-            )
-            continue
-        lines.append(f"- If `{decision_name}` is `{route.id}`, load:")
+    for route_id, refs in route_refs:
+        lines.append(f"- If `{decision_name}` is `{route_id}`, load:")
         lines.extend(f"  - `{ref}`" for ref in refs)
     lines.append("")
     return lines

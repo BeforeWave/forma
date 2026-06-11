@@ -24,11 +24,11 @@ Materialize an already-settled plan into plan.md and task-level execution contra
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
 - Finalize `tasks.md` for the issue, encoding each task's accepted surface, validation gates, proof obligations, dependencies, and constraints while preserving the structured task schema.
-- Commit only `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` before leaving the planning phase.
+- Stage only the finalized `plan.md` and `tasks.md`, show the staged diff to the user, then commit only that staged snapshot after explicit user permission.
 
 ## Adds
 
-- Treat `finalize-plan` as a plan-finalization skill, not a brainstorming skill.
+- Treat the lock stage as a plan-materialization skill, not a brainstorming skill.
 - When invoking `scripts/forma-workflow.sh` or loading bundled planning references, resolve them relative to the current triggered skill package only; do not switch to same-named resources in sibling skill directories, even if the contents match.
 - Treat source references in the planning handoff as confirmed only when their relevant contents are already present in the current session or were loaded through an explicitly injected/profile-owned source adapter.
 - Do not assume GitHub, `gh`, network access, or any other source-context tool is a base finalization capability. If the handoff depends on an unavailable source reference and no explicit adapter is present, block finalization and ask the user to provide the authoritative material or update the plan.

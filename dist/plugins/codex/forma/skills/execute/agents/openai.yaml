@@ -1,4 +1,4 @@
 interface:
   display_name: "Forma Execute"
-  short_description: "Execute one Forma task with focused validation and review-ready evidence."
-  default_prompt: "$forma:execute: 按 sealed tasks.md 执行当前 Forma 自我迭代 task，先跑相关窄验证，再跑必要共享 gate，进入 review-ready。"
+  short_description: "Execute one accepted task and leave verifiable evidence."
+  default_prompt: "Use $forma:execute to execute one accepted task and leave verifiable evidence."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backend Plan-First Finalize Plan"
-  short_description: "Create, certify, and commit final ./plans/issue-<id>/plan.md and tasks.md from an already-settled backend plan."
-  default_prompt: "Finalize and commit plan.md and tasks.md for the current issue only after goal, scope, approach, validation, plan strategy, grounding, and evidence boundaries are explicitly settled. Certify that tasks cover the Goal, Acceptance proves the Goal, validation covers core risks, and task/evidence boundaries are executable before writing files."

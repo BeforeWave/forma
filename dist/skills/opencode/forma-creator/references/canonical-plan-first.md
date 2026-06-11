@@ -50,15 +50,15 @@ choose final installable skill names through the temporary JSON field
 `rename.stages`; those names replace the defaults without changing the
 internal stage keys or methodology mapping.
 
-- `shape` maps to plan-issue: Plan-mode, chat-only convergence before plan files
+- `shape` maps to the plan stage: Plan-mode, chat-only convergence before plan files
   exist.
-- `gauge` maps to ground-plan: read-only repository grounding before
+- `gauge` maps to the ground stage: read-only repository grounding before
   finalization.
-- `seal` maps to finalize-plan: write and commit `plan.md` and `tasks.md` only
+- `seal` maps to the lock stage: write `plan.md` and `tasks.md`, stage only those files, show the staged diff, then commit that snapshot only after explicit user permission
   after the decision gate passes.
-- `pour` maps to implement-feature: execute the current task through
+- `pour` maps to the execute stage: execute the current task through
   `review-ready`, wait for user approval, then `complete`.
-- `flow` maps to showhand: execute all remaining tasks from an already-finalized
+- `flow` maps to showhand: execute all remaining tasks from an already-locked
   plan with preflight and safety stops.
 
 ## Generated Skill Shape
@@ -85,7 +85,7 @@ Generate them into the destination paths below so each emitted skill remains
 self-contained:
 
 - `shape`: `references/output-format.md` and
-  `references/plan-issue-rules.md`.
+  `references/plan-stage-rules.md`.
 - `gauge`: `references/output-format.md`.
 - `seal`: `references/planning-rules.md`,
   `references/output-format.md`, `references/plan-template.md`,

@@ -1,0 +1,251 @@
+# Task Evidence
+
+- Task: [regenerate-and-verify-release-artifacts] Regenerate committed release artifacts from default source
+- Completed At (UTC): 2026-06-11T08:01:48Z
+- Commit Hash: Recorded in the commit that introduces this evidence file.
+
+## Changed Files
+- dist/plugins/claude-code/forma/.claude-plugin/plugin.json
+- dist/plugins/claude-code/forma/.forma-manifest.json
+- dist/plugins/claude-code/forma/skills/execute/SKILL.md
+- dist/plugins/claude-code/forma/skills/execute/references/execution-rules.md
+- dist/plugins/claude-code/forma/skills/execute/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/execute/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/execute/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/execute/references/implement-notes.md
+- dist/plugins/claude-code/forma/skills/execute/references/plan-template.md
+- dist/plugins/claude-code/forma/skills/execute/scripts/forma-workflow.sh
+- dist/plugins/claude-code/forma/skills/ground/SKILL.md
+- dist/plugins/claude-code/forma/skills/ground/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/ground/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/ground/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/lock/SKILL.md
+- dist/plugins/claude-code/forma/skills/lock/references/finalization-decision-gate.md
+- dist/plugins/claude-code/forma/skills/lock/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/lock/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/lock/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/lock/references/plan-materialization.md
+- dist/plugins/claude-code/forma/skills/lock/references/plan-template.md
+- dist/plugins/claude-code/forma/skills/lock/references/planning-rules.md
+- dist/plugins/claude-code/forma/skills/lock/scripts/forma-workflow.sh
+- dist/plugins/claude-code/forma/skills/plan/SKILL.md
+- dist/plugins/claude-code/forma/skills/plan/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/plan/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/plan/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/plan/references/grounding-handoff.md
+- dist/plugins/claude-code/forma/skills/plan/references/output-format.md
+- dist/plugins/claude-code/forma/skills/plan/references/plan-stage-rules.md
+- dist/plugins/claude-code/forma/skills/plan/references/proposal-decision-gate.md
+- dist/plugins/claude-code/forma/skills/reconcile/SKILL.md
+- dist/plugins/claude-code/forma/skills/reconcile/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/reconcile/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/reconcile/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/reconcile/references/output-format.md
+- dist/plugins/claude-code/forma/skills/reconcile/references/reconcile-rules.md
+- dist/plugins/claude-code/forma/skills/showhand/SKILL.md
+- dist/plugins/claude-code/forma/skills/showhand/references/automated-execution.md
+- dist/plugins/claude-code/forma/skills/showhand/references/execution-rules.md
+- dist/plugins/claude-code/forma/skills/showhand/references/forma-iteration-boundaries.md
+- dist/plugins/claude-code/forma/skills/showhand/references/forma-profile-policy.md
+- dist/plugins/claude-code/forma/skills/showhand/references/forma-validation-matrix.md
+- dist/plugins/claude-code/forma/skills/showhand/references/implement-notes.md
+- dist/plugins/claude-code/forma/skills/showhand/scripts/forma-workflow.sh
+- dist/plugins/codex/forma/.codex-plugin/plugin.json
+- dist/plugins/codex/forma/.forma-manifest.json
+- dist/plugins/codex/forma/skills/execute/SKILL.md
+- dist/plugins/codex/forma/skills/execute/agents/openai.yaml
+- dist/plugins/codex/forma/skills/execute/references/execution-rules.md
+- dist/plugins/codex/forma/skills/execute/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/execute/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/execute/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/execute/references/implement-notes.md
+- dist/plugins/codex/forma/skills/execute/references/plan-template.md
+- dist/plugins/codex/forma/skills/execute/scripts/forma-workflow.sh
+- dist/plugins/codex/forma/skills/ground/SKILL.md
+- dist/plugins/codex/forma/skills/ground/agents/openai.yaml
+- dist/plugins/codex/forma/skills/ground/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/ground/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/ground/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/lock/SKILL.md
+- dist/plugins/codex/forma/skills/lock/agents/openai.yaml
+- dist/plugins/codex/forma/skills/lock/references/finalization-decision-gate.md
+- dist/plugins/codex/forma/skills/lock/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/lock/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/lock/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/lock/references/plan-materialization.md
+- dist/plugins/codex/forma/skills/lock/references/plan-template.md
+- dist/plugins/codex/forma/skills/lock/references/planning-rules.md
+- dist/plugins/codex/forma/skills/lock/scripts/forma-workflow.sh
+- dist/plugins/codex/forma/skills/plan/SKILL.md
+- dist/plugins/codex/forma/skills/plan/agents/openai.yaml
+- dist/plugins/codex/forma/skills/plan/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/plan/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/plan/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/plan/references/grounding-handoff.md
+- dist/plugins/codex/forma/skills/plan/references/output-format.md
+- dist/plugins/codex/forma/skills/plan/references/plan-stage-rules.md
+- dist/plugins/codex/forma/skills/plan/references/proposal-decision-gate.md
+- dist/plugins/codex/forma/skills/reconcile/SKILL.md
+- dist/plugins/codex/forma/skills/reconcile/agents/openai.yaml
+- dist/plugins/codex/forma/skills/reconcile/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/reconcile/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/reconcile/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/reconcile/references/output-format.md
+- dist/plugins/codex/forma/skills/reconcile/references/reconcile-rules.md
+- dist/plugins/codex/forma/skills/showhand/SKILL.md
+- dist/plugins/codex/forma/skills/showhand/agents/openai.yaml
+- dist/plugins/codex/forma/skills/showhand/references/automated-execution.md
+- dist/plugins/codex/forma/skills/showhand/references/execution-rules.md
+- dist/plugins/codex/forma/skills/showhand/references/forma-iteration-boundaries.md
+- dist/plugins/codex/forma/skills/showhand/references/forma-profile-policy.md
+- dist/plugins/codex/forma/skills/showhand/references/forma-validation-matrix.md
+- dist/plugins/codex/forma/skills/showhand/references/implement-notes.md
+- dist/plugins/codex/forma/skills/showhand/scripts/forma-workflow.sh
+- dist/skill-bundles/claude-code/.forma-manifest.json
+- dist/skill-bundles/claude-code/forma-execute/references/execution-rules.md
+- dist/skill-bundles/claude-code/forma-execute/references/implement-notes.md
+- dist/skill-bundles/claude-code/forma-execute/scripts/forma-workflow.sh
+- dist/skill-bundles/claude-code/forma-ground/SKILL.md
+- dist/skill-bundles/claude-code/forma-lock/SKILL.md
+- dist/skill-bundles/claude-code/forma-lock/references/finalization-decision-gate.md
+- dist/skill-bundles/claude-code/forma-lock/references/plan-materialization.md
+- dist/skill-bundles/claude-code/forma-lock/references/planning-rules.md
+- dist/skill-bundles/claude-code/forma-lock/scripts/forma-workflow.sh
+- dist/skill-bundles/claude-code/forma-plan/SKILL.md
+- dist/skill-bundles/claude-code/forma-plan/references/grounding-handoff.md
+- dist/skill-bundles/claude-code/forma-plan/references/output-format.md
+- dist/skill-bundles/claude-code/forma-plan/references/plan-stage-rules.md
+- dist/skill-bundles/claude-code/forma-plan/references/proposal-decision-gate.md
+- dist/skill-bundles/claude-code/forma-showhand/SKILL.md
+- dist/skill-bundles/claude-code/forma-showhand/references/automated-execution.md
+- dist/skill-bundles/claude-code/forma-showhand/references/execution-rules.md
+- dist/skill-bundles/claude-code/forma-showhand/references/implement-notes.md
+- dist/skill-bundles/claude-code/forma-showhand/scripts/forma-workflow.sh
+- dist/skill-bundles/codex/.forma-manifest.json
+- dist/skill-bundles/codex/forma-execute/references/execution-rules.md
+- dist/skill-bundles/codex/forma-execute/references/implement-notes.md
+- dist/skill-bundles/codex/forma-execute/scripts/forma-workflow.sh
+- dist/skill-bundles/codex/forma-ground/SKILL.md
+- dist/skill-bundles/codex/forma-lock/SKILL.md
+- dist/skill-bundles/codex/forma-lock/references/finalization-decision-gate.md
+- dist/skill-bundles/codex/forma-lock/references/plan-materialization.md
+- dist/skill-bundles/codex/forma-lock/references/planning-rules.md
+- dist/skill-bundles/codex/forma-lock/scripts/forma-workflow.sh
+- dist/skill-bundles/codex/forma-plan/SKILL.md
+- dist/skill-bundles/codex/forma-plan/references/grounding-handoff.md
+- dist/skill-bundles/codex/forma-plan/references/output-format.md
+- dist/skill-bundles/codex/forma-plan/references/plan-stage-rules.md
+- dist/skill-bundles/codex/forma-plan/references/proposal-decision-gate.md
+- dist/skill-bundles/codex/forma-showhand/SKILL.md
+- dist/skill-bundles/codex/forma-showhand/references/automated-execution.md
+- dist/skill-bundles/codex/forma-showhand/references/execution-rules.md
+- dist/skill-bundles/codex/forma-showhand/references/implement-notes.md
+- dist/skill-bundles/codex/forma-showhand/scripts/forma-workflow.sh
+- dist/skill-bundles/opencode/.forma-manifest.json
+- dist/skill-bundles/opencode/forma-execute/references/execution-rules.md
+- dist/skill-bundles/opencode/forma-execute/references/implement-notes.md
+- dist/skill-bundles/opencode/forma-execute/scripts/forma-workflow.sh
+- dist/skill-bundles/opencode/forma-ground/SKILL.md
+- dist/skill-bundles/opencode/forma-lock/SKILL.md
+- dist/skill-bundles/opencode/forma-lock/references/finalization-decision-gate.md
+- dist/skill-bundles/opencode/forma-lock/references/plan-materialization.md
+- dist/skill-bundles/opencode/forma-lock/references/planning-rules.md
+- dist/skill-bundles/opencode/forma-lock/scripts/forma-workflow.sh
+- dist/skill-bundles/opencode/forma-plan/SKILL.md
+- dist/skill-bundles/opencode/forma-plan/references/grounding-handoff.md
+- dist/skill-bundles/opencode/forma-plan/references/output-format.md
+- dist/skill-bundles/opencode/forma-plan/references/plan-issue-rules.md
+- dist/skill-bundles/opencode/forma-plan/references/plan-stage-rules.md
+- dist/skill-bundles/opencode/forma-plan/references/proposal-decision-gate.md
+- dist/skill-bundles/opencode/forma-showhand/SKILL.md
+- dist/skill-bundles/opencode/forma-showhand/references/automated-execution.md
+- dist/skill-bundles/opencode/forma-showhand/references/execution-rules.md
+- dist/skill-bundles/opencode/forma-showhand/references/implement-notes.md
+- dist/skill-bundles/opencode/forma-showhand/scripts/forma-workflow.sh
+- dist/skills/claude-code/forma-creator/.forma-manifest.json
+- dist/skills/claude-code/forma-creator/references/agent-target.md
+- dist/skills/claude-code/forma-creator/references/canonical-plan-first.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/flow/automated-execution-adds.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/seal/decision-gate-adds.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/seal/entry-gate.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/seal/plan-materialization-adds.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/shape/artifact-evidence-boundary-adds.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/fragments/shape/handoff-adds.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shape/references/output-format.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-issue-rules.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-stage-rules.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shared/references/execution-rules.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shared/references/implement-notes.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shared/references/planning-rules.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/resources/shared/scripts/forma-workflow.sh
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/stages/flow.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/stages/gauge.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/stages/seal.md
+- dist/skills/claude-code/forma-creator/resources/plan-first/methodology/stages/shape.md
+- dist/skills/claude-code/forma-creator/scripts/create.py
+- dist/skills/claude-code/forma-creator/scripts/forma_verifier/rules.py
+- dist/skills/codex/forma-creator/.forma-manifest.json
+- dist/skills/codex/forma-creator/references/agent-target.md
+- dist/skills/codex/forma-creator/references/canonical-plan-first.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/flow/automated-execution-adds.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/seal/decision-gate-adds.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/seal/entry-gate.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/seal/plan-materialization-adds.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/shape/artifact-evidence-boundary-adds.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/fragments/shape/handoff-adds.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shape/references/output-format.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-issue-rules.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-stage-rules.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shared/references/execution-rules.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shared/references/implement-notes.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shared/references/planning-rules.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/resources/shared/scripts/forma-workflow.sh
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/stages/flow.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/stages/gauge.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/stages/seal.md
+- dist/skills/codex/forma-creator/resources/plan-first/methodology/stages/shape.md
+- dist/skills/codex/forma-creator/scripts/create.py
+- dist/skills/codex/forma-creator/scripts/forma_verifier/rules.py
+- dist/skills/opencode/forma-creator/.forma-manifest.json
+- dist/skills/opencode/forma-creator/references/agent-target.md
+- dist/skills/opencode/forma-creator/references/canonical-plan-first.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/flow/automated-execution-adds.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/seal/decision-gate-adds.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/seal/entry-gate.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/seal/plan-materialization-adds.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/shape/artifact-evidence-boundary-adds.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/fragments/shape/handoff-adds.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shape/references/output-format.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-issue-rules.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shape/references/plan-stage-rules.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shared/references/execution-rules.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shared/references/implement-notes.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shared/references/planning-rules.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/resources/shared/scripts/forma-workflow.sh
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/stages/flow.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/stages/gauge.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/stages/seal.md
+- dist/skills/opencode/forma-creator/resources/plan-first/methodology/stages/shape.md
+- dist/skills/opencode/forma-creator/scripts/create.py
+- dist/skills/opencode/forma-creator/scripts/forma_verifier/rules.py
+- plans/issue-forma-workflow-adapter-description-cleanup/implement-notes.md
+- src/forma/adopt.py
+- tests/test_cli.py
+
+## Validation Results
+- PASS [task, final]: uv run --extra dev forma verify dist/skills/codex/forma-creator
+- PASS [task, final]: uv run --extra dev forma verify dist/skills/claude-code/forma-creator
+- PASS [task, final]: uv run --extra dev forma verify dist/skills/opencode/forma-creator
+- PASS [task, final]: uv run --extra dev forma verify dist/skill-bundles/codex
+- PASS [task, final]: uv run --extra dev forma verify dist/skill-bundles/claude-code
+- PASS [task, final]: uv run --extra dev forma verify dist/skill-bundles/opencode
+- PASS [task, final]: uv run --extra dev forma verify dist/plugins/codex/forma
+- PASS [task, final]: uv run --extra dev forma verify dist/plugins/claude-code/forma
+- PASS [task]: if rg -n "finalize-plan|plan-issue|ground-plan|implement-feature" dist/skills dist/skill-bundles dist/plugins; then exit 1; fi
+- PASS [final]: uv run --extra dev python -m pytest -p no:cacheprovider tests/
+- PASS [final]: uv run --extra dev forma verify source/skill-creator/
+- PASS [final]: if rg -n "finalize-plan|plan-issue|ground-plan|implement-feature" source/methodology source/skill-creator docs tests dist/skills dist/skill-bundles dist/plugins; then exit 1; fi
+- PASS [final]: git diff --check
+
+## Risks / Unresolved Items
+- None recorded.

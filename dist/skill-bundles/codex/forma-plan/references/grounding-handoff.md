@@ -1,8 +1,8 @@
-- After the Decision Gate passes, identify the grounding producer needed before `finalize-plan`: generic `ground-plan`, a specialized producer such as direct activity requirement-to-solution or direct Go refactor planning, a direct contract/source producer, or no producer only when the current context already contains sufficient confirmed grounding facts.
-- Do not inspect the repository from `plan-issue` to fill grounding gaps. If repository facts are needed, hand off to the selected grounding producer and name the facts it must confirm.
+- After the Decision Gate passes, identify the grounding producer needed before the lock stage: generic ground stage, a specialized producer such as direct activity requirement-to-solution or direct Go refactor planning, a direct contract/source producer, or no producer only when the current context already contains sufficient confirmed grounding facts.
+- Do not inspect the repository from the plan stage to fill grounding gaps. If repository facts are needed, hand off to the selected grounding producer and name the facts it must confirm.
 - Before `proposal-ready`, state the validation runner, exact command or review-only marker, and required prerequisites. If those are not known, clarify instead of proposing commands that may not run in the current environment.
 - Before `proposal-ready`, state whether each required proof gate is task-local, a shared check, a final gate, or explicitly post-commit/manual.
-- The output of `plan-issue` lives in chat only. Do not write `plan.md`, do not write `tasks.md`, and do not start execution work.
+- The output of the plan stage lives in chat only. Do not write `plan.md`, do not write `tasks.md`, and do not start execution work.
 - In `proposal-ready`, explicitly state that blocking decisions are resolved, then present a concrete proposal that the user can review, including what is already settled, the selected grounding producer, any `Source-of-truth refs`, and the Artifact/Evidence Boundary when required.
 - If critical planning decisions remain open, return to clarification instead of pretending the plan is ready.
-- After the user reviews and confirms the proposal, stop and explicitly hand off to `finalize-plan`.
+- After the user reviews and confirms the proposal, stop and explicitly hand off to the lock stage.

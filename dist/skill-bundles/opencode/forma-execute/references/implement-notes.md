@@ -1,14 +1,16 @@
 # Implement Notes
 
-Use this reference when a plan-first `implement-feature` or automated execution task discovers execution details that are not already captured by the task plan.
+Use this reference when a plan-first execute-stage or automated execution task discovers execution details that are not already captured by the task plan.
 
 `implement-notes.md` is an execution decision journal, not an operation log. Record decisions that help the next task or reviewer understand why work was handled a certain way. Do not list every command or file touch.
 
-For `implement-feature`, update the notes before presenting the task for review when the current task produces meaningful execution decisions or follow-ups.
+For the execute stage, update the notes before presenting the task for review when the current task produces meaningful execution decisions or follow-ups.
 
 For automated execution, update the notes during the automated task loop when a decision, gap, classification, deviation, or follow-up should carry forward to later tasks or final review.
 
 When automated execution makes an ordinary execution decision without waiting for the user, record the viable options, the selected best option, and the rationale in `Decision Notes:` before continuing. Do not use this to invent missing requirements, bypass permission approval, or skip required workflow gates.
+
+Do not record a process-gate exception as an execution decision. If the current task would skip or bypass workflow runner, approval, validation, safety, plan-lock, or plan-correction gates, stop and return to the required gate instead of putting that exception in `Decision Notes:`.
 
 Use `scripts/forma-workflow.sh notes-template <issue-id>` to print a current-task section skeleton when starting or updating the notes file. If `implement-notes.md` is changed, `review-ready` checks that it has a `# Implement Notes` title, a section for the current task, and an `Outcome:` field.
 

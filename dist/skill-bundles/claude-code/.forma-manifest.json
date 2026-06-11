@@ -1,7 +1,7 @@
 {
   "base_origin": {
     "artifact_kind": "skill-bundle",
-    "base_output_digest": "19ee2400cfe2f52323d7b7a8d2f4b996da3a87c48c576e47b1e26b748a24b5d6",
+    "base_output_digest": "b2d088e2e1c1f3ff644de6da495f3ada34cdaf68f5c96d7d6a8fc505cb56cc8a",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "claude-code"
@@ -35,16 +35,16 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-10T17:16:07Z",
+  "generated_at": "2026-06-11T08:10:27Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "0af735f",
+  "methodology_source_revision": "fce6d0b",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "9131f7ad137d63827f68283f263b10a649add1d5dee91148bb09402c60e37625",
+  "methodology_tree_digest": "325f2f010a8ec99f71dc2eb1518b4ea41321508f4b1833ce4bc6367118a22683",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {

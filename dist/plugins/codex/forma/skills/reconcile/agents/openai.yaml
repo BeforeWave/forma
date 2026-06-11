@@ -1,4 +1,0 @@
-interface:
-  display_name: "Forma Reconcile"
-  short_description: "Reconcile Forma delivery feedback against stage contracts and issue evidence."
-  default_prompt: "$forma:reconcile: 对 Forma 交付反馈做只读对齐评价，结合最近触发的 workflow 阶段、当前 stage 约束、issue evidence、验证记录和用户反馈，输出下一步路由。"

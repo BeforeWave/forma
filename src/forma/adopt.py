@@ -362,11 +362,12 @@ def _extract_stage_config(
     skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
     frontmatter, body = parse_frontmatter(skill_text)
     name = _required_string(frontmatter, "name", f"{kind} frontmatter.name")
-    description = _required_string(
+    trigger_description = _required_string(
         frontmatter,
         "description",
         f"{kind} frontmatter.description",
     )
+    body_description = _body_intro_description(body, trigger_description)
     display_name = _first_h1(body) or name.replace("-", " ").title()
     stage: dict[str, str] = {
         "name": name,
@@ -379,17 +380,24 @@ def _extract_stage_config(
             raise ValueError(
                 f"{kind} display_name differs between SKILL.md and agents/openai.yaml"
             )
-        stage["short_description"] = _required_string(
+        openai_short_description = _required_string(
             interface,
             "short_description",
             f"{kind} agents.openai.short_description",
         )
+        if openai_short_description != trigger_description:
+            raise ValueError(
+                f"{kind} short_description differs between SKILL.md and agents/openai.yaml"
+            )
+        stage["short_description"] = openai_short_description
         stage["default_prompt"] = _required_string(
             interface,
             "default_prompt",
             f"{kind} agents.openai.default_prompt",
         )
-    return stage, description
+    elif trigger_description != body_description:
+        stage["short_description"] = trigger_description
+    return stage, body_description
 
 
 def _load_openai_interface(path: Path) -> Mapping[str, Any]:
@@ -404,6 +412,29 @@ def _first_h1(body: str) -> str | None:
         if line.startswith("# ") and line[2:].strip():
             return line[2:].strip()
     return None
+
+
+def _body_intro_description(body: str, fallback: str) -> str:
+    lines = body.splitlines()
+    start = 0
+    for index, line in enumerate(lines):
+        if line.startswith("# ") and line[2:].strip():
+            start = index + 1
+            break
+    while start < len(lines) and not lines[start].strip():
+        start += 1
+    description_lines: list[str] = []
+    for line in lines[start:]:
+        if line.startswith("## "):
+            break
+        if not line.strip():
+            if description_lines:
+                break
+            continue
+        description_lines.append(line.strip())
+    if not description_lines:
+        return fallback
+    return "\n".join(description_lines)
 
 
 def _extract_requirement_delta(

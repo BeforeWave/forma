@@ -78,10 +78,10 @@ A real committed sample looks like this:
 
 ```text
 examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-  backend-plan-first-plan-issue/
-  backend-plan-first-ground-plan/
-  backend-plan-first-finalize-plan/
-  backend-plan-first-implement-feature/
+  backend-plan-first-plan/
+  backend-plan-first-ground/
+  backend-plan-first-lock/
+  backend-plan-first-execute/
   backend-plan-first-showhand/
   .forma-manifest.json
 ```
