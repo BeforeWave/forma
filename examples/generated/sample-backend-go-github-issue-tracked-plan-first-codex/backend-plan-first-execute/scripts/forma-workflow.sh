@@ -709,25 +709,13 @@ run_logged_command() {
   local command="$2"
   local log_file="$3"
   local output_file
-  local -a clean_env
 
   output_file=$(mktemp)
   echo "Running validation [$scope]: $command"
-  clean_env=(
-    "PATH=${PATH:-/usr/bin:/bin}"
-    "BASH_ENV="
-    "ENV="
-  )
-  if [ -n "${HOME:-}" ]; then
-    clean_env+=("HOME=$HOME")
-  fi
-  if [ -n "${TMPDIR:-}" ]; then
-    clean_env+=("TMPDIR=$TMPDIR")
-  fi
 
   if (
     cd "$REPO_ROOT"
-    env -i "${clean_env[@]}" bash --noprofile --norc -c "$command"
+    BASH_ENV= ENV= bash --noprofile --norc -c "$command"
   ) >"$output_file" 2>&1; then
     printf -- "- PASS [%s]: %s\n" "$scope" "$command" >>"$log_file"
   else

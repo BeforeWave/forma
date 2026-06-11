@@ -27,7 +27,7 @@ Use these rules for plan-first task execution skills.
 - Use `scripts/forma-workflow.sh notes-template <issue-id>` when you need a current-task `implement-notes.md` section skeleton; if `implement-notes.md` is changed, `review-ready` checks its title, current task section, and `Outcome:` field.
 - For non-showhand execution skills, first implement the current task, run `scripts/forma-workflow.sh review-ready <issue-id>`, and present the review-ready result for user review.
 - For structured tasks, `review-ready` requires the current task's `Validate:` lines, any referenced `Use-Check:` shared checks, and when applicable `## Final Validation`; documentation-only work still needs the explicit `# no-programmatic-validation: <reason>` marker.
-- Validation commands run in a clean non-login, non-interactive Bash process that ignores user profile and rc files and inherits only workflow-owned environment variables.
+- Validation commands run in a non-login, non-interactive Bash process that inherits the invoking process environment, ignores user profile and rc files, and clears `BASH_ENV` / `ENV` so shell startup hooks cannot inject validation behavior.
 - For behavior-changing tasks, put the proving tests in the current task's `Validate:` lines, shared `Use-Check:` references, or `## Final Validation` instead of treating validation as a single issue-wide gate on every task.
 - `scripts/forma-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot in the Git index; if review feedback changes the task, rerun `review-ready` to refresh that snapshot before completion.
 - For non-showhand execution skills, do not use `scripts/forma-workflow.sh complete <issue-id>` until the user explicitly approves the current task for completion.

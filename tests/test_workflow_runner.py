@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -212,7 +213,78 @@ Follow-ups:
     assert "Review-ready task [1]" in result.stdout
 
 
-def _locked_issue(tmp_path: Path, issue_id: str) -> tuple[Path, Path]:
+def test_review_ready_inherits_invoking_environment(tmp_path: Path) -> None:
+    repo, workflow = _locked_issue(
+        tmp_path,
+        "env-inherit",
+        validate='test "$FORMA_WORKFLOW_TEST_ENV" = "inherited-value"',
+    )
+    (repo / "proof.txt").write_text("changed\n", encoding="utf-8")
+
+    env = os.environ.copy()
+    env["FORMA_WORKFLOW_TEST_ENV"] = "inherited-value"
+    result = subprocess.run(
+        ["bash", str(workflow), "review-ready", "env-inherit"],
+        cwd=repo,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "Review-ready task [1]" in result.stdout
+
+
+def test_review_ready_ignores_bash_startup_environment_hooks(tmp_path: Path) -> None:
+    repo, workflow = _locked_issue(
+        tmp_path,
+        "bash-env",
+        validate='test -z "${BASH_ENV:-}" && test -z "${ENV:-}" && test ! -e .bash-env-sourced',
+    )
+    hook = tmp_path / "bash-env-hook.sh"
+    hook.write_text(
+        "export FORMA_WORKFLOW_BASH_ENV_INJECTED=1\n"
+        "touch .bash-env-sourced\n",
+        encoding="utf-8",
+    )
+    (repo / "proof.txt").write_text("changed\n", encoding="utf-8")
+
+    env = os.environ.copy()
+    result = subprocess.run(
+        [
+            "bash",
+            "--noprofile",
+            "--norc",
+            "-c",
+            'hook="$1"; workflow="$2"; shift 2; export BASH_ENV="$hook" ENV="$hook"; source "$workflow" "$@"',
+            "_",
+            str(hook),
+            str(workflow),
+            "review-ready",
+            "bash-env",
+        ],
+        cwd=repo,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "Review-ready task [1]" in result.stdout
+    assert not (repo / ".bash-env-sourced").exists()
+
+
+def _locked_issue(
+    tmp_path: Path,
+    issue_id: str,
+    *,
+    validate: str = "true",
+    final_validation: str = "true",
+) -> tuple[Path, Path]:
     repo = tmp_path / "repo"
     scripts_dir = repo / "skill" / "scripts"
     references_dir = repo / "skill" / "references"
@@ -231,7 +303,7 @@ def _locked_issue(tmp_path: Path, issue_id: str) -> tuple[Path, Path]:
     plan_file = repo / "plans" / f"issue-{issue_id}" / "plan.md"
     tasks_file = repo / "plans" / f"issue-{issue_id}" / "tasks.md"
     plan_file.write_text(
-        """# Issue Plan
+        f"""# Issue Plan
 
 ## Goal
 
@@ -262,7 +334,7 @@ def _locked_issue(tmp_path: Path, issue_id: str) -> tuple[Path, Path]:
 ## Final Validation
 
 ```sh
-true
+{final_validation}
 ```
 
 ## Risks / Notes
@@ -272,9 +344,9 @@ true
         encoding="utf-8",
     )
     tasks_file.write_text(
-        """- [ ] [notes-guard] Exercise notes guard
+        f"""- [ ] [notes-guard] Exercise notes guard
 Accept: Task Type=gate; review-ready checks implement-notes
-Validate: true
+Validate: {validate}
 Depends: none
 """,
         encoding="utf-8",

@@ -1,7 +1,7 @@
 {
   "base_origin": {
     "artifact_kind": "claude-code-plugin",
-    "base_output_digest": "ff7bd58c8b1597b1848335177c4b339a97dff1e9bb0a20af7cd7d0537ac013bd",
+    "base_output_digest": "02c2a065b54b81267bdf454121def38fc43121c3f6de5f2e42e4ef9b188dc42c",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "claude-code"
@@ -35,16 +35,16 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-11T08:10:53Z",
+  "generated_at": "2026-06-11T15:55:37Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "fce6d0b",
+  "methodology_source_revision": "e1ae782",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "325f2f010a8ec99f71dc2eb1518b4ea41321508f4b1833ce4bc6367118a22683",
+  "methodology_tree_digest": "5c14ad4bc81349057261ae847eec3e969914fab0eba3dcfc69a36fadfdcc47ac",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {

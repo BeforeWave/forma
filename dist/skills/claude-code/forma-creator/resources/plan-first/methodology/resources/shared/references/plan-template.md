@@ -71,7 +71,7 @@ Note: shared by tasks that can safely reuse this check while the wider issue is 
 
 List one issue-level final validation command per line in the fenced `sh` block below.
 `scripts/forma-workflow.sh review-ready <issue-id>` executes this block only when preparing the last remaining task for review, and `complete` reuses the reviewed staged snapshot and cached result without rerunning it.
-These commands run through the same clean non-login, non-interactive shell path as task `Validate:` lines and shared `## Validation` checks, so do not rely on user profile or rc files.
+These commands run through the same non-login, non-interactive shell path as task `Validate:` lines and shared `## Validation` checks. They inherit the invoking process environment but do not read user profile or rc files, and the runner clears `BASH_ENV` / `ENV`.
 Each line is executed as an independent command, so it must be self-contained. Do not use standalone variable assignment, `cd`, or `export` lines; fold multi-step setup, execution, and cleanup into one command line.
 When a command needs cleanup with a captured exit code, use portable variable names such as `exit_status`; avoid shell-reserved names such as zsh's read-only `status`.
 For documentation-only or analysis-only issues, replace executable commands with exactly one marker comment:
