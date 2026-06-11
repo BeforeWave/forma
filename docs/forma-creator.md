@@ -79,7 +79,8 @@ It becomes tracked profile source only if the user explicitly promotes it.
 The creator places confirmed rules in the narrowest correct location:
 
 Temporary injection maps always use internal stage keys (`shape`, `gauge`,
-`seal`, `pour`, `flow`), not generated public skill ids such as `forma-plan`.
+`seal`, `pour`, `flow`), not final output names such as plugin-local `plan` or
+direct skill names using the `forma-*` pattern.
 
 | Target | Use for |
 |---|---|

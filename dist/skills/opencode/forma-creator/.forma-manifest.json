@@ -1,7 +1,7 @@
 {
   "base_origin": {
     "artifact_kind": "creator",
-    "base_output_digest": "1ec0669a14bdf4a3a39787b78532059add9c574dac1b12c5f97f714ad4f85683",
+    "base_output_digest": "ebd9fde2bdae7715fb5915b3158524f832cfceec984a72608e9998ee28a7b857",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "opencode"
@@ -10,13 +10,13 @@
   "creator": {
     "directory": "forma-creator",
     "file_hashes": {
-      "SKILL.md": "6382abe56761451dcd1817bc56fab1a674596f4b3bd8233e316b36c392935eed",
+      "SKILL.md": "63293e34ff0c7b3a57f871582f2dc1d3a3b40f87b633a1acc0b4d5a7f1c50cdc",
       "interfaces/codex/openai.yaml": "1ce91309081fee7d3d3e550cff345bbdec1c1a6ea6844b6c840f93abcf4e9435",
-      "references/canonical-plan-first.md": "52d3c767cb61608502e0e8e66a8981e2d182790cc229309eabde98f77fb7d569",
-      "references/profile-authoring-principles.md": "248cf00d7205e36b6e10e8eb49f8115ab7d4dadb8bc9fe6d1ffd3d30b01ea7a0",
-      "references/temporary-injection-generation.md": "15bd237528bf56a8788f0c90f42775800e39f07f6515f89bf285d043a82731c8",
+      "references/canonical-plan-first.md": "d4fd162d0df6420f0f1e9bbdec2495bd3814a7928e3833169d0410af29b51c46",
+      "references/profile-authoring-principles.md": "85b061bd0eda11a187fc5a00802554cb37343097e9dc29db57808ee8c1fd3e39",
+      "references/temporary-injection-generation.md": "db8a4e9bfb1328cbb4b049ed0cd5338c0257f3b74c6956bd084407a78fc0c258",
       "scripts/__pycache__/create.cpython-313.pyc": "b156853da96ce52ca4bd79a3506c0ae2d986bee3582089987a993b23710785ec",
-      "scripts/create.py": "89205f5042d0acf90d68671bf3bd76a103c85797d9682b364bd84a2b0fb33a4c",
+      "scripts/create.py": "f33713b43008bc0811c1e4d6167660a154eb11da9c74b2576f9302b0608b8600",
       "scripts/forma_verifier/__init__.py": "4167f589bf4c95616d0de944e7c7ac9797b4feb2da553a601065b2c0510fc73a",
       "scripts/forma_verifier/__pycache__/__init__.cpython-311.pyc": "07bd66e65f06c09abe1026ee5962161cbf327edb79f121785a97d3c7865b6e82",
       "scripts/forma_verifier/__pycache__/__init__.cpython-313.pyc": "4d879646279a0f962ccb31b90ed44261e067097d7b5feef336803f2636c7bb81",
@@ -36,21 +36,21 @@
       "scripts/verify.py": "51a9a82ef1f4592d81b335a421d7efbc7d21b5b2e86b1781d49c800d632c178a"
     },
     "name": "forma-creator",
-    "source_revision": "0af735f",
+    "source_revision": "3a18eae",
     "source_revision_type": "git-short-sha",
-    "source_tree_digest": "4d280d40b38751e01f6b515619a154bbc2276fb34acc319f3d7e45dd8ad6f72f"
+    "source_tree_digest": "3a2d73f84d4c2bc35d082b35c111e90c2a736f5d70d4da57743a0adeb3f027e7"
   },
   "format": "forma-creator-manifest-v1",
-  "generated_at": "2026-06-10T18:00:42Z",
+  "generated_at": "2026-06-11T03:09:29Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.1"
   },
   "generator_version": "0.1.1",
-  "methodology_source_revision": "0af735f",
+  "methodology_source_revision": "3a18eae",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "9f4e7540a4c62378d6355a1ff8568f7878a549c1ecb0e30d2c34e846dc86fcbf",
+  "methodology_tree_digest": "1f4f28db6f084e1a9e6908a6c4d9f64f5a7e363abc6de659f92ad486cf637c4b",
   "methodology_version": "0.1.0",
   "target": "opencode"
 }

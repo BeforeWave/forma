@@ -47,7 +47,13 @@ def build_plugin(
     manifest_path.unlink()
     profile = load_profile(profile_file)
     plugin_id = _plugin_id(profile.bundle_name)
-    if target_agent == "claude-code":
+    if target_agent == "codex":
+        manifest = _localize_codex_plugin_skills(
+            manifest=manifest,
+            skills_dir=skills_dir,
+            plugin_id=plugin_id,
+        )
+    elif target_agent == "claude-code":
         manifest = _localize_claude_code_plugin_skills(
             manifest=manifest,
             skills_dir=skills_dir,
@@ -251,6 +257,78 @@ def _localize_claude_code_plugin_skills(
         raw["name"] = local_name
         raw["directory"] = local_name
     return localized
+
+
+def _localize_codex_plugin_skills(
+    manifest: Mapping[str, object],
+    skills_dir: Path,
+    plugin_id: str,
+) -> dict[str, object]:
+    localized = json.loads(json.dumps(manifest))
+    emitted = localized.get("emitted_skills")
+    if not isinstance(emitted, dict):
+        raise ValueError(
+            "bundle manifest must include emitted_skills for Codex plugin metadata"
+        )
+    prefix = f"{plugin_id}-"
+    used_names: set[str] = set()
+    for kind in STAGE_ORDER:
+        raw = emitted.get(kind)
+        if raw is None:
+            continue
+        if not isinstance(raw, dict):
+            raise ValueError(f"bundle manifest emitted_skills.{kind} must be an object")
+        old_name = _manifest_string(raw, "name", f"emitted_skills.{kind}.name")
+        old_dir = _manifest_string(raw, "directory", f"emitted_skills.{kind}.directory")
+        local_name = old_name[len(prefix):] if old_name.startswith(prefix) else old_name
+        if not local_name:
+            raise ValueError(f"Codex plugin skill name for {kind} is empty")
+        if not PLUGIN_ID_PATTERN.fullmatch(local_name):
+            raise ValueError(
+                f"Codex plugin skill name for {kind} is not kebab-case: "
+                f"{local_name!r}"
+            )
+        if local_name in used_names:
+            raise ValueError(f"duplicate Codex plugin skill name: {local_name}")
+        used_names.add(local_name)
+        old_path = skills_dir / old_dir
+        new_path = skills_dir / local_name
+        if not old_path.is_dir():
+            raise ValueError(f"emitted skill directory is missing: skills/{old_dir}")
+        if old_path != new_path:
+            if new_path.exists():
+                raise ValueError(
+                    f"cannot rename skills/{old_dir} to skills/{local_name}; "
+                    "destination already exists"
+                )
+            old_path.rename(new_path)
+        _rewrite_skill_frontmatter_name(new_path / "SKILL.md", local_name)
+        qualified_name = f"{plugin_id}:{local_name}"
+        _rewrite_codex_openai_prompt(
+            new_path / "agents" / "openai.yaml",
+            old_name,
+            local_name,
+            qualified_name,
+        )
+        raw["name"] = local_name
+        raw["directory"] = local_name
+        raw["qualified_name"] = qualified_name
+    return localized
+
+
+def _rewrite_codex_openai_prompt(
+    openai_yaml: Path,
+    old_name: str,
+    local_name: str,
+    qualified_name: str,
+) -> None:
+    if not openai_yaml.is_file():
+        return
+    text = openai_yaml.read_text(encoding="utf-8")
+    updated = text.replace(f"${old_name}", f"${qualified_name}")
+    updated = updated.replace(f"${local_name}", f"${qualified_name}")
+    if updated != text:
+        openai_yaml.write_text(updated, encoding="utf-8")
 
 
 def _rewrite_skill_frontmatter_name(skill_file: Path, name: str) -> None:

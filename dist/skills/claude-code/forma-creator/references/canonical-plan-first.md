@@ -41,10 +41,11 @@ under `source/skill-creator/`.
 
 Installed `forma-creator` output uses stable stage keys internally. By
 default, it emits installable skill directories and frontmatter names with
-public Plan-First names: `forma-plan`, `forma-ground`, `forma-lock`,
-`forma-execute`, and `forma-showhand`. If the user supplies `rename.prefix`,
-the prefix form is `<prefix>-plan`, `<prefix>-ground`, `<prefix>-lock`,
-`<prefix>-execute`, and `<prefix>-showhand`. During creation, the user may
+public Plan-First names: the `plan`, `ground`, `lock`, `execute`, and
+`showhand` stages using the `forma-*` direct skill pattern. If the user supplies
+`rename.prefix`, the prefix form is `<prefix>-plan`, `<prefix>-ground`,
+`<prefix>-lock`, `<prefix>-execute`, and `<prefix>-showhand`. During creation,
+the user may
 choose final installable skill names through the temporary JSON field
 `rename.stages`; those names replace the defaults without changing the
 internal stage keys or methodology mapping.

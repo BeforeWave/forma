@@ -56,19 +56,24 @@ Forma produces three things:
 | `workflow bundle / plugin` | Agent workflow installed into Codex, Claude Code, or OpenCode. |
 | `task contract` | The plan contract the agent writes for one task, recorded under `plans/issue-<id>/`. |
 
-The default workflow uses four stage skills to manage the task contract
+The default workflow uses four stages to manage the task contract
 lifecycle, plus one continuous execution entrypoint:
 
-| Skill | Purpose |
+| Stage | Purpose |
 |---|---|
-| `forma-plan` | Align the goal with project rules and produce a reviewable proposal; do not write files or execute work. |
-| `forma-ground` | Gather the evidence required by the rules from code, docs, issues, tests, and related sources. |
-| `forma-lock` | Write the accepted approach into `plan.md` and `tasks.md`, locking the task contract. |
-| `forma-execute` | Execute one accepted task, run validation, record proof, and stop when review is needed. |
+| `plan` | Align the goal with project rules and produce a reviewable proposal; do not write files or execute work. |
+| `ground` | Gather the evidence required by the rules from code, docs, issues, tests, and related sources. |
+| `lock` | Write the accepted approach into `plan.md` and `tasks.md`, locking the task contract. |
+| `execute` | Execute one accepted task, run validation, record proof, and stop when review is needed. |
 
-`forma-showhand` is the continuous execution entrypoint: once a plan is locked,
+`showhand` is the continuous execution entrypoint: once a plan is locked,
 it continues remaining tasks until blocked, validation fails, or human input is
 needed.
+
+Trigger names depend on the installed output. A Forma plugin exposes plugin-local
+stages like `plan` and supports Codex-qualified triggers such as `forma:plan`.
+A direct skill bundle is installed as standalone skills with the `forma-*`
+prefix.
 
 When the team updates a profile, it updates which rules the workflow guards.
 Regenerate the bundle or plugin, and the agent plans and executes against the
@@ -134,11 +139,14 @@ After I confirm, generate and install it from the hints.
 After the generated workflow is installed, start a new thread:
 
 ```text
-Use forma-plan to plan this issue first.
+Use forma:plan to plan this issue first.
 
 Issue:
 <your task or issue>
 ```
+
+If you installed a direct skill bundle rather than a plugin, use the matching
+`forma-*` skill trigger instead.
 
 The first useful response should be a proposal, not a patch.
 

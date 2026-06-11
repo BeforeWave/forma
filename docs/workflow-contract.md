@@ -24,7 +24,7 @@ against project rules.
 | Evidence gathering depends on the agent remembering. | The contract names authoritative sources and facts that must be confirmed. |
 | Boundaries often stay vague. | The contract states what may be touched and what must stop. |
 | Validation may be only a command list. | The contract explains why validation proves the current task. |
-| Continuation depends on momentary judgment. | `forma-showhand` continues only when locked tasks and stop conditions allow it. |
+| Continuation depends on momentary judgment. | `showhand` continues only when locked tasks and stop conditions allow it. |
 
 Forma does not guarantee perfect agent behavior. It gives a clearer control
 surface: contract, validation, and proof stay inspectable.
@@ -39,31 +39,33 @@ goal -> proposal -> evidence -> task contract -> accepted task -> proof
         plan        ground     lock             execute
 ```
 
-| Public skill | Job | Handoff |
+| Stage | Job | Handoff |
 |---|---|---|
-| `forma-plan` | Align the goal with project rules and produce a proposal. | A settled direction, or explicit blocked/clarifying state. |
-| `forma-ground` | Gather evidence read-only according to the rules. | A grounding handoff with facts, risks, and unknowns. |
-| `forma-lock` | Write the accepted approach as a task contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
-| `forma-execute` | Execute one accepted task, run validation, and record proof. | Review-ready task result with validation evidence. |
+| `plan` | Align the goal with project rules and produce a proposal. | A settled direction, or explicit blocked/clarifying state. |
+| `ground` | Gather evidence read-only according to the rules. | A grounding handoff with facts, risks, and unknowns. |
+| `lock` | Write the accepted approach as a task contract. | `plans/issue-<id>/plan.md` and `tasks.md`. |
+| `execute` | Execute one accepted task, run validation, and record proof. | Review-ready task result with validation evidence. |
 
-`forma-showhand` is the autopilot entrypoint for `forma-execute`. After the
+`showhand` is the autopilot entrypoint for `execute`. After the
 plan is locked, it continues remaining accepted tasks until blocked, validation
 does not pass, or human input is needed.
 
-These public skill names are defaults. Profiles or creator output can rename
-them, but the stage semantics should stay the same.
+These stage names are defaults. A plugin exposes them as plugin-local names and,
+in Codex, supports `forma:*` triggers such as `forma:plan`. Direct skill bundles
+use standalone `forma-*` skill names. Profiles or creator output can rename the
+generated names, but the stage semantics should stay the same.
 
 ## Skill Boundaries
 
 The contract matters because each stage has different permissions.
 
-| Public skill | Allowed | Not allowed |
+| Stage | Allowed | Not allowed |
 |---|---|---|
-| `forma-plan` | Clarify goal, scope, approach, validation, plan strategy, and boundaries. | Inspect the repository, write plan files, or implement. |
-| `forma-ground` | Read files, inspect repository state, and produce grounding. | Write files, run mutating commands, or decide final execution tasks. |
-| `forma-lock` | Write the accepted plan and task contract after decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
-| `forma-execute` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue past review gates. |
-| `forma-showhand` | Resume the locked task list and apply `forma-execute` task by task. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
+| `plan` | Clarify goal, scope, approach, validation, plan strategy, and boundaries. | Inspect the repository, write plan files, or implement. |
+| `ground` | Read files, inspect repository state, and produce grounding. | Write files, run mutating commands, or decide final execution tasks. |
+| `lock` | Write the accepted plan and task contract after decisions are settled. | Invent missing scope, skip grounding, or broaden acceptance criteria. |
+| `execute` | Implement the current accepted task and run its validation. | Execute unaccepted tasks, rewrite the plan, or continue past review gates. |
+| `showhand` | Resume the locked task list and apply `execute` task by task. | Bypass missing plans, missing proof, unclear permissions, or blocked routes. |
 
 ## Reading A Task Contract
 
@@ -108,8 +110,8 @@ Common evidence rules include:
 - explicit unknowns when required evidence is missing.
 
 Evidence rules belong in the stage that needs them. For example, source reading
-usually belongs in `forma-ground`; final task validation belongs in
-`forma-lock` and `forma-execute`.
+usually belongs in `ground`; final task validation belongs in `lock` and
+`execute`.
 
 ## Execution Boundaries
 
@@ -132,17 +134,16 @@ conditional overlays.
 
 Validation is not only a command list. It is the proof path for the task.
 
-`forma-lock` should write validation expectations into the task contract.
-`forma-execute` should run the narrowest relevant checks first, then any shared
-gate required by the plan. `forma-showhand` repeats that accepted-task execution
-loop.
+`lock` should write validation expectations into the task contract. `execute`
+should run the narrowest relevant checks first, then any shared gate required by
+the plan. `showhand` repeats that accepted-task execution loop.
 
 If proof is missing, stale, or outside the accepted task, the contract should
 make the agent stop or ask for correction.
 
 ## Showhand
 
-`forma-showhand` is the continuous execution entrypoint for `forma-execute`.
+`showhand` is the continuous execution entrypoint for `execute`.
 After review is done and the approach is fixed, use it to let the agent continue
 through the accepted task list.
 

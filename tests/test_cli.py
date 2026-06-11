@@ -397,8 +397,9 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     assert "Forma does not install Codex plugins" in result.output
     assert (output / ".codex-plugin" / "plugin.json").is_file()
     assert (output / ".forma-manifest.json").is_file()
-    assert (output / "skills" / "forma-plan" / "SKILL.md").is_file()
-    assert (output / "skills" / "forma-showhand" / "SKILL.md").is_file()
+    assert (output / "skills" / "plan" / "SKILL.md").is_file()
+    assert (output / "skills" / "showhand" / "SKILL.md").is_file()
+    assert not (output / "skills" / "forma-plan").exists()
     assert not (output / "skill-bundles").exists()
     assert not (output / "skills" / ".forma-manifest.json").exists()
     plugin = json.loads(
@@ -432,8 +433,10 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     )
 
     assert result.exit_code == 0, result.output
-    assert (output / "skills" / "forma-plan" / "SKILL.md").is_file()
-    assert (output / "skills" / "forma-showhand" / "SKILL.md").is_file()
+    assert (output / "skills" / "plan" / "SKILL.md").is_file()
+    assert (output / "skills" / "showhand" / "SKILL.md").is_file()
+    assert (output / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert not (output / "skills" / "forma-plan").exists()
     plugin = json.loads(
         (output / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
@@ -584,7 +587,7 @@ def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
     profile = yaml.safe_load(profile_file.read_text(encoding="utf-8"))
     assert profile["profile"]["id"] == "acme-plan-first"
     assert profile["bundle"]["name"] == "acme-plan-first"
-    assert profile["stages"]["flow"]["name"] == "acme-plan-first-showhand"
+    assert profile["stages"]["flow"]["name"] == "showhand"
 
     regenerated = tmp_path / "regenerated-plugin"
     create = runner.invoke(

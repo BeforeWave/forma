@@ -45,16 +45,18 @@ Forma 生成三类产物：
 | `workflow bundle / plugin` | 安装到 Codex、Claude Code 或 OpenCode 的 agent 工作流。 |
 | `task contract` | agent 面对具体任务时写下的计划契约，记录到 `plans/issue-<id>/`。 |
 
-默认 workflow 用四个阶段 skill 管住 task contract 的生命周期，并提供一个连续执行入口：
+默认 workflow 用四个阶段管住 task contract 的生命周期，并提供一个连续执行入口：
 
-| Skill | 作用 |
+| 阶段 | 作用 |
 |---|---|
-| `forma-plan` | 把目标和项目准则对齐，形成可 review 的 proposal；不写文件，不执行任务。 |
-| `forma-ground` | 按准则需要的事实取证，只读代码、文档、issue、测试等资料。 |
-| `forma-lock` | 把已接受的方案写成 `plan.md` 和 `tasks.md`，锁定 task contract。 |
-| `forma-execute` | 执行一个已接受 task，跑验证，记录 proof，需要 review 时停。 |
+| `plan` | 把目标和项目准则对齐，形成可 review 的 proposal；不写文件，不执行任务。 |
+| `ground` | 按准则需要的事实取证，只读代码、文档、issue、测试等资料。 |
+| `lock` | 把已接受的方案写成 `plan.md` 和 `tasks.md`，锁定 task contract。 |
+| `execute` | 执行一个已接受 task，跑验证，记录 proof，需要 review 时停。 |
 
-`forma-showhand` 是连续执行入口：计划已经锁定后，它会沿着剩余 tasks 继续推进，直到遇到阻塞、验证没通过或需要人介入。
+`showhand` 是连续执行入口：计划已经锁定后，它会沿着剩余 tasks 继续推进，直到遇到阻塞、验证没通过或需要人介入。
+
+Plugin 用 `forma:plan` 这类 `forma:*` 触发；direct skill bundle 用 `forma-plan` 这类 `forma-*` skill。
 
 团队后续调整 profile，就等于调整 workflow 守护哪些准则；重新生成 bundle 或 plugin 后，agent 会按新的约束规划和执行。
 
@@ -114,11 +116,13 @@ forma install --target codex --scope project /tmp/forma-creator/codex/forma-crea
 生成的 workflow 安装完成后，新开 thread 触发：
 
 ```text
-Use forma-plan to plan this issue first.
+Use forma:plan to plan this issue first.
 
 Issue:
 <你的任务或 issue>
 ```
+
+如果安装的是 direct skill bundle，而不是 plugin，就使用对应的 `forma-*` skill 触发名。
 
 正常的第一步是 proposal，不是 patch。
 

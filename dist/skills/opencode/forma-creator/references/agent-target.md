@@ -1,22 +1,22 @@
 # Agent Target: OpenCode
 
-This `forma-creator` bundle is fixed to `opencode`. Its generated plan-first output must contain exactly five skill directories. Defaults are:
+This `forma-creator` bundle is fixed to `opencode`. Its generated plan-first output must contain exactly five stage skill directories. Direct bundle defaults use the `forma-*` pattern for:
 
-- `forma-plan/` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization.
-- `forma-ground/` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
-- `forma-lock/` - Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
-- `forma-execute/` - Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
-- `forma-showhand/` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops.
+- `plan` - Use only in plan-oriented collaboration to clarify Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer, and task-level artifact/evidence boundaries before plan finalization.
+- `ground` - Inspect repository facts read-only and produce a grounding handoff before plan files are written.
+- `lock` - Materialize an already-settled plan into plan.md and task-level execution contracts without reopening planning decisions.
+- `execute` - Execute the current task contract through review-ready, wait for user approval, then complete and continue if another task remains.
+- `showhand` - Execute all remaining tasks from an already-finalized issue plan automatically with preflight, validation gates, proof recording, and safety stops.
 
 ## Output Contract
 
 - Before generating a bundle, load `references/canonical-plan-first.md` and `references/profile-authoring-principles.md` and `references/temporary-injection-generation.md`; preserve the bundled canonical plan-first semantics and classify natural-language constraints before writing JSON.
 - Convert current-session natural-language injection into a temporary JSON file and run `python scripts/create.py --artifact bundle --output <generated-bundle-path> --injection-json <temporary-injection.json>` for workflow-bundle output; do not use Layer 3 profiles from this installed creator.
 - Copy fixed generated-skill resources from `resources/plan-first/methodology/resources/shared/` and any stage-local resource directory into each generated skill directory according to `references/canonical-plan-first.md`.
-- Generate an OpenCode-native workflow bundle root containing `forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, and `forma-showhand/` by default, or the exact `rename.stages` names confirmed by the user.
+- Generate an OpenCode-native direct skill bundle root containing the five default `forma-*` stage directories for `plan`, `ground`, `lock`, `execute`, and `showhand`, or the exact `rename.stages` names confirmed by the user.
 - Do not generate plugin output for OpenCode. OpenCode runtime plugins are `.opencode/plugins/*.js|ts`, not Forma skill workflow bundles.
 - Keep temporary injection JSON stage keys as `shape`, `gauge`, `seal`, `pour`, and `flow`; do not expose those bare stage keys as installable skill directory names.
-- Do not use generated public skill ids such as `forma-plan` or `forma-showhand` as temporary injection JSON keys.
+- Do not use generated output names such as plugin-local `plan` or direct skill `forma-*` names as temporary injection JSON keys.
 - Every generated skill directory must include `SKILL.md` with frontmatter containing `name`, `description`, `compatibility: opencode`, and string-to-string `metadata`.
 - Every generated skill directory's frontmatter `name` must match its directory name, use lowercase alphanumeric hyphen-separated form, and have a 1-1024 character `description`.
 - Keep bundled references inside each generated skill's own `references/` directory.
@@ -26,7 +26,7 @@ This `forma-creator` bundle is fixed to `opencode`. Its generated plan-first out
 ## Interactive Constraint Handling
 
 - The user may provide one-off special constraints for the generated five-skill bundle during this interaction.
-- Before writing the temporary JSON, show the default installable skill names: `shape -> forma-plan`, `gauge -> forma-ground`, `seal -> forma-lock`, `pour -> forma-execute`, and `flow -> forma-showhand`.
+- Before writing the temporary JSON, show the default installable skill names: direct skill bundles use the `forma-*` pattern for `shape -> plan`, `gauge -> ground`, `seal -> lock`, `pour -> execute`, and `flow -> showhand`.
 - Ask whether the user wants to rename any final installable skill names. If yes, encode exact kebab-case names under `rename.stages`; if no, omit `rename` and use the defaults.
 - Encode those constraints in a temporary injection JSON when they are compatible with the plan-first methodology and this target contract.
 - Classify every natural-language constraint before writing JSON: `constraints.default` is only for minimal always-on bottom lines; planning rules go under `shape` / `gauge` / `seal`; daily execution rules go under `pour` / `flow`; broad docs, generated-baseline, migration, governance, or cross-layer rules belong in `conditional_overlays`.

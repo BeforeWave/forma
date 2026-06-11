@@ -27,31 +27,31 @@ target-specific workflow skill bundle
 
 ## Bundle 结构
 
-一个生成的 bundle 通常包含四个核心 workflow skill、`forma-showhand` 自动驾驶入口，以及一个 manifest：
+一个生成的 direct skill bundle 通常包含四个核心 workflow skill、`showhand` 自动驾驶入口，以及一个 manifest。默认 direct skill 目录使用 `forma-*` 命名模式：
 
 ```text
 <bundle>/
-  forma-plan/
+  forma-<plan-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml        # 仅 Codex target 需要时出现
-  forma-ground/
+  forma-<ground-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-lock/
+  forma-<lock-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-execute/
+  forma-<execute-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-showhand/
+  forma-<showhand-stage>/
     SKILL.md
     references/
     scripts/
@@ -60,6 +60,8 @@ target-specific workflow skill bundle
 ```
 
 目录名可以被 profile 或 temporary injection 重命名。Manifest 会记录每个生成技能对应哪个目录。
+
+Plugin 和 direct skill bundle 的触发名不同：plugin 用 `forma:*`，direct skill bundle 用 `forma-*`。
 
 不是每个 skill 都一定有每个子目录。只有当 methodology、profile 或 temporary injection 为某个阶段选择了 references 或 scripts，它们才会出现。
 

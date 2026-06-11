@@ -36,7 +36,7 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
         in profile.stdout
     )
     assert "Stage Key Boundary" in profile.stdout
-    assert "Generated public skill ids" in profile.stdout
+    assert "Generated output names" in profile.stdout
 
     agent = _run_installed(
         ["explain", "agent"],

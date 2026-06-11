@@ -70,18 +70,18 @@ Forma 不直接执行项目任务。它生成 agent 执行任务时遵守的 wor
 goal -> proposal -> evidence -> task contract -> task execution -> proof
 ```
 
-四个核心 skills 管住 task contract 的生命周期：
+四个核心阶段管住 task contract 的生命周期：
 
-| Skill | 作用 | 边界 |
+| 阶段 | 作用 | 边界 |
 |---|---|---|
-| `forma-plan` | 把目标和项目准则对齐，形成 proposal。 | 不写文件，不执行任务。 |
-| `forma-ground` | 按准则需要的事实取证。 | 只读，不决定最终任务。 |
-| `forma-lock` | 写出 `plan.md` 和 `tasks.md`，锁定 task contract。 | 只落已接受方案。 |
-| `forma-execute` | 执行一个已接受 task，运行验证，记录 proof。 | 不越过 task 边界，不绕过停手条件。 |
+| `plan` | 把目标和项目准则对齐，形成 proposal。 | 不写文件，不执行任务。 |
+| `ground` | 按准则需要的事实取证。 | 只读，不决定最终任务。 |
+| `lock` | 写出 `plan.md` 和 `tasks.md`，锁定 task contract。 | 只落已接受方案。 |
+| `execute` | 执行一个已接受 task，运行验证，记录 proof。 | 不越过 task 边界，不绕过停手条件。 |
 
-`forma-showhand` 是 `forma-execute` 的自动驾驶入口，不是第五个规划阶段。计划锁定后，它连续推进剩余已接受 tasks，直到阻塞、验证没通过或需要人介入。
+`showhand` 是 `execute` 的自动驾驶入口，不是第五个规划阶段。计划锁定后，它连续推进剩余已接受 tasks，直到阻塞、验证没通过或需要人介入。
 
-项目可以重命名生成出来的 skills，但阶段语义应该保持不变。
+触发名取决于安装形态：plugin 用 `forma:plan` 这类 `forma:*`，direct skill bundle 用 `forma-plan` 这类 `forma-*` skill。项目可以重命名生成出来的 skills，但阶段语义应该保持不变。
 
 ## 三条路径
 
@@ -130,7 +130,7 @@ Forma 可以和 Spec 工具、规划文档、项目说明、通用 skill creator
 2. 让 creator 从项目文档和代码里挖掘准则。
 3. review 准则，补充缺口。
 4. 生成并验证 workflow 产物。
-5. 安装后触发 `forma-plan`。
+5. 安装后，plugin 产物触发 `forma:plan`；direct skill bundle 触发对应的 `forma-*` skill。
 6. 检查 task contract：事实、边界、任务顺序、验证和 proof。
 7. 有用的规则再提升成 tracked profile。
 

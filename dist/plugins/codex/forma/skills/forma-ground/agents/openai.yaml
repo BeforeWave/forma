@@ -1,4 +1,0 @@
-interface:
-  display_name: "Forma Ground"
-  short_description: "Inspect code, docs, issues, and evidence before deciding."
-  default_prompt: "Use $forma-ground to inspect code, docs, issues, and evidence before deciding."

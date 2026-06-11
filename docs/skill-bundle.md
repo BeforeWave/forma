@@ -30,32 +30,33 @@ structure.
 
 ## Bundle Layout
 
-A generated bundle normally contains four core workflow skills,
-`forma-showhand` as the autopilot entrypoint, and one manifest:
+A generated direct skill bundle normally contains four core workflow skills,
+`showhand` as the autopilot entrypoint, and one manifest. Default direct skill
+directories use the `forma-*` naming pattern:
 
 ```text
 <bundle>/
-  forma-plan/
+  forma-<plan-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml        # Codex target only, when required
-  forma-ground/
+  forma-<ground-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-lock/
+  forma-<lock-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-execute/
+  forma-<execute-stage>/
     SKILL.md
     references/
     scripts/
     agents/openai.yaml
-  forma-showhand/
+  forma-<showhand-stage>/
     SKILL.md
     references/
     scripts/
@@ -65,6 +66,10 @@ A generated bundle normally contains four core workflow skills,
 
 Directory names may be renamed by a profile or temporary injection. The
 manifest records the final emitted skill names and directories.
+
+Plugin output has a different trigger surface: Forma plugins expose local stage
+names like `plan`, and Codex plugin use can trigger them as `forma:*`. Direct
+skill bundles are the output shape that uses standalone `forma-*` skill names.
 
 Not every skill has every subdirectory. `references/` and `scripts/` appear only
 when methodology, profile, or temporary injection selects them for that stage.

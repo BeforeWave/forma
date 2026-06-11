@@ -1,4 +1,0 @@
-interface:
-  display_name: "Forma Showhand"
-  short_description: "Continue remaining tasks, but stop when evidence is insufficient."
-  default_prompt: "Use $forma-showhand to continue remaining tasks, but stop when evidence is insufficient."

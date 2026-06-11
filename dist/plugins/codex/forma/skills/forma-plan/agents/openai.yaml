@@ -1,4 +1,0 @@
-interface:
-  display_name: "Forma Plan"
-  short_description: "Clarify goals, constraints, boundaries, and acceptance criteria."
-  default_prompt: "Use $forma-plan to clarify goals, constraints, boundaries, and acceptance criteria before implementation."

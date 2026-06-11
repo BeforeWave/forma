@@ -108,7 +108,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "agents/openai.yaml" in (
         codex / "references" / "agent-target.md"
     ).read_text(encoding="utf-8")
-    assert "forma-plan/" in (
+    assert "forma-*` stage directories" in (
         codex / "references" / "agent-target.md"
     ).read_text(encoding="utf-8")
     assert "rename.stages" in (
@@ -207,7 +207,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     )
     assert "fixed to `claude-code`" in claude_target
     assert "Do not emit Codex `agents/openai.yaml`" in claude_target
-    assert "forma-plan/" in claude_target
+    assert "forma-*` stage directories" in claude_target
     assert "forma-shape/" not in claude_target
     assert "rename.stages" in claude_target
     assert "one-off special constraints" in claude_target
@@ -247,7 +247,7 @@ def test_build_creator_emits_opencode_target(tmp_path: Path) -> None:
         encoding="utf-8"
     )
     assert "fixed to `opencode`" in opencode_target
-    assert "OpenCode-native workflow bundle" in opencode_target
+    assert "OpenCode-native direct skill bundle" in opencode_target
     assert "compatibility: opencode" in opencode_target
     assert "Do not generate plugin output for OpenCode" in opencode_target
     assert "agents/openai.yaml" in opencode_target
@@ -499,12 +499,13 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     assert "Forma does not install Codex plugins" in result.stdout
     assert (generated / ".codex-plugin" / "plugin.json").is_file()
     assert (generated / ".forma-manifest.json").is_file()
-    assert (generated / "skills" / "forma-plan" / "SKILL.md").is_file()
-    assert (generated / "skills" / "forma-showhand" / "SKILL.md").is_file()
-    assert (generated / "skills" / "forma-plan" / "agents" / "openai.yaml").is_file()
+    assert (generated / "skills" / "plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "showhand" / "SKILL.md").is_file()
+    assert (generated / "skills" / "plan" / "agents" / "openai.yaml").is_file()
     assert not (generated / "skills" / ".forma-manifest.json").exists()
     assert not (generated / "skill-bundles").exists()
     assert not (generated / "forma-plan").exists()
+    assert not (generated / "skills" / "forma-plan").exists()
     plugin = json.loads(
         (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
@@ -518,7 +519,15 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
     assert manifest["target"] == "codex"
-    assert manifest["emitted_skills"]["shape"]["directory"] == "forma-plan"
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["qualified_name"] == "forma:plan"
+    openai_yaml = (
+        generated / "skills" / "plan" / "agents" / "openai.yaml"
+    ).read_text(encoding="utf-8")
+    assert "$forma:plan" in openai_yaml
+    assert "$forma:forma-plan" not in openai_yaml
+    assert "$forma-plan" not in openai_yaml
     baseline_manifest = json.loads(
         (baseline / ".forma-manifest.json").read_text(encoding="utf-8")
     )
@@ -564,8 +573,9 @@ def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    assert (generated / "skills" / "acme-plan-first-plan" / "SKILL.md").is_file()
-    assert (generated / "skills" / "acme-plan-first-showhand" / "SKILL.md").is_file()
+    assert (generated / "skills" / "plan" / "SKILL.md").is_file()
+    assert (generated / "skills" / "showhand" / "SKILL.md").is_file()
+    assert not (generated / "skills" / "acme-plan-first-plan").exists()
     plugin = json.loads(
         (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
@@ -576,7 +586,9 @@ def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
     manifest = json.loads(
         (generated / ".forma-manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["emitted_skills"]["shape"]["name"] == "acme-plan-first-plan"
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["qualified_name"] == "acme-plan-first:plan"
     assert verify(generated).passed
 
 

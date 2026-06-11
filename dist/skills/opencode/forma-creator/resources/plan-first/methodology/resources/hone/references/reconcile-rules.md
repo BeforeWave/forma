@@ -7,12 +7,13 @@ matches the active Forma stage contract and the user's feedback.
 
 - Prefer an explicit user target, such as a named task, stage, file, commit, or generated artifact.
 - If the user does not name a target, use the most recent Forma skill trigger from the current conversation as a hint:
-  - `forma-plan` maps to `shape`.
-  - `forma-ground` maps to `gauge`.
-  - `forma-lock` maps to `seal`.
-  - `forma-execute` maps to `pour`.
-  - `forma-showhand` maps to `flow`, then the latest task/run evidence decides the concrete work item.
-  - `forma-reconcile` maps to the stage being reconciled, not to itself.
+  - A plugin-local or qualified trigger whose final component is `plan` maps to `shape`.
+  - A plugin-local or qualified trigger whose final component is `ground` maps to `gauge`.
+  - A plugin-local or qualified trigger whose final component is `lock` maps to `seal`.
+  - A plugin-local or qualified trigger whose final component is `execute` maps to `pour`.
+  - A plugin-local or qualified trigger whose final component is `showhand` maps to `flow`, then the latest task/run evidence decides the concrete work item.
+  - Direct skill triggers use the `forma-*` pattern and map by the same stage suffix.
+  - A trigger whose final component is `reconcile` maps to the stage being reconciled, not to itself.
 - If `.forma-workflow/issue-<id>/review-state.env` exists, use its task number and task text as review-cache evidence.
 - If all tasks are complete, use `tasks.md`, `runs/task-*.md`, current diff, and commit history to identify the delivered surface. Do not route to `showhand next` when no unchecked task exists.
 - When trigger context and issue evidence conflict, report the conflict and return `blocked` unless the user feedback clearly resolves it.

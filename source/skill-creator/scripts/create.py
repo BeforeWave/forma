@@ -608,7 +608,15 @@ def build_plugin(
         injection=injection,
         skill_names=skill_names,
     )
-    if target == "claude-code":
+    codex_plugin_namespace: str | None = None
+    if target == "codex":
+        codex_plugin_namespace = plugin_id
+        skill_names = _localize_codex_plugin_skills(
+            skills_dir=skills_dir,
+            plugin_id=plugin_id,
+            skill_names=skill_names,
+        )
+    elif target == "claude-code":
         skill_names = _localize_claude_code_plugin_skills(
             skills_dir=skills_dir,
             plugin_id=plugin_id,
@@ -637,6 +645,7 @@ def build_plugin(
         conditional_overlays,
         creator_manifest,
         _base_origin_for_plugin(methodology_dir, target),
+        codex_plugin_namespace=codex_plugin_namespace,
     )
 
 
@@ -781,6 +790,64 @@ def _localize_claude_code_plugin_skills(
     return localized
 
 
+def _localize_codex_plugin_skills(
+    skills_dir: Path,
+    plugin_id: str,
+    skill_names: Mapping[str, str],
+) -> dict[str, str]:
+    prefix = f"{plugin_id}-"
+    localized: dict[str, str] = {}
+    used_names: set[str] = set()
+    for kind in KINDS:
+        old_name = skill_names[kind]
+        local_name = old_name[len(prefix):] if old_name.startswith(prefix) else old_name
+        if not local_name:
+            raise ValueError(f"Codex plugin skill name for {kind} is empty")
+        if not KEBAB_CASE_RE.fullmatch(local_name):
+            raise ValueError(
+                f"Codex plugin skill name for {kind} is not kebab-case: "
+                f"{local_name!r}"
+            )
+        if local_name in used_names:
+            raise ValueError(f"duplicate Codex plugin skill name: {local_name}")
+        used_names.add(local_name)
+        old_path = skills_dir / old_name
+        new_path = skills_dir / local_name
+        if not old_path.is_dir():
+            raise ValueError(f"emitted skill directory is missing: skills/{old_name}")
+        if old_path != new_path:
+            if new_path.exists():
+                raise ValueError(
+                    f"cannot rename skills/{old_name} to skills/{local_name}; "
+                    "destination already exists"
+                )
+            old_path.rename(new_path)
+        _rewrite_skill_frontmatter_name(new_path / "SKILL.md", local_name)
+        _rewrite_codex_openai_prompt(
+            new_path / "agents" / "openai.yaml",
+            old_name,
+            local_name,
+            f"{plugin_id}:{local_name}",
+        )
+        localized[kind] = local_name
+    return localized
+
+
+def _rewrite_codex_openai_prompt(
+    openai_yaml: Path,
+    old_name: str,
+    local_name: str,
+    qualified_name: str,
+) -> None:
+    if not openai_yaml.is_file():
+        return
+    text = openai_yaml.read_text(encoding="utf-8")
+    updated = text.replace(f"${old_name}", f"${qualified_name}")
+    updated = updated.replace(f"${local_name}", f"${qualified_name}")
+    if updated != text:
+        openai_yaml.write_text(updated, encoding="utf-8")
+
+
 def _rewrite_skill_frontmatter_name(skill_file: Path, name: str) -> None:
     text = skill_file.read_text(encoding="utf-8")
     lines = text.splitlines()
@@ -833,7 +900,13 @@ def _base_origin_for_plugin(methodology_dir: Path, target: str) -> dict[str, str
             skill_names=skill_names,
         )
         plugin_id = _plugin_id({})
-        if target == "claude-code":
+        if target == "codex":
+            skill_names = _localize_codex_plugin_skills(
+                skills_dir=skills_dir,
+                plugin_id=plugin_id,
+                skill_names=skill_names,
+            )
+        elif target == "claude-code":
             skill_names = _localize_claude_code_plugin_skills(
                 skills_dir=skills_dir,
                 plugin_id=plugin_id,
@@ -897,14 +970,17 @@ def _write_manifest(
     conditional_overlays: ConditionalOverlays | None,
     creator_manifest: Mapping[str, Any] | None,
     base_origin: Mapping[str, str],
+    codex_plugin_namespace: str | None = None,
 ) -> None:
-    emitted = {
-        kind: {
+    emitted = {}
+    for kind in KINDS:
+        entry = {
             "name": skill_names[kind],
             "directory": skill_names[kind],
         }
-        for kind in KINDS
-    }
+        if codex_plugin_namespace is not None:
+            entry["qualified_name"] = f"{codex_plugin_namespace}:{skill_names[kind]}"
+        emitted[kind] = entry
     generator = _forma_generator_metadata(creator_manifest)
     manifest = {
         "format": "forma-bundle-manifest-v1",

@@ -93,21 +93,24 @@ The default workflow has a plan-before-execute shape:
 goal -> proposal -> evidence -> task contract -> task execution -> proof
 ```
 
-Four core skills manage the task contract lifecycle:
+Four core stages manage the task contract lifecycle:
 
-| Skill | Purpose | Boundary |
+| Stage | Purpose | Boundary |
 |---|---|---|
-| `forma-plan` | Align the goal with project rules and produce a proposal. | Do not write files or execute work. |
-| `forma-ground` | Gather the facts required by the rules. | Read-only; do not decide final tasks. |
-| `forma-lock` | Write `plan.md` and `tasks.md`, locking the task contract. | Materialize only the accepted approach. |
-| `forma-execute` | Execute one accepted task, run validation, and record proof. | Do not cross task boundaries or bypass stop conditions. |
+| `plan` | Align the goal with project rules and produce a proposal. | Do not write files or execute work. |
+| `ground` | Gather the facts required by the rules. | Read-only; do not decide final tasks. |
+| `lock` | Write `plan.md` and `tasks.md`, locking the task contract. | Materialize only the accepted approach. |
+| `execute` | Execute one accepted task, run validation, and record proof. | Do not cross task boundaries or bypass stop conditions. |
 
-`forma-showhand` is the autopilot entrypoint for `forma-execute`, not a fifth
+`showhand` is the autopilot entrypoint for `execute`, not a fifth
 planning stage. After the plan is locked, it continues accepted tasks until
 blocked, validation does not pass, or human input is needed.
 
-Projects can rename generated skills, but the stage semantics should remain
-the same.
+Output names depend on the install shape. Plugins expose plugin-local stages
+such as `plan`, and Codex plugin triggers can use `forma:*` names such as
+`forma:plan`. Direct skill bundles use standalone `forma-*` skill names.
+Projects can rename generated skills, but the stage semantics should remain the
+same.
 
 ## Three Paths
 
@@ -169,7 +172,8 @@ create a workflow you can try:
 2. Ask the creator to extract rules from project docs and code.
 3. Review the rules and fill gaps.
 4. Generate and verify the workflow output.
-5. Install it and trigger `forma-plan`.
+5. Install it and trigger `forma:plan` for plugin output, or the matching
+   `forma-*` direct skill trigger for a skill bundle.
 6. Inspect the task contract: facts, boundaries, task order, validation, and proof.
 7. Promote useful repeated rules into a tracked profile.
 

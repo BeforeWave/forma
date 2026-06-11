@@ -11,9 +11,10 @@ metadata:
 
 Use this skill to create Forma Plan-First workflow outputs. By default it
 creates a workflow bundle: a flat, ready-to-install set of five plan-first
-skills named `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
-`forma-showhand`. If this installed creator includes a fixed target reference, that
-reference is the hard contract for any additional artifact type.
+direct skills for the `plan`, `ground`, `lock`, `execute`, and `showhand`
+stages using the `forma-*` naming pattern. If this installed creator includes a
+fixed target reference, that reference is the hard contract for any additional
+artifact type.
 
 Before generating any bundle, load `references/canonical-plan-first.md`,
 `references/profile-authoring-principles.md`, and
@@ -44,12 +45,12 @@ target contract.
      adapter. Add stage-specific constraints and resources only when the
      adapter is explicitly requested; do not treat network access, local CLI
      authentication, or any source tool as base capability.
-3. Show the installable skill names before generating. Default:
-   `shape -> forma-plan`, `gauge -> forma-ground`, `seal -> forma-lock`,
-   `pour -> forma-execute`, and `flow -> forma-showhand`. Ask whether the user wants
-   to rename any of those installable skill names. If they do, encode the
-   final names under `rename.stages` in the temporary JSON. If they do not, use
-   the defaults.
+3. Show the installable skill names before generating. Default direct bundle
+   names use the `forma-*` pattern for `shape -> plan`, `gauge -> ground`,
+   `seal -> lock`, `pour -> execute`, and `flow -> showhand`. Ask whether the
+   user wants to rename any of those installable skill names. If they do,
+   encode the final names under `rename.stages` in the temporary JSON. If they
+   do not, use the defaults.
 4. Read `references/canonical-plan-first.md` and preserve the canonical
    workflow shape. It is derived from the validated plan-first model:
    chat-only convergence, read-only grounding, task-contract finalization,
@@ -73,27 +74,28 @@ python scripts/create.py --artifact bundle --output <generated-bundle-path> --in
    permits another artifact type, follow that target-specific command instead.
    Do not infer target-specific artifacts from this generic skill body.
 
-The script creates exactly `forma-plan/`, `forma-ground/`, `forma-lock/`,
-`forma-execute/`, and `forma-showhand/` for bundle output. If the user supplied
-`rename.stages`, the script creates those final installable skill directories
-instead. The script copies bundled methodology resources, applies the temporary
-injection, writes metadata, and runs the bundled verifier. Only report success
-after it exits cleanly. Do not install generated outputs from this creator;
-report the output path and install hint only.
+The script creates the five default direct skill directories using the
+`forma-*` form of the `plan`, `ground`, `lock`, `execute`, and `showhand`
+stages for bundle output. If the user supplied `rename.stages`, the script
+creates those final installable skill directories instead. The script copies
+bundled methodology resources, applies the temporary injection, writes metadata,
+and runs the bundled verifier. Only report success after it exits cleanly. Do
+not install generated outputs from this creator; report the output path and
+install hint only.
 
 ## Stage Rules
 
 Every generated bundle uses the same five stages. The temporary injection JSON
 uses these internal stage keys, while installable skill directories and
-frontmatter names use the public default names:
+frontmatter names use target-specific output names:
 
-- `shape` / `forma-plan` is chat-only convergence. It settles Goal, Scope, Approach,
+- `shape` / `plan` is chat-only convergence. It settles Goal, Scope, Approach,
   Validation, Plan Strategy, and task-level artifact/evidence boundaries before `proposal-ready`.
-- `gauge` / `forma-ground` is read-only repository inspection. It produces a grounding handoff
+- `gauge` / `ground` is read-only repository inspection. It produces a grounding handoff
   for `seal` and does not write files.
-- `seal` / `forma-lock` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/`, including accepted files/surfaces, validation gates, proof requirements, dependencies, and constraints.
-- `pour` / `forma-execute` executes one accepted task contract at a time through `review-ready` and `complete`.
-- `flow` / `forma-showhand` executes all remaining tasks automatically after the plan is sealed,
+- `seal` / `lock` materializes `plan.md` and `tasks.md` under `plans/issue-<id>/`, including accepted files/surfaces, validation gates, proof requirements, dependencies, and constraints.
+- `pour` / `execute` executes one accepted task contract at a time through `review-ready` and `complete`.
+- `flow` / `showhand` executes all remaining tasks automatically after the plan is sealed,
   while still honoring validation, safety, and permission gates.
 
 ## Bundled Resources
@@ -125,15 +127,15 @@ requirement references, keep one effective copy.
 Temporary injection JSON always uses internal stage keys as addressing keys:
 `shape`, `gauge`, `seal`, `pour`, and `flow`.
 
-Do not use public skill ids such as `forma-plan`, `forma-ground`, `forma-lock`,
-`forma-execute`, or `forma-showhand` as keys under `stages`, `skills`,
+Do not use generated output names such as plugin-local `plan`/`showhand` names
+or direct skill `forma-*` names as keys under `stages`, `skills`,
 `constraints`, `validation_commands`, `resources`, `conditional_overlays`, or
 `rename.stages`.
 
-Public skill ids are generated output names and user-facing trigger names.
-Internal stage keys are the stable addressing layer for profile and injection
-rules. To change generated skill names, map internal keys to final output names
-under `rename.stages`.
+Generated output names are user-facing trigger names. Internal stage keys are
+the stable addressing layer for profile and injection rules. To change
+generated skill names, map internal keys to final output names under
+`rename.stages`.
 
 The temporary injection JSON may contain only these top-level keys:
 

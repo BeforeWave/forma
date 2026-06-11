@@ -9,10 +9,10 @@ artifact, not a tracked Layer 3 profile.
 Temporary injection JSON must address stages only by internal stage keys:
 `shape`, `gauge`, `seal`, `pour`, and `flow`.
 
-Do not use generated public skill ids such as `forma-plan`, `forma-ground`,
-`forma-lock`, `forma-execute`, or `forma-showhand` as JSON keys. Public skill ids
-are installable output names and user-facing trigger names; they are not the
-schema keys for `stages`, `skills`, `constraints`, `validation_commands`,
+Do not use generated output names such as plugin-local `plan`/`showhand` names
+or direct skill names using the `forma-*` pattern as JSON keys. Generated output
+names are installable output names and user-facing trigger names; they are not
+the schema keys for `stages`, `skills`, `constraints`, `validation_commands`,
 `resources`, `conditional_overlays`, or `rename.stages`.
 
 When renaming output skills, keep the internal key on the left side and put the

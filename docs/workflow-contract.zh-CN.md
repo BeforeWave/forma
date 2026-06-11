@@ -16,7 +16,7 @@ Forma 生成的 workflow 安装到 agent 后，会推动 agent 从目标走到 p
 | 证据读取容易靠 agent 自觉。 | contract 写清楚权威来源和必须确认的事实。 |
 | 边界常常停在“我会小心”。 | contract 写清楚允许触碰和必须停手的边界。 |
 | 验证可能只是命令列表。 | contract 说明验证为什么足以证明当前 task。 |
-| 继续执行依赖当下判断。 | `forma-showhand` 只在已锁定 task 和停手条件允许时继续。 |
+| 继续执行依赖当下判断。 | `showhand` 只在已锁定 task 和停手条件允许时继续。 |
 
 Forma 不保证 agent 行为完美。它提供的是更清楚的控制面：contract、验证和 proof 留下来，reviewer 可以检查。
 
@@ -29,28 +29,28 @@ goal -> proposal -> evidence -> task contract -> accepted task -> proof
         plan        ground     lock             execute
 ```
 
-| 对外技能 | 职责 | 交接物 |
+| 阶段 | 职责 | 交接物 |
 |---|---|---|
-| `forma-plan` | 把目标和项目准则对齐，形成 proposal。 | 已收敛的方向，或明确的阻塞 / 澄清状态。 |
-| `forma-ground` | 按准则要求只读收集证据。 | 包含事实、风险、未知项的 grounding handoff。 |
-| `forma-lock` | 把已接受方案写成 task contract。 | `plans/issue-<id>/plan.md` 和 `tasks.md`。 |
-| `forma-execute` | 执行一个已接受 task，运行验证，记录 proof。 | 可 review 的任务结果和验证证据。 |
+| `plan` | 把目标和项目准则对齐，形成 proposal。 | 已收敛的方向，或明确的阻塞 / 澄清状态。 |
+| `ground` | 按准则要求只读收集证据。 | 包含事实、风险、未知项的 grounding handoff。 |
+| `lock` | 把已接受方案写成 task contract。 | `plans/issue-<id>/plan.md` 和 `tasks.md`。 |
+| `execute` | 执行一个已接受 task，运行验证，记录 proof。 | 可 review 的任务结果和验证证据。 |
 
-`forma-showhand` 是 `forma-execute` 的自动驾驶入口。计划锁定后，它连续推进剩余已接受 tasks，直到阻塞、验证没通过或需要人介入。
+`showhand` 是 `execute` 的自动驾驶入口。计划锁定后，它连续推进剩余已接受 tasks，直到阻塞、验证没通过或需要人介入。
 
-这些技能名是默认值。Profile 或 creator 可以改名，但阶段语义应该保持不变。
+这些阶段名是默认值。Plugin 用 `forma:plan` 这类 `forma:*`，direct skill bundle 用 `forma-plan` 这类 `forma-*` skill。Profile 或 creator 可以改生成名，但阶段语义应该保持不变。
 
 ## 技能边界
 
 Contract 有价值，是因为每个阶段的权限不同。
 
-| 对外技能 | 允许 | 不允许 |
+| 阶段 | 允许 | 不允许 |
 |---|---|---|
-| `forma-plan` | 澄清 goal、scope、approach、validation、plan strategy 和边界。 | 检查仓库、写计划文件或实现。 |
-| `forma-ground` | 读取文件、检查仓库状态、产出 grounding。 | 写文件、运行会修改状态的命令、决定最终执行任务。 |
-| `forma-lock` | 在方案已经收敛后写入已接受计划和任务契约。 | 编造缺失范围、跳过 grounding、扩大验收条件。 |
-| `forma-execute` | 实现当前已接受 task，并运行对应验证。 | 执行未接受 task、重写计划、绕过评审门禁继续。 |
-| `forma-showhand` | 从已锁定任务列表恢复执行，并逐项套用 `forma-execute`。 | 绕过缺失计划、缺失证明、权限不清或已阻塞路线。 |
+| `plan` | 澄清 goal、scope、approach、validation、plan strategy 和边界。 | 检查仓库、写计划文件或实现。 |
+| `ground` | 读取文件、检查仓库状态、产出 grounding。 | 写文件、运行会修改状态的命令、决定最终执行任务。 |
+| `lock` | 在方案已经收敛后写入已接受计划和任务契约。 | 编造缺失范围、跳过 grounding、扩大验收条件。 |
+| `execute` | 实现当前已接受 task，并运行对应验证。 | 执行未接受 task、重写计划、绕过评审门禁继续。 |
+| `showhand` | 从已锁定任务列表恢复执行，并逐项套用 `execute`。 | 绕过缺失计划、缺失证明、权限不清或已阻塞路线。 |
 
 ## 读一个 Task Contract
 
@@ -91,7 +91,7 @@ Workflow contract 应说明 agent 在行动前必须使用哪些证据。
 - 验证命令和证明要求；
 - 必要证据缺失时明确标出 unknown。
 
-证据规则应该放在需要它的阶段里。例如，来源读取通常属于 `forma-ground`；最终任务验证属于 `forma-lock` 和 `forma-execute`。
+证据规则应该放在需要它的阶段里。例如，来源读取通常属于 `ground`；最终任务验证属于 `lock` 和 `execute`。
 
 ## 执行边界
 
@@ -112,13 +112,13 @@ Workflow contract 应说明 agent 在行动前必须使用哪些证据。
 
 验证不只是命令列表，而是任务完成的证明路径。
 
-`forma-lock` 应把验证预期写入 task contract。`forma-execute` 应先运行最窄的相关检查，再运行计划要求的共享门禁。`forma-showhand` 会重复这条已接受 task 执行回路。
+`lock` 应把验证预期写入 task contract。`execute` 应先运行最窄的相关检查，再运行计划要求的共享门禁。`showhand` 会重复这条已接受 task 执行回路。
 
 如果证明缺失、过期，或不属于当前已接受 task，contract 应让 agent 停下或要求修正计划。
 
 ## Showhand
 
-`forma-showhand` 是 `forma-execute` 连续执行的自动驾驶入口。review 完毕、方案固定后，用它让 agent 沿着已接受任务列表继续推进。
+`showhand` 是 `execute` 连续执行的自动驾驶入口。review 完毕、方案固定后，用它让 agent 沿着已接受任务列表继续推进。
 
 它仍然只在现有 contract 能覆盖下一步时继续。遇到这些情况应该停止：
 

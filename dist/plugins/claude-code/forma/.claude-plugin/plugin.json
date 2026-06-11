@@ -2,7 +2,7 @@
   "author": {
     "name": "Forma"
   },
-  "description": "Generic Plan-First workflow bundle for agents.",
+  "description": "Workflows for Forma development, from scoped planning through verified execution.",
   "name": "forma",
   "skills": "./skills/",
   "version": "0.1.1"

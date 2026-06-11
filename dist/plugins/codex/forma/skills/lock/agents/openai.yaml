@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forma Lock"
+  short_description: "Finalize the Forma plan, tasks, validation gates, and generated-output policy."
+  default_prompt: "$forma:lock: 把已收敛并 grounding 过的 Forma 自我迭代计划写入 plan.md/tasks.md，并明确每个 task 的验证和 generated baseline 边界。"

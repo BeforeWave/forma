@@ -42,11 +42,14 @@ reports the output path and install hints.
 After installing the generated output, start a new thread:
 
 ```text
-Use forma-plan to plan this issue first.
+Use forma:plan to plan this issue first.
 
 Issue:
 <paste the current issue, problem context, or task goal here>
 ```
+
+Use `forma:*` triggers for plugin output. If you installed a direct skill
+bundle instead, use its `forma-*` skill triggers.
 
 The first useful output should be a proposal, not a patch. It should state the
 goal, scope, project rules, and validation approach before touching files.
@@ -54,19 +57,19 @@ goal, scope, project rules, and validation approach before touching files.
 If repository evidence is needed, continue with:
 
 ```text
-Use forma-ground to gather the evidence needed for this plan.
+Use forma:ground to gather the evidence needed for this plan.
 ```
 
 After evidence and the approach are accepted, lock the task contract:
 
 ```text
-Use forma-lock to write the plan and task contract.
+Use forma:lock to write the plan and task contract.
 ```
 
 Then execute one accepted task:
 
 ```text
-Use forma-execute to execute the next accepted task.
+Use forma:execute to execute the next accepted task.
 ```
 
 ## 3. Inspect The Outputs

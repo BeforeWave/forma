@@ -97,8 +97,8 @@ Required options:
 Optional inputs:
 
 - `--profile <file>`: top-level tracked profile. If omitted, Forma emits the
-  generic skills `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`,
-  and `forma-showhand`.
+  generic direct skills for the `plan`, `ground`, `lock`, `execute`, and
+  `showhand` stages with the `forma-*` prefix.
 
 Optional development override:
 
@@ -124,17 +124,16 @@ plugin output uses `.claude-plugin/plugin.json` with the same root manifest and
 nested `skills/<skill-id>/` layout. Plugin output does not emit
 `dist/skill-bundles` or any sibling bundle output.
 
-For a tracked profile, the Codex plugin id is the profile `bundle.name`. The
-plugin display name is derived from the same value, and `plugin.json` points to
-the nested `./skills/` directory. Nested skill names follow the emitted skill
-names in `.forma-manifest.json`. If a profile renames skills with
-`stages.<stage>.name`, the plugin exposes those renamed skills.
+For a tracked profile, the plugin id is the profile `bundle.name`. The plugin
+display name is derived from the same value, and `plugin.json` points to the
+nested `./skills/` directory. Plugin-local skill names strip the exact
+`<plugin-id>-` prefix when present. For plugin `forma`, the default local stages
+are `plan`, `ground`, `lock`, `execute`, and `showhand`.
 
-For Claude Code plugin output, `plugin.json` uses the profile `bundle.name` as
-the plugin name. Plugin-local skill names strip the exact `<plugin-name>-`
-prefix when present. For plugin `forma`, `forma-plan` becomes `plan`.
-Codex plugin output keeps emitted skill names such as `forma-plan`; do not rely
-on `plugin:skill` or `$plugin:skill` colon triggering for Codex.
+Codex plugin output also records qualified names such as `forma:plan` in the
+manifest and in Codex metadata prompts. Use `forma:*` triggers for Codex plugin
+skills. Direct skill bundles are the shape that uses standalone `forma-*` skill
+names.
 
 Required options:
 
@@ -144,8 +143,7 @@ Required options:
 Optional inputs:
 
 - `--profile <file>`: top-level tracked profile. If omitted, the plugin exposes
-  `forma-plan`, `forma-ground`, `forma-lock`, `forma-execute`, and
-  `forma-showhand`.
+  plugin-local `plan`, `ground`, `lock`, `execute`, and `showhand` stages.
 
 Next action: run `forma verify <output-dir>`. Install Codex plugins through
 Codex marketplace/plugin UI. Install Claude Code plugin roots with
@@ -295,7 +293,9 @@ Rules:
 - `name` and `directory` must be lower kebab-case.
 - Semantic stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`.
 - When the same profile is used with `forma create-plugin`, the plugin id stays
-  `bundle.name` and the nested plugin skills follow the renamed emitted skills.
+  `bundle.name`; plugin-local skills strip that exact prefix when present. Codex
+  plugin triggers use the resulting `<plugin-id>:<local-skill>` form, such as
+  `forma:plan` for the default Forma plugin.
 
 ### One-Off Creator Names
 
@@ -315,11 +315,11 @@ Rules:
 
 - The creator-generated injection should use `rename.prefix` to produce `<prefix>-plan`, `<prefix>-ground`, `<prefix>-lock`, `<prefix>-execute`, and `<prefix>-showhand`.
 - The creator-generated injection should use `rename.stages` only when overriding individual stage names.
-- Internal injection maps use internal stage keys (`shape`, `gauge`, `seal`, `pour`, `flow`), not public skill ids such as `forma-plan` or `forma-showhand`.
+- Internal injection maps use internal stage keys (`shape`, `gauge`, `seal`, `pour`, `flow`), not final output names such as `plan`, `showhand`, or `forma-*` direct skill names.
 - Names must be unique kebab-case strings and must not be bare stage names like `shape` or `flow`.
 - Creator injections do not accept profile-style `stages.shape.name`. Durable names belong in profiles; one-off names belong in `rename`.
 - For plugin output from `forma-creator`, `rename.prefix` also becomes the plugin id/name. Without a prefix, the plugin id/name remains `forma`.
-- Claude Code plugin-local skill names strip that exact plugin-name prefix when present; Codex plugin skill names keep the emitted names.
+- Plugin-local skill names strip that exact plugin-name prefix when present. Codex plugin triggers use `<plugin-id>:<local-skill>`, with `forma:*` for the default Forma plugin; direct skill bundles use `forma-*`.
 
 After renaming, verify the generated bundle:
 

@@ -882,11 +882,12 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     )
 
     assert verify(plugin_dir).passed
-    assert (plugin_dir / "skills" / "forma-plan" / "SKILL.md").is_file()
-    assert (plugin_dir / "skills" / "forma-showhand" / "SKILL.md").is_file()
-    assert (plugin_dir / "skills" / "forma-reconcile" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "plan" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "showhand" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert not (plugin_dir / "skills" / "forma-plan").exists()
     plan_template = (
-        plugin_dir / "skills" / "forma-lock" / "references" / "plan-template.md"
+        plugin_dir / "skills" / "lock" / "references" / "plan-template.md"
     ).read_text(encoding="utf-8")
     assert "## Iteration Area" in plan_template
     assert "`creator-profile`: Layer 3 creator, profile schema, or profile stack changes." in plan_template
@@ -905,8 +906,18 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
         (plugin_dir / ".forma-manifest.json").read_text(encoding="utf-8")
     )
     assert manifest["profile"]["bundle_name"] == "forma"
-    assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
-    assert manifest["emitted_skills"]["hone"]["name"] == "forma-reconcile"
+    assert manifest["emitted_skills"]["shape"]["name"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
+    assert manifest["emitted_skills"]["shape"]["qualified_name"] == "forma:plan"
+    assert manifest["emitted_skills"]["hone"]["name"] == "reconcile"
+    assert manifest["emitted_skills"]["hone"]["directory"] == "reconcile"
+    assert manifest["emitted_skills"]["hone"]["qualified_name"] == "forma:reconcile"
+    openai_yaml = (
+        plugin_dir / "skills" / "plan" / "agents" / "openai.yaml"
+    ).read_text(encoding="utf-8")
+    assert "$forma:plan" in openai_yaml
+    assert "$forma:forma-plan" not in openai_yaml
+    assert "$forma-plan" not in openai_yaml
     _assert_base_origin(manifest, "codex", "codex-plugin")
 
 
@@ -1218,7 +1229,7 @@ def test_explain_profile_outputs_canonical_guidance() -> None:
         in result.output
     )
     assert "Stage Key Boundary" in result.output
-    assert "Generated public skill ids" in result.output
+    assert "Generated output names" in result.output
     assert "`constraints.default`: Keep this minimal." in result.output
     assert "`conditional_overlays`: Heavy route-specific rules" in result.output
     assert "| User constraint | Injection/profile target |" in result.output
@@ -1256,7 +1267,7 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
     )
     assert "Stage Key Boundary" in payload["sources"][0]["content"]
     assert "Profile Authoring Principles" in payload["sources"][1]["content"]
-    assert "Generated public skill ids" in payload["sources"][1]["content"]
+    assert "Generated output names" in payload["sources"][1]["content"]
     assert "classification table" in payload["markdown"]
     assert "constraints.default" in payload["markdown"]
     assert "Script Resource Injection Template" in payload["markdown"]

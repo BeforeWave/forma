@@ -80,10 +80,10 @@ of silently promoting it into the profile.
 Profiles and temporary injection use internal stage keys as schema keys:
 `shape`, `gauge`, `seal`, `pour`, and `flow`.
 
-Generated public skill ids such as `forma-plan`, `forma-ground`, `forma-lock`,
-`forma-execute`, and `forma-showhand` are output names and trigger names. Use
-them as `stages.<stage>.name`, `stages.<stage>.directory`, or `rename.stages`
-values, not as profile or injection map keys.
+Generated output names, such as plugin-local `plan`/`showhand` names or direct
+skill names using the `forma-*` pattern, are output names and trigger names.
+Use them as `stages.<stage>.name`, `stages.<stage>.directory`, or
+`rename.stages` values, not as profile or injection map keys.
 
 ## Constraint Placement
 

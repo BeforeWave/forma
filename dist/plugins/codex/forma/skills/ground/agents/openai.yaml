@@ -1,0 +1,4 @@
+interface:
+  display_name: "Forma Ground"
+  short_description: "Read Forma repository facts and produce a grounding handoff for planning."
+  default_prompt: "$forma:ground: 只读确认 Forma 当前计划、文档、methodology、creator、profiles、tests 和 generated baseline 状态，输出 grounding handoff。"

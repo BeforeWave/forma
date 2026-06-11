@@ -215,12 +215,13 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
         f"# Agent Target: {label}",
         "",
         f"This `forma-creator` bundle is fixed to `{target_agent}`. Its "
-        "generated plan-first output must contain exactly five skill "
-        "directories. Defaults are:",
+        "generated plan-first output must contain exactly five stage skill "
+        "directories. Direct bundle defaults use the `forma-*` pattern for:",
         "",
     ]
     for kind in DEFAULT_ENABLED_KINDS:
-        lines.append(f"- `{_creator_skill_name(kind)}/` - {descriptions[kind]}")
+        stage_name = _creator_skill_name(kind).removeprefix("forma-")
+        lines.append(f"- `{stage_name}` - {descriptions[kind]}")
     lines.extend(["", "## Output Contract", ""])
     lines.extend(
         [
@@ -267,9 +268,9 @@ def _interactive_constraint_contract() -> List[str]:
         "- The user may provide one-off special constraints for the generated "
         "five-skill bundle during this interaction.",
         "- Before writing the temporary JSON, show the default installable skill "
-        "names: `shape -> forma-plan`, `gauge -> forma-ground`, "
-        "`seal -> forma-lock`, `pour -> forma-execute`, and "
-        "`flow -> forma-showhand`.",
+        "names: direct skill bundles use the `forma-*` pattern for "
+        "`shape -> plan`, `gauge -> ground`, `seal -> lock`, "
+        "`pour -> execute`, and `flow -> showhand`.",
         "- Ask whether the user wants to rename any final installable skill "
         "names. If yes, encode exact kebab-case names under `rename.stages`; "
         "if no, omit `rename` and use the defaults.",
@@ -309,10 +310,10 @@ def _interactive_constraint_contract() -> List[str]:
 
 def _codex_output_contract() -> List[str]:
     lines = [
-        "- Generate a Codex-ready workflow bundle root containing `forma-plan/`, "
-        "`forma-ground/`, `forma-lock/`, `forma-execute/`, and "
-        "`forma-showhand/` by "
-        "default, or the exact `rename.stages` names confirmed by the user.",
+        "- Generate a Codex-ready direct skill bundle root containing the five "
+        "default `forma-*` stage directories for `plan`, `ground`, `lock`, "
+        "`execute`, and `showhand`, or the exact `rename.stages` names "
+        "confirmed by the user.",
         "- If the user asks for Codex plugin output, run `python "
         "scripts/create.py --artifact plugin --output <generated-plugin-path> "
         "--injection-json <temporary-injection.json>`.",
@@ -322,8 +323,8 @@ def _codex_output_contract() -> List[str]:
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
-        "- Do not use generated public skill ids such as `forma-plan` or "
-        "`forma-showhand` as temporary injection JSON keys.",
+        "- Do not use generated output names such as plugin-local `plan` or "
+        "direct skill `forma-*` names as temporary injection JSON keys.",
         "- Every generated skill directory must include `SKILL.md` with "
         "frontmatter containing only `name` and `description`.",
         "- Every generated skill directory must include `agents/openai.yaml` "
@@ -340,10 +341,10 @@ def _codex_output_contract() -> List[str]:
 
 def _claude_output_contract() -> List[str]:
     lines = [
-        "- Generate a Claude Code-ready workflow bundle root containing "
-        "`forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, "
-        "and `forma-showhand/` by "
-        "default, or the exact `rename.stages` names confirmed by the user.",
+        "- Generate a Claude Code-ready direct skill bundle root containing "
+        "the five default `forma-*` stage directories for `plan`, `ground`, "
+        "`lock`, `execute`, and `showhand`, or the exact `rename.stages` "
+        "names confirmed by the user.",
         "- If the user asks for Claude Code plugin output, run `python "
         "scripts/create.py --artifact plugin --output <generated-plugin-path> "
         "--injection-json <temporary-injection.json>`.",
@@ -352,12 +353,13 @@ def _claude_output_contract() -> List[str]:
         "directories; it must not emit sibling `skill-bundles/` output.",
         "- For plugin output, strip the exact plugin-name prefix from generated "
         "skill names when present. For plugin `forma`, generated direct skill "
-        "names such as `forma-plan` become plugin-local `plan`.",
+        "names using the `forma-*` pattern become plugin-local `plan`, "
+        "`ground`, `lock`, `execute`, and `showhand` stages.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
-        "- Do not use generated public skill ids such as `forma-plan` or "
-        "`forma-showhand` as temporary injection JSON keys.",
+        "- Do not use generated output names such as plugin-local `plan` or "
+        "direct skill `forma-*` names as temporary injection JSON keys.",
         "- Every generated skill directory must include `SKILL.md` with "
         "frontmatter containing only `name` and `description`.",
         "- Keep bundled references inside each generated skill's own "
@@ -372,17 +374,17 @@ def _claude_output_contract() -> List[str]:
 
 def _opencode_output_contract() -> List[str]:
     lines = [
-        "- Generate an OpenCode-native workflow bundle root containing "
-        "`forma-plan/`, `forma-ground/`, `forma-lock/`, `forma-execute/`, "
-        "and `forma-showhand/` by default, or the exact `rename.stages` names "
-        "confirmed by the user.",
+        "- Generate an OpenCode-native direct skill bundle root containing "
+        "the five default `forma-*` stage directories for `plan`, `ground`, "
+        "`lock`, `execute`, and `showhand`, or the exact `rename.stages` "
+        "names confirmed by the user.",
         "- Do not generate plugin output for OpenCode. OpenCode runtime plugins "
         "are `.opencode/plugins/*.js|ts`, not Forma skill workflow bundles.",
         "- Keep temporary injection JSON stage keys as `shape`, `gauge`, "
         "`seal`, `pour`, and `flow`; do not expose those bare stage keys as "
         "installable skill directory names.",
-        "- Do not use generated public skill ids such as `forma-plan` or "
-        "`forma-showhand` as temporary injection JSON keys.",
+        "- Do not use generated output names such as plugin-local `plan` or "
+        "direct skill `forma-*` names as temporary injection JSON keys.",
         "- Every generated skill directory must include `SKILL.md` with "
         "frontmatter containing `name`, `description`, `compatibility: "
         "opencode`, and string-to-string `metadata`.",
