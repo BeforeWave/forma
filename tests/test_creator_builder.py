@@ -489,12 +489,17 @@ def test_installed_codex_creator_script_can_emit_plugin_artifact(
     assert "Codex plugin generated, not installed." in result.stdout
     assert "name: forma" in result.stdout
     assert "root:" in result.stdout
-    assert "Install with Codex:" in result.stdout
+    assert "Before install:" in result.stdout
+    assert "Recommended Codex install path:" in result.stdout
+    assert "run drift before any postprocess" in result.stdout
+    assert "use `forma verify` as the final gate" in result.stdout
     assert "codex plugin marketplace list" in result.stdout
+    assert "Ask the user to choose an existing marketplace" in result.stdout
     assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in result.stdout
     assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in result.stdout
     assert "codex plugin add forma@<marketplace-name>" in result.stdout
     assert "Codex plugin UI" in result.stdout
+    assert "codex plugin marketplace --help" in result.stdout
     assert "Start a new Codex thread" in result.stdout
     assert "Forma does not install Codex plugins" in result.stdout
     assert (generated / ".codex-plugin" / "plugin.json").is_file()
@@ -589,6 +594,49 @@ def test_installed_codex_creator_plugin_prefix_uses_plugin_identity(
     assert manifest["emitted_skills"]["shape"]["name"] == "plan"
     assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
     assert manifest["emitted_skills"]["shape"]["qualified_name"] == "acme-plan-first:plan"
+    assert verify(generated).passed
+
+
+def test_installed_codex_creator_plugin_uses_injected_display_name(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "creator-dist"
+    creator = build_creator(META_SOURCE, output_root, "codex")
+    injection = tmp_path / "plugin-display-name-injection.json"
+    generated = tmp_path / "generated-plugin"
+    injection.write_text(
+        json.dumps(
+            {
+                "rename": {"prefix": "api-tools"},
+                "plugin": {"display_name": "API Tools"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(creator / "scripts" / "create.py"),
+            "--artifact",
+            "plugin",
+            "--output",
+            str(generated),
+            "--injection-json",
+            str(injection),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    plugin = json.loads(
+        (generated / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    assert plugin["id"] == "api-tools"
+    assert plugin["name"] == "api-tools"
+    assert plugin["interface"]["displayName"] == "API Tools"
     assert verify(generated).passed
 
 

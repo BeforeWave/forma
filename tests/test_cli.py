@@ -145,7 +145,9 @@ def test_command_help_includes_agent_next_steps() -> None:
             [
                 "Compile project rules into a target-specific plugin source.",
                 "Verify the plugin source:",
-                "Install Codex plugins through Codex marketplace/plugin UI, not forma install.",
+                "ask the user which marketplace to use",
+                "codex plugin add <plugin-id>@<marketplace-name>",
+                "Do not install Codex plugins with forma install.",
                 "Install Claude Code plugin roots with forma install --target claude-code.",
             ],
         ),
@@ -249,7 +251,10 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "forma create-bundle --target opencode" in result.output
     assert "forma install --target opencode" in result.output
     assert ".opencode/skills" in result.output
-    assert "Codex plugins install through Codex marketplace/plugin UI" in result.output
+    assert "Codex plugin install state belongs to Codex" in result.output
+    assert "ask the user which marketplace to use" in result.output
+    assert "codex plugin marketplace list" in result.output
+    assert "codex plugin add <plugin-id>@<marketplace-name>" in result.output
     assert "Claude Code plugin roots can be installed" in result.output
     assert (
         "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
@@ -391,12 +396,17 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     assert "Codex plugin generated, not installed." in result.output
     assert "name: forma" in result.output
     assert "root:" in result.output
-    assert "Install with Codex:" in result.output
+    assert "Before install:" in result.output
+    assert "Recommended Codex install path:" in result.output
+    assert "run drift before any postprocess" in result.output
+    assert "use `forma verify` as the final gate" in result.output
     assert "codex plugin marketplace list" in result.output
+    assert "Ask the user to choose an existing marketplace" in result.output
     assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in result.output
     assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in result.output
     assert "codex plugin add forma@<marketplace-name>" in result.output
     assert "Codex plugin UI" in result.output
+    assert "codex plugin marketplace --help" in result.output
     assert "Start a new Codex thread" in result.output
     assert "Forma does not install Codex plugins" in result.output
     assert (output / ".codex-plugin" / "plugin.json").is_file()
@@ -674,6 +684,73 @@ def test_profile_adopt_round_trips_profile_codex_plugin(tmp_path: Path) -> None:
             "codex",
             "--profile",
             str(profile_file),
+            "--output",
+            str(regenerated),
+        ],
+    )
+
+    assert create.exit_code == 0, create.output
+    assert normalized_payload_digest(regenerated) == normalized_payload_digest(artifact)
+
+
+def test_profile_adopt_preserves_codex_plugin_display_name(tmp_path: Path) -> None:
+    profile_file = tmp_path / "api-tools.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: api-tools
+bundle:
+  name: api-tools
+  description: API tools workflow.
+plugin:
+  display_name: API Tools
+""".lstrip(),
+        encoding="utf-8",
+    )
+    artifact = tmp_path / "profile-plugin"
+    output = tmp_path / "adopted-profile-plugin"
+    runner = CliRunner()
+
+    create_artifact = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(profile_file),
+            "--output",
+            str(artifact),
+        ],
+    )
+    assert create_artifact.exit_code == 0, create_artifact.output
+
+    result = runner.invoke(
+        main,
+        [
+            "profile",
+            "adopt",
+            str(artifact),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    adopted_profile_file = output / "profile.yaml"
+    profile = yaml.safe_load(adopted_profile_file.read_text(encoding="utf-8"))
+    assert profile["bundle"]["name"] == "api-tools"
+    assert profile["plugin"]["display_name"] == "API Tools"
+
+    regenerated = tmp_path / "regenerated-profile-plugin"
+    create = runner.invoke(
+        main,
+        [
+            "create-plugin",
+            "--target",
+            "codex",
+            "--profile",
+            str(adopted_profile_file),
             "--output",
             str(regenerated),
         ],
@@ -1451,12 +1528,17 @@ def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> 
     assert "Codex plugin generated, not installed." in install.output
     assert "name: forma" in install.output
     assert "root:" in install.output
-    assert "Install with Codex:" in install.output
+    assert "Before install:" in install.output
+    assert "Recommended Codex install path:" in install.output
+    assert "run drift before any postprocess" in install.output
+    assert "use `forma verify` as the final gate" in install.output
     assert "codex plugin marketplace list" in install.output
+    assert "Ask the user to choose an existing marketplace" in install.output
     assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in install.output
     assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in install.output
     assert "codex plugin add forma@<marketplace-name>" in install.output
     assert "Codex plugin UI" in install.output
+    assert "codex plugin marketplace --help" in install.output
     assert "Start a new Codex thread" in install.output
     assert "Forma does not install Codex plugins" in install.output
     assert not (project / ".codex" / "plugins").exists()

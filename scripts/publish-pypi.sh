@@ -101,6 +101,12 @@ fi
 echo "Version: ${package_version}"
 echo "Packages: ${packages[*]}"
 
+changelog_args=()
+if [[ "$publish" -eq 1 ]]; then
+  changelog_args+=(--publish)
+fi
+python3 scripts/check-changelog-version.py --version "$package_version" "${changelog_args[@]}"
+
 uv run --extra dev python -m pytest -p no:cacheprovider tests/
 
 for package_name in "${packages[@]}"; do

@@ -9,4 +9,4 @@ from forma_verifier.runner import verify, classify_bundle, discover_skills
 from forma_verifier.report import Report, RuleResult
 
 __all__ = ["verify", "classify_bundle", "discover_skills", "Report", "RuleResult"]
-__version__ = "0.1.1"
+__version__ = "0.1.2"

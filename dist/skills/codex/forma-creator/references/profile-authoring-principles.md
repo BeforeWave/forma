@@ -1,23 +1,29 @@
 # Profile Authoring Principles
 
-Use this reference when an agent helps a user draft a durable Forma profile or
-decide whether a one-off request should remain a temporary injection.
+Use this reference when an agent helps a user turn project facts into a Forma
+profile, decide whether that profile should remain temporary, or decide whether
+a one-off request belongs in temporary injection.
 
 ## Profile Purpose
 
-- Profiles are durable workflow source. Treat reviewed profile files like code.
-- A profile should capture repeated behavior for an owning repository or team,
-  not every one-off instruction from a single generation request.
+- Profiles are structured project-rule input for workflow generation. They
+  describe stage constraints, tool habits, validation, proof, and stop
+  conditions.
+- A profile may be temporary input for a trial workflow. Commit it as durable
+  project source only when the rules should be reused by the owning repository
+  or team.
+- A profile should capture reusable behavior, not every one-off instruction
+  from a single generation request.
 - Temporary injection JSON is the right place for generation-only constraints
   that should not become tracked source.
-- When a user asks for durable behavior, put the profile in the owning
-  repository that owns those workflow constraints. Keep Forma examples
-  sanitized.
+- When a user asks to keep the rules for long-term reuse, put the profile in
+  the owning repository that owns those workflow constraints. Keep Forma
+  examples sanitized.
 
-## Durable Profile Proposal Review
+## Profile Proposal Review
 
-When proposing a durable tracked profile from repository rules, do not answer
-with only YAML. Include both:
+When proposing a profile from repository rules, do not answer with only YAML.
+Include both:
 
 1. `Profile YAML Proposal`
 2. `Profile Review Packet`
@@ -31,10 +37,10 @@ Do not write or modify profile files during the proposal step unless the user
 explicitly asks you to persist the profile. First return the `Profile YAML
 Proposal` and `Profile Review Packet` for review.
 
-After the user confirms the proposal, write the profile YAML into the owning
-repository's profile path. If preserving the review packet is requested, write
-it as a review artifact such as `profiles/<profile-name>/REVIEW.md`; it is not
-compiled profile source.
+After the user confirms the proposal, write the profile YAML to the requested
+temporary path or owning repository profile path. If preserving the review
+packet is requested, write it as a review artifact such as
+`profiles/<profile-name>/REVIEW.md`; it is not compiled profile source.
 
 ### Profile Review Packet: Included Rules
 
@@ -84,6 +90,11 @@ Generated output names, such as plugin-local `plan`/`showhand` names or direct
 skill names using the `forma-*` pattern, are output names and trigger names.
 Use them as `stages.<stage>.name`, `stages.<stage>.directory`, or
 `rename.stages` values, not as profile or injection map keys.
+
+For plugin output, keep `bundle.name` as the lower kebab-case plugin id. Use
+`plugin.display_name` only when the plugin install surface needs display casing
+or wording that should not change the plugin id, generated skill names, or
+triggers.
 
 ## Constraint Placement
 
@@ -135,10 +146,11 @@ skill will receive the script under `scripts/<dest>`, so stage constraints
 should cite that generated path and concrete source type, for example
 `python3 scripts/adapter_tool.py ...`.
 
-## Durable Versus One-Off
+## Temporary Versus Long-Term
 
-Promote a constraint to a tracked profile when it is expected to repeat, has a
-clear owning repository or team, and should be reviewed with source changes.
+Commit a profile or promote a constraint into a tracked profile when it is
+expected to repeat, has a clear owning repository or team, and should be
+reviewed with source changes.
 
 Keep a constraint in temporary injection when it is specific to the current
 generation, uses local/private values that should not be committed, or has not
@@ -148,7 +160,7 @@ yet been accepted as durable workflow policy.
 
 - Do not copy README, AGENTS, governance docs, issue text, or other source
   documents verbatim into a profile or injection.
-- Extract the durable workflow rule, shorten it, and place it at the narrowest
+- Extract the workflow rule, shorten it, and place it at the narrowest
   effective target.
 - Do not store private paths, credentials, business secrets, or
   organization-only commands in Forma's committed examples.
@@ -176,5 +188,6 @@ language, show the user a short table before generation or commit:
   into conditional overlays.
 - Use stage-specific constraints for planning and materialization rules instead
   of making execution stages rediscover broad context.
-- Prefer a tracked profile only after repeated behavior is clear; otherwise use
-  temporary injection and mark the constraint non-durable.
+- Prefer committing a profile only after repeated behavior is clear. Otherwise
+  keep the profile temporary or use temporary injection and mark the constraint
+  non-durable.

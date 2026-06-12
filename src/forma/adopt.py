@@ -59,6 +59,7 @@ class ArtifactInfo:
     artifact_kind: str
     plugin_id: str | None
     plugin_description: str | None
+    plugin_display_name: str | None
 
 
 def adopt_profile(
@@ -133,6 +134,7 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
         plugin = _load_json(root / ".codex-plugin" / "plugin.json")
         plugin_id = _required_string(plugin, "id", "plugin.id")
         plugin_description = _optional_string(plugin, "description")
+        plugin_display_name = _codex_plugin_display_name(plugin)
         return ArtifactInfo(
             root=root,
             workflow_root=root / "skills",
@@ -141,6 +143,7 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
             artifact_kind=ARTIFACT_PLUGIN,
             plugin_id=plugin_id,
             plugin_description=plugin_description,
+            plugin_display_name=plugin_display_name,
         )
     if (root / ".claude-plugin" / "plugin.json").is_file():
         if target != "claude-code":
@@ -156,6 +159,7 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
             artifact_kind=ARTIFACT_CLAUDE_CODE_PLUGIN,
             plugin_id=plugin_id,
             plugin_description=plugin_description,
+            plugin_display_name=None,
         )
     return ArtifactInfo(
         root=root,
@@ -165,6 +169,7 @@ def _load_artifact_info(artifact_path: Path) -> ArtifactInfo:
         artifact_kind=ARTIFACT_BUNDLE,
         plugin_id=None,
         plugin_description=None,
+        plugin_display_name=None,
     )
 
 
@@ -253,6 +258,10 @@ def _write_candidate_profile(
         },
         "bundle": bundle,
     }
+    if info.plugin_id and info.plugin_display_name:
+        derived_display_name = _plugin_display_name(info.plugin_id)
+        if info.plugin_display_name != derived_display_name:
+            profile["plugin"] = {"display_name": info.plugin_display_name}
     org_name = _manifest_profile_string(info, "org_name")
     if org_name:
         profile["org"] = {"name": org_name}
@@ -873,3 +882,14 @@ def _optional_string(mapping: Mapping[str, Any], key: str) -> str | None:
     if isinstance(value, str) and value.strip():
         return value.strip()
     return None
+
+
+def _codex_plugin_display_name(plugin: Mapping[str, Any]) -> str | None:
+    interface = plugin.get("interface")
+    if not isinstance(interface, Mapping):
+        return None
+    return _optional_string(interface, "displayName")
+
+
+def _plugin_display_name(plugin_id: str) -> str:
+    return " ".join(part.capitalize() for part in plugin_id.split("-"))

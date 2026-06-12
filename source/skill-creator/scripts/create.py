@@ -52,7 +52,7 @@ LOCAL_ADOPTION_REPORTS = frozenset({"adoption-report.json"})
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
-CODEX_PLUGIN_VERSION = "0.1.1"
+CODEX_PLUGIN_VERSION = "0.1.2"
 CODEX_PLUGIN_DEVELOPER = "Forma"
 KEBAB_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 REQUIRED_STAGE_SECTIONS = (
@@ -68,6 +68,7 @@ CONDITIONAL_DECISION_SECTION_PLACEHOLDER = "{{ conditional_decision_section }}"
 RUNNER_REFERENCE_NAMES = {"plan-template.md", "tasks-template.md"}
 ALLOWED_TOP_LEVEL_KEYS = {
     "rename",
+    "plugin",
     "stages",
     "resources",
     "skills",
@@ -77,6 +78,7 @@ ALLOWED_TOP_LEVEL_KEYS = {
     "conditional_overlays",
 }
 ALLOWED_RENAME_KEYS = {"prefix", "stages"}
+ALLOWED_PLUGIN_KEYS = {"display_name"}
 ALLOWED_STAGE_CONFIG_KEYS = {"display_name", "short_description", "default_prompt"}
 ALLOWED_SKILL_FIELD_KEYS = {"description"}
 ALLOWED_RESOURCE_BUCKET_KEYS = {"references", "scripts", "files"}
@@ -312,15 +314,26 @@ def format_codex_plugin_install_hint(plugin_root: Path) -> str:
             f"  name: {plugin_name}",
             f"  root: {resolved_root}",
             "",
-            "Install with Codex:",
-            "  Follow the current Codex docs instead of Forma-specific marketplace instructions:",
-            "    https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually",
-            "    https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli",
-            "  Useful commands after the plugin is in a Codex marketplace:",
-            "    codex plugin marketplace list",
+            "Before install:",
+            f"  forma verify {resolved_root}",
+            "  If this output came from a reviewed profile, run drift before any postprocess:",
+            f"    forma drift {resolved_root} --profile <profile.yaml>",
+            "  If you intentionally postprocess the generated artifact, run postprocess after drift",
+            "  and use `forma verify` as the final gate for the postprocessed artifact.",
+            "",
+            "Recommended Codex install path:",
+            "  codex plugin marketplace list",
+            "  Ask the user to choose an existing marketplace or approve creating/registering a new one.",
+            "  Ensure the chosen marketplace catalog points to the generated plugin root.",
             f"    codex plugin add {plugin_name}@<marketplace-name>",
             "  Or install it from the Codex plugin UI.",
             "  Start a new Codex thread so the plugin skills are discovered.",
+            "",
+            "Fallback:",
+            "  If Codex CLI output or marketplace behavior differs, consult current Codex docs or CLI help:",
+            "    https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually",
+            "    https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli",
+            "    codex plugin marketplace --help",
             "",
             "Forma does not install Codex plugins; Codex owns marketplace registration, install, and enabled state.",
         ]
@@ -418,6 +431,7 @@ def _load_injection(path: Path | None) -> dict[str, Any]:
 
 def _validate_injection(raw: Mapping[str, Any], path: Path) -> None:
     _validate_rename(raw.get("rename", {}))
+    _validate_plugin(raw.get("plugin", {}))
     _validate_stage_mapping(raw.get("constraints", {}), "constraints", path)
     _validate_stage_mapping(raw.get("validation_commands", {}), "validation_commands", path)
     extras = raw.get("decision_gate_extras", [])
@@ -482,6 +496,21 @@ def _validate_rename(value: Any) -> None:
             if name in seen:
                 raise ValueError(f"rename.stages has duplicate skill name: {name}")
             seen.add(name)
+
+
+def _validate_plugin(value: Any) -> None:
+    if not value:
+        return
+    if not isinstance(value, dict):
+        raise ValueError("plugin must be an object")
+    unknown = set(value) - ALLOWED_PLUGIN_KEYS
+    if unknown:
+        raise ValueError(f"plugin has unknown keys: {', '.join(sorted(unknown))}")
+    display_name = value.get("display_name")
+    if display_name is not None and (
+        not isinstance(display_name, str) or not display_name.strip()
+    ):
+        raise ValueError("plugin.display_name must be a non-empty string")
 
 
 def _validate_skill_names(skill_names: Mapping[str, str]) -> None:
@@ -700,7 +729,7 @@ def _plugin_manifest(
             },
             "skills": "./skills/",
         }
-    display_name = _plugin_display_name(plugin_id)
+    display_name = _plugin_display_name(plugin_id, injection)
     return {
         "id": plugin_id,
         "name": plugin_id,
@@ -735,7 +764,16 @@ def _plugin_id(injection: Mapping[str, Any]) -> str:
     return value
 
 
-def _plugin_display_name(plugin_id: str) -> str:
+def _plugin_display_name(
+    plugin_id: str,
+    injection: Mapping[str, Any] | None = None,
+) -> str:
+    if injection is not None:
+        plugin = injection.get("plugin", {})
+        if isinstance(plugin, Mapping):
+            display_name = plugin.get("display_name")
+            if isinstance(display_name, str) and display_name.strip():
+                return display_name.strip()
     return " ".join(part.capitalize() for part in plugin_id.split("-"))
 
 

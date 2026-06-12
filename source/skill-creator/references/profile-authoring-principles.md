@@ -91,6 +91,11 @@ skill names using the `forma-*` pattern, are output names and trigger names.
 Use them as `stages.<stage>.name`, `stages.<stage>.directory`, or
 `rename.stages` values, not as profile or injection map keys.
 
+For plugin output, keep `bundle.name` as the lower kebab-case plugin id. Use
+`plugin.display_name` only when the plugin install surface needs display casing
+or wording that should not change the plugin id, generated skill names, or
+triggers.
+
 ## Constraint Placement
 
 - `constraints.default`: Keep this minimal. It applies to every

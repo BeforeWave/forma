@@ -19,7 +19,7 @@ PLUGIN_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."
 )
-CODEX_PLUGIN_VERSION = "0.1.1"
+CODEX_PLUGIN_VERSION = "0.1.2"
 CODEX_PLUGIN_DEVELOPER = "Forma"
 
 
@@ -201,7 +201,7 @@ class WorkflowTargetAdapter:
                 },
                 "skills": "./skills/",
             }
-        display_name = _plugin_display_name(plugin_name)
+        display_name = profile.plugin_display_name or _plugin_display_name(plugin_name)
         return {
             "id": plugin_name,
             "name": plugin_name,

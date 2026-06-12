@@ -24,8 +24,9 @@ final generated skill name on the right side, for example
 - Do not copy README, AGENTS, governance docs, issue text, or other user docs
   verbatim into the injection.
 - Extract only workflow constraints, validation preferences, local references,
-  display text, final installable skill names, and conditional route decisions
-  that affect the generated five-skill bundle.
+  display text, final installable skill names, plugin display metadata, and
+  conditional route decisions that affect the generated five-skill bundle or
+  plugin.
 - Keep source-specific examples concise and sanitized. Do not include private
   paths, credentials, business secrets, or organization-only commands unless
   the current user explicitly wants those values in this one generated bundle.
@@ -58,6 +59,9 @@ Classify every extracted constraint before writing JSON.
 - `resources`: Adapter references, scripts, or support files needed by an
   explicitly selected source-context integration. Add these only when the
   current generation needs that adapter.
+- `plugin.display_name`: Codex plugin install-surface display label. Use this
+  only when plugin output needs brand casing or wording that cannot be derived
+  from `rename.prefix`; it must not change plugin id, skill names, or triggers.
 
 ## Source Adapter Classification
 

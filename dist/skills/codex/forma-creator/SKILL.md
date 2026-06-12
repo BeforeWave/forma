@@ -140,6 +140,9 @@ The temporary injection JSON may contain only these top-level keys:
   skill name. Omit it to use the default public names. Use `rename.prefix` only
   when the desired generated names are `<prefix>-plan`, `<prefix>-ground`,
   `<prefix>-lock`, `<prefix>-execute`, and `<prefix>-showhand`.
+- `plugin`: optional plugin-level metadata for plugin output. Use
+  `plugin.display_name` only when the Codex plugin install-surface display label
+  needs different casing or wording from the plugin id.
 - `stages`: optional `display_name`, `short_description`, and `default_prompt`
   per stage.
 - `skills`: optional `description` per stage.

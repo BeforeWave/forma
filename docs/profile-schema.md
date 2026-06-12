@@ -55,6 +55,7 @@ private workflow commands.
 | `profile` | Stable profile `id` and optional human description. |
 | `includes` | Relative paths or profile ids resolved before the local file. |
 | `bundle` | Review-facing bundle `name` and `description`. |
+| `plugin` | Optional plugin-level display metadata for plugin outputs. |
 | `org` | Optional owning organization or project name. |
 | `stages` | Per-stage installable names, directories, display labels, prompts, and `enabled` flags. |
 | `resources` | Stage resources copied into generated skills as `references`, `scripts`, or `files`. |
@@ -100,6 +101,23 @@ stages:
 
 The stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`. Only the
 installable names, directories, display labels, and prompts are renamed.
+
+## Plugin Display Metadata
+
+When a profile is used with `forma create-plugin`, `bundle.name` remains the
+plugin id and must stay lower kebab-case. Codex plugin `interface.displayName`
+defaults to a title-cased version of that id. Use `plugin.display_name` only
+when the plugin's install-surface brand label needs different casing or wording:
+
+```yaml
+bundle:
+  name: api-tools
+plugin:
+  display_name: API Tools
+```
+
+This does not change the plugin id, the generated skill names, or Codex
+plugin triggers such as `<plugin-id>:plan`.
 
 ## Constraints
 

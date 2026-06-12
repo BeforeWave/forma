@@ -56,6 +56,7 @@ Use this repository when the task involves:
 - Do not write non-temporary absolute filesystem paths into tracked files. Only temporary paths under `/tmp`, `/private/tmp`, or `$TMPDIR` may appear when they are necessary evidence; use relative paths or placeholders instead of local home, workspace, private, credential, or organization-sensitive paths.
 - Record meaningful execution decisions in `plans/issue-<id>/implement-notes.md` when they would help a later task or reviewer understand the work.
 - Verify generated or release artifacts before recommending them: `forma verify <path>`.
+- Treat `CHANGELOG.md` as the source of truth for release notes. GitHub Releases, PyPI, npm, Homebrew, and downstream announcements should derive release wording from the matching version section there; channel-specific notes may be shortened, but must not introduce release claims that are absent from `CHANGELOG.md`.
 
 ## CLI Quick Reference
 
@@ -115,3 +116,9 @@ generate native OpenCode skill bundles only.
 When handing off to another agent, give it the local path or release URL for one
 of those artifacts, ask it to verify the artifact first, then install the local
 verified path into the requested target and scope.
+
+Release processes must check the matching `CHANGELOG.md` version section before
+publishing or announcing a version. If a publishing path is scripted, the script
+should enforce that the version being published has a corresponding changelog
+section. If a publishing path is manual, the handoff or release checklist should
+explicitly cite the `CHANGELOG.md` section used for the release notes.

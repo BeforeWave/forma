@@ -23,6 +23,7 @@ ALLOWED_TOP_LEVEL_KEYS = {
     "profile",
     "includes",
     "bundle",
+    "plugin",
     "org",
     "stages",
     "resources",
@@ -35,6 +36,7 @@ ALLOWED_TOP_LEVEL_KEYS = {
 }
 ALLOWED_PROFILE_KEYS = {"id", "description"}
 ALLOWED_BUNDLE_KEYS = {"name", "description"}
+ALLOWED_PLUGIN_KEYS = {"display_name"}
 ALLOWED_ORG_KEYS = {"name"}
 ALLOWED_SKILL_KEYS = set(KINDS)
 ALLOWED_SKILL_FIELD_KEYS = {"description"}
@@ -122,6 +124,7 @@ class ProfileConfig:
     resolved_paths: Tuple[Path, ...]
     bundle_name: str
     bundle_description: str
+    plugin_display_name: str
     org_name: str
     stages: Mapping[str, StageConfig]
     resources: Mapping[str, Tuple[ResourceSpec, ...]]
@@ -170,6 +173,7 @@ def load_profile(profile_file: Path) -> ProfileConfig:
         resolved_paths=tuple(resolved_paths),
         bundle_name=merged["bundle"].get("name") or top_profile_id,
         bundle_description=merged["bundle"].get("description") or "",
+        plugin_display_name=merged["plugin"].get("display_name") or "",
         org_name=merged["org_name"] or "Local Team",
         stages=_build_stage_configs(merged["stages"]),
         resources=_copy_resources(merged["resources"]),
@@ -245,6 +249,7 @@ def _load_profile_file(path: Path) -> Mapping[str, Any]:
     _validate_profile_mapping(raw.get("profile", {}), path)
     _load_includes(raw.get("includes", []), path)
     _load_bundle(raw.get("bundle", {}), path)
+    _load_plugin(raw.get("plugin", {}), path)
     _load_org(raw.get("org"), path)
     _load_stages(raw.get("stages", {}), path)
     _load_resources(raw.get("resources", {}), path)
@@ -269,6 +274,7 @@ def _load_yaml_mapping(path: Path) -> Dict[str, Any]:
 def _empty_merged() -> Dict[str, Any]:
     return {
         "bundle": {},
+        "plugin": {},
         "org_name": "",
         "stages": {},
         "resources": {},
@@ -291,6 +297,10 @@ def _merge_profile(merged: Dict[str, Any], raw: Mapping[str, Any], path: Path) -
     bundle = _load_bundle(raw.get("bundle", {}), None)
     for key, value in bundle.items():
         merged["bundle"][key] = value
+
+    plugin = _load_plugin(raw.get("plugin", {}), None)
+    for key, value in plugin.items():
+        merged["plugin"][key] = value
 
     org_name = _load_org(raw.get("org"), None)
     if org_name:
@@ -389,6 +399,18 @@ def _load_bundle(value: Any, path: Path | None) -> Dict[str, str]:
         keys = ", ".join(sorted(unknown))
         raise ValueError(f"{_prefix(path)}bundle has unknown keys: {keys}")
     return _string_fields(value, "bundle", path)
+
+
+def _load_plugin(value: Any, path: Path | None) -> Dict[str, str]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ValueError(f"{_prefix(path)}plugin must be a mapping")
+    unknown = set(value) - ALLOWED_PLUGIN_KEYS
+    if unknown:
+        keys = ", ".join(sorted(unknown))
+        raise ValueError(f"{_prefix(path)}plugin has unknown keys: {keys}")
+    return _string_fields(value, "plugin", path)
 
 
 def _load_org(value: Any, path: Path | None) -> str:

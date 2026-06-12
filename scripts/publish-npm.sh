@@ -101,6 +101,12 @@ fi
 echo "Python package: ${python_package} ${python_version}"
 echo "npm packages: ${packages[*]}"
 
+changelog_args=()
+if [[ "$publish" -eq 1 ]]; then
+  changelog_args+=(--publish)
+fi
+python3 scripts/check-changelog-version.py --version "$python_version" "${changelog_args[@]}"
+
 if [[ "$publish" -eq 1 ]]; then
   npm whoami >/dev/null
 fi

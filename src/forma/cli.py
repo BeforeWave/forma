@@ -121,7 +121,14 @@ Next:
   Verify the plugin source:
     forma verify <output-dir>
 
-  Install Codex plugins through Codex marketplace/plugin UI, not forma install.
+  For Codex plugins, list marketplaces, ask the user which marketplace to use
+  or whether to create/register a new one, then install with:
+    codex plugin add <plugin-id>@<marketplace-name>
+
+  If Codex CLI output or marketplace behavior differs, consult current Codex
+  plugin docs or `codex plugin marketplace --help`.
+
+  Do not install Codex plugins with forma install.
   Install Claude Code plugin roots with forma install --target claude-code.
 """
 

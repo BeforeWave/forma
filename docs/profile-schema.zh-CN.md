@@ -47,6 +47,7 @@ examples/profiles/sample-software/sample-software-plan-first.yaml
 | `profile` | 稳定 profile `id` 和可选的人类说明。 |
 | `includes` | 相对路径或 profile id，会先于当前文件解析。 |
 | `bundle` | 面向评审的 bundle `name` 和 `description`。 |
+| `plugin` | 可选的 plugin 顶层展示 metadata。 |
 | `org` | 可选的所属组织或项目名。 |
 | `stages` | 为各阶段设置安装名、目录名、展示名、提示词和 `enabled` 开关。 |
 | `resources` | 按阶段复制进生成技能的 `references`、`scripts` 或 `files`。 |
@@ -88,6 +89,23 @@ stages:
 ```
 
 阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。只重命名可安装名称、目录、展示名和提示词。
+
+## Plugin 展示 metadata
+
+当 profile 用于 `forma create-plugin` 时，`bundle.name` 仍然是 plugin id，
+必须保持 lower kebab-case。Codex plugin 的 `interface.displayName` 默认由这个
+id title-case 派生。只有当安装界面的品牌名需要不同大小写或措辞时，才使用
+`plugin.display_name`：
+
+```yaml
+bundle:
+  name: api-tools
+plugin:
+  display_name: API Tools
+```
+
+这个字段不改变 plugin id、生成的 skill 名称，也不改变
+`<plugin-id>:plan` 这类 Codex plugin 触发名。
 
 ## Constraints
 

@@ -307,6 +307,22 @@ stages:
         load_profile(profile_file)
 
 
+def test_profile_rejects_unknown_plugin_keys(tmp_path: Path) -> None:
+    profile_file = tmp_path / "bad.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: bad
+plugin:
+  displayName: Wrong shape
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="plugin has unknown keys: displayName"):
+        load_profile(profile_file)
+
+
 def test_profile_rejects_missing_resource_source(tmp_path: Path) -> None:
     profile_file = tmp_path / "bad.yaml"
     profile_file.write_text(
@@ -990,6 +1006,36 @@ def test_sample_profile_codex_plugin_uses_bundle_name(tmp_path: Path) -> None:
     assert plugin["id"] == "sample-backend-go-github-issue-tracked"
     assert plugin["name"] == "sample-backend-go-github-issue-tracked"
     assert plugin["interface"]["displayName"] == "Sample Backend Go Github Issue Tracked"
+    assert plugin["skills"] == "./skills/"
+
+
+def test_codex_plugin_profile_can_set_plugin_display_name(tmp_path: Path) -> None:
+    profile_file = tmp_path / "api-tools.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: api-tools
+bundle:
+  name: api-tools
+  description: API tools workflow.
+plugin:
+  display_name: API Tools
+""".lstrip(),
+        encoding="utf-8",
+    )
+    plugin_dir = tmp_path / "plugin"
+
+    plugin_json = build_codex_plugin(
+        profile_file=profile_file,
+        output_dir=plugin_dir,
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert verify(plugin_dir).passed
+    plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
+    assert plugin["id"] == "api-tools"
+    assert plugin["name"] == "api-tools"
+    assert plugin["interface"]["displayName"] == "API Tools"
     assert plugin["skills"] == "./skills/"
 
 

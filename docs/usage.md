@@ -124,8 +124,9 @@ plugin output uses `.claude-plugin/plugin.json` with the same root manifest and
 nested `skills/<skill-id>/` layout. Plugin output does not emit
 `dist/skill-bundles` or any sibling bundle output.
 
-For a tracked profile, the plugin id is the profile `bundle.name`. The plugin
-display name is derived from the same value, and `plugin.json` points to the
+For a tracked profile, the plugin id is the profile `bundle.name`. The Codex
+plugin display name defaults to a title-cased version of the same value, or can
+be set explicitly with `plugin.display_name`. `plugin.json` points to the
 nested `./skills/` directory. Plugin-local skill names strip the exact
 `<plugin-id>-` prefix when present. For plugin `forma`, the default local stages
 are `plan`, `ground`, `lock`, `execute`, and `showhand`.
@@ -145,8 +146,20 @@ Optional inputs:
 - `--profile <file>`: top-level tracked profile. If omitted, the plugin exposes
   plugin-local `plan`, `ground`, `lock`, `execute`, and `showhand` stages.
 
-Next action: run `forma verify <output-dir>`. Install Codex plugins through
-Codex marketplace/plugin UI. Install Claude Code plugin roots with
+Next action: run `forma verify <output-dir>`. For profile-generated output, run
+`forma drift <output-dir> --profile <profile.yaml>` before any postprocess. If
+you intentionally postprocess the generated artifact, postprocess after drift
+and use `forma verify <output-dir>` as the final gate.
+
+Install Codex plugins through Codex marketplace/plugin UI, not `forma install`.
+Run `codex plugin marketplace list`, ask the user which existing marketplace to
+use or whether to create/register a new one, ensure that marketplace catalog
+points to the generated plugin root, then install with
+`codex plugin add <plugin-id>@<marketplace-name>`. If Codex CLI output or
+marketplace behavior differs, consult current Codex docs or
+`codex plugin marketplace --help`.
+
+Install Claude Code plugin roots with
 `forma install --target claude-code --scope user|project <output-dir>`.
 
 ### `forma build-creator`
@@ -200,8 +213,10 @@ Overwrite behavior:
 
 - Without `--replace`, existing destination directories are rejected.
 - With `--replace`, Forma replaces only the destination outputs selected by the verified source.
-- Codex plugin install attempts report Codex marketplace guidance,
-  `codex plugin add <plugin>@<marketplace-name>`, and the need to start a new thread after install.
+- Codex plugin install attempts report Codex marketplace guidance, including
+  `codex plugin marketplace list`, user marketplace selection, explicit
+  `codex plugin add <plugin-id>@<marketplace-name>`, and the need to start a
+  new thread after install.
 - Claude Code plugin roots install under `.claude/skills/<plugin-name>` for
   project scope or `$HOME/.claude/skills/<plugin-name>` for user scope.
 
@@ -252,10 +267,13 @@ OpenCode uses direct skill bundles. Generate an OpenCode bundle with
 plugin output.
 
 Codex plugin outputs are local plugin sources. Forma does not install Codex
-plugins. Follow the current Codex docs to add the generated plugin root to a
-Codex marketplace, then run `codex plugin add <plugin>@<marketplace-name>` or
-install it from the Codex plugin UI. Start a new Codex thread after installing
-so the plugin skills are discovered.
+plugins. Run `codex plugin marketplace list`, ask the user which existing
+marketplace to use or whether to create/register a new one, make sure that
+marketplace catalog points to the generated plugin root, then run
+`codex plugin add <plugin-id>@<marketplace-name>` or install it from the Codex
+plugin UI. Start a new Codex thread after installing so the plugin skills are
+discovered. If Codex CLI output or marketplace behavior differs from this guide,
+consult current Codex docs or `codex plugin marketplace --help`.
 
 Claude Code plugin outputs are installable through Forma because Claude Code
 loads skills-directory plugins from `.claude/skills/<plugin-name>`.
@@ -292,6 +310,8 @@ Rules:
 - `name` is the skill frontmatter name.
 - `directory` is the installable skill directory.
 - `display_name` is the target-surface display label.
+- `plugin.display_name` sets the Codex plugin install-surface display label
+  without changing the plugin id, skill names, or triggers.
 - `name` and `directory` must be lower kebab-case.
 - Semantic stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`.
 - When the same profile is used with `forma create-plugin`, the plugin id stays
@@ -321,6 +341,7 @@ Rules:
 - Names must be unique kebab-case strings and must not be bare stage names like `shape` or `flow`.
 - Creator injections do not accept profile-style `stages.shape.name`. Durable names belong in profiles; one-off names belong in `rename`.
 - For plugin output from `forma-creator`, `rename.prefix` also becomes the plugin id/name. Without a prefix, the plugin id/name remains `forma`.
+- For plugin output from `forma-creator`, `plugin.display_name` sets the Codex plugin install-surface display label without changing the plugin id/name.
 - Plugin-local skill names strip that exact plugin-name prefix when present. Codex plugin triggers use `<plugin-id>:<local-skill>`, with `forma:*` for the default Forma plugin; direct skill bundles use `forma-*`.
 
 After renaming, verify the generated bundle:

@@ -182,7 +182,11 @@ def _next_steps(
         plugin_name = codex_plugin_name(source)
         return [
             "Install through Codex marketplace/plugin UI, not `forma install`.",
-            f"After marketplace registration, run `codex plugin add {plugin_name}@<marketplace-name>`.",
+            "Run `codex plugin marketplace list`.",
+            "Ask the user to choose an existing marketplace or approve creating/registering a new one.",
+            "Ensure the chosen marketplace catalog points to this plugin root.",
+            f"Run `codex plugin add {plugin_name}@<marketplace-name>`.",
+            "If Codex CLI output or marketplace behavior differs, consult current Codex plugin docs or `codex plugin marketplace --help`.",
             "Start a new Codex thread after installation.",
         ]
     if artifact_kind == "claude-code-plugin":

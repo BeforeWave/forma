@@ -103,7 +103,10 @@ forma create-plugin --target claude-code --output /tmp/forma-claude-code-plugin
 
 Codex plugin 输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。Claude Code plugin 使用 `.claude-plugin/plugin.json`，同样带根 manifest 和嵌套 `skills/<skill-id>/`。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
 
-对 tracked profile 来说，plugin id 来自 profile 的 `bundle.name`。plugin 展示名也从这个值派生，`plugin.json` 指向嵌套的 `./skills/` 目录。如果 generated skill 名称以精确的 `<plugin-id>-` 开头，Forma 会在 plugin-local skill 名称里去掉这个前缀。比如 plugin `forma` 中，默认 local 阶段是 `plan`、`ground`、`lock`、`execute` 和 `showhand`。
+对 tracked profile 来说，plugin id 来自 profile 的 `bundle.name`。Codex
+plugin 展示名默认从这个值 title-case 派生，也可以用 `plugin.display_name`
+显式设置。`plugin.json` 指向嵌套的 `./skills/` 目录。如果 generated skill
+名称以精确的 `<plugin-id>-` 开头，Forma 会在 plugin-local skill 名称里去掉这个前缀。比如 plugin `forma` 中，默认 local 阶段是 `plan`、`ground`、`lock`、`execute` 和 `showhand`。
 
 Plugin 输出会在 manifest 和 metadata prompt 里记录 `forma:plan` 这类 qualified name。Plugin 用 `forma:*` 触发；direct skill bundle 用 `forma-*`。
 
@@ -116,7 +119,20 @@ Plugin 输出会在 manifest 和 metadata prompt 里记录 `forma:plan` 这类 q
 
 - `--profile <file>`：顶层 tracked profile。省略时，plugin 会暴露 plugin-local 的 `plan`、`ground`、`lock`、`execute` 和 `showhand` 阶段。
 
-下一步：运行 `forma verify <output-dir>`。Codex plugin 通过 Codex marketplace/plugin UI 安装。Claude Code plugin root 用 `forma install --target claude-code --scope user|project <output-dir>` 安装。
+下一步：运行 `forma verify <output-dir>`。对 profile 生成的输出，在任何
+postprocess 之前运行 `forma drift <output-dir> --profile <profile.yaml>`。
+如果有意对生成产物做 postprocess，postprocess 必须在 drift 之后执行，最终 gate
+用 `forma verify <output-dir>`，不要用 drift。
+
+Codex plugin 通过 Codex marketplace/plugin UI 安装，不用 `forma install`。
+先运行 `codex plugin marketplace list`，询问用户选择哪个已有 marketplace，
+或者是否创建/注册一个新的 marketplace；确认所选 marketplace catalog 指向生成出的
+plugin root 后，再运行 `codex plugin add <plugin-id>@<marketplace-name>`。
+如果 Codex CLI 输出或 marketplace 行为和这里不一致，再看当前 Codex 官方文档或
+`codex plugin marketplace --help`。
+
+Claude Code plugin root 用
+`forma install --target claude-code --scope user|project <output-dir>` 安装。
 
 ### `forma build-creator`
 
@@ -162,8 +178,9 @@ forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 
 - 不加 `--replace` 时，如果目标目录已经存在，会拒绝覆盖。
 - 加 `--replace` 时，Forma 只替换 verified source 对应的目标产物。
-- Codex plugin 安装会明确报错，并提示 Codex marketplace 设置、
-  `codex plugin add <plugin>@<marketplace-name>`，以及安装后新开 thread。
+- Codex plugin 安装会明确报错，并提示 Codex marketplace 设置，包括
+  `codex plugin marketplace list`、用户选择 marketplace、显式
+  `codex plugin add <plugin-id>@<marketplace-name>`，以及安装后新开 thread。
 - Claude Code plugin root 会安装到项目级 `.claude/skills/<plugin-name>` 或用户级 `$HOME/.claude/skills/<plugin-name>`。
 
 下一步：安装 skill、skill bundle 或 Claude Code plugin 后，新开 agent thread，让新安装的 skills 被发现。
@@ -204,10 +221,13 @@ OpenCode 使用 direct skill bundle。先用 `forma create-bundle --target openc
 生成 OpenCode bundle，验证后用 `forma install --target opencode` 安装。Forma
 不生成 OpenCode JS/TS runtime plugin。
 
-Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。按照当前 Codex
-官方文档把生成出的 plugin root 加到 Codex marketplace，然后运行
-`codex plugin add <plugin>@<marketplace-name>`，或在 Codex plugin UI 里安装。安装后新开
-Codex thread，这样 plugin skills 才会被发现。
+Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。
+先运行 `codex plugin marketplace list`，询问用户选择哪个已有 marketplace，
+或者是否创建/注册一个新的 marketplace；确认所选 marketplace catalog 指向生成出的
+plugin root 后，再运行 `codex plugin add <plugin-id>@<marketplace-name>`，
+或在 Codex plugin UI 里安装。安装后新开 Codex thread，这样 plugin skills 才会被发现。
+如果 Codex CLI 输出或 marketplace 行为和这里不一致，再看当前 Codex 官方文档或
+`codex plugin marketplace --help`。
 
 Claude Code plugin 输出可以通过 Forma 安装，因为 Claude Code 会从 `.claude/skills/<plugin-name>` 加载 skills-directory plugin。
 
@@ -241,6 +261,7 @@ stages:
 - `name` 是 skill frontmatter 里的名字；
 - `directory` 是安装目录名；
 - `display_name` 是 target 里的展示名；
+- `plugin.display_name` 设置 Codex plugin 安装界面的展示名，不改变 plugin id、skill 名称或触发名；
 - `name` 和 `directory` 必须是 lower kebab-case；
 - 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
 - 同一个 profile 用于 `forma create-plugin` 时，plugin id 仍然是 `bundle.name`；如果生成名带有这个精确前缀，plugin-local skills 会去掉前缀。Plugin 使用最终的 `<plugin-id>:<local-skill>` 形式触发，默认 Forma plugin 是 `forma:plan` 这类 `forma:*`。
@@ -264,6 +285,7 @@ stages:
 - 名字必须唯一，必须是 kebab-case，不能直接叫裸阶段名 `shape` 或 `flow`；
 - creator 的一次性注入不接受 profile 风格的 `stages.shape.name`。长期命名进 profile，临场命名进 `rename`。
 - 通过 `forma-creator` 生成 plugin 时，`rename.prefix` 也会成为 plugin id/name。没有 prefix 时，plugin id/name 保持 `forma`。
+- 通过 `forma-creator` 生成 plugin 时，`plugin.display_name` 设置 Codex plugin 安装界面的展示名，不改变 plugin id/name。
 - Plugin-local skill 名会在存在精确 plugin-name 前缀时去掉该前缀。Plugin 使用 `<plugin-id>:<local-skill>` 触发，默认 Forma plugin 是 `forma:*`；direct skill bundle 使用 `forma-*`。
 
 改名后验证生成 bundle：

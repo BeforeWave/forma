@@ -130,14 +130,27 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         plugin_lines = [
             "## Generate a Codex plugin from an approved profile",
             "",
-            "Install the verified plugin through Codex marketplace/plugin UI, "
-            "not `forma install`.",
+            "Run drift before any postprocess. If the artifact is intentionally "
+            "postprocessed, run postprocess after drift and use `forma verify` "
+            "as the final gate for the postprocessed artifact.",
+            "",
+            "Codex plugin install state belongs to Codex, not `forma install`. "
+            "List configured marketplaces first, then ask the user which "
+            "existing marketplace to use or whether to create/register a new "
+            "one. Always install with an explicit "
+            "`<plugin-id>@<marketplace-name>` selector.",
             "",
             "```bash",
             "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
+            "codex plugin marketplace list",
+            "codex plugin add <plugin-id>@<marketplace-name>",
             "```",
+            "",
+            "If Codex CLI output or marketplace behavior differs from this "
+            "guide, consult current Codex plugin docs or "
+            "`codex plugin marketplace --help`.",
             "",
         ]
     elif target_agent == "claude-code":
@@ -168,20 +181,31 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         plugin_lines = [
             "## Generate plugin output from an approved profile",
             "",
-            "Codex plugins install through Codex marketplace/plugin UI. Claude "
-            "Code plugin roots can be installed with `forma install --target "
+            "Codex plugin install state belongs to Codex. List configured "
+            "marketplaces first, ask the user which marketplace to use or "
+            "whether to create/register a new one, and install with an "
+            "explicit `<plugin-id>@<marketplace-name>` selector. Claude Code "
+            "plugin roots can be installed with `forma install --target "
             "claude-code`.",
             "",
             "```bash",
             "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
+            "codex plugin marketplace list",
+            "codex plugin add <plugin-id>@<marketplace-name>",
             "",
             "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
             "forma install --target claude-code --scope project <dir>",
             "```",
+            "",
+            "If a generated artifact is intentionally postprocessed, run "
+            "postprocess after drift and use `forma verify` as the final gate.",
+            "If Codex CLI output or marketplace behavior differs from this "
+            "guide, consult current Codex plugin docs or "
+            "`codex plugin marketplace --help`.",
             "",
         ]
 
