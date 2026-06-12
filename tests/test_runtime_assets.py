@@ -45,6 +45,9 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     )
     assert "# Forma Agent Guide" in agent.stdout
     assert "Generation targets: `codex`, `claude-code`, `opencode`" in agent.stdout
+    assert "Draft project rules, then generate workflow output" in agent.stdout
+    assert "forma explain profile --target <generation-target>" in agent.stdout
+    assert "Optional on-the-spot creator path" in agent.stdout
     assert "forma verify <dir>/<generation-target>/forma-creator" in agent.stdout
     assert "Omitting `--profile` generates generic no-profile workflow output" in agent.stdout
 

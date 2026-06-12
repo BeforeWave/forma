@@ -127,6 +127,7 @@ def test_command_help_includes_agent_next_steps() -> None:
         (
             ["build-creator", "--help"],
             [
+                "Use this when a user specifically wants an on-the-spot creator run",
                 "Verify the generated creator skill:",
                 "forma install --target codex|claude-code|opencode --scope user|project <creator-path>",
             ],
@@ -176,7 +177,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             ["drift", "--help"],
             [
                 "Check whether generated Forma artifacts are fresh.",
-                "Use --profile when an artifact should still match tracked profile source.",
+                "Use --profile when an artifact should still match profile source.",
                 "Without a source, drift reports base-origin freshness only.",
             ],
         ),
@@ -184,15 +185,15 @@ def test_command_help_includes_agent_next_steps() -> None:
             ["explain", "agent", "--help"],
             [
                 "Explain the agent command path for workflow generation and maintenance.",
-                "creator, generic no-profile output, tracked",
-                "profile generation, plugin output, profile adoption, drift, doctor, and install",
-                "If no reviewed profile exists yet",
+                "profile authoring, workflow generation",
+                "plugin output, optional creator output, profile adoption, drift, doctor, and install",
+                "If no approved profile exists yet",
             ],
         ),
         (
             ["explain", "profile", "--help"],
             [
-                "Explain durable profile authoring and task-rule placement.",
+                "Explain profile authoring and task-rule placement.",
                 "Profile YAML Proposal",
                 "Profile Review Packet",
                 "forma create-bundle or forma create-plugin",
@@ -203,7 +204,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             [
                 "Explain temporary injection classification for one-off workflow rules.",
                 "classify one-off workflow rules",
-                "not durable tracked profile source",
+                "not an approved profile source",
             ],
         ),
         (
@@ -211,7 +212,7 @@ def test_command_help_includes_agent_next_steps() -> None:
             [
                 "Convert a same-origin creator artifact into a candidate profile package.",
                 "Directory to write the candidate profile package.",
-                "Treat the profile as durable project source only after human review",
+                "Treat the profile as approved project source only after human review",
             ],
         ),
     ]
@@ -234,9 +235,11 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "plugin targets: `codex`, `claude-code`" in result.output
     assert "install targets: `codex`, `claude-code`, `opencode`" in result.output
     assert "## Profile write boundary" in result.output
-    assert "do not write or modify profile files" in result.output
+    assert "Profiles are structured project-rule input" in result.output
     assert "`Profile YAML Proposal` and `Profile Review Packet`" in result.output
     assert "forma doctor <path>" in result.output
+    assert "## Draft project rules, then generate workflow output" in result.output
+    assert "forma explain profile --target <generation-target>" in result.output
     assert "forma verify <dir>/<generation-target>/forma-creator" in result.output
     assert "forma create-bundle --target <generation-target> --output <dir>" in result.output
     assert (
@@ -256,7 +259,8 @@ def test_explain_agent_outputs_command_guide() -> None:
         "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>"
         in result.output
     )
-    assert "Generate from an already reviewed tracked profile" in result.output
+    assert "Generate from an approved profile" in result.output
+    assert "Optional on-the-spot creator path" in result.output
     assert "candidate profile package" in result.output
     assert "forma profile adopt <artifact-dir> --output <profile-dir>" in result.output
     assert "`drift` checks whether generated output is fresh" in result.output

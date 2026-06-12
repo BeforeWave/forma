@@ -2,7 +2,7 @@
 
 Chinese version: [concepts.zh-CN.md](./concepts.zh-CN.md)
 
-This page expands the README thesis: Forma compiles project rules into a
+This page expands the README thesis: Forma turns project rules into a
 dedicated agent workflow, then uses workflow skills to apply those rules to each
 task contract.
 
@@ -13,32 +13,23 @@ That helps, but it still leaves a gap: the plan may not apply the team's most
 important rules to the current task in a way reviewers can rely on and verify.
 
 Forma fills that layer. It helps the agent extract engineering rules from docs,
-code, tests, and conventions, then compiles those rules into workflow skills.
+code, tests, and conventions, then turns those rules into workflow skills.
 When a task starts, those skills make the agent produce a task contract:
 evidence, boundaries, validation, proof, and stop conditions.
 
-## Customize A Workflow In One Sentence
+## Generate A Workflow In One Sentence
 
-The lightweight entrypoint is `forma-creator`; the team does not need to write
-YAML first:
-
-```text
-Use forma-creator to customize a workflow for this project.
-Read the docs and code, extract the engineering rules, show them to me first;
-after I confirm, generate the workflow and install it from the hints.
-```
-
-In this path, the rules enter a generated workflow you can try. It is for
-exploration, quick adaptation, and project-specific fit.
-
-If the team already wants durable source, ask the agent to draft a profile:
+The lightweight entrypoint is to have the agent extract project rules, show them
+for review, then generate the workflow:
 
 ```text
-Use Forma to extract engineering rules from this project's docs and code, and
-draft a profile for me.
+Use Forma to generate a Codex workflow for this project.
+Show me the project rules you extracted first; after I approve them, generate and install it.
 ```
 
-After review, the profile can be compiled into workflow outputs repeatedly.
+The agent should organize extracted rules into a profile. The profile can be
+temporary input for a trial workflow; commit it only when the rules need to be
+shared or maintained long term.
 
 ## Three Layers
 
@@ -46,20 +37,20 @@ Forma puts project rules into three layers:
 
 | Layer | Meaning |
 |---|---|
-| Project rules | Team-approved ways of working: authoritative sources, boundaries, required tools, validation depth, proof, and stop conditions. |
-| Workflow output | Installed workflow skills: a Codex, Claude Code, or OpenCode skill bundle; Codex and Claude Code can also use plugin output. |
+| Profile | A structured description of extracted engineering rules: stage constraints, tool habits, validation, proof, and stop conditions. |
+| Workflow output | Workflow skills generated from the profile and installed for the agent as a skill bundle or plugin. |
 | Task contract | The plan contract the agent writes for one task under `plans/issue-<id>/`. |
 
-With on-the-spot customization, project rules enter this generated workflow
-output. With long-term maintenance, project rules become a tracked profile and
-are compiled by Forma.
+For a trial, the profile can be a temporary local file. For long-term
+maintenance, the profile becomes tracked source and Forma regenerates workflow
+outputs from it.
 
 ## Profile vs Task Contract
 
 A profile should not hard-code every future task's files or commands. It
-describes durable rules: which evidence is authoritative, which boundaries must
-not be crossed, which tools must be used, how deep validation should go, and
-when the agent must stop.
+describes engineering rules: which evidence is authoritative, which boundaries
+must not be crossed, which tools must be used, how deep validation should go,
+and when the agent must stop.
 
 A task contract is the result of applying those rules to the current task. At
 that point, the agent writes current evidence, file boundaries, task order,
@@ -69,13 +60,13 @@ So exact commands and task order in examples are usually task contract output,
 not raw profile text. The profile determines what standards the plan must meet;
 the task contract says how this task will be done.
 
-## Compiler Model
+## Generation Model
 
-Forma is a compiler that turns project rules into a dedicated agent workflow.
+Forma turns the project rules in a profile into a dedicated agent workflow.
 
 ```text
-profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task contract
-durable / on-the-spot rules         compiler            install output       current task contract
+profile  ->  Forma generator  ->  workflow output  ->  task contract
+rules        generator             install output       current task contract
 ```
 
 Codex, Claude Code, and OpenCode are the current skill-bundle targets. The same
@@ -116,12 +107,12 @@ same.
 
 | Path | Best for | Result |
 |---|---|---|
-| `forma-creator` | On-the-spot customization; try a project workflow first. | One-off workflow output you can install and try. |
-| `forma explain profile` + agent | Durable source from the start. | Tracked profile YAML, reviewed before compilation. |
+| `forma explain profile` + agent | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow output. |
 | `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Deterministic workflow bundle or plugin. |
+| `forma-creator` | Optional on-the-spot path when you do not want to handle a profile file first. | One-off workflow output you can install and try. |
 
-All three paths end in verified workflow output. The difference is whether the
-rules enter a one-off output first or become a long-term profile first.
+All three paths end in verified workflow output. The default mental model is
+that rules first become a profile; whether to keep that profile is your choice.
 
 ## Why Boundaries And Proof Matter
 
@@ -165,17 +156,17 @@ must leave.
 
 ## First Successful Run
 
-Do not start by designing the perfect profile. First use `forma-creator` to
-create a workflow you can try:
+Do not start by designing the perfect profile. First create a workflow you can
+try:
 
-1. Install the CLI and `forma-creator`.
-2. Ask the creator to extract rules from project docs and code.
+1. Install the CLI.
+2. Ask the agent to extract rules from project docs and code.
 3. Review the rules and fill gaps.
 4. Generate and verify the workflow output.
 5. Install it and trigger `forma:plan` for plugin output, or the matching
    `forma-*` direct skill trigger for a skill bundle.
 6. Inspect the task contract: facts, boundaries, task order, validation, and proof.
-7. Promote useful repeated rules into a tracked profile.
+7. Commit the profile only if the rules should be reused.
 
 See [Quick Start](./quick-start.md) for the concrete path.
 
@@ -183,8 +174,8 @@ See [Quick Start](./quick-start.md) for the concrete path.
 
 - [Workflow Contract](./workflow-contract.md): stages, gates, boundaries, evidence, and proof.
 - [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
-- [Profile Schema](./profile-schema.md): durable workflow source format.
-- [Forma Creator](./forma-creator.md): on-the-spot generation and temporary injection.
+- [Profile Schema](./profile-schema.md): how profiles describe stage constraints, tool habits, validation, and proof.
+- [Forma Creator](./forma-creator.md): optional on-the-spot generation and temporary injection.
 - [Verifier](./verifier.md): what the verifier checks and cannot prove.
 - [Targets](./targets.md): target install and metadata behavior.
 - [Examples](./examples.md): sample profiles, generated baselines, and real runs.

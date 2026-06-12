@@ -23,7 +23,7 @@ Use this repository when the task involves:
 ## Read First
 
 - `README.md` - product positioning and the main project-rule workflow model.
-- `docs/quick-start.md` - fastest creator-first usage path.
+- `docs/quick-start.md` - fastest project-rules-first usage path.
 - `docs/concepts.md` - project rules, workflow output, and task contract.
 - `STRUCTURE.md` - current source tree.
 - `plans/issue-<id>/plan.md` - active issue goal, scope, approach, and validation when present.

@@ -98,7 +98,7 @@ Next:
 DRIFT_HELP = """
 Sources:
 
-  Use --profile when an artifact should still match tracked profile source.
+  Use --profile when an artifact should still match profile source.
   Use --creator-source for creator bundles or no-injection creator output.
   Without a source, drift reports base-origin freshness only.
 """
@@ -137,6 +137,11 @@ Boundaries:
 
 
 BUILD_CREATOR_HELP = """
+Optional path:
+
+  Use this when a user specifically wants an on-the-spot creator run instead
+  of handling a profile file first.
+
 Next:
 
   Verify the generated creator skill:
@@ -148,7 +153,7 @@ Next:
 
 
 EXPLAIN_HELP = """
-Use this when an agent needs command-routing guidance, durable profile rules, or
+Use this when an agent needs command-routing guidance, profile authoring rules, or
 temporary one-off workflow rules without reading Forma source files.
 """
 
@@ -156,10 +161,10 @@ temporary one-off workflow rules without reading Forma source files.
 EXPLAIN_AGENT_HELP = """
 Next:
 
-  Read this before choosing between creator, generic no-profile output, tracked
-  profile generation, plugin output, profile adoption, drift, doctor, and install.
-  If no reviewed profile exists yet, do not write profile files from this guide;
-  run forma explain profile and return a proposal plus review packet first.
+  Read this before choosing between profile authoring, workflow generation,
+  plugin output, optional creator output, profile adoption, drift, doctor, and install.
+  If no approved profile exists yet, run forma explain profile and return a
+  proposal plus review packet first.
 """
 
 
@@ -176,7 +181,7 @@ EXPLAIN_INJECTION_HELP = """
 Next:
 
   Use this guidance inside forma-creator to classify one-off workflow rules.
-  Temporary injection is not durable tracked profile source.
+  Temporary injection is not an approved profile source.
 """
 
 
@@ -184,7 +189,7 @@ PROFILE_ADOPT_HELP = """
 Next:
 
   Generate from the candidate profile package and compare with the source
-  artifact. Treat the profile as durable project source only after human review
+  artifact. Treat the profile as approved project source only after human review
   and explicit promotion.
 """
 
@@ -246,7 +251,7 @@ def doctor(ctx: click.Context, json_output: bool, path: Path) -> None:
     "profile_file",
     required=False,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Tracked profile source used to regenerate the artifact.",
+    help="Profile source used to regenerate the artifact.",
 )
 @click.option(
     "--creator-source",
@@ -312,7 +317,7 @@ def drift_command(
     "profile_file",
     required=False,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Tracked profile file that owns project workflow rules (default: generic Plan-First).",
+    help="Profile file describing project workflow rules (default: generic Plan-First).",
 )
 @click.option(
     "--target",
@@ -362,7 +367,7 @@ def create_bundle_command(
     "profile_file",
     required=False,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    help="Tracked profile file that owns project workflow rules (default: generic Plan-First).",
+    help="Profile file describing project workflow rules (default: generic Plan-First).",
 )
 @click.option(
     "--target",
@@ -490,7 +495,7 @@ def build_creator_command(
     output_dir: Path,
     target_agent: str,
 ) -> None:
-    """Build target-specific creators that generate and verify workflow outputs."""
+    """Build optional target-specific creators for on-the-spot workflow output."""
     try:
         output = build_creator(source_dir, output_dir, target_agent)
     except ValueError as exc:
@@ -598,7 +603,7 @@ def explain_agent(output_format: str, target_agent: str | None) -> None:
     help="Optional agent target context.",
 )
 def explain_profile(output_format: str, target_agent: str | None) -> None:
-    """Explain durable profile authoring and task-rule placement."""
+    """Explain profile authoring and task-rule placement."""
     try:
         click.echo(render_guidance("profile", output_format, target_agent), nl=False)
     except ValueError as exc:

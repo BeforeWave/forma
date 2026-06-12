@@ -2,7 +2,7 @@
 
 英文版：[usage.md](./usage.md)
 
-这页是 Forma 的命令参考。第一次跑通不要从命令背起，先看 [快速开始](./quick-start.zh-CN.md)：把 creator 装给 agent，再用自然请求让它挖掘准则、生成 workflow。
+这页是 Forma 的命令参考。第一次跑通不要从命令背起，先看 [快速开始](./quick-start.zh-CN.md)：让 agent 提炼项目规则，确认后生成并安装 workflow。
 
 不带子命令运行 `forma` 是一个成功的 discovery 入口。它会以退出码 `0`
 打印和 `forma --help` 相同的 agent 路由指南，所以 coding agent 不确定该走哪条
@@ -12,12 +12,13 @@
 
 | 目标 | 命令路径 | 下一步 |
 |---|---|---|
-| 安装 creator，让 agent 从项目事实里定制 workflow | `forma build-creator --target <target> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>/<target>/forma-creator`，再用匹配的 target 安装。 |
+| 让 agent 读取 profile 编写规则 | `forma explain profile --target codex` | agent-facing 命令；把输出作为只读指南，再结合项目事实起草 profile。 |
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
 | 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
 | 生成 plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`；Codex plugin 通过 Codex 安装，Claude Code plugin root 用 `forma install --target claude-code` 安装。 |
 | handoff 前诊断生成产物 | `forma doctor <dir>` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和下一步。 |
-| 给 agent 提供编写规则 | `forma explain profile --target codex` 或 `forma explain temporary-injection --target codex` | 把输出作为只读指南，再起草 profile 或一次性 creator injection。 |
+| 构建可选 creator 临场路径 | `forma build-creator --target <target> --output <dir>` | 只在 creator 路径使用；运行 `forma verify <dir>/<target>/forma-creator`，再用匹配的 target 安装。 |
+| 给 agent 提供 temporary-injection 规则 | `forma explain temporary-injection --target codex` | 只用于可选 creator / 临场生成路径。 |
 
 使用 `create-bundle` 或 `create-plugin`；旧的 `forma create` 命令不再支持。
 
@@ -28,9 +29,8 @@
 打印根命令指南和命令列表。不带子命令时，`forma` 返回退出码 `0`，并显示
 和 `forma --help` 相同的路由指南。
 
-当 agent 需要判断是 build creator、create skill bundle、create plugin、
-install verified 本地产物、verify 产物，还是打印 authoring guidance 时，先用
-这个命令做 discovery。
+当 agent 需要判断是打印 authoring guidance、create skill bundle、create plugin、
+install verified 本地产物、verify 产物，还是构建可选 creator 时，先用这个命令做 discovery。
 
 ### `forma verify <path>`
 
@@ -120,7 +120,7 @@ Plugin 输出会在 manifest 和 metadata prompt 里记录 `forma:plan` 这类 q
 
 ### `forma build-creator`
 
-生成 target 专用的可安装 `forma-creator`。把它装给 agent 后，就可以用一句自然请求让 agent 临场定制项目 workflow：
+生成 target 专用的可安装 `forma-creator`。这是可选临场路径：不想先处理 profile 文件时，可以让 agent 临场生成 workflow：
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
@@ -177,13 +177,14 @@ forma explain profile --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-当另一个 agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。实际使用时可以直接说：
+当另一个 agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。正常 profile-first 路径可以直接说：
 
 ```text
-用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
+用 Forma 给这个项目生成一套 Codex workflow。
+先把你提炼出的项目规则给我看；确认后再生成并安装。
 ```
 
-agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 tracked profile YAML。这个路径的产物是长期 profile 源，不是一次性 workflow。
+agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 profile YAML。只有这些规则需要长期复用时，才把 profile 提交进版本控制。
 
 下一步：profile review 通过后，用 `forma create-bundle` 生成 skill bundle，或用
 `forma create-plugin` 生成 plugin source。
@@ -310,7 +311,7 @@ git diff --check
 
 - [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、task 契约、门禁、边界和证明。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
-- [Profile Schema](./profile-schema.zh-CN.md)：长期工程准则源码格式。
-- [Forma Creator](./forma-creator.zh-CN.md)：让 agent 临场定制 workflow。
+- [Profile Schema](./profile-schema.zh-CN.md)：profile 如何描述阶段约束、工具习惯、验证和 proof。
+- [Forma Creator](./forma-creator.zh-CN.md)：可选临场 workflow 生成路径。
 - [Verifier](./verifier.zh-CN.md)：验证检查和限制。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。

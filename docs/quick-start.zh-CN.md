@@ -2,9 +2,9 @@
 
 英文版：[quick-start.md](./quick-start.md)
 
-这页只讲从零跑通 Forma：先把 `forma-creator` 装给 agent，再让它从项目文档和代码里挖掘工程准则，生成一套可试用 workflow。确认有用后，再把规则长期化成 profile。
+这页只讲从零跑通 Forma：让 agent 先提炼项目规则，确认后生成、验证并安装一套可试用 workflow。规则需要长期复用时，再把 profile 提交进仓库；只想试用时，profile 可以是临时文件。
 
-## 1. 安装 CLI 和 Creator
+## 1. 安装 CLI
 
 先安装 Forma CLI：
 
@@ -13,22 +13,22 @@ pipx install forma-cli
 forma --help
 ```
 
-以 Codex 为例，生成并安装 creator skill：
-
-```bash
-forma build-creator --target codex --output /tmp/forma-creator
-forma verify /tmp/forma-creator/codex/forma-creator
-forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
-```
-
-装好以后，新开 agent thread，直接说：
+然后对 agent 说：
 
 ```text
-用 forma-creator 给这个项目定制一套 workflow。
-从文档和代码里挖掘工程准则，先整理给我看；我确认后再生成 workflow，并按提示安装。
+用 Forma 给这个项目生成一套 Codex workflow。
+先把你提炼出的项目规则给我看；确认后再生成并安装。
 ```
 
-Creator 会让 agent 先从项目事实里提炼准则，例如权威资料、修改边界、验证深度、proof 和停手条件。你确认后，它会生成并验证一套可试用 workflow 产物，并报告输出路径和安装提示。
+agent 会自己调用 Forma 的 profile 编写指南，先把项目规则整理成 profile：阶段约束、工具习惯、验证、proof 和停手条件。你确认后，它可以把 profile 存到临时路径，生成并验证 workflow 产物，再按 target 安装。
+
+如果你要手动复现，Codex direct skill bundle 的命令形状是：
+
+```bash
+forma create-bundle --target codex --profile /tmp/myproject-profile.yaml --output /tmp/myproject-workflow
+forma verify /tmp/myproject-workflow
+forma install --target codex --scope project /tmp/myproject-workflow
+```
 
 ## 2. 试用生成的 Workflow
 
@@ -73,18 +73,9 @@ Use forma:execute to execute the next accepted task.
 
 这个仓库自己的 Forma plans 在 [`../plans/`](../plans/)。
 
-## 4. 长期化成 Profile
+## 4. 复用或长期维护
 
-如果一开始就想形成长期 profile，也可以直接让 agent 用 Forma 起草：
-
-```text
-用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
-profile 确认后，基于它生成、验证并安装目标 workflow。
-```
-
-agent 会用 `forma explain profile --target codex` 读取 profile 编写标准。流程是：先给 profile 草案；你 review；确认后再生成、验证并按提示安装 workflow。
-
-如果你已经有 review 过的 profile，可以直接确定性生成：
+如果这套规则要团队共用或长期维护，把确认后的 profile 放进版本控制。以后可以直接确定性生成：
 
 ```bash
 forma create-bundle --target codex --profile myproject.yaml --output /tmp/bundle
@@ -112,9 +103,9 @@ forma install --target opencode --scope project /tmp/bundle-opencode
 
 | 路径 | 适合 | 产物 |
 |---|---|---|
-| `forma-creator` | 临场定制，先试一套项目 workflow。 | 已验证的一次性 skill bundle 或 plugin。 |
-| `forma explain profile` + agent | 一开始就要可 review、可维护的长期源码。 | tracked profile YAML，再编译成 workflow。 |
-| `forma create-bundle` | 已经有 review 过的 profile。 | 从 profile 重复生成的 workflow bundle。 |
+| `forma explain profile` + agent | 先从项目规则生成一套 workflow，可临时试用，也可长期维护。 | profile + 已验证 workflow bundle 或 plugin。 |
+| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | 从 profile 重复生成的 workflow 产物。 |
+| `forma-creator` | 可选的临场生成路径，不想先处理 profile 文件时使用。 | 已验证的一次性 skill bundle 或 plugin。 |
 
 ## 安装位置
 
@@ -144,8 +135,8 @@ forma verify /tmp/myproject-bundle
 
 - [核心概念](./concepts.zh-CN.md)：三层模型、定制路径和阶段边界。
 - [Workflow Contract](./workflow-contract.zh-CN.md)：生成工作流具体约束什么。
-- [Forma Creator](./forma-creator.zh-CN.md)：临场定制和 temporary injection 如何工作。
-- [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源如何组织。
+- [Profile Schema](./profile-schema.zh-CN.md)：profile 如何描述阶段约束、工具习惯、验证和 proof。
+- [Forma Creator](./forma-creator.zh-CN.md)：可选临场路径和 temporary injection 如何工作。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：Forma 写到磁盘上的产物是什么。
 - [Verifier](./verifier.zh-CN.md)：`forma verify` 检查什么。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。

@@ -128,7 +128,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
     plugin_lines: list[str]
     if target_agent == "codex":
         plugin_lines = [
-            "## Generate a Codex plugin from an already reviewed tracked profile",
+            "## Generate a Codex plugin from an approved profile",
             "",
             "Install the verified plugin through Codex marketplace/plugin UI, "
             "not `forma install`.",
@@ -142,7 +142,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         ]
     elif target_agent == "claude-code":
         plugin_lines = [
-            "## Generate a Claude Code plugin from an already reviewed tracked profile",
+            "## Generate a Claude Code plugin from an approved profile",
             "",
             "Install the verified plugin root with `forma install --target "
             "claude-code`.",
@@ -166,7 +166,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         ]
     else:
         plugin_lines = [
-            "## Generate plugin output from an already reviewed tracked profile",
+            "## Generate plugin output from an approved profile",
             "",
             "Codex plugins install through Codex marketplace/plugin UI. Claude "
             "Code plugin roots can be installed with `forma install --target "
@@ -202,18 +202,20 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "## Profile write boundary",
         "",
-        "Profiles are durable project source. If no reviewed profile exists yet, "
-        "do not write or modify profile files from the command guide alone.",
+        "Profiles are structured project-rule input for workflow generation. "
+        "They can be temporary for a trial workflow or committed for long-term "
+        "reuse.",
         "",
         "Run `forma explain profile --target <target>` first, then return both a "
         "`Profile YAML Proposal` and `Profile Review Packet` for human review. "
-        "Write or promote profile files only after explicit user approval.",
+        "Write profile files only after explicit user approval. Commit them only "
+        "when the rules should be reused.",
         "",
         "Creator and temporary injection outputs are generated workflow "
-        "artifacts, not durable profile source. `forma profile adopt` writes a "
-        "candidate profile package; exact regeneration and drift proof show that "
-        "the candidate can reproduce the artifact, not that it has been reviewed "
-        "as source of truth.",
+        "artifacts, not automatically approved profile source. `forma profile "
+        "adopt` writes a candidate profile package; exact regeneration and drift "
+        "proof show that the candidate can reproduce the artifact, not that it "
+        "has been reviewed as source of truth.",
         "",
         "## If the artifact type or install route is unclear",
         "",
@@ -225,15 +227,17 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "forma doctor <path>",
         "```",
         "",
-        "## Ask an agent to summarize a project and generate workflows",
+        "## Draft project rules, then generate workflow output",
         "",
-        "Build and install a target-specific creator. Verify the generated "
-        "creator before installing it.",
+        "Use this when no approved profile exists yet. Load profile guidance, "
+        "summarize project rules, return a profile proposal and review packet, "
+        "then generate only after user approval.",
         "",
         "```bash",
-        f"forma build-creator --target {generation_target} --output <dir>",
-        f"forma verify <dir>/{generation_target}/forma-creator",
-        f"forma install --target {install_target} --scope project <dir>/{generation_target}/forma-creator",
+        f"forma explain profile --target {generation_target}",
+        f"forma create-bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
+        "forma verify <dir>",
+        f"forma install --target {install_target} --scope project <dir>",
         "```",
         "",
         "## Generate a generic no-profile workflow",
@@ -247,12 +251,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         f"forma install --target {install_target} --scope project <dir>",
         "```",
         "",
-        "## Generate from an already reviewed tracked profile",
+        "## Generate from an approved profile",
         "",
-        "Use this only when `<profile.yaml>` already exists as reviewed durable "
-        "project source. If the profile does not exist yet, follow the profile "
-        "write boundary first. Verify shape, then use drift to prove the artifact "
-        "is fresh against the profile.",
+        "Use this when `<profile.yaml>` already exists and has been approved for "
+        "this generation. If the profile does not exist yet, follow the profile "
+        "write boundary first. Verify shape, then use drift to prove the "
+        "artifact is fresh against the profile.",
         "",
         "```bash",
         f"forma create-bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
@@ -262,10 +266,22 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "```",
         "",
         *plugin_lines,
+        "## Optional on-the-spot creator path",
+        "",
+        "Use this only when the user specifically wants a creator run instead "
+        "of handling a profile file first. Verify the generated creator before "
+        "installing it.",
+        "",
+        "```bash",
+        f"forma build-creator --target {generation_target} --output <dir>",
+        f"forma verify <dir>/{generation_target}/forma-creator",
+        f"forma install --target {install_target} --scope project <dir>/{generation_target}/forma-creator",
+        "```",
+        "",
         "## Adopt a same-origin creator artifact into a candidate profile package",
         "",
         "Use this only when the artifact carries same-origin Forma metadata. "
-        "Adoption writes a candidate profile package, not durable source of "
+        "Adoption writes a candidate profile package, not approved source of "
         "truth. Regenerate from the candidate and compare before presenting it "
         "for human review; promote it only after explicit approval.",
         "",
@@ -288,8 +304,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "- Omitting `--profile` generates generic no-profile workflow output, "
         "not project-specific rules.",
         "- `profile adopt` writes candidate profile packages for review, not "
-        "already-approved tracked profile source.",
-        "- Use `forma explain profile --target <target>` for durable profile authoring rules.",
+        "already-approved profile source.",
+        "- Use `forma explain profile --target <target>` for profile authoring rules.",
         "- Use `forma explain temporary-injection --target <target>` for "
         "one-off creator injection rules.",
     ]

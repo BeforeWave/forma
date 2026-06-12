@@ -2,7 +2,9 @@
 
 英文版：[forma-creator.md](./forma-creator.md)
 
-`forma-creator` 是装给 agent 的生成入口。它让 agent 不必先等团队写好 profile，就能从项目文档、代码、测试和现有约定里挖掘工程准则，临场生成一套可试用的 Forma workflow。
+`forma-creator` 是可选临场生成路径。它让已经安装好的 agent 从项目文档、代码、测试和现有约定里挖掘工程准则，并在用户不想先处理 profile 文件时，临场生成一套可试用的 Forma workflow。
+
+正常首次运行先看 [快速开始](./quick-start.zh-CN.md)：让 agent 把项目规则整理成 profile，再生成并安装 workflow。只有当你希望 profile / injection 处理隐藏在一次 creator 运行里时，才使用 `forma-creator`。
 
 最短用法是直接对 agent 说：
 
@@ -21,7 +23,7 @@
 | `forma explain profile` + agent | 一开始就要长期维护源码。 | profile 编写标准、项目事实、团队 review。 | tracked profile YAML，再编译成 workflow。 |
 | `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 plugin。 |
 
-`forma-creator` 走的是“先试用”的路径。反复有用、团队认可的规则，再提升成 profile。`forma explain profile` 走的是“先长期化”的路径，产物是可 review、可维护的 YAML 源码。`forma create-bundle` 和 `forma create-plugin` 是 profile 已经存在后的确定性生成命令。
+`forma explain profile` 是默认路径：先把项目规则整理成可 review 的 profile，再生成 workflow。`forma-creator` 是可选路径：隐藏 profile 文件处理，先临场试一套 workflow。`forma create-bundle` 和 `forma create-plugin` 是 profile 已经存在后的确定性生成命令。
 
 ## 固定目标契约
 
@@ -98,7 +100,7 @@ Source adapter 不是 Forma 基础能力。只有 profile 或 temporary injectio
 
 ## 相关文档
 
-- [快速开始](./quick-start.zh-CN.md)：从 creator 跑通临场定制，再长期化成 profile。
-- [Profile Schema](./profile-schema.zh-CN.md)：长期 profile 格式。
+- [快速开始](./quick-start.zh-CN.md)：默认 profile-first workflow 生成路径。
+- [Profile Schema](./profile-schema.zh-CN.md)：profile 如何描述阶段约束、工具习惯、验证和 proof。
 - [Targets](./targets.zh-CN.md)：Codex、Claude Code 和 OpenCode 安装行为。
 - [Verifier](./verifier.zh-CN.md)：验证会检查什么。

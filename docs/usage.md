@@ -3,9 +3,8 @@
 Chinese version: [usage.zh-CN.md](./usage.zh-CN.md)
 
 This page is the command reference for Forma. For a first run, do not start by
-memorizing commands; start with [Quick Start](./quick-start.md): install creator
-for the agent, then use a natural-language request to extract rules and generate
-a workflow.
+memorizing commands; start with [Quick Start](./quick-start.md): ask the agent
+to extract project rules, review them, then generate and install a workflow.
 
 Running `forma` with no subcommand is a successful discovery entrypoint. It exits
 `0` and prints the same agent routing guide as `forma --help`, so a coding agent
@@ -15,12 +14,13 @@ can start there when it is unsure which command path to use.
 
 | Goal | Command path | Next action |
 |---|---|---|
-| Install creator so an agent can customize a workflow from project facts | `forma build-creator --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
+| Let an agent load profile authoring rules | `forma explain profile --target codex` | Agent-facing command; use the output as read-only guidance before drafting a profile from project facts. |
 | Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
 | Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
 | Build plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | `forma verify <dir>`; install Codex plugins through Codex, and install Claude Code plugin roots with `forma install --target claude-code`. |
 | Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
-| Give an agent authoring rules | `forma explain profile --target codex` or `forma explain temporary-injection --target codex` | Use the output as read-only guidance before drafting a profile or one-off creator injection. |
+| Build optional creator for on-the-spot generation | `forma build-creator --target <target> --output <dir>` | Use only for the creator path; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
+| Give an agent temporary-injection rules | `forma explain temporary-injection --target codex` | Use only for optional creator/on-the-spot generation flows. |
 
 ## Commands
 
@@ -29,9 +29,9 @@ can start there when it is unsure which command path to use.
 Prints the root command guide and command list. With no subcommand, `forma`
 returns exit code `0` and shows the same routing guide as `forma --help`.
 
-Use it as the first command when an agent needs to discover whether to build a
-creator, create a skill bundle, create a plugin, install a verified local
-output, verify an output, or print authoring guidance.
+Use it as the first command when an agent needs to discover whether to print
+authoring guidance, create a skill bundle, create a plugin, install a verified
+local output, verify an output, or build an optional creator.
 
 ### `forma verify <path>`
 
@@ -151,8 +151,9 @@ Codex marketplace/plugin UI. Install Claude Code plugin roots with
 
 ### `forma build-creator`
 
-Builds a target-specific installable `forma-creator`. After installing it for
-the agent, use one natural-language request to customize a project workflow:
+Builds a target-specific installable `forma-creator`. This is the optional
+on-the-spot path for generating a workflow without handling a profile file
+first:
 
 ```bash
 forma build-creator --target codex --output /tmp/forma-creator-dist
@@ -218,16 +219,17 @@ forma explain temporary-injection --format json --target codex
 ```
 
 When another agent needs to draft a profile or temporary injection, use this
-command to give it the rules. In practice, you can simply say:
+command to give it the rules. For the normal profile-first path, you can simply
+say:
 
 ```text
-Use Forma to extract engineering rules from this project's docs and code, and
-draft a profile for me.
+Use Forma to generate a Codex workflow for this project.
+Show me the project rules you extracted first; after I approve them, generate and install it.
 ```
 
 The agent uses `forma explain profile --target codex` to load the authoring
-standard, then combines it with project facts to propose tracked profile YAML.
-This path produces durable profile source, not a one-off workflow.
+standard, then combines it with project facts to propose profile YAML. Commit
+that profile only when the rules need long-term reuse.
 
 Next action: after the profile is reviewed, use `forma create-bundle` for a
 skill bundle or `forma create-plugin` for plugin source.
@@ -369,7 +371,7 @@ checkout.
 
 - [Workflow Contract](./workflow-contract.md): stages, task contracts, gates, boundaries, and proof.
 - [Skill Bundle](./skill-bundle.md): generated output layout and manifest.
-- [Profile Schema](./profile-schema.md): durable engineering-rule source format.
-- [Forma Creator](./forma-creator.md): let the agent customize a workflow on the spot.
+- [Profile Schema](./profile-schema.md): how profiles describe stage constraints, tool habits, validation, and proof.
+- [Forma Creator](./forma-creator.md): optional on-the-spot workflow generation.
 - [Verifier](./verifier.md): verification checks and limits.
 - [Targets](./targets.md): target install and metadata behavior.

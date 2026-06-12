@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "forma-cli"
 version = "0.1.1"
-description = "Compile project rules into dedicated agent workflows for reviewable planning, validation, and proof."
+description = "Turn project rules into installable agent workflows."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

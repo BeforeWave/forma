@@ -2,32 +2,24 @@
 
 英文版：[concepts.md](./concepts.md)
 
-这页展开 README 的主线：Forma 把项目规则编译成专属 agent workflow，并通过 workflow skills 把规则落到每次任务的 task contract。
+这页展开 README 的主线：Forma 把项目规则变成专属 agent workflow，并通过 workflow skills 把规则落到每次任务的 task contract。
 
 ## Forma 解决什么
 
 AGENTS.md、custom skill 或 Superpowers 可以给 agent 规则和流程。这个做法能减少直接开写，但仍然有缺口：计划可能没有把团队最关切的准则落到当前任务里。
 
-Forma 补的是这一层。它让 agent 从项目文档、代码、测试和约定里梳理工程准则，再把这些准则编译成一组 workflow skills。任务开始后，这些 skills 要求 agent 先产出 task contract，把事实依据、修改边界、验证方式、proof 和停手条件写清楚。
+Forma 补的是这一层。它让 agent 从项目文档、代码、测试和约定里梳理工程准则，再把这些准则变成一组 workflow skills。任务开始后，这些 skills 要求 agent 先产出 task contract，把事实依据、修改边界、验证方式、proof 和停手条件写清楚。
 
-## 一句话定制 Workflow
+## 一句话生成 Workflow
 
-Forma 的轻量入口是先让 agent 用 `forma-creator` 临场定制，团队不用先写 YAML：
-
-```text
-用 forma-creator 给这个项目定制一套 workflow。
-从文档和代码里挖掘工程准则，先整理给我看；我确认后再生成 workflow，并按提示安装。
-```
-
-这条路径里，准则先进入一次生成出来的可试用 workflow。它适合探索、试用、快速适配当前项目。
-
-如果团队已经确定要长期维护这些规则，可以让 agent 用 Forma 起草 profile：
+轻量入口是让 agent 先提炼项目规则，确认后生成 workflow：
 
 ```text
-用 Forma 从这个项目的文档和代码里提炼工程准则，给我一版 profile 草案。
+用 Forma 给这个项目生成一套 Codex workflow。
+先把你提炼出的项目规则给我看；确认后再生成并安装。
 ```
 
-profile 经过 review 后，再反复编译成 workflow 产物。
+agent 会把提炼出的规则整理成 profile。profile 可以只是临时生成输入；如果这些规则要团队共用或长期维护，再把它提交进仓库。
 
 ## 三层模型
 
@@ -35,27 +27,27 @@ Forma 把项目准则放进三层：
 
 | 层 | 含义 |
 |---|---|
-| 项目准则 | 团队认可的做事方式：权威资料、修改边界、工具要求、验证深度、proof 和停手条件。 |
-| Workflow 产物 | 安装给 agent 的 workflow skills，可以是 Codex、Claude Code 或 OpenCode skill bundle；Codex 和 Claude Code 也可以使用 plugin 产物。 |
+| Profile | 从项目里提炼出的工程规则说明：阶段约束、工具习惯、验证、proof 和停手条件。 |
+| Workflow 产物 | 按 profile 生成并安装给 agent 的 workflow skills，可以是 skill bundle 或 plugin。 |
 | Task contract | agent 面对一个具体任务时写出的计划契约，记录到 `plans/issue-<id>/`。 |
 
-临场定制时，项目准则进入本次生成的 workflow 产物。长期维护时，项目准则沉淀成 tracked profile，再由 Forma 编译成 workflow 产物。
+临时试用时，profile 可以只是本地临时文件。长期维护时，profile 进入版本控制，后续由 Forma 反复生成 workflow 产物。
 
 ## Profile vs Task Contract
 
-Profile 不应该写死每个未来任务要改哪些文件、跑哪些命令。它描述长期准则：哪些证据更权威，哪些边界不能碰，哪些工具必须用，验证要到什么深度，什么情况必须停下来。
+Profile 不应该写死每个未来任务要改哪些文件、跑哪些命令。它描述工程准则：哪些证据更权威，哪些边界不能碰，哪些工具必须用，验证要到什么深度，什么情况必须停下来。
 
 Task contract 是这些准则落到当前任务后的结果。到了这个阶段，agent 才会写清楚当前任务的证据、文件边界、任务顺序、验证命令、proof 路径和停手条件。
 
 所以，示例里的具体命令和 task 顺序通常是 task contract 的结果，不是 profile 原文。Profile 决定计划必须按什么标准展开；task contract 说明这次任务具体怎么做。
 
-## 编译模型
+## 生成模型
 
-Forma 是把项目准则变成专属 agent workflow 的编译器。
+Forma 把 profile 里的项目规则变成专属 agent workflow。
 
 ```text
-profile / temporary injection  ->  Forma compiler  ->  workflow output  ->  task contract
-长期规则 / 临场规则                  编译器              安装产物              当前任务契约
+profile  ->  Forma generator  ->  workflow output  ->  task contract
+项目规则      生成器                 安装产物              当前任务契约
 ```
 
 Codex、Claude Code 和 OpenCode 是当前支持的 skill-bundle target。同一份 profile 可以生成不同 target 的产物，同时保持 task 级 workflow 语义不变。
@@ -87,11 +79,11 @@ goal -> proposal -> evidence -> task contract -> task execution -> proof
 
 | 路径 | 适合 | 结果 |
 |---|---|---|
-| `forma-creator` | 临场定制，先试一套项目 workflow。 | 一次性 workflow 产物，可安装体验。 |
-| `forma explain profile` + agent | 一开始就要长期维护的源码。 | tracked profile YAML，review 后再编译。 |
+| `forma explain profile` + agent | 从项目规则生成 workflow；profile 可临时，也可长期维护。 | profile + 已验证 workflow 产物。 |
 | `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | 确定性生成 workflow bundle 或 plugin。 |
+| `forma-creator` | 可选临场路径，不想先处理 profile 文件时使用。 | 一次性 workflow 产物，可安装体验。 |
 
-三条路径都会走到已验证的 workflow 产物。区别在于：准则是临场进入一次性产物，还是长期进入 profile。
+三条路径都会走到已验证的 workflow 产物。默认理解是：规则先被整理成 profile；是否长期保存，由你决定。
 
 ## 为什么边界和 Proof 重要
 
@@ -124,15 +116,15 @@ Forma 可以和 Spec 工具、规划文档、项目说明、通用 skill creator
 
 ## 第一次跑通
 
-不要一开始就设计完美 profile。先让 `forma-creator` 临场定制一套可试用 workflow：
+不要一开始就设计完美 profile。先生成一套可试用 workflow：
 
-1. 安装 CLI 和 `forma-creator`。
-2. 让 creator 从项目文档和代码里挖掘准则。
+1. 安装 CLI。
+2. 让 agent 从项目文档和代码里挖掘准则。
 3. review 准则，补充缺口。
 4. 生成并验证 workflow 产物。
 5. 安装后，plugin 产物触发 `forma:plan`；direct skill bundle 触发对应的 `forma-*` skill。
 6. 检查 task contract：事实、边界、任务顺序、验证和 proof。
-7. 有用的规则再提升成 tracked profile。
+7. 有用的 profile 再提交进版本控制。
 
 具体路径见 [快速开始](./quick-start.zh-CN.md)。
 
@@ -140,8 +132,8 @@ Forma 可以和 Spec 工具、规划文档、项目说明、通用 skill creator
 
 - [Workflow Contract](./workflow-contract.zh-CN.md)：阶段、门禁、边界、证据和证明。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构和 manifest。
-- [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
-- [Forma Creator](./forma-creator.zh-CN.md)：临场 workflow 生成和 temporary injection。
+- [Profile Schema](./profile-schema.zh-CN.md)：profile 如何描述阶段约束、工具习惯、验证和 proof。
+- [Forma Creator](./forma-creator.zh-CN.md)：可选临场路径和 temporary injection。
 - [Verifier](./verifier.zh-CN.md)：验证器检查什么，以及不能证明什么。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。
 - [Examples](./examples.zh-CN.md)：sample profiles、生成基线和真实 runs。

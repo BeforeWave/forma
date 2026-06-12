@@ -4,12 +4,12 @@
 
 # Forma
 
-**Compile project rules into a dedicated agent workflow.**
+**Turn project rules into a dedicated agent workflow.**
 
 AGENTS.md, custom skills, and Superpowers can give an agent rules and process.
 For lightweight projects, that is usually enough.
 
-Forma compiles project rules into workflow skills. Those skills make the agent
+Forma turns project rules into workflow skills. Those skills make the agent
 preview how the rules apply to the current task before implementation, then
 execute against a task contract and leave proof.
 
@@ -29,12 +29,10 @@ from the current project.
 For the same goal, "add rate limiting to settings", a plain plan may say: read
 the code, add the limiter, run tests.
 
-Forma's difference is that different profiles make the agent write different
-planning priorities.
-You do not have to remind the agent every time; the profile carries those
-priorities into the workflow.
+Forma's difference is that project rules enter the workflow, so the agent
+writes different planning priorities. You do not have to remind it every time.
 
-| Profile bias | Planning priority becomes |
+| Rule emphasis | Planning priority becomes |
 |---|---|
 | API compatibility first | Which endpoints, fields, and generated files are affected, and whether API review is needed. |
 | Rollout first | Which switch to use, how to disable or roll back, and how to test invalid config. |
@@ -49,13 +47,16 @@ rules.
 
 ## What Forma Produces
 
-Forma produces three things:
+Most users see three things:
 
-| Output | Meaning |
+| Name | What it does |
 |---|---|
-| `profile` | Team-approved practices kept in version control for review and maintenance. |
-| `workflow bundle / plugin` | Agent workflow installed into Codex, Claude Code, or OpenCode. |
-| `task contract` | The plan contract the agent writes for one task, recorded under `plans/issue-<id>/`. |
+| `profile` | A structured description of extracted engineering rules: stage constraints, tool habits, validation, proof, and stop conditions. |
+| `workflow bundle / plugin` | Generated from the profile and installed into Codex, Claude Code, or OpenCode so the agent follows the same rules. |
+| `task contract` | The task boundary the agent writes before implementation: goal, scope, validation, and proof. |
+
+Commit the profile only when the rules need long-term reuse. For a trial
+workflow, it can be a temporary file and does not need to be kept.
 
 The default workflow uses four stages to manage the task contract
 lifecycle, plus one continuous execution entrypoint:
@@ -77,8 +78,6 @@ A direct skill bundle is installed as standalone skills with the `forma-*`
 prefix.
 
 When the team updates a profile, it updates which rules the workflow guards.
-Regenerate the bundle or plugin, and the agent plans and executes against the
-new constraints.
 
 ---
 
@@ -97,7 +96,7 @@ Scope:
 
 Out of scope:
   Do not change create-bundle, create-plugin, install, verify,
-  build-creator, or explain execution semantics.
+  or explain execution semantics.
   Do not restore forma create or add a compatibility alias.
 
 Approach:
@@ -119,23 +118,22 @@ locks before editing code. The task list and execution proof are recorded in
 
 ## Start Using Forma
 
-The lightest path is to install `forma-creator` and let the agent read the
-current project rules to generate a trial workflow:
+The lightest path is to have the agent summarize project rules, then generate
+and install a workflow:
 
 ```bash
 pipx install forma-cli
-forma build-creator --target codex --output /tmp/forma-creator
-forma verify /tmp/forma-creator/codex/forma-creator
-forma install --target codex --scope project /tmp/forma-creator/codex/forma-creator
 ```
 
 Then tell the agent:
 
 ```text
-Use forma-creator to customize a workflow for this project.
-Summarize the key rules for me first.
-After I confirm, generate and install it from the hints.
+Use Forma to generate a Codex workflow for this project.
+Show me the project rules you extracted first; after I approve them, generate and install it.
 ```
+
+The agent should load Forma's profile guidance itself, then generate, verify,
+and install the workflow after you approve the rules.
 
 After the generated workflow is installed, start a new thread:
 
@@ -154,19 +152,11 @@ The first useful response should be a proposal, not a patch.
 > **If the agent edits files immediately**, the workflow was not loaded or was
 > not triggered; Forma is not running.
 
-For shared or long-lived team rules, use the tracked profile path:
-
-```text
-Use Forma to extract engineering rules from this project's docs and code,
-and draft a profile for review.
-After I confirm the profile, generate, verify, and install the target workflow
-from it.
-```
-
-If you already have a reviewed profile, use `forma create-bundle --profile
-<profile.yaml>` or `forma create-plugin --profile <profile.yaml>` to generate
-workflow output. Full commands are in [Quick Start](./docs/quick-start.md) and
-[Usage](./docs/usage.md).
+If the rules should be shared or maintained long term, keep the profile in
+version control. If you already have a reviewed profile, use `forma
+create-bundle --profile <profile.yaml>` or `forma create-plugin --profile
+<profile.yaml>` to generate workflow output. Full commands are in [Quick
+Start](./docs/quick-start.md) and [Usage](./docs/usage.md).
 
 ---
 
@@ -227,7 +217,7 @@ repository's profile source lives in
 
 | | |
 |---|---|
-| [Quick Start](./docs/quick-start.md) | First run, creator path, and tracked-profile path. |
+| [Quick Start](./docs/quick-start.md) | First run, workflow generation, verification, and installation. |
 | [Concepts](./docs/concepts.md) | Project rules, workflow outputs, task contracts, and stage boundaries. |
 | [Workflow Contract](./docs/workflow-contract.md) | How task contracts organize evidence, boundaries, validation, and proof. |
 
@@ -235,8 +225,7 @@ repository's profile source lives in
 
 | | |
 |---|---|
-| [Profile Schema](./docs/profile-schema.md) | YAML source for durable engineering rules. |
-| [Forma Creator](./docs/forma-creator.md) | Conversational workflow generation and temporary injection. |
+| [Profile Schema](./docs/profile-schema.md) | How to structure a profile when rules need long-term maintenance. |
 | [Skill Bundle](./docs/skill-bundle.md) | Generated output layout. |
 | [Verifier](./docs/verifier.md) | What verification checks and cannot prove. |
 | [Targets](./docs/targets.md) | Codex, Claude Code, and OpenCode target behavior. |

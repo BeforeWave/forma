@@ -2,10 +2,15 @@
 
 Chinese version: [forma-creator.zh-CN.md](./forma-creator.zh-CN.md)
 
-`forma-creator` is the generation entrypoint installed for an agent. It lets the
+`forma-creator` is an optional on-the-spot generation path. It lets an installed
 agent extract engineering rules from project docs, code, tests, and conventions,
-then generate a Forma workflow you can try before the team writes a durable
-profile.
+then generate a Forma workflow without asking the user to handle a profile file
+first.
+
+For the normal first run, start with [Quick Start](./quick-start.md): have the
+agent extract project rules into a profile, then generate and install a workflow.
+Use `forma-creator` when you specifically want that profile/injection handling
+hidden inside a temporary creator run.
 
 The shortest use is to tell the agent:
 
@@ -28,10 +33,10 @@ them, those rules enter the generated workflow output for this run.
 | `forma explain profile` + agent | Durable source from the start. | Profile authoring standard, project facts, team review. | Tracked profile YAML, then compiled workflow. |
 | `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or plugin. |
 
-`forma-creator` is the "try first" path. Rules that keep proving useful and win
-team agreement can be promoted into a profile. `forma explain profile` is the
-"make it durable first" path. `forma create-bundle` and `forma create-plugin`
-are deterministic build commands after a profile exists.
+`forma explain profile` is the default path for making project rules visible as
+a profile before generation. `forma-creator` is the optional "hide the profile
+file and try a workflow now" path. `forma create-bundle` and
+`forma create-plugin` are deterministic build commands after a profile exists.
 
 ## Fixed Target Contract
 
@@ -127,7 +132,7 @@ See [Verifier](./verifier.md) for the boundary.
 
 ## Related Docs
 
-- [Quick Start](./quick-start.md): run creator first, then promote durable rules.
-- [Profile Schema](./profile-schema.md): durable profile source format.
+- [Quick Start](./quick-start.md): normal profile-first workflow generation.
+- [Profile Schema](./profile-schema.md): how profiles describe stage constraints, tool habits, validation, and proof.
 - [Targets](./targets.md): Codex, Claude Code, and OpenCode install behavior.
 - [Verifier](./verifier.md): what verification checks.
