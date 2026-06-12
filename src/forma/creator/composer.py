@@ -55,6 +55,10 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
         ("resources/hone/references/reconcile-rules.md", "references/reconcile-rules.md", False),
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
     ),
+    "mend": (
+        ("resources/mend/references/rework-rules.md", "references/rework-rules.md", False),
+        ("resources/shared/references/output-format.md", "references/output-format.md", False),
+    ),
 }
 
 REQUIRED_STAGE_SECTIONS = (
@@ -131,6 +135,7 @@ METHODOLOGY_REQUIREMENT_REFERENCES: Mapping[
         ),
     ),
     "hone": (),
+    "mend": (),
 }
 
 

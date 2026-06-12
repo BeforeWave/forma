@@ -33,6 +33,11 @@ constraints:
     - Evaluate feedback against the current stage constraints and bundled references before deciding whether it is implementation rework, delivery revision, plan rework, source rework, aligned, acceptable deviation, or blocked.
     - For task implementation rework, require `plans/issue-<id>/implement-notes.md` to record how feedback changed implementation, validation, generated artifacts, or commit/history.
     - For plan-level feedback, return to planning without recording the finding as implementation notes.
+  mend:
+    - Resolve rework intake from explicit human feedback first, then from `forma-reconcile` output when present.
+    - Write feedback source, classification, same-issue rationale, confirmation state, and appended task ids to `plans/issue-<id>/rework.md`.
+    - Append only ordinary structured `rework-*` task blocks to `plans/issue-<id>/tasks.md`; keep grouping and source prose out of `tasks.md`.
+    - Do not implement source changes, complete tasks, or write run evidence while materializing a rework contract.
 resources:
   default:
     references:
@@ -55,6 +60,8 @@ skills:
     description: Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
   hone:
     description: Reconcile Forma delivery feedback against stage contracts, issue evidence, and workflow boundaries.
+  mend:
+    description: Materialize same-issue Forma feedback into a locked rework contract.
 decision_gate_extras:
   - Layer impact
   - Profile ownership

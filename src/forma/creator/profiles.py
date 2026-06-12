@@ -15,7 +15,7 @@ import yaml
 
 
 DEFAULT_ENABLED_KINDS = ("shape", "gauge", "seal", "pour", "flow")
-OPTIONAL_KINDS = ("hone",)
+OPTIONAL_KINDS = ("hone", "mend")
 KINDS = (*DEFAULT_ENABLED_KINDS, *OPTIONAL_KINDS)
 STAGE_KEYS = ("default", *KINDS)
 

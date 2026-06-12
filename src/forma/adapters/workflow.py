@@ -14,7 +14,7 @@ from forma_verifier.rules import parse_frontmatter
 
 WORKFLOW_TARGETS = ("codex", "claude-code", "opencode")
 PLUGIN_TARGETS = ("codex", "claude-code")
-STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow", "hone")
+STAGE_ORDER = ("shape", "gauge", "seal", "pour", "flow", "hone", "mend")
 PLUGIN_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 CODEX_PLUGIN_DESCRIPTION = (
     "Forma provides Plan-First workflow skills for grounded planning, locked task contracts, and evidence-backed execution."

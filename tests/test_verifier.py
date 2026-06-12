@@ -453,6 +453,54 @@ Run read-only reconciliation using the stage evaluation frame, recent Forma skil
     assert report.passed, report.format_human()
 
 
+def test_manifest_emitted_skill_mapping_supports_mend(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    skill_dir = bundle / "forma-rework"
+    references_dir = skill_dir / "references"
+    references_dir.mkdir(parents=True)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": {
+                    "mend": {
+                        "name": "forma-rework",
+                        "directory": "forma-rework",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (references_dir / "rework-rules.md").write_text(
+        "# Rework Rules\n", encoding="utf-8"
+    )
+    (skill_dir / "SKILL.md").write_text(
+        skill_text(
+            "forma-rework",
+            "Record rework contract.",
+            """
+## Workflow
+
+Write plans/issue-<id>/rework.md, append flat rework-* task blocks to plans/issue-<id>/tasks.md, require explicit user confirmation, then hand off to forma-execute or forma-showhand.
+
+## Load As Needed
+
+- `references/rework-rules.md`
+
+## Output
+
+- Use `## rework-contract`.
+""",
+        ),
+        encoding="utf-8",
+    )
+
+    report = verify(bundle)
+
+    assert report.passed, report.format_human()
+
+
 def test_hone_methodology_requires_reconcile_markers(tmp_path: Path) -> None:
     bundle = tmp_path / "bundle"
     skill_dir = bundle / "forma-reconcile"
@@ -485,6 +533,40 @@ Review feedback and recommend next steps.
     )
 
     assert_has_error(verify(bundle), "R106")
+
+
+def test_mend_methodology_requires_rework_markers(tmp_path: Path) -> None:
+    bundle = tmp_path / "bundle"
+    skill_dir = bundle / "forma-rework"
+    skill_dir.mkdir(parents=True)
+    (bundle / ".forma-manifest.json").write_text(
+        json.dumps(
+            {
+                "bundle_kind": "plan-first-workflow",
+                "emitted_skills": {
+                    "mend": {
+                        "name": "forma-rework",
+                        "directory": "forma-rework",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (skill_dir / "SKILL.md").write_text(
+        skill_text(
+            "forma-rework",
+            "Incomplete rework stage.",
+            """
+## Workflow
+
+Record feedback and add follow-up work.
+""",
+        ),
+        encoding="utf-8",
+    )
+
+    assert_has_error(verify(bundle), "R107")
 
 
 def test_codex_plugin_manifest_matches_emitted_skills(tmp_path: Path) -> None:

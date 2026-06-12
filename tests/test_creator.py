@@ -62,6 +62,7 @@ FORMA_SELF_STAGE_DIRS = {
     "pour": "forma-execute",
     "flow": "forma-showhand",
     "hone": "forma-reconcile",
+    "mend": "forma-rework",
 }
 
 
@@ -192,6 +193,9 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert profile.stages["hone"].enabled is True
     assert profile.stages["hone"].directory == "forma-reconcile"
     assert "$forma-reconcile" in profile.stages["hone"].default_prompt
+    assert profile.stages["mend"].enabled is True
+    assert profile.stages["mend"].directory == "forma-rework"
+    assert "$forma-rework" in profile.stages["mend"].default_prompt
     assert "Layer impact" in profile.decision_gate_extras
     assert not any("README.md" in item for item in profile.constraints["default"])
     assert any("dirty worktree" in item for item in profile.constraints["default"])
@@ -205,6 +209,7 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["pour"])
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["flow"])
     assert any("recent Forma skill trigger context" in item for item in profile.constraints["hone"])
+    assert any("rework.md" in item for item in profile.constraints["mend"])
     assert profile.conditional_overlays is not None
     assert profile.conditional_overlays.decision.name == "Iteration Area"
     assert [route.id for route in profile.conditional_overlays.routes] == [
@@ -586,6 +591,9 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     hone_text = (
         codex_dir / FORMA_SELF_STAGE_DIRS["hone"] / "SKILL.md"
     ).read_text(encoding="utf-8")
+    mend_text = (
+        codex_dir / FORMA_SELF_STAGE_DIRS["mend"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
 
     assert 'name: "forma-plan"' in shape_text
     assert "references/forma-iteration-boundaries.md" in shape_text
@@ -601,6 +609,11 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "stage evaluation frame" in hone_text.lower()
     assert "issue plan/tasks/notes/runs" in hone_text
     assert "delivery-revision" in hone_text
+    assert 'name: "forma-rework"' in mend_text
+    assert "references/rework-rules.md" in mend_text
+    assert "plans/issue-<id>/rework.md" in mend_text
+    assert "rework-*" in mend_text
+    assert "forma-showhand" in mend_text
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
     assert manifest["profile"]["top_level_id"] == "forma-self-iteration"
@@ -615,6 +628,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
         == "forma-plan"
     )
     assert manifest["emitted_skills"]["hone"]["directory"] == "forma-reconcile"
+    assert manifest["emitted_skills"]["mend"]["directory"] == "forma-rework"
     assert manifest["conditional_overlays"]["decision"]["name"] == "Iteration Area"
     assert manifest["conditional_overlays"]["routes"][5]["overlays"] == [
         "methodology",
@@ -880,6 +894,7 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert (bundle_dir / "forma-execute" / "SKILL.md").is_file()
     assert (bundle_dir / "forma-showhand" / "SKILL.md").is_file()
     assert not (bundle_dir / "forma-reconcile").exists()
+    assert not (bundle_dir / "forma-rework").exists()
     default_plan_template = (
         bundle_dir / "forma-lock" / "references" / "plan-template.md"
     ).read_text(encoding="utf-8")
@@ -888,6 +903,8 @@ def test_default_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert verify(bundle_dir).passed
     assert verify(plugin_dir).passed
     assert not (plugin_dir / "skills" / "forma-reconcile").exists()
+    assert not (plugin_dir / "skills" / "forma-rework").exists()
+    assert not (plugin_dir / "skills" / "rework").exists()
 
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"
@@ -920,6 +937,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert (plugin_dir / "skills" / "plan" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "showhand" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "rework" / "SKILL.md").is_file()
     assert not (plugin_dir / "skills" / "forma-plan").exists()
     plan_template = (
         plugin_dir / "skills" / "lock" / "references" / "plan-template.md"
@@ -947,6 +965,9 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
     assert manifest["emitted_skills"]["hone"]["name"] == "reconcile"
     assert manifest["emitted_skills"]["hone"]["directory"] == "reconcile"
     assert manifest["emitted_skills"]["hone"]["qualified_name"] == "forma:reconcile"
+    assert manifest["emitted_skills"]["mend"]["name"] == "rework"
+    assert manifest["emitted_skills"]["mend"]["directory"] == "rework"
+    assert manifest["emitted_skills"]["mend"]["qualified_name"] == "forma:rework"
     openai_yaml = (
         plugin_dir / "skills" / "plan" / "agents" / "openai.yaml"
     ).read_text(encoding="utf-8")
@@ -973,6 +994,7 @@ def test_forma_self_profile_and_claude_code_plugin_localizes_skill_names(
     assert (plugin_dir / "skills" / "plan" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "showhand" / "SKILL.md").is_file()
     assert (plugin_dir / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert (plugin_dir / "skills" / "rework" / "SKILL.md").is_file()
     assert not (plugin_dir / "skills" / "forma-plan").exists()
     assert not (plugin_dir / "skills" / "plan" / "agents" / "openai.yaml").exists()
     plan_text = (plugin_dir / "skills" / "plan" / "SKILL.md").read_text(
@@ -989,6 +1011,7 @@ def test_forma_self_profile_and_claude_code_plugin_localizes_skill_names(
     assert manifest["emitted_skills"]["shape"]["name"] == "plan"
     assert manifest["emitted_skills"]["shape"]["directory"] == "plan"
     assert manifest["emitted_skills"]["hone"]["name"] == "reconcile"
+    assert manifest["emitted_skills"]["mend"]["name"] == "rework"
     _assert_base_origin(manifest, "claude-code", "claude-code-plugin")
 
 
@@ -1151,6 +1174,104 @@ skills:
     assert verify(output_dir).passed
 
 
+def test_optional_mend_stage_is_known_but_disabled_by_default(tmp_path: Path) -> None:
+    profile_file = tmp_path / "optional-mend.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: optional-mend
+stages:
+  mend:
+    name: custom-rework
+    directory: custom-rework
+    display_name: Custom Rework
+constraints:
+  mend:
+    - Materialize same-issue corrective feedback into ordinary follow-up tasks.
+skills:
+  mend:
+    description: Record a rework contract without implementing it.
+""".lstrip(),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "optional-mend-output"
+
+    profile = load_profile(profile_file)
+    assert profile.stages["mend"].enabled is False
+    assert profile.stages["mend"].name == "custom-rework"
+    assert profile.constraints["mend"] == [
+        "Materialize same-issue corrective feedback into ordinary follow-up tasks."
+    ]
+    assert profile.skill_descriptions["mend"] == (
+        "Record a rework contract without implementing it."
+    )
+
+    build_bundle(
+        profile_file=profile_file,
+        output_dir=output_dir,
+        target_agent="codex",
+        methodology_dir=METHODOLOGY,
+    )
+
+    assert not (output_dir / "custom-rework").exists()
+    manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["skills"] == list(KINDS)
+    assert "mend" not in manifest["emitted_skills"]
+    assert verify(output_dir).passed
+
+
+def test_plugin_localization_supports_optional_mend_stage(tmp_path: Path) -> None:
+    skills_dir = tmp_path / "skills"
+    skill_dir = skills_dir / "forma-rework"
+    agents_dir = skill_dir / "agents"
+    agents_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        """---
+name: forma-rework
+description: Record rework contract.
+---
+
+# Forma Rework
+""",
+        encoding="utf-8",
+    )
+    (agents_dir / "openai.yaml").write_text(
+        """interface:
+  display_name: "Forma Rework"
+  short_description: "Record rework contract."
+  default_prompt: "$forma-rework: Record rework."
+""",
+        encoding="utf-8",
+    )
+    manifest = {
+        "emitted_skills": {
+            "mend": {
+                "name": "forma-rework",
+                "directory": "forma-rework",
+                "display_name": "Forma Rework",
+            }
+        }
+    }
+
+    localized = workflow_adapter("codex").localize_plugin_skills(
+        manifest=manifest,
+        skills_dir=skills_dir,
+        plugin_name="forma",
+    )
+
+    assert not (skills_dir / "forma-rework").exists()
+    assert (skills_dir / "rework" / "SKILL.md").is_file()
+    skill_text = (skills_dir / "rework" / "SKILL.md").read_text(encoding="utf-8")
+    openai_yaml = (
+        skills_dir / "rework" / "agents" / "openai.yaml"
+    ).read_text(encoding="utf-8")
+    assert "name: rework" in skill_text
+    assert "$forma:rework" in openai_yaml
+    assert localized["emitted_skills"]["mend"]["name"] == "rework"
+    assert localized["emitted_skills"]["mend"]["directory"] == "rework"
+    assert localized["emitted_skills"]["mend"]["qualified_name"] == "forma:rework"
+
+
 def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
     sources = load_stage_sources(METHODOLOGY, ("hone",))
     hone = sources["hone"]
@@ -1167,6 +1288,29 @@ def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
     assert "`plans/issue-<id>/implement-notes.md`" in rules
     assert "`plans/issue-<id>/runs/task-*.md`" in rules
     assert "`delivery-revision`" in rules
+
+
+def test_mend_methodology_defines_rework_contract_rules() -> None:
+    sources = load_stage_sources(METHODOLOGY, ("mend",))
+    mend = sources["mend"]
+    rules = (
+        METHODOLOGY / "resources" / "mend" / "references" / "rework-rules.md"
+    ).read_text(encoding="utf-8")
+
+    assert "same-issue corrective feedback" in mend.description
+    assert any("explicit human feedback first" in line for line in mend.workflow_lines)
+    assert any("plans/issue-<id>/rework.md" in line for line in mend.workflow_lines)
+    assert any("rework-*" in line for line in mend.workflow_lines)
+    assert any("explicit user confirmation" in line for line in mend.workflow_lines)
+    assert any("forma-execute" in line for line in mend.workflow_lines)
+    assert any("forma-showhand" in line for line in mend.workflow_lines)
+    assert "## Intake Sources" in rules
+    assert "`plans/issue-<id>/rework.md`" in rules
+    assert "`plans/issue-<id>/tasks.md`" in rules
+    assert "do not add a `## Rework Tasks` heading" in rules
+    assert "require explicit user confirmation before committing" in rules
+    assert "`forma-execute`" in rules
+    assert "`forma-showhand`" in rules
 
 
 def test_creator_profile_supports_conditional_overlays(tmp_path: Path) -> None:

@@ -93,7 +93,7 @@ class BundleContext:
     manifest: Mapping[str, object]
 
 
-PLAN_FIRST_KINDS = ["shape", "gauge", "seal", "pour", "flow", "hone"]
+PLAN_FIRST_KINDS = ["shape", "gauge", "seal", "pour", "flow", "hone", "mend"]
 FORMA_STAGE_PREFIX = "forma"
 FORMA_PUBLIC_STAGE_NAMES = {
     "forma-plan": "shape",
@@ -102,6 +102,7 @@ FORMA_PUBLIC_STAGE_NAMES = {
     "forma-execute": "pour",
     "forma-showhand": "flow",
     "forma-reconcile": "hone",
+    "forma-rework": "mend",
 }
 
 
@@ -381,6 +382,19 @@ check_hone_methodology = _make_keyword_rule(
         "runs/task-*.md",
     ],
     "hone skill must cite read-only stage-aware reconciliation and delivery revision routing",
+)
+
+check_mend_methodology = _make_keyword_rule(
+    "R107", "mend",
+    [
+        "plans/issue-<id>/rework.md",
+        "plans/issue-<id>/tasks.md",
+        ("rework-*", "rework-001"),
+        "explicit user confirmation",
+        ("forma-execute", "execute"),
+        ("forma-showhand", "showhand"),
+    ],
+    "mend skill must cite rework ledger, flat task appending, confirmation, and execution handoff",
 )
 
 
@@ -997,6 +1011,7 @@ ALL_RULES: List[Callable[[SkillFile, BundleContext], List[RuleResult]]] = [
     check_seal_methodology,
     check_pour_methodology,
     check_hone_methodology,
+    check_mend_methodology,
     check_conditional_overlays,
     check_target_metadata,
     check_codex_plugin_manifest,

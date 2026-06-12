@@ -450,6 +450,7 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     assert (output / "skills" / "plan" / "SKILL.md").is_file()
     assert (output / "skills" / "showhand" / "SKILL.md").is_file()
     assert (output / "skills" / "reconcile" / "SKILL.md").is_file()
+    assert (output / "skills" / "rework" / "SKILL.md").is_file()
     assert not (output / "skills" / "forma-plan").exists()
     plugin = json.loads(
         (output / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")

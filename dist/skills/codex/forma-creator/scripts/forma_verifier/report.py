@@ -20,6 +20,8 @@ FAILURE_CLASS_BY_RULE_ID: Dict[str, str] = {
     "R102": "methodology_gate",
     "R103": "methodology_gate",
     "R104": "methodology_gate",
+    "R106": "methodology_gate",
+    "R107": "methodology_gate",
     "R201": "target_contract",
     "R202": "target_contract",
     "R203": "plugin_contract",
