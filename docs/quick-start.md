@@ -32,10 +32,15 @@ If you need to reproduce the commands manually, a Codex direct skill bundle
 looks like this:
 
 ```bash
-forma create-bundle --target codex --profile /tmp/myproject-profile.yaml --output /tmp/myproject-workflow
+forma build bundle --target codex --profile /tmp/myproject-profile.yaml --output /tmp/myproject-workflow
 forma verify /tmp/myproject-workflow
 forma install --target codex --scope project /tmp/myproject-workflow
 ```
+
+If the profile's directory already contains `reinstall-workflow.sh`, run that
+profile-local script instead of reconstructing build, verify, drift, install, or
+marketplace commands from the guide. Agent-side bootstrap and reuse rules for a
+manual build/install process live in `forma explain agent`.
 
 ## 2. Try The Generated Workflow
 
@@ -88,7 +93,7 @@ If these rules should be shared or maintained long term, commit the reviewed
 profile. Future workflow output can then be generated deterministically:
 
 ```bash
-forma create-bundle --target codex --profile myproject.yaml --output /tmp/bundle
+forma build bundle --target codex --profile myproject.yaml --output /tmp/bundle
 forma verify /tmp/bundle
 forma install --target codex --scope project /tmp/bundle
 ```
@@ -96,7 +101,7 @@ forma install --target codex --scope project /tmp/bundle
 The same profile can target Claude Code:
 
 ```bash
-forma create-bundle --target claude-code --profile myproject.yaml --output /tmp/bundle-cc
+forma build bundle --target claude-code --profile myproject.yaml --output /tmp/bundle-cc
 forma verify /tmp/bundle-cc
 forma install --target claude-code --scope user /tmp/bundle-cc
 ```
@@ -104,7 +109,7 @@ forma install --target claude-code --scope user /tmp/bundle-cc
 Or OpenCode:
 
 ```bash
-forma create-bundle --target opencode --profile myproject.yaml --output /tmp/bundle-opencode
+forma build bundle --target opencode --profile myproject.yaml --output /tmp/bundle-opencode
 forma verify /tmp/bundle-opencode
 forma install --target opencode --scope project /tmp/bundle-opencode
 ```
@@ -114,7 +119,7 @@ forma install --target opencode --scope project /tmp/bundle-opencode
 | Path | Best for | Output |
 |---|---|---|
 | `forma explain profile` + agent | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow bundle or plugin. |
-| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Repeatable workflow output from profile source. |
+| `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Repeatable workflow output from profile source. |
 | `forma-creator` | Optional on-the-spot generation when you do not want to handle a profile file first. | Verified one-off skill bundle or plugin. |
 
 ## Install Locations

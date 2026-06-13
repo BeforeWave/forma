@@ -40,6 +40,6 @@ Use these rules for plan-first task execution skills.
 - If `next` reports no unchecked tasks remain, stop and report the completed issue state.
 - Do not generate evidence, mark the task complete, or create the task commit outside `scripts/forma-workflow.sh complete <issue-id>`.
 - Completion is determined by repository state and review-ready validation results, not by self-report.
-- `scripts/forma-workflow.sh review-ready <issue-id>` may write transient review cache state under `.forma-workflow/`.
+- `scripts/forma-workflow.sh review-ready <issue-id>` may write transient review cache state under `.forma/state/workflow/`; do not read or migrate legacy `.forma-workflow/` cache.
 - `scripts/forma-workflow.sh complete <issue-id>` records task evidence under `./plans/issue-<id>/runs/`.
 - If validation fails, the task remains unchecked and no commit is created.

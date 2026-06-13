@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backend Plan-First Showhand"
-  short_description: "Sequentially implement all tasks from an already-locked backend plan automatically."
-  default_prompt: "Execute the already-locked issue plan sequentially using the packaged workflow. Do not create, rewrite, or commit plan.md/tasks.md; if planning files are missing, templated, incomplete, or uncertified, stop and hand off to the lock stage or the required grounding producer. Preflight task permissions, make bounded execution decisions directly, and automatically move through review-ready and complete for each task."

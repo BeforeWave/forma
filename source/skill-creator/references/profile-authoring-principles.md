@@ -108,8 +108,18 @@ triggers.
   and evidence-materialization rules.
 - `constraints.pour`: Daily current-task execution.
 - `constraints.flow`: Automated remaining-task execution.
+- `workflow_adds.<stage>`: Additional ordered workflow steps, completion
+  gates, or stop conditions that must appear in the generated stage's
+  `## Workflow` section instead of the weaker `## Requirements` section.
+- `output_adds.<stage>`: Required final-response fields that must appear in
+  the generated stage's `## Output` section.
 - `conditional_overlays`: Heavy route-specific rules that should apply only
   after `shape` records the selected scenario in `plan.md`.
+
+If a project rule changes when a stage is allowed to stop, where it must hand
+off, or what field must appear in the final response, do not encode it as a
+plain `constraints` item. Use `workflow_adds` or `output_adds` so the generated
+skill carries the rule in the stage's execution path.
 
 ## Heavy Rule Routing
 

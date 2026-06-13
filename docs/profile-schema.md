@@ -36,6 +36,12 @@ constraints:
     - Each accepted task must name evidence, boundary, validation, proof, and stop conditions.
   pour:
     - Use lightweight markdown or link checks for docs-only changes.
+workflow_adds:
+  pour:
+    - Stop before review-ready if documentation evidence is missing.
+output_adds:
+  pour:
+    - Include the documentation evidence paths in the final report.
 ```
 
 For a complete composable example, start with:
@@ -64,6 +70,8 @@ private workflow commands.
 | `validation_commands` | Default or stage-specific validation commands. |
 | `decision_gate_extras` | Extra dimensions `shape` must settle. |
 | `constraints` | Default or stage-specific engineering rules. |
+| `workflow_adds` | Default or stage-specific workflow steps rendered into `## Workflow`. |
+| `output_adds` | Default or stage-specific output requirements rendered into `## Output`. |
 | `conditional_overlays` | Route-specific constraints, resources, and validation activated after the plan records the selected route. |
 
 ## Includes
@@ -104,7 +112,7 @@ installable names, directories, display labels, and prompts are renamed.
 
 ## Plugin Display Metadata
 
-When a profile is used with `forma create-plugin`, `bundle.name` remains the
+When a profile is used with `forma build plugin`, `bundle.name` remains the
 plugin id and must stay lower kebab-case. Codex plugin `interface.displayName`
 defaults to a title-cased version of that id. Use `plugin.display_name` only
 when the plugin's install-surface brand label needs different casing or wording:
@@ -151,6 +159,21 @@ constraints:
     - Put exact validation commands or shared checks into each accepted task.
   pour:
     - Execute only the current accepted task and record proof under `plans/issue-<id>/runs/`.
+```
+
+`constraints` render into `## Requirements`. Use `workflow_adds` when a profile
+must strengthen a stage's ordered workflow, completion gate, or stop condition.
+Use `output_adds` when a profile must add required fields to the stage's final
+response. Both fields use the same `default` and stage-specific shape as
+`constraints`, but render into `## Workflow` and `## Output` respectively.
+
+```yaml
+workflow_adds:
+  mend:
+    - After committing a confirmed rework contract, resolve and report the execution handoff disposition before stopping.
+output_adds:
+  mend:
+    - Include `Execution Handoff:` with the sent or blocked disposition.
 ```
 
 ## Resources

@@ -95,9 +95,8 @@ Scope:
   docs/usage.md, and docs/usage.zh-CN.md.
 
 Out of scope:
-  Do not change create-bundle, create-plugin, install, verify,
-  or explain execution semantics.
-  Do not restore forma create or add a compatibility alias.
+  Do not change install, verify, or explain execution semantics.
+  Do not restore removed command aliases.
 
 Approach:
   Make `forma` with no arguments exit 0 and print the same
@@ -153,9 +152,8 @@ The first useful response should be a proposal, not a patch.
 > not triggered; Forma is not running.
 
 If the rules should be shared or maintained long term, keep the profile in
-version control. If you already have a reviewed profile, use `forma
-create-bundle --profile <profile.yaml>` or `forma create-plugin --profile
-<profile.yaml>` to generate workflow output. Full commands are in [Quick
+version control. If you already have a reviewed profile, build workflow output
+with `forma build bundle` or `forma build plugin`. Full commands are in [Quick
 Start](./docs/quick-start.md) and [Usage](./docs/usage.md).
 
 ---
@@ -184,9 +182,9 @@ The repository contains more than concept docs.
 families. They show how teams express engineering rules, source-reading rules,
 validation depth, proof, and stop conditions.
 
-`examples/generated/` contains committed baselines compiled from those profiles.
-They are used to inspect generated output and catch drift; they do not prove
-that a real agent will always execute correctly.
+Generated example output is no longer committed. If a sample profile is useful,
+build it locally with `forma build bundle` or `forma build plugin` and inspect
+the generated output in a temporary or project-chosen path.
 
 `plans/issue-*/` is Forma's own development record. Each issue records `plan.md`,
 `tasks.md`, and `runs/task-*.md` with real task contracts, validation results,
@@ -207,7 +205,7 @@ stronger verification, and more real runs.
 
 Forma also uses its own plan-before-execute workflow for development; this
 repository's profile source lives in
-[`profiles/forma-self/`](./profiles/forma-self/).
+[`.forma/profile.yaml`](./.forma/profile.yaml).
 
 ---
 
@@ -229,7 +227,7 @@ repository's profile source lives in
 | [Skill Bundle](./docs/skill-bundle.md) | Generated output layout. |
 | [Verifier](./docs/verifier.md) | What verification checks and cannot prove. |
 | [Targets](./docs/targets.md) | Codex, Claude Code, and OpenCode target behavior. |
-| [Examples](./docs/examples.md) | Sanitized sample profiles, generated baselines, and real tracked runs. |
+| [Examples](./docs/examples.md) | Sanitized sample profiles and real tracked runs. |
 | [Usage](./docs/usage.md) | Command reference. |
 
 Apache-2.0 - see [LICENSE](./LICENSE)

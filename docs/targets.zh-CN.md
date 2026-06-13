@@ -19,11 +19,11 @@ Forma 生成的是 target 专用 workflow 产物。Codex plugin 是同一套 tas
 使用对应的 `--target`：
 
 ```bash
-forma create-bundle --target codex --profile <profile.yaml> --output <dir>
-forma create-bundle --target claude-code --profile <profile.yaml> --output <dir>
-forma create-bundle --target opencode --profile <profile.yaml> --output <dir>
-forma create-plugin --target codex --profile <profile.yaml> --output <dir>
-forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>
+forma build bundle --target codex --profile <profile.yaml> --output <dir>
+forma build bundle --target claude-code --profile <profile.yaml> --output <dir>
+forma build bundle --target opencode --profile <profile.yaml> --output <dir>
+forma build plugin --target codex --profile <profile.yaml> --output <dir>
+forma build plugin --target claude-code --profile <profile.yaml> --output <dir>
 ```
 
 OpenCode 使用 direct skill 形态。Forma 生成 OpenCode 原生 skill bundle，不生成

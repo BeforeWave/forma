@@ -6,8 +6,10 @@
 - For `Task Type=loop-batch`, prioritize metric/artifact movement and report that outcome before validation details; never allow empty selection or failed filtering to fall back to an unintended full run.
 - For `Task Type=gate`, require a decision-critical boundary in the task text, such as protecting later selection, closure, artifact acceptance, promotion, or destructive write decisions; otherwise record the issue as follow-up instead of implementing generic cleanup.
 - For `Task Type=promote`, require explicit allowed write surfaces and prerequisite evidence in the task before writing source-of-truth, long-lived assets, production-like config, or other hard-to-revert surfaces.
-- Record meaningful execution decisions, plan gaps, classifications, deviations, and intentional follow-ups in `plans/issue-<id>/implement-notes.md` using `references/implement-notes.md`; do not use notes as a command log.
+- Before `review-ready`, decide whether `implement-notes.md` is required for the current task. If the task introduced or changed command/API shape, output schema, default behavior, source/generated/installed boundary, generated artifact policy, install/bootstrap/reinstall handoff, validation model, or a non-obvious compatibility route, update `plans/issue-<id>/implement-notes.md` using `references/implement-notes.md`.
+- Record meaningful execution decisions, plan gaps, classifications, deviations, and intentional follow-ups in `implement-notes.md`; absence of notes means no such decision occurred. Do not use notes as a command log.
 - Use `scripts/forma-workflow.sh notes-template <issue-id>` when you need a current-task `implement-notes.md` section skeleton, and keep only meaningful notes before review.
+- Do not run `git add`, `git rm`, or any other index-mutating command for current-task changes before `review-ready`. The workflow runner owns review staging; make ordinary working-tree edits and deletions, then let `review-ready` stage the reviewed snapshot.
 - Use `tasks.md` only to confirm surrounding context; do not pick a different task by parsing the checklist yourself.
 - Do not modify `plan.md` or mark tasks complete yourself.
 - Work one workflow task at a time, but after an approved completion you may continue directly to the next unchecked task in the same invocation.

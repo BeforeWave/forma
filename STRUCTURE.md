@@ -21,9 +21,9 @@ This document maps the current Forma source tree and the role of each area.
 | `source/` | Canonical methodology source and Layer 1 meta skill source | present |
 | `src/forma/` | Developer Python package and CLI | present |
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
-| `examples/` | Composable profile examples and generated Plan-First workflow bundles | present |
+| `examples/` | Composable profile examples; generated example outputs are built locally when needed | present |
 | `docs/` | Human-facing split documentation linked from the README files | present |
-| `dist/` | Committed release artifacts for creator skills, skill bundles, OpenCode skill output, and Codex / Claude Code plugins | present |
+| `dist/` | Committed release artifacts for profile-backed skill bundles, OpenCode skill output, Codex / Claude Code plugins, and deferred creator skills | present |
 | `tests/` | Verifier, creator, fixture, and dogfood tests | present |
 
 ## Source tree
@@ -49,7 +49,7 @@ package. The same `forma_verifier` package is also discovered by
 `pyproject.toml` for the developer CLI and tests.
 
 `source/skill-creator/` does not keep a second copy of
-`source/methodology/`. `forma build-creator` injects that methodology tree into
+`source/methodology/`. `forma build creator` injects that methodology tree into
 the built creator bundle at `resources/plan-first/methodology/`.
 
 Wheel builds copy `source/methodology/` and `source/skill-creator/` into
@@ -70,7 +70,7 @@ generated skill resources.
 
 | Path | Role |
 |---|---|
-| `src/forma/cli.py` | Click CLI exposing `verify`, `create-bundle`, `create-plugin`, `install`, `build-creator`, and `explain` |
+| `src/forma/cli.py` | Click CLI exposing `verify`, `build bundle`, `build plugin`, `install`, `build creator`, and `explain` |
 | `src/forma/assets/` | Package-data anchor for runtime assets copied into wheels |
 | `src/forma/runtime_assets.py` | `importlib.resources` runtime asset resolver with source-checkout fallback |
 | `src/forma/explain.py` | Read-only `forma explain ...` guidance renderer assembled from canonical reference files |
@@ -135,9 +135,9 @@ binary, and are not Node.js implementations of Forma.
 
 | Path | Role |
 |---|---|
-| `dist/skills/codex/forma-creator` | Codex-targeted creator skill |
-| `dist/skills/claude-code/forma-creator` | Claude Code-targeted creator skill |
-| `dist/skills/opencode/forma-creator` | OpenCode-targeted creator skill |
+| `dist/skills/codex/forma-creator` | Codex-targeted creator skill; deferred until creator iteration resumes |
+| `dist/skills/claude-code/forma-creator` | Claude Code-targeted creator skill; deferred until creator iteration resumes |
+| `dist/skills/opencode/forma-creator` | OpenCode-targeted creator skill; deferred until creator iteration resumes |
 | `dist/skill-bundles/codex/` | Default Codex Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/skill-bundles/claude-code/` | Default Claude Code Plan-First skill bundle with `forma-plan` through `forma-showhand` |
 | `dist/skill-bundles/opencode/` | Default OpenCode-native Plan-First skill bundle with `forma-plan` through `forma-showhand` |
@@ -148,11 +148,11 @@ binary, and are not Node.js implementations of Forma.
 
 | Path | Role |
 |---|---|
-| `profiles/forma-self/` | Project-owned profile stack for generating skills that manage Forma's own development iterations |
-| `profiles/forma-self/forma-self-iteration.yaml` | Top-level self-iteration profile with `Iteration Area` conditional routing |
-| `profiles/forma-self/base.yaml` | Lightweight always-on self-profile constraints; governance docs are stage- or overlay-scoped, not default execution requirements |
-| `profiles/forma-self/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-layer execution overlays |
-| `profiles/forma-self/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration bundles |
+| `.forma/` | Project-owned profile stack for generating skills that manage Forma's own development iterations |
+| `.forma/profile.yaml` | Top-level self-iteration profile with `Iteration Area` conditional routing |
+| `.forma/base.yaml` | Lightweight always-on self-profile constraints; governance docs are stage- or overlay-scoped, not default execution requirements |
+| `.forma/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-layer execution overlays |
+| `.forma/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration bundles |
 
 Project-owned profiles may contain Forma-specific workflow policy. They are
 separate from public examples under `examples/profiles/`.
@@ -172,15 +172,15 @@ heavy scenario-specific behavior belongs in conditional overlays.
 |---|---|
 | `examples/profiles/sample-backend/` | Profile stack showing base/dev/backend/language composition |
 | `examples/profiles/sample-software/` | Profile stack showing generic software plan-first behavior, Chinese workflow wording, Impact Profile / Impact Boundary controls, and safe showhand gates |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/` | Codex generated Plan-First workflow bundle and drift baseline |
-| `examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/` | Claude Code generated Plan-First workflow bundle and drift baseline |
+| `examples/profiles/sample-backend/scripts/` | Profile-declared helper scripts used only by profiles that select them as resources |
+| `examples/profiles/sample-backend/references/` | Profile-declared reference resources copied into generated skills when selected |
 
 Real downstream profiles with organization-specific workflow commands, private
 paths, credentials, or business rules belong in the downstream repository that
 owns those constraints.
-`sample-software` is currently a profile-only example; the committed generated
-drift baselines in this issue remain the `sample-backend-go-github-issue-tracked` Codex and Claude
-Code bundles.
+Examples are profile source only. Users who want to inspect generated output
+should run `forma build bundle` or `forma build plugin` themselves and choose
+the output directory.
 
 ## Tests
 

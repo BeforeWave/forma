@@ -14,16 +14,20 @@ from pathlib import Path
 
 import click
 from forma import __version__
-from forma.adapters import ADAPTER_TARGETS, build_creator
+from forma.adapters import ADAPTER_TARGETS
 from forma.adopt import adopt_profile
-from forma.creator import build_bundle
-from forma.doctor import diagnose_artifact
+from forma.build_commands import (
+    run_build_bundle,
+    run_build_creator,
+    run_build_plugin,
+)
+from forma.doctor import diagnose_artifact_report
 from forma.drift import drift_artifact, drift_release_surface
 from forma.explain import render_guidance
+from forma.init_remediation import plan_init
 from forma.install import INSTALL_TARGETS, install_artifact
-from forma.plugin_guidance import codex_plugin_install_hint
-from forma.plugins import build_plugin
-from forma.runtime_assets import runtime_asset_path
+from forma.repo_doctor import diagnose_repo
+from forma.reports import REPORT_FORMATS, ReportFormat, render_report
 from forma_verifier import verify as verify_bundle
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -66,6 +70,17 @@ class RawEpilogGroup(RawEpilogMixin, click.Group):
         super().__init__(*args, **kwargs)
 
 
+class DoctorGroup(RawEpilogGroup):
+    """Route legacy `forma doctor <path>` calls to the artifact subcommand."""
+
+    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        if args and not any(arg in {"-h", "--help"} for arg in args):
+            first_non_option = next((arg for arg in args if not arg.startswith("-")), None)
+            if first_non_option not in self.commands:
+                args = ["artifact", *args]
+        return super().parse_args(ctx, args)
+
+
 ROOT_HELP = """
 Agents:
 
@@ -104,7 +119,29 @@ Sources:
 """
 
 
-CREATE_BUNDLE_HELP = """
+PROFILE_LOCAL_WORKFLOW_HELP = """
+Profile-local reinstall workflow:
+
+  For profile-backed build/install work, inspect the profile directory before
+  composing commands. If reinstall-workflow.sh exists there, run the script
+  from that directory instead of rebuilding the command chain.
+
+  If the script is missing, treat the profile as needing bootstrap. Before
+  hand-assembling build/install commands, ask whether to create the missing
+  profile-local reinstall script and then run the workflow through it. Only
+  use a one-off manual flow when the user explicitly asks not to keep scripts
+  for this profile or explicitly requests a temporary one-time run.
+
+  A bootstrapped reinstall script should cover generation, drift when
+  profile-backed, verify, the local install route, marketplace or install-target
+  refresh, and the final visibility check.
+"""
+
+
+BUILD_HELP = PROFILE_LOCAL_WORKFLOW_HELP
+
+
+BUILD_BUNDLE_HELP = """
 Next:
 
   Verify before installing:
@@ -112,10 +149,10 @@ Next:
 
   Install verified local skill bundles with:
     forma install --target codex|claude-code|opencode --scope user|project <output-dir>
-"""
+""" + PROFILE_LOCAL_WORKFLOW_HELP
 
 
-CREATE_PLUGIN_HELP = """
+BUILD_PLUGIN_HELP = """
 Next:
 
   Verify the plugin source:
@@ -130,7 +167,7 @@ Next:
 
   Do not install Codex plugins with forma install.
   Install Claude Code plugin roots with forma install --target claude-code.
-"""
+""" + PROFILE_LOCAL_WORKFLOW_HELP
 
 
 INSTALL_HELP = """
@@ -140,6 +177,14 @@ Boundaries:
   Do not pass URLs.
   Do not pass Codex plugin sources; install plugins through Codex.
   Use --replace only when replacing existing installed artifacts is intended.
+"""
+
+
+INIT_HELP = """
+Behavior:
+
+  Default mode is a dry run. Use --apply to create deterministic skeleton files.
+  Generated profile source is draft project source and still needs human review.
 """
 
 
@@ -180,7 +225,7 @@ Next:
 
   Combine this guidance with project facts to return a Profile YAML Proposal
   and Profile Review Packet. Write profile files only after user approval.
-  Then generate output with forma create-bundle or forma create-plugin.
+  Then generate output with forma build bundle or forma build plugin.
 """
 
 
@@ -232,23 +277,73 @@ def verify(ctx: click.Context, json_output: bool, path: Path) -> None:
         raise click.ClickException("verification failed")
 
 
-@main.command(cls=RawEpilogCommand, epilog=DOCTOR_HELP)
+@main.group(
+    "doctor",
+    cls=DoctorGroup,
+    invoke_without_command=True,
+    epilog=DOCTOR_HELP,
+)
+@click.pass_context
+def doctor(ctx: click.Context) -> None:
+    """Diagnose generated artifacts or repository agent operability."""
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@doctor.command("artifact", cls=RawEpilogCommand, hidden=True)
 @click.option(
     "--json",
     "json_output",
     is_flag=True,
     help="Emit a machine-readable artifact diagnosis.",
 )
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
 @click.argument("path", type=click.Path(path_type=Path))
 @click.pass_context
-def doctor(ctx: click.Context, json_output: bool, path: Path) -> None:
+def doctor_artifact(
+    ctx: click.Context,
+    json_output: bool,
+    output_format: ReportFormat,
+    path: Path,
+) -> None:
     """Diagnose a generated Forma artifact at PATH."""
-    report = diagnose_artifact(path)
-    if json_output:
-        click.echo(report.format_json())
-    else:
-        click.echo(report.format_human())
+    report = diagnose_artifact_report(path)
+    click.echo(render_report(report, "json" if json_output else output_format))
     if report.blockers:
+        ctx.exit(1)
+
+
+@doctor.command("repo", cls=RawEpilogCommand)
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
+@click.argument(
+    "path",
+    required=False,
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+)
+@click.pass_context
+def doctor_repo(
+    ctx: click.Context,
+    output_format: ReportFormat,
+    path: Path | None,
+) -> None:
+    """Diagnose repository readiness for agent operation."""
+    report = diagnose_repo(path or Path.cwd())
+    click.echo(render_report(report, output_format))
+    if report.status == "unsafe":
         ctx.exit(1)
 
 
@@ -269,7 +364,7 @@ def doctor(ctx: click.Context, json_output: bool, path: Path) -> None:
 @click.option(
     "--release-surface",
     is_flag=True,
-    help="Check Forma's committed examples/generated and dist release surface.",
+    help="Check Forma's committed dist release surface.",
 )
 @click.option(
     "--json",
@@ -318,7 +413,12 @@ def drift_command(
         ctx.exit(1)
 
 
-@main.command("create-bundle", cls=RawEpilogCommand, epilog=CREATE_BUNDLE_HELP)
+@main.group("build", cls=RawEpilogGroup, epilog=BUILD_HELP)
+def build_group() -> None:
+    """Build Forma workflow artifacts from profile or creator source."""
+
+
+@build_group.command("bundle", cls=RawEpilogCommand, epilog=BUILD_BUNDLE_HELP)
 @click.option(
     "--profile",
     "profile_file",
@@ -347,28 +447,35 @@ def drift_command(
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Methodology source path override (default: auto-detect).",
 )
-def create_bundle_command(
-    profile_file: Path,
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
+def build_bundle_command(
+    profile_file: Path | None,
     target_agent: str,
     output_dir: Path,
     methodology_dir: Path | None,
+    output_format: ReportFormat,
 ) -> None:
     """Compile project rules into a target-specific skill bundle."""
     try:
-        resolved_profile = _resolve_profile_file(profile_file)
-        manifest = build_bundle(
-            profile_file=resolved_profile,
+        result = run_build_bundle(
+            profile_file=profile_file,
             target_agent=target_agent,
             output_dir=output_dir,
             methodology_dir=methodology_dir,
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma create-bundle: wrote workflow bundle: {output_dir}")
-    click.echo(f"manifest: {manifest}")
+    click.echo(render_report(result.to_report(), output_format))
 
 
-@main.command("create-plugin", cls=RawEpilogCommand, epilog=CREATE_PLUGIN_HELP)
+@build_group.command("plugin", cls=RawEpilogCommand, epilog=BUILD_PLUGIN_HELP)
 @click.option(
     "--profile",
     "profile_file",
@@ -397,33 +504,32 @@ def create_bundle_command(
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Methodology source path override (default: auto-detect).",
 )
-def create_plugin_command(
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
+def build_plugin_command(
     profile_file: Path | None,
     target_agent: str,
     output_dir: Path,
     methodology_dir: Path | None,
+    output_format: ReportFormat,
 ) -> None:
     """Compile project rules into a target-specific plugin source."""
     try:
-        plugin_json = build_plugin(
-            profile_file=_resolve_profile_file(profile_file),
+        result = run_build_plugin(
+            profile_file=profile_file,
             output_dir=output_dir,
             target_agent=target_agent,
             methodology_dir=methodology_dir,
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    label = "Codex" if target_agent == "codex" else "Claude Code"
-    click.echo(f"forma create-plugin: wrote {label} plugin: {output_dir}")
-    click.echo(f"plugin: {plugin_json}")
-    click.echo("install hint:")
-    if target_agent == "codex":
-        click.echo(codex_plugin_install_hint(output_dir))
-    else:
-        click.echo(
-            "Install with Forma:\n"
-            f"  forma install --target claude-code --scope user|project {output_dir}"
-        )
+    click.echo(render_report(result.to_report(), output_format))
 
 
 @main.command("install", cls=RawEpilogCommand, epilog=INSTALL_HELP)
@@ -468,14 +574,52 @@ def install_command(
         click.echo(str(installed_path))
 
 
-def _resolve_profile_file(profile_file: Path | None) -> Path:
-    if profile_file is not None:
-        return profile_file
-    with runtime_asset_path("profiles", "default", "forma-plan-first.yaml") as path:
-        return path
+@main.command("init", cls=RawEpilogCommand, epilog=INIT_HELP)
+@click.option(
+    "--apply",
+    "apply_changes",
+    is_flag=True,
+    help="Create missing deterministic skeleton files instead of only planning.",
+)
+@click.option(
+    "--profile-dir",
+    required=False,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Repo-local profile directory (default: .forma under PATH).",
+)
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
+@click.argument(
+    "path",
+    required=False,
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+)
+@click.pass_context
+def init_command(
+    ctx: click.Context,
+    apply_changes: bool,
+    profile_dir: Path | None,
+    output_format: ReportFormat,
+    path: Path | None,
+) -> None:
+    """Plan or apply deterministic Forma repository initialization."""
+    report = plan_init(
+        root=path or Path.cwd(),
+        profile_dir=profile_dir,
+        apply=apply_changes,
+    )
+    click.echo(render_report(report, output_format))
+    if report.status == "unsafe":
+        ctx.exit(1)
 
 
-@main.command("build-creator", cls=RawEpilogCommand, epilog=BUILD_CREATOR_HELP)
+@build_group.command("creator", cls=RawEpilogCommand, epilog=BUILD_CREATOR_HELP)
 @click.option(
     "--source",
     "source_dir",
@@ -504,10 +648,14 @@ def build_creator_command(
 ) -> None:
     """Build optional target-specific creators for on-the-spot workflow output."""
     try:
-        output = build_creator(source_dir, output_dir, target_agent)
+        result = run_build_creator(
+            source_dir=source_dir,
+            output_dir=output_dir,
+            target_agent=target_agent,
+        )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    click.echo(f"forma build-creator: wrote creator bundle: {output}")
+    click.echo(result.format_human())
 
 
 @main.group("profile", cls=RawEpilogGroup)
@@ -573,8 +721,8 @@ def explain() -> None:
 @click.option(
     "--format",
     "output_format",
-    default="markdown",
-    type=click.Choice(("markdown", "json")),
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
     show_default=True,
     help="Output format.",
 )
@@ -597,8 +745,8 @@ def explain_agent(output_format: str, target_agent: str | None) -> None:
 @click.option(
     "--format",
     "output_format",
-    default="markdown",
-    type=click.Choice(("markdown", "json")),
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
     show_default=True,
     help="Output format.",
 )
@@ -621,8 +769,8 @@ def explain_profile(output_format: str, target_agent: str | None) -> None:
 @click.option(
     "--format",
     "output_format",
-    default="markdown",
-    type=click.Choice(("markdown", "json")),
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
     show_default=True,
     help="Output format.",
 )

@@ -28,6 +28,18 @@ Add or update a task section when any of these occur:
 - execution intentionally deviated from the plan
 - work was intentionally deferred as a follow-up because it was outside the current task
 
+Also treat these as mandatory notes triggers when the task changes them:
+
+- command/API shape, CLI compatibility route, output schema, renderer contract, or default behavior
+- source/generated/installed/release boundary, including whether generated artifacts are kept, deleted, regenerated, or excluded
+- install, bootstrap, handoff, or reinstall automation that future agents should reuse instead of reconstructing commands
+- validation model, test scope, or proof strategy when the implementation relies on a narrower or broader gate than the plan spelled out
+- compatibility or migration choice where viable alternatives existed and the selected route would not be obvious from the diff alone
+
+If a reviewer would ask why this shape, boundary, default, compatibility route, or generated artifact policy was chosen, write it in `Decision Notes:` before `review-ready`. Absence of `implement-notes.md` for a task means no meaningful implementation decision, plan gap, classification, deviation, or follow-up occurred.
+
+If a process mistake happens, do not use notes to justify bypassing a gate. Return to the required gate first. After the gate is restored, record only the durable implementation or workflow decision that future tasks should remember.
+
 Keep notes sanitized. Do not include secrets, raw request or response payloads, local fixture values, private identifiers, or downstream project-specific details copied from another repository.
 
 ## Format

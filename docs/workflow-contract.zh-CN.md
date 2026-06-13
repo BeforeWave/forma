@@ -149,5 +149,5 @@ Temporary injection 适合只影响本次生成产物的临场准则。
 - [核心概念](./concepts.zh-CN.md)：编译器模型和核心术语。
 - [Profile Schema](./profile-schema.zh-CN.md)：长期工作流来源格式。
 - [Skill Bundle](./skill-bundle.zh-CN.md)：生成产物结构。
-- [Examples](./examples.zh-CN.md)：sample profiles、生成基线和真实 runs。
+- [Examples](./examples.zh-CN.md)：sample profiles、本地生成说明和真实 runs。
 - [使用说明](./usage.zh-CN.md)：命令参考。

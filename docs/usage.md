@@ -14,13 +14,31 @@ can start there when it is unsure which command path to use.
 
 | Goal | Command path | Next action |
 |---|---|---|
-| Let an agent load profile authoring rules | `forma explain profile --target codex` | Agent-facing command; use the output as read-only guidance before drafting a profile from project facts. |
-| Build a skill bundle from a reviewed tracked profile | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
-| Build the default Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
-| Build plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | `forma verify <dir>`; install Codex plugins through Codex, and install Claude Code plugin roots with `forma install --target claude-code`. |
-| Diagnose a generated artifact before handoff | `forma doctor <dir>` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next steps. |
-| Build optional creator for on-the-spot generation | `forma build-creator --target <target> --output <dir>` | Use only for the creator path; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
+| Read or hand off profile authoring rules | `forma explain profile --format human|agent|json --target codex` | Use `human` for concise reader guidance, `agent` for an executable authoring contract, and `json` for tools. Combine the guidance with project facts before drafting a profile. |
+| Build a skill bundle from a reviewed tracked profile | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; human output is a concise artifact result. Use `--format agent` or `--format json` when another agent or tool needs structured next actions. |
+| Build the default Plan-First skill bundle | `forma build bundle --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
+| Build plugin source | `forma build plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | Human output is a concise artifact result. Use `--format agent` or `--format json` for install handoff; Codex plugins install through Codex, and Claude Code plugin roots install with `forma install --target claude-code`. |
+| Diagnose repo agent-operability | `forma doctor repo [path] --format human|agent|json` | Read-only check for agent entrypoints, boundaries, validation signals, profile presence, and instruction weight. |
+| Diagnose a generated artifact before handoff | `forma doctor <dir> --format human|agent|json` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next actions. |
+| Initialize deterministic Forma source | `forma init [path] --format human|agent|json` | Dry-run remediation by default; use `--apply` to create `.forma/` profile source and a bootstrap-incomplete reinstall workflow skeleton. |
+| Build optional creator for on-the-spot generation | `forma build creator --target <target> --output <dir>` | Use only for the creator path; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
 | Give an agent temporary-injection rules | `forma explain temporary-injection --target codex` | Use only for optional creator/on-the-spot generation flows. |
+
+When a reviewed profile is stored in a directory, check that profile directory.
+If it contains `reinstall-workflow.sh`, run that profile-local
+script before falling back to hand-composed `forma build`, `forma verify`,
+`forma drift`, `forma install`, marketplace refresh, or Codex plugin commands.
+Profile-backed `forma build bundle` and `forma build plugin` expose the
+profile-local reinstall state and structured next actions through
+`--format agent` and `--format json`. Default `human` output stays concise so it
+can be used inside profile-local scripts without printing agent handoff text.
+If the script is missing or still bootstrap-incomplete, the agent must settle
+the install facts with the user and complete the script before reporting a
+reusable reinstall flow. Fixed-fact reinstall scripts should encode artifact
+kind, target, plugin id when relevant, marketplace source when relevant, install
+selector, and visibility check.
+See `forma explain agent` for the agent-side bootstrap and reuse rules for that
+process.
 
 ## Commands
 
@@ -53,7 +71,7 @@ Next action:
 - If a Claude Code plugin verifies, install the plugin root with
   `forma install --target claude-code`.
 - If the path is ambiguous, run `forma doctor <path>` to get the install route
-  and next steps.
+  and next actions.
 
 `forma verify` checks structure and methodology rules. It does not replace
 profile review or product judgment. See [Verifier](./verifier.md) for the
@@ -63,6 +81,14 @@ Use `--json` when another tool or agent needs structured output. The JSON report
 keeps the same exit code contract and includes semantic failure classes for each
 reported rule result.
 
+Use `--format human|agent|json` on commands that emit structured handoff output,
+such as `doctor`, `init`, selected `build` commands, and `explain`. The
+`human` renderer stays concise and suppresses agent-only handoff details;
+`agent` includes executable next actions, stop conditions, and forbidden
+actions; `json` is for tools. The command shape is shared, but the content is
+command-specific: `doctor` reports findings and evidence, while `explain`
+reports authoring guidance and handoff rules.
+
 ### `forma doctor <path>`
 
 Diagnoses a generated artifact before handoff or installation:
@@ -70,23 +96,62 @@ Diagnoses a generated artifact before handoff or installation:
 ```bash
 forma doctor /tmp/settings-workflow-codex
 forma doctor --json /tmp/forma-codex-plugin
+forma doctor --format agent /tmp/forma-codex-plugin
 ```
 
 The doctor output identifies the artifact kind, target, verification status,
 whether `forma install` supports the artifact, whether it is installable now,
-the correct install route, blockers, and next steps.
+the correct install route, blockers, and next actions.
 
 Use it when a user or agent is unsure whether the current path is a skill, skill
 bundle, Codex plugin, Claude Code plugin, broken artifact, or unsupported
 directory.
 
-### `forma create-bundle`
+### `forma doctor repo [path]`
+
+Runs a read-only repository agent-operability check:
+
+```bash
+forma doctor repo
+forma doctor repo --format json /path/to/repo
+```
+
+It reports whether the repository is `ready`, `needs-agent`, `needs-human`, or
+`unsafe` based on static signals such as agent entrypoints, source/write
+boundaries, validation commands, Forma profile presence, and instruction
+weight. It does not create files, review a profile, or run installs.
+
+### `forma init [path]`
+
+Plans deterministic remediation for a repository:
+
+```bash
+forma init
+forma init --format agent
+forma init --apply
+```
+
+Default mode is a dry run. With `--apply`, Forma creates missing deterministic
+skeleton files under a git-trackable `.forma/` directory:
+`.forma/profile.yaml`, `.forma/reinstall-workflow.sh`, and `.forma/.gitignore`.
+The `.gitignore` ignores only `/state/`, so profile source and reinstall
+workflow stay trackable while runtime workflow state lives under `.forma/state/`.
+These are draft project
+source files; `forma init` does not claim the profile has been reviewed. Agents
+can use profile-authoring principles to draft candidate rules, but review is a
+human durability decision about which rules become long-term project workflow
+source. The generated `reinstall-workflow.sh` is bootstrap-incomplete until
+install facts are confirmed and written into a fixed-fact script. If a review
+packet is generated during profile authoring, ask the user whether to keep it;
+do not leave it in the repo by default.
+
+### `forma build bundle`
 
 Composes the methodology and a resolved tracked profile into a target-specific
 workflow bundle:
 
 ```bash
-forma create-bundle --target codex --output /tmp/forma-codex-bundle
+forma build bundle --target codex --output /tmp/forma-codex-bundle
 ```
 
 Required options:
@@ -105,17 +170,21 @@ Optional development override:
 - `--methodology <dir>`: use a source methodology directory instead of packaged runtime assets.
 
 Next action: run `forma verify <output-dir>`, then install the verified local
-bundle with `forma install`.
+bundle with `forma install`. For profile-backed output, default `human` output
+stays concise; use `--format agent` when an agent needs the structured next
+actions. If the profile directory contains `reinstall-workflow.sh`, run that
+script before reconstructing build/install commands. If it is missing, that is a
+bootstrap state, not a reusable manual install path.
 
 Profile format is documented in [Profile Schema](./profile-schema.md).
 
-### `forma create-plugin`
+### `forma build plugin`
 
 Builds a local plugin output from a profile:
 
 ```bash
-forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma create-plugin --target claude-code --output /tmp/forma-claude-code-plugin
+forma build plugin --target codex --output /tmp/forma-codex-plugin
+forma build plugin --target claude-code --output /tmp/forma-claude-code-plugin
 ```
 
 Codex plugin output contains `.codex-plugin/plugin.json`, root
@@ -152,25 +221,26 @@ you intentionally postprocess the generated artifact, postprocess after drift
 and use `forma verify <output-dir>` as the final gate.
 
 Install Codex plugins through Codex marketplace/plugin UI, not `forma install`.
-Run `codex plugin marketplace list`, ask the user which existing marketplace to
-use or whether to create/register a new one, ensure that marketplace catalog
-points to the generated plugin root, then install with
-`codex plugin add <plugin-id>@<marketplace-name>`. If Codex CLI output or
-marketplace behavior differs, consult current Codex docs or
-`codex plugin marketplace --help`.
+During bootstrap discovery or diagnostics, inspect configured marketplaces as
+needed, ask the user to confirm the plugin id, marketplace name, marketplace
+source, install selector, and visibility check, ensure the confirmed marketplace
+catalog points to the generated plugin root, then install with a confirmed
+`<plugin-id>@<marketplace>` selector. Stable profile-local reinstall scripts
+should not list marketplaces or leave plugin id, marketplace, selector, or
+source refresh decisions open at runtime.
 
 Install Claude Code plugin roots with
 `forma install --target claude-code --scope user|project <output-dir>`.
 
-### `forma build-creator`
+### `forma build creator`
 
 Builds a target-specific installable `forma-creator`. This is the optional
 on-the-spot path for generating a workflow without handling a profile file
 first:
 
 ```bash
-forma build-creator --target codex --output /tmp/forma-creator-dist
-forma build-creator --target opencode --output /tmp/forma-creator-dist
+forma build creator --target codex --output /tmp/forma-creator-dist
+forma build creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 Required options:
@@ -230,8 +300,24 @@ Forma source files:
 
 ```bash
 forma explain profile --target codex
+forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
+
+`forma explain profile` is useful both for people and for agents, but the
+renderer changes the handoff:
+
+- `--format human` gives a concise reader-facing explanation of what belongs in
+  a durable profile and what stays in the current task.
+- `--format agent` gives an executable authoring contract: what project facts
+  to gather, how to separate durable rules from task-specific work, what files
+  may be proposed, and when to stop for user review.
+- `--format json` gives tools the same guidance as structured data.
+
+This command does not create profile files and does not claim a profile has been
+reviewed. Use `forma init --apply` when deterministic skeleton files are needed,
+then combine `forma explain profile` with project facts to draft rules for human
+review.
 
 When another agent needs to draft a profile or temporary injection, use this
 command to give it the rules. For the normal profile-first path, you can simply
@@ -246,8 +332,8 @@ The agent uses `forma explain profile --target codex` to load the authoring
 standard, then combines it with project facts to propose profile YAML. Commit
 that profile only when the rules need long-term reuse.
 
-Next action: after the profile is reviewed, use `forma create-bundle` for a
-skill bundle or `forma create-plugin` for plugin source.
+Next action: after the profile is reviewed, use `forma build bundle` for a
+skill bundle or `forma build plugin` for plugin source.
 
 ## Install Targets
 
@@ -262,18 +348,18 @@ skill outputs into the matching target location:
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
 OpenCode uses direct skill bundles. Generate an OpenCode bundle with
-`forma create-bundle --target opencode`, verify it, then install it with
+`forma build bundle --target opencode`, verify it, then install it with
 `forma install --target opencode`. Forma does not emit OpenCode JS/TS runtime
 plugin output.
 
 Codex plugin outputs are local plugin sources. Forma does not install Codex
-plugins. Run `codex plugin marketplace list`, ask the user which existing
-marketplace to use or whether to create/register a new one, make sure that
-marketplace catalog points to the generated plugin root, then run
-`codex plugin add <plugin-id>@<marketplace-name>` or install it from the Codex
-plugin UI. Start a new Codex thread after installing so the plugin skills are
-discovered. If Codex CLI output or marketplace behavior differs from this guide,
-consult current Codex docs or `codex plugin marketplace --help`.
+plugins. During bootstrap discovery or diagnostics, inspect configured
+marketplaces as needed, confirm the plugin id, marketplace name, marketplace
+source, install selector, and visibility check with the user, then run
+`codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>` or install it
+from the Codex plugin UI. Start a new Codex thread after installing so the
+plugin skills are discovered. Stable profile-local reinstall scripts should use
+confirmed facts rather than marketplace discovery.
 
 Claude Code plugin outputs are installable through Forma because Claude Code
 loads skills-directory plugins from `.claude/skills/<plugin-name>`.
@@ -314,7 +400,7 @@ Rules:
   without changing the plugin id, skill names, or triggers.
 - `name` and `directory` must be lower kebab-case.
 - Semantic stage keys remain `shape`, `gauge`, `seal`, `pour`, and `flow`.
-- When the same profile is used with `forma create-plugin`, the plugin id stays
+- When the same profile is used with `forma build plugin`, the plugin id stays
   `bundle.name`; plugin-local skills strip that exact prefix when present. Codex
   plugin triggers use the resulting `<plugin-id>:<local-skill>` form, such as
   `forma:plan` for the default Forma plugin.
@@ -357,8 +443,6 @@ after editable dev installation:
 
 ```bash
 forma verify source/skill-creator/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 python -m pytest -p no:cacheprovider tests/
 git diff --check
 ```
@@ -368,10 +452,10 @@ git diff --check
 - `source/methodology/`: methodology used to emit task-level workflow skills.
 - `source/skill-creator/`: self-contained `forma-creator` source with bundled references, creator script, and verifier.
 - `src/forma/`: Python CLI, profile compiler, runtime asset resolver, and target emitters.
-- `profiles/forma-self/`: Forma-owned profile stack for this repository.
+- `.forma/`: Forma-owned profile stack for this repository.
 - `examples/profiles/`: profile examples.
-- `examples/generated/`: committed generated baselines for drift checks.
-- `tests/`: verifier, creator, runtime asset, profile, and generated-baseline tests.
+- Generated sample outputs are built locally when needed, not committed.
+- `tests/`: verifier, creator, runtime asset, profile, and CLI behavior tests.
 
 See [Repository Structure](../STRUCTURE.md) for the detailed tree map.
 
@@ -380,9 +464,9 @@ See [Repository Structure](../STRUCTURE.md) for the detailed tree map.
 Packaged Forma commands use `forma.assets` runtime assets by default. Source
 paths are development overrides only:
 
-- `forma create-bundle` and `forma create-plugin` use packaged methodology unless `--methodology` is provided.
+- `forma build bundle` and `forma build plugin` use packaged methodology unless `--methodology` is provided.
 - `forma install` only installs verified local outputs; it does not download URLs.
-- `forma build-creator` uses packaged creator source unless `--source` is provided.
+- `forma build creator` uses packaged creator source unless `--source` is provided.
 - `forma explain` renders canonical guidance from packaged references.
 
 This keeps the `forma-cli` installed CLI behavior independent of the source

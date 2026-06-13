@@ -81,17 +81,17 @@ constraints:
 resources:
   shape:
     references:
-      - source: ../../../source/methodology/resources/shared/references/script-resource-adapter.md
+      - source: references/script-resource-adapter.md
         dest: script-resource-adapter.md
     scripts:
-      - source: ../../../source/methodology/resources/shared/script/github_issue_context.py
+      - source: scripts/github_issue_context.py
         dest: github_issue_context.py
   seal:
     references:
-      - source: ../../../source/methodology/resources/shared/references/script-resource-adapter.md
+      - source: references/script-resource-adapter.md
         dest: script-resource-adapter.md
     scripts:
-      - source: ../../../source/methodology/resources/shared/script/github_issue_context.py
+      - source: scripts/github_issue_context.py
         dest: github_issue_context.py
 decision_gate_extras:
   - API or stream impact

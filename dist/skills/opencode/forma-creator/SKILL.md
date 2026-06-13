@@ -103,7 +103,7 @@ frontmatter names use target-specific output names:
 Generated bundles must keep the canonical resources stage-local. These paths
 exist inside a built or installed `forma-creator` bundle. In Forma source, the
 same files are maintained only under `source/methodology/` and copied into the
-creator bundle by `forma build-creator`.
+creator bundle by `forma build creator`.
 
 - `shape`: resources under
   `resources/plan-first/methodology/resources/shape/`.

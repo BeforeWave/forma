@@ -474,6 +474,7 @@ def _render_skill(
             "## Workflow",
             "",
             *stage_source.workflow_lines,
+            *[f"- {line}" for line in _items_for_kind(profile.workflow_adds, kind)],
             "",
         ]
     )
@@ -499,6 +500,7 @@ def _render_skill(
             "## Output",
             "",
             *stage_source.output_lines,
+            *[f"- {line}" for line in _items_for_kind(profile.output_adds, kind)],
             "",
         ]
     )

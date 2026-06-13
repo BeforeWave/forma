@@ -23,11 +23,11 @@ match the agent that will load it.
 Use the matching `--target` value:
 
 ```bash
-forma create-bundle --target codex --profile <profile.yaml> --output <dir>
-forma create-bundle --target claude-code --profile <profile.yaml> --output <dir>
-forma create-bundle --target opencode --profile <profile.yaml> --output <dir>
-forma create-plugin --target codex --profile <profile.yaml> --output <dir>
-forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>
+forma build bundle --target codex --profile <profile.yaml> --output <dir>
+forma build bundle --target claude-code --profile <profile.yaml> --output <dir>
+forma build bundle --target opencode --profile <profile.yaml> --output <dir>
+forma build plugin --target codex --profile <profile.yaml> --output <dir>
+forma build plugin --target claude-code --profile <profile.yaml> --output <dir>
 ```
 
 OpenCode uses the direct skill shape. Forma generates OpenCode-native skill

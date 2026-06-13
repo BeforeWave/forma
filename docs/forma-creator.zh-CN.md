@@ -21,18 +21,18 @@
 |---|---|---|---|
 | `forma-creator` | 临场定制，先试一套项目 workflow。 | 项目事实、用户补充、确认后的准则。 | 已验证的一次性 skill bundle 或 plugin。 |
 | `forma explain profile` + agent | 一开始就要长期维护源码。 | profile 编写标准、项目事实、团队 review。 | tracked profile YAML，再编译成 workflow。 |
-| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 plugin。 |
+| `forma build bundle` / `forma build plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 plugin。 |
 
-`forma explain profile` 是默认路径：先把项目规则整理成可 review 的 profile，再生成 workflow。`forma-creator` 是可选路径：隐藏 profile 文件处理，先临场试一套 workflow。`forma create-bundle` 和 `forma create-plugin` 是 profile 已经存在后的确定性生成命令。
+`forma explain profile` 是默认路径：先把项目规则整理成可 review 的 profile，再生成 workflow。`forma-creator` 是可选路径：隐藏 profile 文件处理，先临场试一套 workflow。`forma build bundle` 和 `forma build plugin` 是 profile 已经存在后的确定性生成命令。
 
 ## 固定目标契约
 
 每个 creator 都固定一个 target：
 
 ```bash
-forma build-creator --target codex --output /tmp/forma-creator-dist
-forma build-creator --target claude-code --output /tmp/forma-creator-dist
-forma build-creator --target opencode --output /tmp/forma-creator-dist
+forma build creator --target codex --output /tmp/forma-creator-dist
+forma build creator --target claude-code --output /tmp/forma-creator-dist
+forma build creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 Codex creator 生成 Codex 形态的 skill bundle；用户要求 plugin 输出时，也可以生成 Codex plugin。Claude Code creator 生成 Claude Code 形态的 skill bundle 和 Claude Code plugin。OpenCode creator 生成 OpenCode 原生 skill bundle，不生成 OpenCode JS/TS runtime plugin。不要用一个 target 的 creator 去生成另一个 target 的产物。

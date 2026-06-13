@@ -11,11 +11,12 @@ from click.testing import CliRunner
 from forma.adapters import build_creator
 from forma.cli import main
 from forma.origin import normalized_payload_digest
+from forma.reports import ActionableReport, NextAction, ReportSection, render_report
 
 
 ROOT = Path(__file__).resolve().parents[1]
 METHODOLOGY = ROOT / "source" / "methodology"
-FORMA_SELF_PROFILE = ROOT / "profiles" / "forma-self" / "forma-self-iteration.yaml"
+FORMA_SELF_PROFILE = ROOT / ".forma" / "profile.yaml"
 SAMPLE_PROFILE = (
     ROOT
     / "examples"
@@ -125,7 +126,17 @@ def test_command_help_includes_agent_next_steps() -> None:
     runner = CliRunner()
     cases = [
         (
-            ["build-creator", "--help"],
+            ["build", "--help"],
+            [
+                "Build Forma workflow artifacts from profile or creator source.",
+                "Profile-local reinstall workflow:",
+                "If reinstall-workflow.sh exists",
+                "treat the profile as needing bootstrap",
+                "explicitly requests a temporary one-time run",
+            ],
+        ),
+        (
+            ["build", "creator", "--help"],
             [
                 "Use this when a user specifically wants an on-the-spot creator run",
                 "Verify the generated creator skill:",
@@ -133,15 +144,19 @@ def test_command_help_includes_agent_next_steps() -> None:
             ],
         ),
         (
-            ["create-bundle", "--help"],
+            ["build", "bundle", "--help"],
             [
                 "Compile project rules into a target-specific skill bundle.",
                 "Verify before installing:",
                 "forma install --target codex|claude-code|opencode --scope user|project <output-dir>",
+                "Profile-local reinstall workflow:",
+                "If reinstall-workflow.sh exists",
+                "treat the profile as needing bootstrap",
+                "A bootstrapped reinstall script should cover generation",
             ],
         ),
         (
-            ["create-plugin", "--help"],
+            ["build", "plugin", "--help"],
             [
                 "Compile project rules into a target-specific plugin source.",
                 "Verify the plugin source:",
@@ -149,6 +164,10 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "codex plugin add <plugin-id>@<marketplace-name>",
                 "Do not install Codex plugins with forma install.",
                 "Install Claude Code plugin roots with forma install --target claude-code.",
+                "Profile-local reinstall workflow:",
+                "If reinstall-workflow.sh exists",
+                "treat the profile as needing bootstrap",
+                "the local install route",
             ],
         ),
         (
@@ -157,6 +176,15 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Install only verified local skills, skill bundles, or Claude Code plugin roots.",
                 "Do not pass URLs.",
                 "Do not pass Codex plugin sources; install plugins through Codex.",
+            ],
+        ),
+        (
+            ["init", "--help"],
+            [
+                "Plan or apply deterministic Forma repository initialization.",
+                "Default mode is a dry run.",
+                "Use --apply to create deterministic skeleton files.",
+                "still needs human review",
             ],
         ),
         (
@@ -170,7 +198,8 @@ def test_command_help_includes_agent_next_steps() -> None:
         (
             ["doctor", "--help"],
             [
-                "Diagnose a generated Forma artifact at PATH.",
+                "Diagnose generated artifacts or repository agent operability.",
+                "repo",
                 "whether",
                 "install route",
             ],
@@ -198,7 +227,7 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Explain profile authoring and task-rule placement.",
                 "Profile YAML Proposal",
                 "Profile Review Packet",
-                "forma create-bundle or forma create-plugin",
+                "forma build bundle or forma build plugin",
             ],
         ),
         (
@@ -239,35 +268,55 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "## Profile write boundary" in result.output
     assert "Profiles are structured project-rule input" in result.output
     assert "`Profile YAML Proposal` and `Profile Review Packet`" in result.output
+    assert "## Profile-local workflow scripts" in result.output
+    assert "`reinstall-workflow.sh`" in result.output
+    assert "instead of assembling `forma build bundle`" in result.output
+    assert "treat that as a bootstrap state" in result.output
+    assert "Before running hand-assembled build or install commands" in result.output
+    assert "Only proceed with a one-off manual flow" in result.output
+    assert "Bootstrap goal: explore whatever local environment details" in result.output
+    assert "Required install facts before reusable success" in result.output
+    assert "artifact kind, target" in result.output
+    assert "Stable reinstall scripts must encode fixed facts" in result.output
+    assert "must not run `codex plugin marketplace list`" in result.output
+    assert "write one real script, not notes" in result.output
+    assert "`reinstall-workflow.sh` must reproduce generation" in result.output
+    assert "run the new script once before reporting bootstrap success" in result.output
+    assert "final install report must include the profile-local reinstall state" in result.output
+    assert "bootstrapped the script and ran it" in result.output
+    assert "user requested one-off manual flow" in result.output
     assert "forma doctor <path>" in result.output
     assert "## Draft project rules, then generate workflow output" in result.output
     assert "forma explain profile --target <generation-target>" in result.output
     assert "forma verify <dir>/<generation-target>/forma-creator" in result.output
-    assert "forma create-bundle --target <generation-target> --output <dir>" in result.output
+    assert "forma build bundle --target <generation-target> --output <dir>" in result.output
     assert (
-        "forma create-bundle --target <generation-target> --profile <profile.yaml> --output <dir>"
+        "forma build bundle --target <generation-target> --profile <profile.yaml> --output <dir>"
         in result.output
     )
-    assert "forma create-bundle --target opencode" in result.output
+    assert "forma build bundle --target opencode" in result.output
     assert "forma install --target opencode" in result.output
     assert ".opencode/skills" in result.output
     assert "Codex plugin install state belongs to Codex" in result.output
-    assert "ask the user which marketplace to use" in result.output
-    assert "codex plugin marketplace list" in result.output
-    assert "codex plugin add <plugin-id>@<marketplace-name>" in result.output
+    assert "marketplace source" in result.output
+    assert "codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>" in result.output
     assert "Claude Code plugin roots can be installed" in result.output
     assert (
-        "forma create-plugin --target codex --profile <profile.yaml> --output <dir>"
+        "forma build plugin --target codex --profile <profile.yaml> --output <dir>"
         in result.output
     )
     assert (
-        "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>"
+        "forma build plugin --target claude-code --profile <profile.yaml> --output <dir>"
         in result.output
     )
     assert "Generate from an approved profile" in result.output
     assert "Optional on-the-spot creator path" in result.output
     assert "candidate profile package" in result.output
     assert "forma profile adopt <artifact-dir> --output <profile-dir>" in result.output
+    assert "Build workflow artifacts with `forma build bundle`" in result.output
+    assert "Do not use removed command entrypoints" in result.output
+    assert "`forma create-bundle`, `forma create-plugin`" in result.output
+    assert "Do not add compatibility aliases" in result.output
     assert "`drift` checks whether generated output is fresh" in result.output
     assert "Omitting `--profile` generates generic no-profile workflow output" in result.output
 
@@ -282,24 +331,153 @@ def test_explain_agent_json_outputs_command_guide() -> None:
 
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
-    assert payload["topic"] == "agent"
-    assert payload["target"] == "claude-code"
-    assert "# Forma Agent Guide" in payload["markdown"]
-    assert "## Profile write boundary" in payload["markdown"]
-    assert "candidate profile package" in payload["markdown"]
-    assert "Generate a Claude Code plugin" in payload["markdown"]
-    assert "forma install --target claude-code --scope project <dir>" in payload["markdown"]
+    assert payload["schema"] == "forma.actionable-report.v1"
+    assert payload["command"] == "forma explain agent"
+    assert payload["metadata"]["topic"] == "agent"
+    assert payload["metadata"]["target"] == "claude-code"
+    assert "# Forma Agent Guide" in payload["metadata"]["markdown"]
+    assert "## Profile write boundary" in payload["metadata"]["markdown"]
+    assert "candidate profile package" in payload["metadata"]["markdown"]
+    assert "Generate a Claude Code plugin" in payload["metadata"]["markdown"]
+    assert "forma install --target claude-code --scope project <dir>" in payload["metadata"]["markdown"]
+    assert any(
+        action["command"] == "forma doctor <path>"
+        for action in payload["next_actions"]
+    )
 
 
-def test_old_create_command_is_rejected_with_current_command_names() -> None:
+def test_explain_profile_renderer_boundaries() -> None:
     runner = CliRunner()
 
-    result = runner.invoke(main, ["create", "--help"])
+    human = runner.invoke(
+        main,
+        ["explain", "profile", "--format", "human", "--target", "codex"],
+    )
+    agent = runner.invoke(
+        main,
+        ["explain", "profile", "--format", "agent", "--target", "codex"],
+    )
+    json_result = runner.invoke(
+        main,
+        ["explain", "profile", "--format", "json", "--target", "codex"],
+    )
 
-    assert result.exit_code != 0
-    assert "No such command 'create'" in result.output
-    assert "create-bundle" in result.output
-    assert "create-plugin" in result.output
+    assert human.exit_code == 0, human.output
+    assert "Profile Renderer Boundary" in human.output
+    assert "Use `--format agent` for the full executable authoring contract" in human.output
+    assert "## Constraint Placement" not in human.output
+
+    assert agent.exit_code == 0, agent.output
+    assert "ACTIONABLE REPORT" in agent.output
+    assert "[guidance] Forma Profile Guidance" in agent.output
+    assert "## Constraint Placement" in agent.output
+    assert "settle reusable reinstall facts" in agent.output
+    assert "artifact kind" in agent.output
+    assert "visibility check" in agent.output
+    assert "next_actions:" in agent.output
+
+    assert json_result.exit_code == 0, json_result.output
+    payload = json.loads(json_result.output)
+    assert payload["schema"] == "forma.actionable-report.v1"
+    assert payload["command"] == "forma explain profile"
+    assert payload["metadata"]["topic"] == "profile"
+    assert {section["kind"] for section in payload["sections"]} == {
+        "guidance",
+        "sources",
+    }
+    assert "diagnostic-findings" not in {
+        section["kind"] for section in payload["sections"]
+    }
+    assert "facts" not in payload
+    assert "findings" not in payload
+    assert "evidence" not in payload
+    assert any(
+        action["title"] == "settle reusable reinstall facts"
+        for action in payload["next_actions"]
+    )
+
+
+def test_old_create_commands_are_rejected_with_current_command_names() -> None:
+    runner = CliRunner()
+
+    create = runner.invoke(main, ["create", "--help"])
+    create_bundle = runner.invoke(main, ["create-bundle", "--help"])
+    create_plugin = runner.invoke(main, ["create-plugin", "--help"])
+
+    assert create.exit_code != 0
+    assert "No such command 'create'" in create.output
+    assert create_bundle.exit_code != 0
+    assert "No such command 'create-bundle'" in create_bundle.output
+    assert create_plugin.exit_code != 0
+    assert "No such command 'create-plugin'" in create_plugin.output
+
+
+def test_actionable_report_renders_human_agent_and_json() -> None:
+    report = ActionableReport(
+        command="forma build plugin",
+        subject="profiles/sample/profile.yaml",
+        status="needs-agent",
+        summary="plugin source was generated",
+        sections=(
+            ReportSection(
+                kind="produced-artifact",
+                title="Produced Artifact",
+                payload={"path": "/tmp/plugin", "target": "codex"},
+            ),
+        ),
+        next_actions=(
+            NextAction(
+                title="verify generated plugin",
+                command="forma verify /tmp/plugin",
+                stop_condition="verification fails",
+                forbidden=("do not install Codex plugins with forma install",),
+            ),
+        ),
+    )
+
+    human = render_report(report, "human")
+    agent = render_report(report, "agent")
+    payload = json.loads(render_report(report, "json"))
+
+    assert "forma build plugin: plugin source was generated" in human
+    assert "Produced Artifact" in human
+    assert "verify generated plugin: forma verify /tmp/plugin" not in human
+    assert "Next:" not in human
+    assert "ACTIONABLE REPORT" in agent
+    assert "[produced-artifact] Produced Artifact" in agent
+    assert "stop_condition: verification fails" in agent
+    assert "forbidden: do not install Codex plugins with forma install" in agent
+    assert payload["schema"] == "forma.actionable-report.v1"
+    assert payload["status"] == "needs-agent"
+    assert payload["sections"][0]["kind"] == "produced-artifact"
+    assert "facts" not in payload
+    assert "findings" not in payload
+    assert "evidence" not in payload
+
+
+def test_actionable_report_rejects_unsupported_format() -> None:
+    report = ActionableReport(
+        command="forma explain agent",
+        subject="codex",
+        status="ready",
+        summary="guidance is available",
+    )
+
+    try:
+        report.render("markdown")  # type: ignore[arg-type]
+    except ValueError as exc:
+        assert "unsupported report format" in str(exc)
+        assert "human, agent, json" in str(exc)
+    else:
+        raise AssertionError("expected unsupported format to raise")
+
+
+def _report_section(payload: dict[str, object], kind: str) -> dict[str, object]:
+    for section in payload["sections"]:  # type: ignore[index]
+        if section["kind"] == kind:
+            return section["payload"]  # type: ignore[return-value]
+    raise AssertionError(f"missing report section {kind!r}")
+
 
 def test_verify_json_emits_machine_readable_report_for_failures() -> None:
     runner = CliRunner()
@@ -315,14 +493,15 @@ def test_verify_json_emits_machine_readable_report_for_failures() -> None:
     assert "Error:" not in result.output
 
 
-def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
+def test_build_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> None:
     output = tmp_path / "bundle"
     runner = CliRunner()
 
     result = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--output",
@@ -342,7 +521,7 @@ def test_create_bundle_default_profile_emits_forma_workflow(tmp_path: Path) -> N
     assert manifest["emitted_skills"]["shape"]["name"] == "forma-plan"
 
 
-def test_create_bundle_opencode_emits_native_skill_frontmatter(
+def test_build_bundle_opencode_emits_native_skill_frontmatter(
     tmp_path: Path,
 ) -> None:
     output = tmp_path / "opencode-bundle"
@@ -351,7 +530,8 @@ def test_create_bundle_opencode_emits_native_skill_frontmatter(
     result = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "opencode",
             "--output",
@@ -375,14 +555,82 @@ def test_create_bundle_opencode_emits_native_skill_frontmatter(
     assert manifest["emitted_skills"]["shape"]["directory"] == "forma-plan"
 
 
-def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
+def test_profile_backed_build_bundle_outputs_script_status(tmp_path: Path) -> None:
+    output = tmp_path / "profile-bundle"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "build",
+            "bundle",
+            "--target",
+            "codex",
+            "--profile",
+            str(SAMPLE_PROFILE),
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Produced Artifact" in result.output
+    assert "Profile-Local Reinstall Workflow" not in result.output
+    assert f"profile_dir: {SAMPLE_PROFILE.parent}" not in result.output
+    assert "script: reinstall-workflow.sh" not in result.output
+    assert "state: bootstrap-required" not in result.output
+    assert "bootstrap profile-local reinstall workflow" not in result.output
+    assert "Next:" not in result.output
+
+
+def test_profile_backed_build_bundle_agent_format_outputs_next_actions(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "profile-bundle"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "build",
+            "bundle",
+            "--target",
+            "codex",
+            "--profile",
+            str(SAMPLE_PROFILE),
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+            "--format",
+            "agent",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "ACTIONABLE REPORT" in result.output
+    assert "[profile-local-reinstall-workflow] Profile-Local Reinstall Workflow" in result.output
+    assert "settle install facts and complete profile-local reinstall workflow" in result.output
+    assert "required_install_facts" in result.output
+    assert "artifact kind" in result.output
+    assert "marketplace source" in result.output
+    assert "drift generated output against profile" in result.output
+    assert f"forma drift {output} --profile {SAMPLE_PROFILE}" in result.output
+    assert "forbidden: do not report the manual flow as reusable" in result.output
+    assert "forbidden: do not put Codex marketplace listing in the stable reinstall script" in result.output
+
+
+def test_build_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     output = tmp_path / "plugin"
     runner = CliRunner()
 
     result = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--output",
@@ -393,22 +641,15 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0, result.output
-    assert "Codex plugin generated, not installed." in result.output
-    assert "name: forma" in result.output
-    assert "root:" in result.output
-    assert "Before install:" in result.output
-    assert "Recommended Codex install path:" in result.output
-    assert "run drift before any postprocess" in result.output
-    assert "use `forma verify` as the final gate" in result.output
-    assert "codex plugin marketplace list" in result.output
-    assert "Ask the user to choose an existing marketplace" in result.output
-    assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in result.output
-    assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in result.output
-    assert "codex plugin add forma@<marketplace-name>" in result.output
-    assert "Codex plugin UI" in result.output
-    assert "codex plugin marketplace --help" in result.output
-    assert "Start a new Codex thread" in result.output
-    assert "Forma does not install Codex plugins" in result.output
+    assert "Produced Artifact" in result.output
+    assert "Codex plugin generated, not installed." not in result.output
+    assert "Before install:" not in result.output
+    assert "Recommended Codex install path:" not in result.output
+    assert "run drift before any postprocess" not in result.output
+    assert "codex plugin marketplace list" not in result.output
+    assert "codex plugin add forma@<marketplace-name>" not in result.output
+    assert "Forma does not install Codex plugins" not in result.output
+    assert "Next:" not in result.output
     assert (output / ".codex-plugin" / "plugin.json").is_file()
     assert (output / ".forma-manifest.json").is_file()
     assert (output / "skills" / "plan" / "SKILL.md").is_file()
@@ -425,7 +666,56 @@ def test_create_plugin_emits_codex_plugin_layout(tmp_path: Path) -> None:
     assert plugin["skills"] == "./skills/"
 
 
-def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
+def test_build_plugin_json_outputs_codex_handoff_next_actions(tmp_path: Path) -> None:
+    output = tmp_path / "plugin"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        main,
+        [
+            "build",
+            "plugin",
+            "--target",
+            "codex",
+            "--output",
+            str(output),
+            "--methodology",
+            str(METHODOLOGY),
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["schema"] == "forma.actionable-report.v1"
+    assert payload["command"] == "forma build plugin"
+    assert _report_section(payload, "produced-artifact")["artifact_kind"] == "codex-plugin"
+    commands = {
+        action.get("command")
+        for action in payload["next_actions"]
+        if "command" in action
+    }
+    assert "forma verify " + str(output) in commands
+    assert "codex plugin marketplace list" not in commands
+    assert "codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>" in commands
+    assert any(
+        action["title"] == "confirm Codex plugin install facts"
+        and "marketplace source" in action.get("description", "")
+        for action in payload["next_actions"]
+    )
+    assert any(
+        "do not install Codex plugins with forma install" in action.get("forbidden", [])
+        for action in payload["next_actions"]
+    )
+    assert any(
+        "do not leave plugin id, marketplace, selector, or source refresh decisions open"
+        in " ".join(action.get("forbidden", []))
+        for action in payload["next_actions"]
+    )
+
+
+def test_build_plugin_with_forma_self_profile_uses_emitted_skills(
     tmp_path: Path,
 ) -> None:
     output = tmp_path / "plugin"
@@ -434,7 +724,8 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     result = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -447,6 +738,13 @@ def test_create_plugin_with_forma_self_profile_uses_emitted_skills(
     )
 
     assert result.exit_code == 0, result.output
+    assert "Produced Artifact" in result.output
+    assert "Profile-Local Reinstall Workflow" not in result.output
+    assert f"profile_dir: {ROOT / '.forma'}" not in result.output
+    assert "script: reinstall-workflow.sh" not in result.output
+    assert "state: reusable" not in result.output
+    assert "run profile-local reinstall workflow" not in result.output
+    assert "Next:" not in result.output
     assert (output / "skills" / "plan" / "SKILL.md").is_file()
     assert (output / "skills" / "showhand" / "SKILL.md").is_file()
     assert (output / "skills" / "reconcile" / "SKILL.md").is_file()
@@ -554,7 +852,8 @@ def test_profile_adopt_round_trips_creator_bundle(tmp_path: Path) -> None:
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--profile",
@@ -613,7 +912,8 @@ def test_profile_adopt_round_trips_creator_codex_plugin(tmp_path: Path) -> None:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -638,7 +938,8 @@ def test_profile_adopt_round_trips_profile_codex_plugin(tmp_path: Path) -> None:
     create_artifact = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -680,7 +981,8 @@ def test_profile_adopt_round_trips_profile_codex_plugin(tmp_path: Path) -> None:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -715,7 +1017,8 @@ plugin:
     create_artifact = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -747,7 +1050,8 @@ plugin:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -781,7 +1085,8 @@ stages:
     create_artifact = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -818,7 +1123,8 @@ stages:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -876,7 +1182,8 @@ conditional_overlays:
     create_artifact = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -916,7 +1223,8 @@ conditional_overlays:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -997,7 +1305,8 @@ def test_drift_with_profile_reports_fresh_and_stale(tmp_path: Path) -> None:
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--profile",
@@ -1084,9 +1393,7 @@ def test_drift_release_surface_reports_known_paths() -> None:
     assert result.exit_code == 0, result.output
     data = json.loads(result.output)
     paths = {item["path"] for item in data["artifacts"]}
-    assert any(path.endswith("examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex") for path in paths)
-    assert any(path.endswith("dist/skills/codex/forma-creator") for path in paths)
-    assert any(path.endswith("dist/skills/opencode/forma-creator") for path in paths)
+    assert not any("/dist/skills/" in path for path in paths)
     assert any(path.endswith("dist/skill-bundles/opencode") for path in paths)
     assert any(path.endswith("dist/plugins/codex/forma") for path in paths)
     assert any(path.endswith("dist/plugins/claude-code/forma") for path in paths)
@@ -1104,7 +1411,8 @@ def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> N
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--output",
@@ -1119,14 +1427,17 @@ def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> N
 
     assert result.exit_code == 0, result.output
     data = json.loads(result.output)
-    assert data["schema"] == "forma.doctor.report.v1"
-    assert data["artifact_kind"] == "skill-bundle"
-    assert data["target"] == "codex"
-    assert data["verification"]["passed"] is True
-    assert data["forma_install_supported"] is True
-    assert data["installable_now"] is True
-    assert data["install_route"] == "forma-install:codex"
-    assert data["blockers"] == []
+    install_route = _report_section(data, "artifact-install-route")
+    verification = _report_section(data, "verification")
+    assert data["schema"] == "forma.actionable-report.v1"
+    assert data["status"] == "ready"
+    assert install_route["artifact_kind"] == "skill-bundle"
+    assert install_route["target"] == "codex"
+    assert verification["passed"] is True
+    assert install_route["forma_install_supported"] is True
+    assert install_route["installable_now"] is True
+    assert install_route["install_route"] == "forma-install:codex"
+    assert data["metadata"]["legacy_doctor"]["install_route"] == "forma-install:codex"
 
 
 def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
@@ -1135,7 +1446,8 @@ def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--output",
@@ -1150,18 +1462,23 @@ def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
     result = runner.invoke(main, ["doctor", "--json", str(output)])
 
     assert human.exit_code == 0, human.output
-    assert "artifact kind : codex-plugin" in human.output
-    assert "forma install : no" in human.output
-    assert "install route : codex-plugin" in human.output
+    assert "artifact_kind: codex-plugin" in human.output
+    assert "forma_install_supported: False" in human.output
+    assert "install_route: codex-plugin" in human.output
     data = json.loads(result.output)
     assert result.exit_code == 0, result.output
-    assert data["artifact_kind"] == "codex-plugin"
-    assert data["target"] == "codex"
-    assert data["forma_install_supported"] is False
-    assert data["installable_now"] is False
-    assert data["install_route"] == "codex-plugin"
-    assert data["blockers"] == []
-    assert any("codex plugin add forma@<marketplace-name>" in step for step in data["next_steps"])
+    install_route = _report_section(data, "artifact-install-route")
+    assert data["status"] == "needs-agent"
+    assert install_route["artifact_kind"] == "codex-plugin"
+    assert install_route["target"] == "codex"
+    assert install_route["forma_install_supported"] is False
+    assert install_route["installable_now"] is False
+    assert install_route["install_route"] == "codex-plugin"
+    assert "blockers" not in data
+    assert any(
+        "codex plugin add forma@<marketplace-name>" in step["title"]
+        for step in data["next_actions"]
+    )
 
 
 def test_doctor_routes_claude_code_plugins_to_forma_install(tmp_path: Path) -> None:
@@ -1170,7 +1487,8 @@ def test_doctor_routes_claude_code_plugins_to_forma_install(tmp_path: Path) -> N
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "claude-code",
             "--output",
@@ -1185,18 +1503,22 @@ def test_doctor_routes_claude_code_plugins_to_forma_install(tmp_path: Path) -> N
     result = runner.invoke(main, ["doctor", "--json", str(output)])
 
     assert human.exit_code == 0, human.output
-    assert "artifact kind : claude-code-plugin" in human.output
-    assert "forma install : yes" in human.output
-    assert "install route : forma-install:claude-code" in human.output
+    assert "artifact_kind: claude-code-plugin" in human.output
+    assert "forma_install_supported: True" in human.output
+    assert "install_route: forma-install:claude-code" in human.output
     data = json.loads(result.output)
     assert result.exit_code == 0, result.output
-    assert data["artifact_kind"] == "claude-code-plugin"
-    assert data["target"] == "claude-code"
-    assert data["forma_install_supported"] is True
-    assert data["installable_now"] is True
-    assert data["install_route"] == "forma-install:claude-code"
-    assert data["blockers"] == []
-    assert any("forma install --target claude-code" in step for step in data["next_steps"])
+    install_route = _report_section(data, "artifact-install-route")
+    assert install_route["artifact_kind"] == "claude-code-plugin"
+    assert install_route["target"] == "claude-code"
+    assert install_route["forma_install_supported"] is True
+    assert install_route["installable_now"] is True
+    assert install_route["install_route"] == "forma-install:claude-code"
+    assert "blockers" not in data
+    assert any(
+        "forma install --target claude-code" in step["title"]
+        for step in data["next_actions"]
+    )
 
 
 def test_doctor_json_reports_invalid_bundle_blockers() -> None:
@@ -1206,19 +1528,128 @@ def test_doctor_json_reports_invalid_bundle_blockers() -> None:
 
     assert result.exit_code == 1
     data = json.loads(result.output)
-    assert data["artifact_kind"] == "skill-bundle"
-    assert data["verification"]["passed"] is False
+    install_route = _report_section(data, "artifact-install-route")
+    verification = _report_section(data, "verification")
+    assert install_route["artifact_kind"] == "skill-bundle"
+    assert verification["passed"] is False
     assert "verification failed" in data["blockers"]
 
 
-def test_create_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:
+def test_doctor_repo_reports_ready_repo_from_static_signals(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("Use tests before completion.\n", encoding="utf-8")
+    (tmp_path / "STRUCTURE.md").write_text("source: src\n", encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+    profile_dir = tmp_path / ".forma"
+    profile_dir.mkdir()
+    (profile_dir / "profile.yaml").write_text(
+        "profile:\n  id: sample\n",
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    human = runner.invoke(main, ["doctor", "repo", str(tmp_path)])
+    result = runner.invoke(main, ["doctor", "repo", "--format", "json", str(tmp_path)])
+
+    assert human.exit_code == 0, human.output
+    assert "forma doctor repo: repo is ready for agent operation" in human.output
+    assert "status: ready" in human.output
+    data = json.loads(result.output)
+    assert result.exit_code == 0, result.output
+    assert data["schema"] == "forma.actionable-report.v1"
+    assert data["command"] == "forma doctor repo"
+    assert data["status"] == "ready"
+    findings = _report_section(data, "diagnostic-findings")
+    assert {item["id"] for item in findings["items"]} >= {
+        "agent-entry",
+        "source-boundaries",
+        "validation",
+        "forma-profile",
+    }
+
+
+def test_doctor_repo_reports_needs_human_for_sparse_repo(tmp_path: Path) -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "repo", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "needs-human"
+    assert "no obvious agent entrypoint found" in data["warnings"]
+    assert any(
+        "AGENTS.md" in action["description"] for action in data["next_actions"]
+    )
+
+
+def test_init_dry_run_reports_git_trackable_profile_source_without_writing(
+    tmp_path: Path,
+) -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["init", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    assert not (tmp_path / ".forma").exists()
+    assert not (tmp_path / ".forma-profile").exists()
+    data = json.loads(result.output)
+    assert data["command"] == "forma init"
+    assert data["status"] == "needs-human"
+    assert "does not review or approve a profile" in data["warnings"][0]
+    changes = _report_section(data, "planned-changes")
+    items = changes["items"]
+    assert any(item["path"] == ".forma/.gitignore" for item in items)
+    assert any(item["path"] == ".forma/profile.yaml" for item in items)
+    assert any(item["path"] == ".forma/reinstall-workflow.sh" for item in items)
+    assert not any("review-packet.md" in item["path"] for item in items)
+    assert not any(item["path"] == ".forma/config.yaml" for item in items)
+    assert not any(".forma-profile" in item["path"] for item in items)
+    assert not any("agent-handoff" in item["path"] for item in items)
+    assert not any("/handoff/" in item["path"] for item in items)
+    assert all(item["action"] == "plan-create" for item in items)
+
+
+def test_init_apply_creates_draft_profile_skeletons(tmp_path: Path) -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["init", "--apply", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    profile = tmp_path / ".forma" / "profile.yaml"
+    gitignore = tmp_path / ".forma" / ".gitignore"
+    agent_handoff = tmp_path / ".forma" / "handoff" / "agent-handoff.md"
+    reinstall = tmp_path / ".forma" / "reinstall-workflow.sh"
+    assert not (tmp_path / ".forma" / "config.yaml").exists()
+    assert gitignore.read_text(encoding="utf-8") == "/state/\n"
+    assert not (tmp_path / ".forma-profile").exists()
+    assert "Draft local Forma profile" in profile.read_text(encoding="utf-8")
+    assert not (tmp_path / ".forma" / "review" / "review-packet.md").exists()
+    assert not agent_handoff.exists()
+    reinstall_text = reinstall.read_text(encoding="utf-8")
+    assert "FORMA_REINSTALL_WORKFLOW_BOOTSTRAP_INCOMPLETE=1" in reinstall_text
+    assert "This reinstall-workflow.sh is bootstrap-incomplete." in reinstall_text
+    assert "artifact kind" in reinstall_text
+    assert "marketplace source" in reinstall_text
+    assert "install selector" in reinstall_text
+    assert "visibility check" in reinstall_text
+    assert "not list marketplaces" in reinstall_text
+    assert "exit 3" in reinstall_text
+    assert "FORMA_ARTIFACT" not in reinstall_text
+    assert "codex plugin marketplace list" not in reinstall_text
+    assert reinstall.stat().st_mode & 0o111
+    data = json.loads(result.output)
+    changes = _report_section(data, "applied-changes")
+    assert all(item["action"] == "create" for item in changes["items"])
+
+
+def test_build_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:
     runner = CliRunner()
     output = tmp_path / "plugin"
 
     result = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "claude-code",
             "--output",
@@ -1230,7 +1661,8 @@ def test_create_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:
 
     assert result.exit_code == 0, result.output
     assert "wrote Claude Code plugin" in result.output
-    assert "forma install --target claude-code" in result.output
+    assert "forma install --target claude-code" not in result.output
+    assert "Next:" not in result.output
     assert (output / ".claude-plugin" / "plugin.json").is_file()
     assert (output / ".forma-manifest.json").is_file()
     assert (output / "skills" / "plan" / "SKILL.md").is_file()
@@ -1247,6 +1679,24 @@ def test_create_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:
     assert manifest["target"] == "claude-code"
     assert manifest["emitted_skills"]["shape"]["name"] == "plan"
 
+    agent = runner.invoke(
+        main,
+        [
+            "build",
+            "plugin",
+            "--target",
+            "claude-code",
+            "--output",
+            str(tmp_path / "plugin-agent"),
+            "--methodology",
+            str(METHODOLOGY),
+            "--format",
+            "agent",
+        ],
+    )
+    assert agent.exit_code == 0, agent.output
+    assert "forma install --target claude-code" in agent.output
+
 
 def test_install_codex_bundle_project_scope_and_replace(
     tmp_path: Path,
@@ -1259,7 +1709,8 @@ def test_install_codex_bundle_project_scope_and_replace(
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--output",
@@ -1313,7 +1764,8 @@ def test_install_codex_bundle_user_scope_uses_codex_home(
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--output",
@@ -1347,7 +1799,8 @@ def test_install_opencode_bundle_project_scope(
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "opencode",
             "--output",
@@ -1381,7 +1834,8 @@ def test_install_opencode_bundle_user_scope(
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "opencode",
             "--output",
@@ -1415,7 +1869,8 @@ def test_install_claude_code_bundle_project_scope(
     create = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "claude-code",
             "--output",
@@ -1507,7 +1962,8 @@ def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> 
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--output",
@@ -1533,11 +1989,13 @@ def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> 
     assert "Recommended Codex install path:" in install.output
     assert "run drift before any postprocess" in install.output
     assert "use `forma verify` as the final gate" in install.output
-    assert "codex plugin marketplace list" in install.output
-    assert "Ask the user to choose an existing marketplace" in install.output
+    assert "codex plugin marketplace list" not in install.output
+    assert "Ask the user to choose an existing marketplace" not in install.output
+    assert "During bootstrap discovery or diagnostics" in install.output
+    assert "marketplace source" in install.output
     assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in install.output
     assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in install.output
-    assert "codex plugin add forma@<marketplace-name>" in install.output
+    assert "codex plugin add forma@<confirmed-marketplace>" in install.output
     assert "Codex plugin UI" in install.output
     assert "codex plugin marketplace --help" in install.output
     assert "Start a new Codex thread" in install.output
@@ -1556,7 +2014,8 @@ def test_install_rejects_profile_named_codex_plugin(
     create = runner.invoke(
         main,
         [
-            "create-plugin",
+            "build",
+            "plugin",
             "--target",
             "codex",
             "--profile",
@@ -1578,4 +2037,7 @@ def test_install_rejects_profile_named_codex_plugin(
     assert install.exit_code != 0
     assert "forma install does not install Codex plugin artifacts" in install.output
     assert "name: sample-backend-go-github-issue-tracked" in install.output
-    assert "codex plugin add sample-backend-go-github-issue-tracked@<marketplace-name>" in install.output
+    assert (
+        "codex plugin add sample-backend-go-github-issue-tracked@<confirmed-marketplace>"
+        in install.output
+    )

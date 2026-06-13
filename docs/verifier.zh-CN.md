@@ -15,7 +15,7 @@ Code 和 OpenCode。
 这些时候运行验证：
 
 - 安装生成 bundle、安装 Claude Code plugin，或把 Codex plugin 交给 Codex 安装前；
-- 提交生成基线前；
+- 提交生成 release artifact 前；
 - 修改 profile 后；
 - 使用 creator 临场生成后；
 - 使用 temporary injection 后；
@@ -90,23 +90,21 @@ python scripts/verify.py --json <generated-output>
 
 Manifest 记录 compiler 的实际输出：target、mode、输出的 skill 名称和目录、profile 顺序、hash、方法来源和 generator metadata。
 
-验证会使用 manifest 理解 bundle。漂移检查会比较已提交生成基线和当前 compiler 应该生成的结果。
+验证会使用 manifest 理解 bundle。漂移检查会比较已提交生成产物和当前 compiler 应该生成的结果。
 
 Manifest 是溯源。验证是一致性检查。二者都不能替代对 profile 意图、临场准则和真实 task contract 的评审。
 
 ## CI 用法
 
-CI 可以用 `forma verify` 保持生成 bundle 结构有效，并发现已提交生成基线是否漂移：
+CI 可以用 `forma verify` 保持生成 bundle 结构有效，并用测试覆盖文档和 compiler 行为：
 
 ```bash
 forma verify source/skill-creator/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 python -m pytest -p no:cacheprovider tests/test_docs_links.py
 git diff --check
 ```
 
-这些检查覆盖结构、target metadata、本地 Markdown 链接、空白问题和生成 bundle 的一致性。它们不能替代对 profile 意图、临场准则或 agent 真实运行行为的评审。
+这些检查覆盖结构、target metadata、本地 Markdown 链接、空白问题和源码一致性。它们不能替代对 profile 意图、临场准则或 agent 真实运行行为的评审。想查看 sample profile 的生成结果时，在本地运行 build 命令。
 
 ## Bundled Verifier
 

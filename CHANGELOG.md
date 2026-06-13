@@ -6,6 +6,16 @@ notes from the matching version section here. Channel-specific notes may be
 shortened, but should not introduce release claims that are not represented in
 this file.
 
+## Unreleased
+
+### Changed
+
+- Replaced the top-level workflow artifact commands with `forma build`
+  subcommands: `forma build bundle`, `forma build plugin`, and
+  `forma build creator`.
+- Removed the previous `create-bundle`, `create-plugin`, and `build-creator`
+  command entrypoints instead of keeping compatibility aliases.
+
 ## 0.1.2 - 2026-06-12
 
 ### Added

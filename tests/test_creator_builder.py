@@ -1148,7 +1148,8 @@ def test_build_creator_cli(tmp_path: Path) -> None:
     result = runner.invoke(
         main,
         [
-            "build-creator",
+            "build",
+            "creator",
             "--output",
             str(output_root),
             "--target",

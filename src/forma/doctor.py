@@ -9,6 +9,7 @@ from typing import Any
 
 from forma.install import classify_install_artifact
 from forma.plugin_guidance import codex_plugin_name
+from forma.reports import ActionableReport, NextAction, ReportSection
 from forma_verifier import verify
 
 
@@ -104,6 +105,59 @@ def diagnose_artifact(path: Path) -> DoctorReport:
         blockers=tuple(blockers),
         next_steps=tuple(next_steps),
     )
+
+
+def diagnose_artifact_report(path: Path) -> ActionableReport:
+    """Return artifact diagnosis wrapped in the shared CLI report envelope."""
+    diagnosis = diagnose_artifact(path)
+    status = _report_status(diagnosis)
+    return ActionableReport(
+        command="forma doctor artifact",
+        subject=diagnosis.path,
+        status=status,
+        summary=_report_summary(status),
+        sections=(
+            ReportSection(
+                kind="artifact-install-route",
+                title="Artifact Install Route",
+                payload={
+                    "artifact_kind": diagnosis.artifact_kind,
+                    "target": diagnosis.target,
+                    "forma_install_supported": diagnosis.forma_install_supported,
+                    "installable_now": diagnosis.installable_now,
+                    "install_route": diagnosis.install_route,
+                },
+            ),
+            ReportSection(
+                kind="verification",
+                title="Verification",
+                payload={
+                    "passed": diagnosis.verification_passed,
+                    "bundle_kind": diagnosis.verification_bundle_kind,
+                    "summary": diagnosis.verification_summary,
+                },
+            ),
+        ),
+        next_actions=tuple(NextAction(title=step) for step in diagnosis.next_steps),
+        blockers=diagnosis.blockers,
+        metadata={"legacy_doctor": diagnosis.to_dict()},
+    )
+
+
+def _report_status(diagnosis: DoctorReport) -> str:
+    if diagnosis.blockers:
+        return "unsafe"
+    if diagnosis.installable_now:
+        return "ready"
+    return "needs-agent"
+
+
+def _report_summary(status: str) -> str:
+    if status == "ready":
+        return "artifact is verified and installable by Forma"
+    if status == "needs-agent":
+        return "artifact is verified but needs a non-Forma install handoff"
+    return "artifact has blockers"
 
 
 def _safe_artifact_kind(source: Path) -> str:

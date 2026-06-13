@@ -108,7 +108,7 @@ same.
 | Path | Best for | Result |
 |---|---|---|
 | `forma explain profile` + agent | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow output. |
-| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Deterministic workflow bundle or plugin. |
+| `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Deterministic workflow bundle or plugin. |
 | `forma-creator` | Optional on-the-spot path when you do not want to handle a profile file first. | One-off workflow output you can install and try. |
 
 All three paths end in verified workflow output. The default mental model is
@@ -178,5 +178,5 @@ See [Quick Start](./quick-start.md) for the concrete path.
 - [Forma Creator](./forma-creator.md): optional on-the-spot generation and temporary injection.
 - [Verifier](./verifier.md): what the verifier checks and cannot prove.
 - [Targets](./targets.md): target install and metadata behavior.
-- [Examples](./examples.md): sample profiles, generated baselines, and real runs.
+- [Examples](./examples.md): sample profiles, local build instructions, and real runs.
 - [Usage](./usage.md): command reference and install locations.

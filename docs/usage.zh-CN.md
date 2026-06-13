@@ -12,15 +12,29 @@
 
 | 目标 | 命令路径 | 下一步 |
 |---|---|---|
-| 让 agent 读取 profile 编写规则 | `forma explain profile --target codex` | agent-facing 命令；把输出作为只读指南，再结合项目事实起草 profile。 |
-| 从已经 review 的 tracked profile 生成 skill bundle | `forma create-bundle --target <target> --profile <profile.yaml> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
-| 生成默认 Plan-First skill bundle | `forma create-bundle --target <target> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
-| 生成 plugin source | `forma create-plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | 运行 `forma verify <dir>`；Codex plugin 通过 Codex 安装，Claude Code plugin root 用 `forma install --target claude-code` 安装。 |
-| handoff 前诊断生成产物 | `forma doctor <dir>` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和下一步。 |
-| 构建可选 creator 临场路径 | `forma build-creator --target <target> --output <dir>` | 只在 creator 路径使用；运行 `forma verify <dir>/<target>/forma-creator`，再用匹配的 target 安装。 |
+| 阅读或交接 profile 编写规则 | `forma explain profile --format human|agent|json --target codex` | `human` 给人看简洁说明，`agent` 给可执行编写契约，`json` 给工具链；起草 profile 前仍要结合项目事实。 |
+| 从已经 review 的 tracked profile 生成 skill bundle | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；human 输出是简洁产物结果。需要给 agent 或工具链交接下一步时，用 `--format agent` 或 `--format json`。 |
+| 生成默认 Plan-First skill bundle | `forma build bundle --target <target> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
+| 生成 plugin source | `forma build plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | human 输出是简洁产物结果。安装 handoff 用 `--format agent` 或 `--format json`；Codex plugin 通过 Codex 安装，Claude Code plugin root 用 `forma install --target claude-code` 安装。 |
+| 诊断 repo 是否 agent 友好 | `forma doctor repo [path] --format human|agent|json` | 只读检查 agent 入口、边界、验证信号、profile 和 instructions 负担。 |
+| handoff 前诊断生成产物 | `forma doctor <dir> --format human|agent|json` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和 next actions。 |
+| 初始化确定性的 Forma 源文件 | `forma init [path] --format human|agent|json` | 默认 dry-run；用 `--apply` 创建 `.forma/` profile source 和 bootstrap-incomplete reinstall workflow skeleton。 |
+| 构建可选 creator 临场路径 | `forma build creator --target <target> --output <dir>` | 只在 creator 路径使用；运行 `forma verify <dir>/<target>/forma-creator`，再用匹配的 target 安装。 |
 | 给 agent 提供 temporary-injection 规则 | `forma explain temporary-injection --target codex` | 只用于可选 creator / 临场生成路径。 |
 
-使用 `create-bundle` 或 `create-plugin`；旧的 `forma create` 命令不再支持。
+已经 review 的 profile 存放目录就是需要检查的 profile directory。如果该目录包含
+`reinstall-workflow.sh`，先运行这个 profile-local 脚本，再考虑手动拼
+`forma build`、`forma verify`、`forma drift`、`forma install`、marketplace refresh
+或 Codex plugin 命令。带 `--profile` 的 `forma build bundle` 和 `forma build plugin`
+会通过 `--format agent` 和 `--format json` 暴露 profile-local reinstall 状态和结构化
+next actions。默认 `human` 输出保持简洁，方便放进 profile-local 脚本而不打印
+agent handoff 文本。如果脚本缺失或仍是 bootstrap-incomplete，agent 必须先和用户确认
+install facts，并把它们写进脚本，才能报告 reusable reinstall flow。fixed-fact
+reinstall 脚本应固化 artifact kind、target、相关 plugin id、相关 marketplace source、
+install selector 和 visibility check。agent 侧关于 bootstrap 和复用这套流程的规则在
+`forma explain agent` 里。
+
+使用 `forma build bundle` 或 `forma build plugin`；旧的 `forma create` 命令不再支持。
 
 ## 命令
 
@@ -48,11 +62,17 @@ forma verify --json /tmp/settings-workflow-codex
 - 如果 skill bundle 或 creator 验证通过，用 `forma install` 安装 verified 本地路径。
 - 如果 Codex plugin 验证通过，通过 Codex 安装，不要用 `forma install`。
 - 如果 Claude Code plugin 验证通过，用 `forma install --target claude-code` 安装 plugin root。
-- 如果路径含义不清楚，运行 `forma doctor <path>` 查看安装路线和下一步。
+- 如果路径含义不清楚，运行 `forma doctor <path>` 查看安装路线和 next actions。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
 当其他工具或 agent 需要结构化结果时，使用 `--json`。JSON report 保持同样的退出码契约，并为每条 rule result 提供语义 failure class。
+
+对输出结构化 handoff 的命令，例如 `doctor`、`init`、部分 `build` 命令和
+`explain`，使用 `--format human|agent|json`。`human` 简洁给人读，并隐藏
+agent-only handoff 细节；`agent` 包含可执行 next actions、stop conditions 和
+forbidden actions；`json` 给工具链使用。命令外形可以共用，但内容按命令语义区分：
+`doctor` 输出 findings 和 evidence，`explain` 输出编写指南和 handoff 规则。
 
 ### `forma doctor <path>`
 
@@ -61,18 +81,52 @@ handoff 或安装前诊断一个生成产物：
 ```bash
 forma doctor /tmp/settings-workflow-codex
 forma doctor --json /tmp/forma-codex-plugin
+forma doctor --format agent /tmp/forma-codex-plugin
 ```
 
-doctor 输出会说明 artifact kind、target、验证状态、`forma install` 是否支持、当前是否可安装、正确安装路线、blockers 和下一步。
+doctor 输出会说明 artifact kind、target、验证状态、`forma install` 是否支持、当前是否可安装、正确安装路线、blockers 和 next actions。
 
 当用户或 agent 不确定当前路径是 skill、skill bundle、Codex plugin、Claude Code plugin、损坏产物还是不支持的目录时，先运行这个命令。
 
-### `forma create-bundle`
+### `forma doctor repo [path]`
+
+只读诊断一个 repo 是否适合 agent 操作：
+
+```bash
+forma doctor repo
+forma doctor repo --format json /path/to/repo
+```
+
+它会基于静态信号报告 `ready`、`needs-agent`、`needs-human` 或 `unsafe`，包括
+agent 入口、source/write 边界、验证命令、Forma profile 和 instructions
+负担。它不会创建文件、review profile 或执行安装。
+
+### `forma init [path]`
+
+为 repo 规划确定性的 remediation：
+
+```bash
+forma init
+forma init --format agent
+forma init --apply
+```
+
+默认是 dry-run。加 `--apply` 后，Forma 会在可被 Git 跟踪的 `.forma/` 目录下创建
+结构化 skeleton 文件：`.forma/profile.yaml`、
+`.forma/reinstall-workflow.sh`，以及 `.forma/.gitignore`。`.gitignore` 只 ignore
+`/state/`，所以 profile source 和 reinstall workflow 仍可被 Git 跟踪，runtime workflow state
+放在 `.forma/state/` 下。这些是 draft project source；`forma init` 不会声称 profile 已经 review。Agent 可以按
+profile-authoring principles 生成候选规则草稿，但 review 是人的长期采纳决策：决定
+哪些规则可以成为 long-term project workflow source。生成的 `reinstall-workflow.sh`
+在 install facts 被确认并写入 fixed-fact 脚本之前都是 bootstrap-incomplete。如果
+profile authoring 过程中生成了 review packet，应询问用户是否保留；不要默认留在 repo 里。
+
+### `forma build bundle`
 
 把标准方法和解析后的 tracked profile 组合起来，生成 target 专用 workflow bundle：
 
 ```bash
-forma create-bundle --target codex --output /tmp/forma-codex-bundle
+forma build bundle --target codex --output /tmp/forma-codex-bundle
 ```
 
 必需选项：
@@ -88,17 +142,21 @@ forma create-bundle --target codex --output /tmp/forma-codex-bundle
 
 - `--methodology <dir>`：使用指定的方法目录，而不是打包内置的运行时资源。
 
-下一步：运行 `forma verify <output-dir>`，再用 `forma install` 安装 verified 本地 bundle。
+下一步：运行 `forma verify <output-dir>`，再用 `forma install` 安装 verified 本地
+bundle。对于 profile-backed 输出，默认 `human` 只输出简洁产物结果；需要 agent
+继续处理时，用 `--format agent` 查看结构化 next actions。如果 profile 目录包含
+`reinstall-workflow.sh`，先运行这个脚本，不要重新拼 build/install 命令；如果缺失，
+这是 bootstrap state，不是可复用的手动安装路径。
 
 Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
-### `forma create-plugin`
+### `forma build plugin`
 
 从 profile 生成本地 plugin 产物：
 
 ```bash
-forma create-plugin --target codex --output /tmp/forma-codex-plugin
-forma create-plugin --target claude-code --output /tmp/forma-claude-code-plugin
+forma build plugin --target codex --output /tmp/forma-codex-plugin
+forma build plugin --target claude-code --output /tmp/forma-claude-code-plugin
 ```
 
 Codex plugin 输出根目录包含 `.codex-plugin/plugin.json`、根 `.forma-manifest.json` 和 `skills/<skill-id>/` 子目录。Claude Code plugin 使用 `.claude-plugin/plugin.json`，同样带根 manifest 和嵌套 `skills/<skill-id>/`。它不会顺带输出 `dist/skill-bundles` 或 sibling bundle。
@@ -125,22 +183,22 @@ postprocess 之前运行 `forma drift <output-dir> --profile <profile.yaml>`。
 用 `forma verify <output-dir>`，不要用 drift。
 
 Codex plugin 通过 Codex marketplace/plugin UI 安装，不用 `forma install`。
-先运行 `codex plugin marketplace list`，询问用户选择哪个已有 marketplace，
-或者是否创建/注册一个新的 marketplace；确认所选 marketplace catalog 指向生成出的
-plugin root 后，再运行 `codex plugin add <plugin-id>@<marketplace-name>`。
-如果 Codex CLI 输出或 marketplace 行为和这里不一致，再看当前 Codex 官方文档或
-`codex plugin marketplace --help`。
+在 bootstrap discovery 或诊断阶段，可以按需检查当前配置的 marketplaces；随后要和用户确认
+plugin id、marketplace name、marketplace source、install selector 和 visibility check，
+确认 marketplace catalog 指向生成出的 plugin root 后，再用 confirmed
+`<plugin-id>@<marketplace>` selector 安装。稳定的 profile-local reinstall 脚本不应列出
+marketplaces，也不应在运行时继续开放 plugin id、marketplace、selector 或 source refresh 决策。
 
 Claude Code plugin root 用
 `forma install --target claude-code --scope user|project <output-dir>` 安装。
 
-### `forma build-creator`
+### `forma build creator`
 
 生成 target 专用的可安装 `forma-creator`。这是可选临场路径：不想先处理 profile 文件时，可以让 agent 临场生成 workflow：
 
 ```bash
-forma build-creator --target codex --output /tmp/forma-creator-dist
-forma build-creator --target opencode --output /tmp/forma-creator-dist
+forma build creator --target codex --output /tmp/forma-creator-dist
+forma build creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 必需选项：
@@ -191,8 +249,19 @@ forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 
 ```bash
 forma explain profile --target codex
+forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
+
+`forma explain profile` 既可以给人看，也可以给 agent 用，但 renderer 的交接重点不同：
+
+- `--format human` 给出简洁的读者说明，解释哪些内容属于长期 profile，哪些内容应该留在当前任务。
+- `--format agent` 给出可执行编写契约：需要收集哪些项目事实，如何区分长期规则和任务规则，可以提出哪些文件，以及什么时候必须停下来让用户 review。
+- `--format json` 把同一类指导转成结构化数据，供工具链消费。
+
+这个命令不创建 profile 文件，也不能声称 profile 已经 review。需要确定性 skeleton
+时用 `forma init --apply`；之后再把 `forma explain profile` 的规则和项目事实结合起来，
+起草给人 review 的 profile。
 
 当另一个 agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。正常 profile-first 路径可以直接说：
 
@@ -203,8 +272,8 @@ forma explain temporary-injection --format json --target codex
 
 agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 profile YAML。只有这些规则需要长期复用时，才把 profile 提交进版本控制。
 
-下一步：profile review 通过后，用 `forma create-bundle` 生成 skill bundle，或用
-`forma create-plugin` 生成 plugin source。
+下一步：profile review 通过后，用 `forma build bundle` 生成 skill bundle，或用
+`forma build plugin` 生成 plugin source。
 
 ## 安装目标
 
@@ -217,17 +286,16 @@ Forma 生成 target 专用 skill bundle。`forma install` 会把 verified 本地
 | Claude Code skills | `$HOME/.claude/skills` | `.claude/skills` |
 | Claude Code plugins | `$HOME/.claude/skills/<plugin-name>` | `.claude/skills/<plugin-name>` |
 
-OpenCode 使用 direct skill bundle。先用 `forma create-bundle --target opencode`
+OpenCode 使用 direct skill bundle。先用 `forma build bundle --target opencode`
 生成 OpenCode bundle，验证后用 `forma install --target opencode` 安装。Forma
 不生成 OpenCode JS/TS runtime plugin。
 
-Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。
-先运行 `codex plugin marketplace list`，询问用户选择哪个已有 marketplace，
-或者是否创建/注册一个新的 marketplace；确认所选 marketplace catalog 指向生成出的
-plugin root 后，再运行 `codex plugin add <plugin-id>@<marketplace-name>`，
-或在 Codex plugin UI 里安装。安装后新开 Codex thread，这样 plugin skills 才会被发现。
-如果 Codex CLI 输出或 marketplace 行为和这里不一致，再看当前 Codex 官方文档或
-`codex plugin marketplace --help`。
+Codex plugin 输出是本地 plugin source。Forma 不安装 Codex plugin。在 bootstrap
+discovery 或诊断阶段，可以按需检查当前配置的 marketplaces；随后和用户确认 plugin id、
+marketplace name、marketplace source、install selector 和 visibility check，再运行
+`codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>`，或在 Codex plugin UI
+里安装。安装后新开 Codex thread，这样 plugin skills 才会被发现。稳定的
+profile-local reinstall 脚本应使用 confirmed facts，而不是每次做 marketplace discovery。
 
 Claude Code plugin 输出可以通过 Forma 安装，因为 Claude Code 会从 `.claude/skills/<plugin-name>` 加载 skills-directory plugin。
 
@@ -264,7 +332,7 @@ stages:
 - `plugin.display_name` 设置 Codex plugin 安装界面的展示名，不改变 plugin id、skill 名称或触发名；
 - `name` 和 `directory` 必须是 lower kebab-case；
 - 语义阶段键仍然是 `shape`、`gauge`、`seal`、`pour`、`flow`。
-- 同一个 profile 用于 `forma create-plugin` 时，plugin id 仍然是 `bundle.name`；如果生成名带有这个精确前缀，plugin-local skills 会去掉前缀。Plugin 使用最终的 `<plugin-id>:<local-skill>` 形式触发，默认 Forma plugin 是 `forma:plan` 这类 `forma:*`。
+- 同一个 profile 用于 `forma build plugin` 时，plugin id 仍然是 `bundle.name`；如果生成名带有这个精确前缀，plugin-local skills 会去掉前缀。Plugin 使用最终的 `<plugin-id>:<local-skill>` 形式触发，默认 Forma plugin 是 `forma:plan` 这类 `forma:*`。
 
 ### 一次性 creator 命名
 
@@ -300,8 +368,6 @@ forma verify <generated-bundle-dir>
 
 ```bash
 forma verify source/skill-creator/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 python -m pytest -p no:cacheprovider tests/
 git diff --check
 ```
@@ -311,10 +377,10 @@ git diff --check
 - `source/methodology/`：生成 task 级 workflow skills 的标准方法。
 - `source/skill-creator/`：自包含的 `forma-creator` 源码，包含 references、creator script 和 verifier。
 - `src/forma/`：Python CLI、profile compiler、runtime asset resolver 和 target emitters。
-- `profiles/forma-self/`：Forma 管理本仓库时使用的 profile。
+- `.forma/`：Forma 管理本仓库时使用的 profile。
 - `examples/profiles/`：profile 示例。
-- `examples/generated/`：已提交的生成基线，用于检查漂移。
-- `tests/`：verifier、creator、runtime asset、profile 和生成基线测试。
+- sample 生成产物需要时在本地生成，不提交到仓库。
+- `tests/`：verifier、creator、runtime asset、profile 和 CLI 行为测试。
 
 详细源码结构见 [仓库结构](../STRUCTURE.md)。
 
@@ -322,9 +388,9 @@ git diff --check
 
 打包安装后的 Forma 命令默认使用 `forma.assets` 中的运行时资源。源码路径只作为开发覆盖：
 
-- `forma create-bundle` 和 `forma create-plugin` 默认使用打包内置的方法，除非提供 `--methodology`。
+- `forma build bundle` 和 `forma build plugin` 默认使用打包内置的方法，除非提供 `--methodology`。
 - `forma install` 只安装 verified 本地产物，不下载 URL。
-- `forma build-creator` 默认使用打包内置的 creator 源，除非提供 `--source`。
+- `forma build creator` 默认使用打包内置的 creator 源，除非提供 `--source`。
 - `forma explain` 从打包内置的 references 渲染编写指南。
 
 因此，通过 `forma-cli` 发行包安装后的命令不依赖 Forma 源码仓库。

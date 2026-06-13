@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backend Plan-First Lock"
-  short_description: "Create and certify final ./plans/issue-<id>/plan.md and tasks.md from an already-settled backend plan."
-  default_prompt: "Write plan.md and tasks.md for the current issue only after goal, scope, approach, validation, plan strategy, grounding, and evidence boundaries are explicitly settled. Show the content for user confirmation and commit only after explicit permission. Certify that tasks cover the Goal, Acceptance proves the Goal, validation covers core risks, and task/evidence boundaries are executable before writing files."

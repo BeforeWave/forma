@@ -37,6 +37,7 @@ usage() {
 Usage:
   ./$SELF_NAME init <issue-id>
   ./$SELF_NAME status <issue-id>
+  ./$SELF_NAME check <issue-id>
   ./$SELF_NAME next <issue-id>
   ./$SELF_NAME notes-template <issue-id>
   ./$SELF_NAME review-ready <issue-id>
@@ -61,7 +62,7 @@ issue_paths() {
   PLAN_FILE="$PLAN_DIR/plan.md"
   TASK_FILE="$PLAN_DIR/tasks.md"
   RUNS_DIR="$PLAN_DIR/runs"
-  REVIEW_STATE_DIR="$REPO_ROOT/.forma-workflow/issue-$ISSUE_ID"
+  REVIEW_STATE_DIR="$REPO_ROOT/.forma/state/workflow/issue-$ISSUE_ID"
   REVIEW_STATE_FILE="$REVIEW_STATE_DIR/review-state.env"
   REVIEW_CHANGED_FILES_FILE="$REVIEW_STATE_DIR/changed-files.txt"
   REVIEW_CHANGED_SNAPSHOT_FILE="$REVIEW_STATE_DIR/changed-files.snapshot"
@@ -201,7 +202,7 @@ collect_worktree_changed_files() {
       git diff --name-only
       git diff --cached --name-only
       git ls-files --others --exclude-standard
-    } | sed '/^$/d' | awk '$0 !~ /^\.forma-workflow\//' | sort -u
+    } | sed '/^$/d' | awk '$0 !~ /^\.forma\/state\//' | sort -u
   )
 }
 
@@ -211,7 +212,7 @@ collect_unstaged_files() {
     {
       git diff --name-only
       git ls-files --others --exclude-standard
-    } | sed '/^$/d' | awk '$0 !~ /^\.forma-workflow\//' | sort -u
+    } | sed '/^$/d' | awk '$0 !~ /^\.forma\/state\//' | sort -u
   )
 }
 
@@ -533,6 +534,146 @@ parse_structured_validation_checks() {
   ' "$PLAN_FILE"
 }
 
+validate_plan_contract_structure() {
+  python3 - "$PLAN_FILE" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+plan_file = Path(sys.argv[1])
+text = plan_file.read_text(encoding="utf-8")
+lines = text.splitlines()
+
+required_headings = [
+    "Goal",
+    "Plan Strategy",
+    "Scope",
+    "Approach",
+    "Artifact/Evidence Boundary",
+    "Constraints",
+    "Acceptance Criteria",
+    "Validation",
+    "Final Validation",
+    "Risks / Notes",
+]
+
+sections: dict[str, list[str]] = {}
+current: str | None = None
+for line in lines:
+    match = re.match(r"^## (.+)$", line)
+    if match:
+        current = match.group(1).strip()
+        sections.setdefault(current, [])
+        continue
+    if current is not None:
+        sections[current].append(line)
+
+for heading in required_headings:
+    if heading not in sections:
+        print(f"Error: plan.md is missing required section: ## {heading}", file=sys.stderr)
+        sys.exit(1)
+    body = "\n".join(sections[heading]).strip()
+    if not body and heading != "Validation":
+        print(f"Error: plan.md section is empty: ## {heading}", file=sys.stderr)
+        sys.exit(1)
+
+strategy = "\n".join(sections["Plan Strategy"])
+if "Plan Strategy:" not in strategy:
+    print(
+        "Error: plan.md Plan Strategy section must contain `Plan Strategy:`.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+if not re.search(r"Plan Strategy:\s*(step-execution|loop-exploration|hybrid)\b", strategy):
+    print(
+        "Error: plan.md Plan Strategy must be step-execution, loop-exploration, or hybrid.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+validation = "\n".join(sections["Validation"])
+if validation.strip() and ("Check:" not in validation or "Command:" not in validation):
+    print(
+        "Error: plan.md Validation section must use structured Check:/Command: entries when shared checks are present.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+final_validation = "\n".join(sections["Final Validation"])
+if "```" not in final_validation and "# no-programmatic-validation:" not in final_validation:
+    print(
+        "Error: plan.md Final Validation section must contain a fenced command block or a no-programmatic-validation marker.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+PY
+}
+
+validate_rework_contract_structure() {
+  local rework_file="$PLAN_DIR/rework.md"
+
+  if ! grep -Eq '^- \[[ x]\] \[rework-[0-9]+-' "$TASK_FILE"; then
+    return 0
+  fi
+
+  [ -f "$rework_file" ] || die "rework tasks exist but rework.md is missing: $(repo_relative_path "$rework_file")"
+
+  python3 - "$TASK_FILE" "$rework_file" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+task_file = Path(sys.argv[1])
+rework_file = Path(sys.argv[2])
+task_text = task_file.read_text(encoding="utf-8")
+rework_text = rework_file.read_text(encoding="utf-8")
+
+task_ids = re.findall(r"^- \[[ x]\] \[(rework-[0-9]+-[^\]]+)\] ", task_text, re.M)
+if not task_ids:
+    sys.exit(0)
+
+blocks: list[tuple[str, str]] = []
+matches = list(re.finditer(r"^## Rework [0-9]+: .+$", rework_text, re.M))
+for index, match in enumerate(matches):
+    start = match.start()
+    end = matches[index + 1].start() if index + 1 < len(matches) else len(rework_text)
+    blocks.append((match.group(0), rework_text[start:end]))
+
+if not blocks:
+    print("Error: rework.md must contain `## Rework <n>:` ledger blocks.", file=sys.stderr)
+    sys.exit(1)
+
+required_labels = [
+    "Source:",
+    "Feedback:",
+    "Classification:",
+    "Same-Issue Rationale:",
+    "User Confirmation:",
+    "Appended Tasks:",
+]
+
+appended: set[str] = set()
+for title, block in blocks:
+    for label in required_labels:
+        if f"\n{label}" not in block:
+            print(f"Error: {title} is missing `{label}`.", file=sys.stderr)
+            sys.exit(1)
+    for task_id in re.findall(r"^- (rework-[0-9]+-[^\s]+)\s*$", block, re.M):
+        appended.add(task_id)
+
+for task_id in task_ids:
+    if task_id not in appended:
+        print(f"Error: rework task is not listed in rework.md Appended Tasks: {task_id}", file=sys.stderr)
+        sys.exit(1)
+PY
+}
+
 extract_fenced_validation_commands() {
   local heading="$1"
 
@@ -759,6 +900,72 @@ validate_structured_task_dependencies() {
   ' "$parsed_tasks_file"
 }
 
+validate_structured_contract_dependencies() {
+  local parsed_tasks_file="$1"
+
+  awk -F'\t' '
+    $1 == "TASK" {
+      task_seen[$5] = 1
+    }
+
+    $1 == "DEPENDS" {
+      dependency_seen[$3] = 1
+    }
+
+    END {
+      for (dependency_id in dependency_seen) {
+        if (!(dependency_id in task_seen)) {
+          print "Error: Structured task references unknown dependency: " dependency_id > "/dev/stderr"
+          exit 1
+        }
+      }
+    }
+  ' "$parsed_tasks_file"
+}
+
+validate_structured_shared_check_references() {
+  local parsed_tasks_file="$1"
+  local shared_checks_file="$2"
+  local check_id
+
+  while IFS= read -r check_id; do
+    [ -n "$check_id" ] || continue
+    awk -F'\t' -v check_id="$check_id" '
+      $1 == "CHECK" && $2 == check_id {
+        found = 1
+        exit
+      }
+      END {
+        exit !found
+      }
+    ' "$shared_checks_file" || die "Structured task references unknown shared check: $check_id"
+  done < <(
+    awk -F'\t' '
+      $1 == "USE_CHECK" {
+        print $3
+      }
+    ' "$parsed_tasks_file"
+  )
+}
+
+structured_contract_summary() {
+  local parsed_tasks_file="$1"
+
+  awk -F'\t' '
+    $1 == "TASK" {
+      total++
+      if ($4 == "checked") {
+        checked++
+      } else if ($4 == "unchecked") {
+        unchecked++
+      }
+    }
+    END {
+      printf "%d|%d|%d\n", total, checked, unchecked
+    }
+  ' "$parsed_tasks_file"
+}
+
 structured_task_is_last_unchecked() {
   local parsed_tasks_file="$1"
 
@@ -773,7 +980,7 @@ structured_task_is_last_unchecked() {
 }
 
 ensure_no_staged_changes() {
-  git -C "$REPO_ROOT" diff --cached --quiet || die "Staged changes detected. Clear the index before running workflow commands."
+  git -C "$REPO_ROOT" diff --cached --quiet || die "Pre-staged changes violate the workflow contract. Do not run git add, git rm, or any other index-mutating command for current-task changes before review-ready; the workflow runner owns review staging. Restore the index without discarding working-tree edits, for example: git restore --staged <path>."
 }
 
 ensure_planning_files_clean() {
@@ -929,7 +1136,7 @@ write_index_changed_files_file() {
 
   changed_files=$(
     cd "$REPO_ROOT"
-    git diff --cached --name-only --diff-filter=ACDMRTUXB | sed '/^$/d' | awk '$0 !~ /^\.forma-workflow\//' | sort -u
+    git diff --cached --name-only --diff-filter=ACDMRTUXB | sed '/^$/d' | awk '$0 !~ /^\.forma\/state\//' | sort -u
   )
   [ -n "$changed_files" ] || die "No staged review snapshot found for the current task."
 
@@ -1413,6 +1620,52 @@ cmd_next() {
   echo "$CURRENT_TASK_TEXT"
 }
 
+cmd_check() {
+  local issue_id="$1"
+  local current_task_format
+  local parsed_tasks_file=""
+  local shared_checks_file=""
+  local total
+  local checked
+  local unchecked
+
+  issue_paths "$issue_id"
+  ensure_issue_files_exist
+  ensure_task_exists
+  validate_plan_contract_structure
+
+  current_task_format=$(task_format)
+  if [ "$current_task_format" != "structured" ]; then
+    validate_rework_contract_structure
+    echo "Contract check passed for issue-$issue_id"
+    echo "Task format: legacy"
+    echo "Validation commands were not run."
+    return 0
+  fi
+
+  parsed_tasks_file=$(mktemp)
+  shared_checks_file=$(mktemp)
+
+  parse_structured_tasks >"$parsed_tasks_file"
+  parse_structured_validation_checks >"$shared_checks_file"
+  validate_structured_contract_dependencies "$parsed_tasks_file"
+  validate_structured_shared_check_references "$parsed_tasks_file" "$shared_checks_file"
+  validate_rework_contract_structure
+
+  IFS='|' read -r total checked unchecked <<EOF
+$(structured_contract_summary "$parsed_tasks_file")
+EOF
+
+  rm -f "$parsed_tasks_file" "$shared_checks_file"
+
+  cat <<EOF
+Contract check passed for issue-$issue_id
+Task format: structured
+Tasks: $total total, $checked checked, $unchecked unchecked
+Validation commands were not run.
+EOF
+}
+
 cmd_notes_template() {
   local task_id
 
@@ -1650,7 +1903,7 @@ main() {
   fi
 
   case "$1" in
-    init|status|next|notes-template|review-ready|complete)
+    init|status|check|next|notes-template|review-ready|complete)
       [ "$#" -eq 2 ] || die "Command '$1' requires exactly one <issue-id> argument."
       case "$1" in
         review-ready)

@@ -74,10 +74,10 @@ skill bundles are the output shape that uses standalone `forma-*` skill names.
 Not every skill has every subdirectory. `references/` and `scripts/` appear only
 when methodology, profile, or temporary injection selects them for that stage.
 
-A real committed sample looks like this:
+A locally generated sample can look like this:
 
 ```text
-examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+/tmp/forma-sample-backend-codex/
   backend-plan-first-plan/
   backend-plan-first-ground/
   backend-plan-first-lock/

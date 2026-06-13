@@ -80,7 +80,7 @@ goal -> proposal -> evidence -> task contract -> task execution -> proof
 | 路径 | 适合 | 结果 |
 |---|---|---|
 | `forma explain profile` + agent | 从项目规则生成 workflow；profile 可临时，也可长期维护。 | profile + 已验证 workflow 产物。 |
-| `forma create-bundle` / `forma create-plugin` | 已经有 review 过的 profile。 | 确定性生成 workflow bundle 或 plugin。 |
+| `forma build bundle` / `forma build plugin` | 已经有 review 过的 profile。 | 确定性生成 workflow bundle 或 plugin。 |
 | `forma-creator` | 可选临场路径，不想先处理 profile 文件时使用。 | 一次性 workflow 产物，可安装体验。 |
 
 三条路径都会走到已验证的 workflow 产物。默认理解是：规则先被整理成 profile；是否长期保存，由你决定。
@@ -136,5 +136,5 @@ Forma 可以和 Spec 工具、规划文档、项目说明、通用 skill creator
 - [Forma Creator](./forma-creator.zh-CN.md)：可选临场路径和 temporary injection。
 - [Verifier](./verifier.zh-CN.md)：验证器检查什么，以及不能证明什么。
 - [Targets](./targets.zh-CN.md)：target 安装和 metadata 行为。
-- [Examples](./examples.zh-CN.md)：sample profiles、生成基线和真实 runs。
+- [Examples](./examples.zh-CN.md)：sample profiles、本地生成说明和真实 runs。
 - [使用说明](./usage.zh-CN.md)：命令参考和安装位置。

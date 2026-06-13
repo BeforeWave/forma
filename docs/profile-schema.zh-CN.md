@@ -30,6 +30,12 @@ constraints:
     - Each accepted task must name evidence, boundary, validation, proof, and stop conditions.
   pour:
     - Use lightweight markdown or link checks for docs-only changes.
+workflow_adds:
+  pour:
+    - Stop before review-ready if documentation evidence is missing.
+output_adds:
+  pour:
+    - Include the documentation evidence paths in the final report.
 ```
 
 完整的可组合示例可以从这里开始看：
@@ -56,6 +62,8 @@ examples/profiles/sample-software/sample-software-plan-first.yaml
 | `validation_commands` | 默认或阶段专用验证命令。 |
 | `decision_gate_extras` | `shape` 必须额外收敛的决策维度。 |
 | `constraints` | 默认或阶段专用工程准则。 |
+| `workflow_adds` | 默认或阶段专用 workflow 步骤，渲染进 `## Workflow`。 |
+| `output_adds` | 默认或阶段专用输出要求，渲染进 `## Output`。 |
 | `conditional_overlays` | 计划记录所选路线后才启用的路线专用约束、资源和验证。 |
 
 ## Includes
@@ -92,7 +100,7 @@ stages:
 
 ## Plugin 展示 metadata
 
-当 profile 用于 `forma create-plugin` 时，`bundle.name` 仍然是 plugin id，
+当 profile 用于 `forma build plugin` 时，`bundle.name` 仍然是 plugin id，
 必须保持 lower kebab-case。Codex plugin 的 `interface.displayName` 默认由这个
 id title-case 派生。只有当安装界面的品牌名需要不同大小写或措辞时，才使用
 `plugin.display_name`：
@@ -139,6 +147,17 @@ constraints:
     - Put exact validation commands or shared checks into each accepted task.
   pour:
     - Execute only the current accepted task and record proof under `plans/issue-<id>/runs/`.
+```
+
+`constraints` 会渲染进 `## Requirements`。如果 profile 要加强某个阶段的有序流程、完成门禁或停手条件，用 `workflow_adds`。如果 profile 要给阶段最终回复增加必填字段，用 `output_adds`。这两个字段和 `constraints` 一样支持 `default` 和阶段专用键，但分别渲染进 `## Workflow` 和 `## Output`。
+
+```yaml
+workflow_adds:
+  mend:
+    - After committing a confirmed rework contract, resolve and report the execution handoff disposition before stopping.
+output_adds:
+  mend:
+    - Include `Execution Handoff:` with the sent or blocked disposition.
 ```
 
 ## Resources

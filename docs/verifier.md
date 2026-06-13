@@ -20,7 +20,7 @@ Run verification:
 
 - before installing a generated bundle, installing a Claude Code plugin, or
   handing a Codex plugin to Codex;
-- before committing a generated baseline;
+- before committing a generated release artifact;
 - after changing a profile;
 - after creator on-the-spot generation;
 - after temporary injection;
@@ -105,27 +105,26 @@ names/directories, profile order, hashes, methodology provenance, and generator
 metadata.
 
 Verification uses that manifest to understand the bundle. Drift checks compare
-committed generated baselines against what the current compiler should emit.
+generated release artifacts against what the current compiler should emit.
 
 The manifest is provenance. Verification is conformance. Neither replaces
 review of profile intent, on-the-spot rules, or real task contracts.
 
 ## CI Usage
 
-CI can use `forma verify` to keep generated bundles structurally valid and to
-catch drift in committed baselines:
+CI can use `forma verify` to keep generated bundles structurally valid and run
+tests for docs and compiler behavior:
 
 ```bash
 forma verify source/skill-creator/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
 python -m pytest -p no:cacheprovider tests/test_docs_links.py
 git diff --check
 ```
 
 These checks cover structure, target metadata, local Markdown links, whitespace,
-and generated-bundle conformance. They do not replace review of profile intent,
-on-the-spot rules, or runtime agent behavior.
+and source conformance. They do not replace review of profile intent,
+on-the-spot rules, or runtime agent behavior. Build sample profiles locally when
+you want to inspect their generated output.
 
 ## Bundled Verifier
 

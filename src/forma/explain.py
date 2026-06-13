@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from typing import Literal
 
+from forma.reports import (
+    ActionableReport,
+    NextAction,
+    ReportFormat,
+    ReportSection,
+    render_report,
+)
 from forma.runtime_assets import read_runtime_text
 
-OutputFormat = Literal["markdown", "json"]
+OutputFormat = ReportFormat
 
 
 @dataclass(frozen=True)
@@ -58,7 +63,7 @@ TOPICS = {
 
 def render_guidance(
     topic: str,
-    output_format: OutputFormat = "markdown",
+    output_format: OutputFormat = "human",
     target_agent: str | None = None,
 ) -> str:
     """Render a read-only guidance topic."""
@@ -67,8 +72,8 @@ def render_guidance(
     if topic not in TOPICS:
         allowed = ", ".join(["agent", *sorted(TOPICS)])
         raise ValueError(f"unsupported explain topic {topic!r}; use {allowed}")
-    if output_format not in ("markdown", "json"):
-        raise ValueError("output_format must be markdown or json")
+    if output_format not in ("human", "agent", "json"):
+        raise ValueError("output_format must be human, agent, or json")
 
     spec = TOPICS[topic]
     source_payload = [
@@ -80,40 +85,134 @@ def render_guidance(
         for source in spec.sources
     ]
     markdown = _render_markdown(spec, source_payload, target_agent)
-    if output_format == "markdown":
-        return markdown
-    return json.dumps(
-        {
+    guidance_payload = (
+        _render_human_markdown(spec, source_payload, target_agent)
+        if output_format == "human"
+        else markdown
+    )
+    report = ActionableReport(
+        command=f"forma explain {topic}",
+        subject=target_agent or "all-targets",
+        status="ready",
+        summary=f"{spec.title} is available",
+        sections=(
+            ReportSection(
+                kind="guidance",
+                title=spec.title,
+                payload=guidance_payload,
+            ),
+            ReportSection(
+                kind="sources",
+                title="Sources",
+                payload={
+                    "items": [
+                        {"path": source["path"], "title": source["title"]}
+                        for source in source_payload
+                    ]
+                },
+            ),
+        ),
+        next_actions=_topic_next_actions(topic, target_agent),
+        metadata={
             "topic": spec.topic,
-            "title": spec.title,
             "target": target_agent,
             "sources": source_payload,
             "markdown": markdown,
         },
-        indent=2,
-        sort_keys=True,
     )
+    return render_report(report, output_format)
 
 
 def render_agent_guidance(
-    output_format: OutputFormat = "markdown",
+    output_format: OutputFormat = "human",
     target_agent: str | None = None,
 ) -> str:
     """Render the command-level guide agents should read before using Forma."""
-    if output_format not in ("markdown", "json"):
-        raise ValueError("output_format must be markdown or json")
+    if output_format not in ("human", "agent", "json"):
+        raise ValueError("output_format must be human, agent, or json")
     markdown = _render_agent_markdown(target_agent)
-    if output_format == "markdown":
-        return markdown
-    return json.dumps(
-        {
+    report = ActionableReport(
+        command="forma explain agent",
+        subject=target_agent or "all-targets",
+        status="ready",
+        summary="Forma Agent Guide is available",
+        sections=(
+            ReportSection(
+                kind="guidance",
+                title="Forma Agent Guide",
+                payload=markdown,
+            ),
+        ),
+        next_actions=_topic_next_actions("agent", target_agent),
+        metadata={
             "topic": "agent",
             "title": "Forma Agent Guide",
             "target": target_agent,
             "markdown": markdown,
         },
-        indent=2,
-        sort_keys=True,
+    )
+    return render_report(report, output_format)
+
+
+def _topic_next_actions(topic: str, target_agent: str | None) -> tuple[NextAction, ...]:
+    target = target_agent or "<target>"
+    if topic == "agent":
+        return (
+            NextAction(
+                title="draft project rules before generation",
+                command=f"forma explain profile --target {target}",
+                description="Use when no approved profile exists yet.",
+            ),
+            NextAction(
+                title="build from approved profile",
+                command=f"forma build bundle --target {target} --profile <profile.yaml> --output <dir>",
+                description=(
+                    "If the profile directory has a completed reinstall-workflow.sh, "
+                    "run that fixed-fact script first. If the script is missing or "
+                    "bootstrap-incomplete, settle install facts with the user and "
+                    "complete the script before reporting reusable reinstall success."
+                ),
+                stop_condition=(
+                    "install facts are not confirmed or reinstall-workflow.sh is "
+                    "missing/bootstrap-incomplete"
+                ),
+                forbidden=(
+                    "do not reconstruct profile-backed install commands before checking reinstall-workflow.sh",
+                    "do not report reusable reinstall success until the completed script has run",
+                ),
+            ),
+            NextAction(
+                title="diagnose artifact install route",
+                command="forma doctor <path>",
+            ),
+        )
+    if topic == "profile":
+        return (
+            NextAction(
+                title="return profile proposal and review packet",
+                description="Write files only after explicit user approval.",
+            ),
+            NextAction(
+                title="build after approval",
+                command=f"forma build bundle --target {target} --profile <profile.yaml> --output <dir>",
+            ),
+            NextAction(
+                title="settle reusable reinstall facts",
+                description=(
+                    "After first build/install exploration, confirm artifact kind, "
+                    "target, plugin id when relevant, marketplace name/source when "
+                    "relevant, install selector, and visibility check. Write those "
+                    "facts into the profile-local reinstall-workflow.sh before "
+                    "calling the flow reusable."
+                ),
+                stop_condition="profile-local reinstall facts are not confirmed",
+            ),
+        )
+    return (
+        NextAction(
+            title="classify one-off rules",
+            description="Keep temporary injection separate from approved profile source.",
+        ),
     )
 
 
@@ -135,17 +234,18 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "as the final gate for the postprocessed artifact.",
             "",
             "Codex plugin install state belongs to Codex, not `forma install`. "
-            "List configured marketplaces first, then ask the user which "
-            "existing marketplace to use or whether to create/register a new "
-            "one. Always install with an explicit "
-            "`<plugin-id>@<marketplace-name>` selector.",
+            "During bootstrap discovery or diagnostics, inspect configured "
+            "marketplaces as needed, then ask the user to confirm plugin id, "
+            "marketplace name, marketplace source, install selector, and "
+            "visibility check. Stable reinstall scripts must encode those "
+            "facts and must not list marketplaces or ask for marketplace "
+            "choices at runtime.",
             "",
             "```bash",
-            "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
+            "forma build plugin --target codex --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
-            "codex plugin marketplace list",
-            "codex plugin add <plugin-id>@<marketplace-name>",
+            "codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>",
             "```",
             "",
             "If Codex CLI output or marketplace behavior differs from this "
@@ -161,7 +261,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "claude-code`.",
             "",
             "```bash",
-            "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>",
+            "forma build plugin --target claude-code --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
             "forma install --target claude-code --scope project <dir>",
@@ -173,7 +273,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "## OpenCode plugin output",
             "",
             "Forma does not generate OpenCode JS/TS runtime plugins. Use "
-            "`forma create-bundle --target opencode` for native OpenCode "
+            "`forma build bundle --target opencode` for native OpenCode "
             "direct skill output.",
             "",
         ]
@@ -181,21 +281,22 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         plugin_lines = [
             "## Generate plugin output from an approved profile",
             "",
-            "Codex plugin install state belongs to Codex. List configured "
-            "marketplaces first, ask the user which marketplace to use or "
-            "whether to create/register a new one, and install with an "
-            "explicit `<plugin-id>@<marketplace-name>` selector. Claude Code "
+            "Codex plugin install state belongs to Codex. During bootstrap "
+            "discovery or diagnostics, inspect configured marketplaces as "
+            "needed, then ask the user to confirm plugin id, marketplace name, "
+            "marketplace source, install selector, and visibility check. Stable "
+            "reinstall scripts must encode those facts and must not list "
+            "marketplaces or ask for marketplace choices at runtime. Claude Code "
             "plugin roots can be installed with `forma install --target "
             "claude-code`.",
             "",
             "```bash",
-            "forma create-plugin --target codex --profile <profile.yaml> --output <dir>",
+            "forma build plugin --target codex --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
-            "codex plugin marketplace list",
-            "codex plugin add <plugin-id>@<marketplace-name>",
+            "codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>",
             "",
-            "forma create-plugin --target claude-code --profile <profile.yaml> --output <dir>",
+            "forma build plugin --target claude-code --profile <profile.yaml> --output <dir>",
             "forma verify <dir>",
             "forma drift <dir> --profile <profile.yaml>",
             "forma install --target claude-code --scope project <dir>",
@@ -218,7 +319,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "profile or injection authoring details.",
         "",
         "OpenCode uses native direct skill output. Generate an OpenCode bundle "
-        "with `forma create-bundle --target opencode`, verify it, then install "
+        "with `forma build bundle --target opencode`, verify it, then install "
         "it with `forma install --target opencode`; project installs land in "
         "`.opencode/skills` and user installs land in "
         "`$HOME/.config/opencode/skills`. Forma does not generate OpenCode "
@@ -241,6 +342,68 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "proof show that the candidate can reproduce the artifact, not that it "
         "has been reviewed as source of truth.",
         "",
+        "## Profile-local workflow scripts",
+        "",
+        "When using an approved profile, treat the profile file's parent "
+        "directory as the profile directory. Before composing generation or "
+        "installation commands from this guide, check that directory for "
+        "a profile-local script named `reinstall-workflow.sh`.",
+        "",
+        "If `<profile-dir>/reinstall-workflow.sh` exists and is not marked "
+        "bootstrap-incomplete, run it from the profile directory instead of "
+        "assembling `forma build bundle`, `forma build plugin`, install, "
+        "marketplace refresh, or visibility check commands by hand. Run the "
+        "script from the profile directory so relative paths stay stable, and "
+        "verify or drift exactly as the script specifies.",
+        "",
+        "If the profile-local reinstall script is missing or "
+        "bootstrap-incomplete, treat that as a bootstrap state, not a normal "
+        "manual build/install path. Before running hand-assembled build or "
+        "install commands, ask the user whether to complete "
+        "`reinstall-workflow.sh` with confirmed install facts and then run the "
+        "workflow through that script. Only proceed with a one-off manual flow "
+        "when the user explicitly says not to keep scripts for this profile or "
+        "explicitly asks for a temporary one-time run.",
+        "",
+        "Bootstrap goal: explore whatever local environment details are needed "
+        "to make this profile build/install repeatable, then preserve that "
+        "verified local process beside the profile. This is where target-specific "
+        "marketplace paths, plugin selectors, output directories, remove/add "
+        "steps, and installation checks belong. Do not make future agents "
+        "rediscover those details from scratch.",
+        "",
+        "Required install facts before reusable success: artifact kind, target, "
+        "plugin id when the artifact kind is plugin, marketplace name and "
+        "marketplace source when the install route uses a marketplace, install "
+        "selector, and visibility check.",
+        "",
+        "When the user approves bootstrap, write one real script, not notes. "
+        "`reinstall-workflow.sh` must reproduce generation and freshness gates "
+        "for the same profile, including `forma build bundle` or `forma build "
+        "plugin`, `forma drift` when a profile-backed artifact is produced, "
+        "`forma verify`, the local install route for this environment, any "
+        "target-specific marketplace sync, `forma install`, or explicit plugin "
+        "add/remove commands, followed by the required installation visibility "
+        "check.",
+        "",
+        "Stable reinstall scripts must encode fixed facts. They must not run "
+        "`codex plugin marketplace list`, ask the user which marketplace to use, "
+        "or leave plugin id, marketplace, selector, or source refresh decisions "
+        "open at runtime. Marketplace listing belongs only to bootstrap "
+        "discovery or diagnostics before those facts are written.",
+        "",
+        "Script authoring rules: resolve the repository root and profile path "
+        "relative to the script directory; keep output paths configurable with "
+        "environment variables while preserving the just-used defaults; include "
+        "`set -euo pipefail`; do not write placeholder commands; make scripts "
+        "executable; and run the new script once before reporting bootstrap "
+        "success.",
+        "",
+        "Your final install report must include the profile-local reinstall "
+        "state: reused existing script, bootstrapped the script and ran it, "
+        "user requested one-off manual flow, or blocked waiting for the "
+        "bootstrap decision.",
+        "",
         "## If the artifact type or install route is unclear",
         "",
         "Run `doctor` first. Do this before handoff when you do not know whether "
@@ -259,7 +422,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "```bash",
         f"forma explain profile --target {generation_target}",
-        f"forma create-bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
+        f"forma build bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
         "forma verify <dir>",
         f"forma install --target {install_target} --scope project <dir>",
         "```",
@@ -270,7 +433,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "output does not contain project-specific rules.",
         "",
         "```bash",
-        f"forma create-bundle --target {generation_target} --output <dir>",
+        f"forma build bundle --target {generation_target} --output <dir>",
         "forma verify <dir>",
         f"forma install --target {install_target} --scope project <dir>",
         "```",
@@ -283,7 +446,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "artifact is fresh against the profile.",
         "",
         "```bash",
-        f"forma create-bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
+        f"forma build bundle --target {generation_target} --profile <profile.yaml> --output <dir>",
         "forma verify <dir>",
         "forma drift <dir> --profile <profile.yaml>",
         f"forma install --target {install_target} --scope project <dir>",
@@ -297,7 +460,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "installing it.",
         "",
         "```bash",
-        f"forma build-creator --target {generation_target} --output <dir>",
+        f"forma build creator --target {generation_target} --output <dir>",
         f"forma verify <dir>/{generation_target}/forma-creator",
         f"forma install --target {install_target} --scope project <dir>/{generation_target}/forma-creator",
         "```",
@@ -311,13 +474,18 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "```bash",
         "forma profile adopt <artifact-dir> --output <profile-dir>",
-        f"forma create-bundle --target {generation_target} --profile <profile-dir>/profile.yaml --output <dir>",
+        f"forma build bundle --target {generation_target} --profile <profile-dir>/profile.yaml --output <dir>",
         "forma verify <dir>",
         "forma drift <dir> --profile <profile-dir>/profile.yaml",
         "```",
         "",
         "## Command boundaries",
         "",
+        "- Build workflow artifacts with `forma build bundle`, `forma build "
+        "plugin`, or `forma build creator`.",
+        "- Do not use removed command entrypoints: `forma create`, "
+        "`forma create-bundle`, `forma create-plugin`, or "
+        "`forma build-creator`. Do not add compatibility aliases for them.",
         "- `verify` checks generated artifact structure and required files.",
         "- `drift` checks whether generated output is fresh against its source "
         "profile, creator source, or release surface.",
@@ -357,4 +525,48 @@ def _render_markdown(
     lines.append("")
     for source in sources:
         lines.extend([f"## {source['title']}", "", source["content"], ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_human_markdown(
+    spec: GuidanceTopic,
+    sources: list[dict[str, str]],
+    target_agent: str | None,
+) -> str:
+    lines = [f"# {spec.title}", ""]
+    if target_agent is not None:
+        lines.extend([f"Target: `{target_agent}`", ""])
+    lines.extend(
+        [
+            "This is reader-facing guidance. Use `--format agent` for the full "
+            "executable authoring contract, or `--format json` for structured "
+            "tool output.",
+            "",
+        ]
+    )
+    if spec.topic == "profile":
+        lines.extend(
+            [
+                "## Profile Renderer Boundary",
+                "",
+                "- Use profiles for durable, repeated project workflow rules.",
+                "- Keep task-specific or one-off generation constraints out of the profile.",
+                "- Draft a `Profile YAML Proposal` and `Profile Review Packet` before writing files.",
+                "- Human review decides whether candidate rules become long-term profile source.",
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "## Temporary Injection Boundary",
+                "",
+                "- Use temporary injection for one-off generation constraints.",
+                "- Do not promote temporary rules into tracked profile source without review.",
+                "",
+            ]
+        )
+    lines.extend(["Sources:"])
+    for source in sources:
+        lines.append(f"- `{source['path']}`")
     return "\n".join(lines).rstrip() + "\n"

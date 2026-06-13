@@ -124,29 +124,13 @@ def drift_artifact(
 
 
 def drift_release_surface(root: Path) -> DriftReport:
-    """Check Forma's known committed generated release surface."""
+    """Check Forma's active committed dist release surface.
+
+    Product-level forma-creator bundles are intentionally deferred from this
+    fixed check until the creator path is isolated and resumed.
+    """
     root = root.resolve()
     results = [
-        _drift_with_profile(
-            root / "examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex",
-            root / "examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml",
-        ),
-        _drift_with_profile(
-            root / "examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code",
-            root / "examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml",
-        ),
-        _drift_with_creator_source(
-            root / "dist/skills/codex/forma-creator",
-            root / "source/skill-creator",
-        ),
-        _drift_with_creator_source(
-            root / "dist/skills/claude-code/forma-creator",
-            root / "source/skill-creator",
-        ),
-        _drift_with_creator_source(
-            root / "dist/skills/opencode/forma-creator",
-            root / "source/skill-creator",
-        ),
         _drift_with_creator_source(
             root / "dist/skill-bundles/codex",
             root / "source/skill-creator",

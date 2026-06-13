@@ -1,0 +1,92 @@
+profile:
+  id: forma-self-project
+  description: Forma-specific layer, artifact, documentation, and validation boundaries.
+constraints:
+  default:
+    - When a Forma workflow step requires explicit user confirmation, prefer a host-provided structured user-input or choice capability when it is available in the current thread; otherwise ask with a concise textual `Required Confirmation:` prompt.
+    - Treat structured user-input support as an optional host capability, not a hard dependency; do not block solely because an experimental or mode-limited confirmation UI is unavailable.
+  shape:
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
+    - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
+    - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
+    - When asking whether a proposal is ready to hand off to lock, use structured user input when available; otherwise use a textual confirmation and stop until the user confirms.
+  gauge:
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Confirm whether profile changes belong under .forma, examples/profiles, or a downstream repository.
+    - Confirm current generated baselines before recommending any delete/add replacement.
+  seal:
+    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in finalized plans and tasks.
+    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
+    - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
+    - After staging finalized plan files and showing the staged diff, use structured user input when available for commit permission; after the user confirms, commit the locked plan without asking for a second confirmation.
+  pour:
+    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
+    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
+    - Run the narrowest relevant test first, then the shared validation gate before review-ready.
+    - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
+  flow:
+    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
+    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
+    - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
+    - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
+  hone:
+    - Resolve the reconciliation target from explicit feedback first, then recent Forma skill trigger context, review cache, task run evidence, and current diff or commit evidence.
+    - Evaluate feedback against the current stage constraints and bundled references before deciding whether it is implementation rework, delivery revision, plan rework, source rework, aligned, acceptable deviation, or blocked.
+    - For task implementation rework, require `plans/issue-<id>/implement-notes.md` to record how feedback changed implementation, validation, generated artifacts, or commit/history.
+    - For plan-level feedback, return to planning without recording the finding as implementation notes.
+    - When reconciliation needs the user to choose whether to materialize same-issue rework or notify a parent thread, prefer structured user input when available; otherwise present the route choices in text and wait for explicit confirmation.
+  mend:
+    - Resolve rework intake from explicit human feedback first, then from `forma-reconcile` output when present.
+    - Write feedback source, classification, same-issue rationale, confirmation state, and appended task ids to `plans/issue-<id>/rework.md`.
+    - Append only ordinary structured `rework-*` task blocks to `plans/issue-<id>/tasks.md`; keep grouping and source prose out of `tasks.md`.
+    - Do not implement source changes, complete tasks, or write run evidence while materializing a rework contract.
+    - For rework contract confirmation, prefer structured user input when available; otherwise use the required `## rework-contract` output with `Required Confirmation:` and wait for explicit user confirmation.
+workflow_adds:
+  seal:
+    - Run the bundled workflow runner with `check <issue-id>` after finalizing `plan.md` and `tasks.md` and before staging or asking for commit permission.
+    - If the contract check fails, fix the plan/task contract and rerun the check; do not stage or commit the locked plan while the check is failing.
+  mend:
+    - Run the bundled workflow runner with `check <issue-id>` after updating `rework.md` and appending tasks and before staging or asking for commit permission.
+    - If the contract check fails, fix the rework task contract and rerun the check; do not stage or commit the rework contract while the check is failing.
+    - After the user confirms a staged rework contract, commit only `plans/issue-<id>/rework.md` and `plans/issue-<id>/tasks.md`; then do not stop until the execution handoff disposition is resolved and reported.
+    - If a trusted parent thread id and host thread-messaging capability are available, send the execution handoff to that thread. If no trusted parent thread id was injected, ask the user whether to provide one or authorize a bounded host-thread search; when authorized, use host thread listing/search tools to locate the likely parent instead of guessing.
+    - "Rework completion requires an `Execution Handoff` disposition: `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, `search-authorized-not-found`, or `declined-by-user`."
+output_adds:
+  seal:
+    - "Include `Contract Check:` with the result of the bundled workflow runner `check <issue-id>` command before asking for commit permission."
+  mend:
+    - "Include `Contract Check:` with the result of the bundled workflow runner `check <issue-id>` command before asking for commit permission."
+    - "Include `Execution Handoff:` with one of `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, `search-authorized-not-found`, or `declined-by-user` after the rework contract is committed or the handoff is blocked."
+resources:
+  default:
+    references:
+      - source: references/forma-iteration-boundaries.md
+        dest: forma-iteration-boundaries.md
+      - source: references/forma-validation-matrix.md
+        dest: forma-validation-matrix.md
+      - source: references/forma-profile-policy.md
+        dest: forma-profile-policy.md
+skills:
+  shape:
+    description: Converge a Forma self-iteration plan, including layer impact, profile ownership, generated-output policy, and validation boundaries.
+  gauge:
+    description: Read Forma repository facts and produce grounding for a self-iteration plan.
+  seal:
+    description: Finalize a Forma self-iteration plan with tasks, validation gates, and generated-output policy.
+  pour:
+    description: Execute one Forma self-iteration task through focused validation and review.
+  flow:
+    description: Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
+  hone:
+    description: Reconcile Forma delivery feedback against stage contracts, issue evidence, and workflow boundaries.
+  mend:
+    description: Materialize same-issue Forma feedback into a locked rework contract.
+decision_gate_extras:
+  - Layer impact
+  - Profile ownership
+  - Generated baseline policy
+  - Documentation update requirement

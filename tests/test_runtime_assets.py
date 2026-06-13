@@ -26,10 +26,11 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     env["PYTHONPATH"] = str(wheel)
 
     profile = _run_installed(
-        ["explain", "profile", "--target", "codex"],
+        ["explain", "profile", "--format", "agent", "--target", "codex"],
         cwd=outside_cwd,
         env=env,
     )
+    assert "ACTIONABLE REPORT" in profile.stdout
     assert "# Forma Profile Guidance" in profile.stdout
     assert (
         "source/skill-creator/references/profile-authoring-principles.md"
@@ -45,6 +46,8 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     )
     assert "# Forma Agent Guide" in agent.stdout
     assert "Generation targets: `codex`, `claude-code`, `opencode`" in agent.stdout
+    assert "Profile-local workflow scripts" in agent.stdout
+    assert "`reinstall-workflow.sh`" in agent.stdout
     assert "Draft project rules, then generate workflow output" in agent.stdout
     assert "forma explain profile --target <generation-target>" in agent.stdout
     assert "Optional on-the-spot creator path" in agent.stdout
@@ -57,15 +60,16 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
         env=env,
     )
     payload = json.loads(injection.stdout)
-    assert payload["topic"] == "temporary-injection"
-    assert payload["target"] == "codex"
-    assert "constraints.default" in payload["markdown"]
-    assert "Stage Key Boundary" in payload["markdown"]
+    assert payload["metadata"]["topic"] == "temporary-injection"
+    assert payload["metadata"]["target"] == "codex"
+    assert "constraints.default" in payload["metadata"]["markdown"]
+    assert "Stage Key Boundary" in payload["metadata"]["markdown"]
 
     generated = tmp_path / "generated"
     _run_installed(
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--profile",
@@ -81,7 +85,8 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
 
     creator_dist = tmp_path / "creator-dist"
     _run_installed(
-        ["build-creator", "--output", str(creator_dist), "--target", "codex"],
+        ["build",
+            "creator", "--output", str(creator_dist), "--target", "codex"],
         cwd=outside_cwd,
         env=env,
     )

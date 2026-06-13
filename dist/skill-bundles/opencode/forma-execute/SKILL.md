@@ -25,7 +25,7 @@ Execute one accepted task and leave verifiable evidence.
 - Resolve `scripts/forma-workflow.sh` relative to the current triggered skill package only; never switch to a same-named script in a sibling skill directory, even if the contents match.
 - Implement only the current task by treating `Accept:` as the delivery target and `Validate:` / `Use-Check:` as validation gates and proof obligations; if it is the last remaining task, `review-ready` will also run `## Final Validation`.
 - For `loop-batch`, report metric/artifact movement before validation; for `gate`, name the protected decision boundary; for `promote`, write only the surfaces explicitly allowed by the current task.
-- Record meaningful execution decisions, plan gaps, classifications, deviations, and follow-ups in `plans/issue-<id>/implement-notes.md` using the bundled notes reference.
+- Before review, decide whether `plans/issue-<id>/implement-notes.md` is required. Record meaningful decisions, plan gaps, classifications, deviations, and follow-ups using the bundled notes reference before `review-ready`.
 - Run `scripts/forma-workflow.sh review-ready <issue-id>` before presenting the current task result for user review.
 - `scripts/forma-workflow.sh review-ready <issue-id>` stages the reviewed task snapshot; if review feedback changes the task, rerun `review-ready` before completion.
 - Only after the user explicitly approves the current task for completion, run `scripts/forma-workflow.sh complete <issue-id>`.

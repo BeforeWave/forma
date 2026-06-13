@@ -31,21 +31,21 @@ them, those rules enter the generated workflow output for this run.
 |---|---|---|---|
 | `forma-creator` | On-the-spot customization; try a project workflow first. | Project facts, user additions, confirmed rules. | Verified one-off skill bundle or plugin. |
 | `forma explain profile` + agent | Durable source from the start. | Profile authoring standard, project facts, team review. | Tracked profile YAML, then compiled workflow. |
-| `forma create-bundle` / `forma create-plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or plugin. |
+| `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or plugin. |
 
 `forma explain profile` is the default path for making project rules visible as
 a profile before generation. `forma-creator` is the optional "hide the profile
-file and try a workflow now" path. `forma create-bundle` and
-`forma create-plugin` are deterministic build commands after a profile exists.
+file and try a workflow now" path. `forma build bundle` and
+`forma build plugin` are deterministic build commands after a profile exists.
 
 ## Fixed Target Contract
 
 Each creator is built for one target:
 
 ```bash
-forma build-creator --target codex --output /tmp/forma-creator-dist
-forma build-creator --target claude-code --output /tmp/forma-creator-dist
-forma build-creator --target opencode --output /tmp/forma-creator-dist
+forma build creator --target codex --output /tmp/forma-creator-dist
+forma build creator --target claude-code --output /tmp/forma-creator-dist
+forma build creator --target opencode --output /tmp/forma-creator-dist
 ```
 
 A Codex creator generates Codex-shaped skill bundles and Codex plugin output

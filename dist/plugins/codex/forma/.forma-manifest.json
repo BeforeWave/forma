@@ -1,7 +1,7 @@
 {
   "base_origin": {
     "artifact_kind": "codex-plugin",
-    "base_output_digest": "24783c62baaf4a75600f1faec1a0ec6a5a7437fe893855fb798238afcdc63f1c",
+    "base_output_digest": "c7618f634ea65a71c89db7c7205a481fb7f8519c0c2e9be861ef0ca8b34ecf01",
     "normalization_id": "forma.normalized-output.v1",
     "schema": "forma.base-origin.v1",
     "target": "codex"
@@ -40,16 +40,16 @@
     }
   },
   "format": "forma-bundle-manifest-v1",
-  "generated_at": "2026-06-12T05:31:57Z",
+  "generated_at": "2026-06-13T11:46:11Z",
   "generator": {
     "name": "forma",
     "repository_url": "https://github.com/BeforeWave/forma",
     "version": "0.1.2"
   },
   "generator_version": "0.1.2",
-  "methodology_source_revision": "93e65c8",
+  "methodology_source_revision": "4ae9eaf",
   "methodology_source_revision_type": "git-short-sha",
-  "methodology_tree_digest": "5c14ad4bc81349057261ae847eec3e969914fab0eba3dcfc69a36fadfdcc47ac",
+  "methodology_tree_digest": "88b5b4a90b267bae2d4fc991211286e01d4479c06963127e1c73e1d09bcb6e16",
   "methodology_version": "0.1.0",
   "mode": "solo",
   "profile": {

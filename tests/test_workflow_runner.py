@@ -42,6 +42,179 @@ def test_next_rejects_unlocked_plan_with_showhand_stop_message(tmp_path: Path) -
     assert "Stop showhand and return to the lock stage." in result.stderr
 
 
+def test_check_accepts_dirty_contract_without_running_validation_or_state(
+    tmp_path: Path,
+) -> None:
+    repo, workflow = _locked_issue(tmp_path, "contract-check", validate="false")
+    tasks_file = repo / "plans" / "issue-contract-check" / "tasks.md"
+    tasks_file.write_text(
+        """- [ ] [contract-guard] Exercise contract check
+Accept: Task Type=gate; check parses the contract
+Validate: false
+Depends: none
+""",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(workflow), "check", "contract-check"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "Contract check passed for issue-contract-check" in result.stdout
+    assert "Task format: structured" in result.stdout
+    assert "Tasks: 1 total, 0 checked, 1 unchecked" in result.stdout
+    assert "Validation commands were not run." in result.stdout
+    assert not (repo / ".forma" / "state" / "workflow").exists()
+    assert not list((repo / "plans" / "issue-contract-check" / "runs").glob("*.md"))
+    staged = _run(["git", "diff", "--cached", "--name-only"], cwd=repo)
+    assert staged.stdout == ""
+
+
+def test_check_rejects_structured_task_schema_before_review_ready(
+    tmp_path: Path,
+) -> None:
+    repo, workflow = _locked_issue(tmp_path, "contract-schema")
+    tasks_file = repo / "plans" / "issue-contract-schema" / "tasks.md"
+    tasks_file.write_text(
+        """- [ ] [contract-guard] Exercise contract check
+Accept: Task Type=gate; check parses the contract
+Accept: Task Type=gate; duplicate accept should fail
+Validate: false
+Depends: none
+""",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(workflow), "check", "contract-schema"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "Structured task [contract-guard] must not repeat Accept:" in result.stderr
+    assert not (repo / ".forma" / "state" / "workflow").exists()
+    assert not list((repo / "plans" / "issue-contract-schema" / "runs").glob("*.md"))
+    staged = _run(["git", "diff", "--cached", "--name-only"], cwd=repo)
+    assert staged.stdout == ""
+
+
+def test_check_rejects_unknown_shared_check_reference(tmp_path: Path) -> None:
+    repo, workflow = _locked_issue(tmp_path, "contract-shared-check")
+    tasks_file = repo / "plans" / "issue-contract-shared-check" / "tasks.md"
+    tasks_file.write_text(
+        """- [ ] [contract-guard] Exercise contract check
+Accept: Task Type=gate; check parses shared check references
+Validate: true
+Use-Check: missing-check
+Depends: none
+""",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(workflow), "check", "contract-shared-check"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "Structured task references unknown shared check: missing-check" in result.stderr
+    assert not (repo / ".forma" / "state" / "workflow").exists()
+
+
+def test_check_rejects_missing_plan_contract_section(tmp_path: Path) -> None:
+    repo, workflow = _locked_issue(tmp_path, "contract-plan")
+    plan_file = repo / "plans" / "issue-contract-plan" / "plan.md"
+    plan_file.write_text(
+        plan_file.read_text(encoding="utf-8").replace(
+            "## Artifact/Evidence Boundary\n\n",
+            "",
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(workflow), "check", "contract-plan"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "plan.md is missing required section: ## Artifact/Evidence Boundary" in result.stderr
+    assert not (repo / ".forma" / "state" / "workflow").exists()
+
+
+def test_check_rejects_rework_task_missing_from_rework_ledger(tmp_path: Path) -> None:
+    repo, workflow = _locked_issue(tmp_path, "contract-rework")
+    tasks_file = repo / "plans" / "issue-contract-rework" / "tasks.md"
+    rework_file = repo / "plans" / "issue-contract-rework" / "rework.md"
+    tasks_file.write_text(
+        """- [ ] [rework-001-contract-guard] Exercise rework ledger check
+Accept: Task Type=gate; check parses rework ledger
+Validate: true
+Depends: none
+""",
+        encoding="utf-8",
+    )
+    rework_file.write_text(
+        """# Rework
+
+## Rework 001: Contract guard
+
+Source:
+- direct-human-feedback
+
+Feedback:
+- Check rework ledger structure.
+
+Classification:
+- task-rework
+
+Same-Issue Rationale:
+- This remains inside the active issue.
+
+User Confirmation:
+- confirmed
+
+Appended Tasks:
+- rework-001-other-task
+""",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(workflow), "check", "contract-rework"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert (
+        "rework task is not listed in rework.md Appended Tasks: rework-001-contract-guard"
+        in result.stderr
+    )
+    assert not (repo / ".forma" / "state" / "workflow").exists()
+
+
 def test_review_ready_rejects_stateful_final_validation_lines(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     scripts_dir = repo / "skill" / "scripts"
@@ -211,6 +384,36 @@ Follow-ups:
 
     assert result.returncode == 0, result.stderr + result.stdout
     assert "Review-ready task [1]" in result.stdout
+    assert (
+        repo / ".forma" / "state" / "workflow" / "issue-ordinary-notes" / "review-state.env"
+    ).is_file()
+    assert (
+        repo / ".forma" / "state" / "workflow" / "issue-ordinary-notes" / "validation.log"
+    ).is_file()
+    assert not (repo / ".forma-workflow").exists()
+
+
+def test_review_ready_rejects_pre_staged_index_as_contract_violation(
+    tmp_path: Path,
+) -> None:
+    repo, workflow = _locked_issue(tmp_path, "staged-index")
+    (repo / "proof.txt").write_text("changed\n", encoding="utf-8")
+    _run(["git", "add", "proof.txt"], cwd=repo)
+
+    result = subprocess.run(
+        ["bash", str(workflow), "review-ready", "staged-index"],
+        cwd=repo,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "Pre-staged changes violate the workflow contract" in result.stderr
+    assert "Do not run git add, git rm" in result.stderr
+    assert "the workflow runner owns review staging" in result.stderr
+    assert "git restore --staged <path>" in result.stderr
 
 
 def test_review_ready_inherits_invoking_environment(tmp_path: Path) -> None:
@@ -328,6 +531,10 @@ def _locked_issue(
 ## Acceptance Criteria
 
 - review-ready validates implement-notes.
+
+## Artifact/Evidence Boundary
+
+- Evidence stays under the issue runs directory.
 
 ## Validation
 

@@ -32,9 +32,7 @@ SAMPLE_SOFTWARE_PROFILE = (
     / "sample-software"
     / "sample-software-plan-first.yaml"
 )
-FORMA_SELF_PROFILE = ROOT / "profiles" / "forma-self" / "forma-self-iteration.yaml"
-COMMITTED_CODEX_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-github-issue-tracked-plan-first-codex"
-COMMITTED_CLAUDE_OUTPUT = ROOT / "examples" / "generated" / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
+FORMA_SELF_PROFILE = ROOT / ".forma" / "profile.yaml"
 FORMA_GENERATOR = {
     "name": "forma",
     "version": __version__,
@@ -205,7 +203,7 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
         "Layer 1 temporary injection" in item
         for item in profile.constraints["shape"]
     )
-    assert any("profiles/forma-self" in item for item in profile.constraints["gauge"])
+    assert any(".forma" in item for item in profile.constraints["gauge"])
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["pour"])
     assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["flow"])
     assert any("recent Forma skill trigger context" in item for item in profile.constraints["hone"])
@@ -381,6 +379,12 @@ bundle:
 constraints:
   default:
     - shared base rule
+workflow_adds:
+  pour:
+    - Base workflow gate.
+output_adds:
+  pour:
+    - Base output field.
 validation_commands:
   default:
     - pytest
@@ -402,6 +406,14 @@ constraints:
   default:
     - shared base rule
     - top rule
+workflow_adds:
+  pour:
+    - Base workflow gate.
+    - Top workflow gate.
+output_adds:
+  pour:
+    - Base output field.
+    - Top output field.
 validation_commands:
   default:
     - pytest
@@ -418,6 +430,14 @@ skills:
     assert profile.resolved_order == ("base", "top")
     assert profile.bundle_name == "top-bundle"
     assert profile.constraints["default"] == ["shared base rule", "top rule"]
+    assert profile.workflow_adds["pour"] == [
+        "Base workflow gate.",
+        "Top workflow gate.",
+    ]
+    assert profile.output_adds["pour"] == [
+        "Base output field.",
+        "Top output field.",
+    ]
     assert profile.validation_commands["default"] == ["pytest", "mypy"]
     assert profile.skill_descriptions["pour"] == "Top pour description."
 
@@ -608,6 +628,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "references/reconcile-rules.md" in hone_text
     assert "stage evaluation frame" in hone_text.lower()
     assert "issue plan/tasks/notes/runs" in hone_text
+    assert "both fits the contract and is the best practical outcome" in hone_text
     assert "delivery-revision" in hone_text
     assert 'name: "forma-rework"' in mend_text
     assert "references/rework-rules.md" in mend_text
@@ -640,6 +661,33 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     ]
     assert verify(codex_dir).passed
     assert verify(claude_dir).passed
+
+
+def test_forma_self_workflow_adds_require_contract_check_before_commits(
+    tmp_path: Path,
+) -> None:
+    output_dir = tmp_path / "forma-self-contract-check"
+
+    build_bundle(
+        profile_file=FORMA_SELF_PROFILE,
+        output_dir=output_dir,
+        target_agent="codex",
+        methodology_dir=METHODOLOGY,
+    )
+
+    seal_text = (
+        output_dir / FORMA_SELF_STAGE_DIRS["seal"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    mend_text = (
+        output_dir / FORMA_SELF_STAGE_DIRS["mend"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    assert "bundled workflow runner with `check <issue-id>`" in seal_text
+    assert "before staging or asking for commit permission" in seal_text
+    assert "Contract Check:" in seal_text
+    assert "bundled workflow runner with `check <issue-id>`" in mend_text
+    assert "before staging or asking for commit permission" in mend_text
+    assert "Contract Check:" in mend_text
 
 
 def test_find_methodology_dir_accepts_explicit_path() -> None:
@@ -682,6 +730,15 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
         / SAMPLE_STAGE_DIRS["flow"]
         / "references"
         / "automated-execution.md"
+    ).read_text(encoding="utf-8")
+    task_runner = (
+        output_dir
+        / SAMPLE_STAGE_DIRS["pour"]
+        / "references"
+        / "task-runner.md"
+    ).read_text(encoding="utf-8")
+    flow_workflow_script = (
+        output_dir / SAMPLE_STAGE_DIRS["flow"] / "scripts" / "forma-workflow.sh"
     ).read_text(encoding="utf-8")
     seal_planning_rules = (
         output_dir
@@ -786,6 +843,12 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "Add or update Go tests" in pour_text
     assert "contract, compatibility, data, or operational risk" in pour_text
     assert "Do not record a process-gate exception as an execution decision" in implement_notes
+    assert "command/API shape, CLI compatibility route, output schema" in implement_notes
+    assert "install, bootstrap, handoff, or reinstall automation" in implement_notes
+    assert "If a reviewer would ask why this shape, boundary, default" in implement_notes
+    assert "Before review, decide whether `plans/issue-<id>/implement-notes.md` is required" in pour_text
+    assert "Before `review-ready`, decide whether `implement-notes.md` is required" in task_runner
+    assert "absence of notes means no such decision occurred" in task_runner
     assert "show the staged diff to the user before leaving planning" in seal_planning_rules
     assert "Commit only that staged plan/task snapshot" in seal_planning_rules
     assert "Each `## Final Validation` command line must be self-contained" in seal_planning_rules
@@ -799,7 +862,9 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "record the options, selected best choice, and rationale" in flow_text
     assert "Treat `scripts/forma-workflow.sh next <issue-id>` as the only task selector" in automated_execution
     assert "Do not compensate for a failed `review-ready` or `complete`" in automated_execution
+    assert "Do not run `git add`, `git rm`, or any other index-mutating command" in automated_execution
     assert "include `Recorded Decisions` only when this invocation recorded autonomous execution choices" in automated_execution
+    assert "git restore --staged <path>" in flow_workflow_script
     assert "references/showhand-automation.md" not in flow_text
     assert not (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "plan-template.md"
@@ -807,9 +872,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert not (
         output_dir / SAMPLE_STAGE_DIRS["flow"] / "references" / "tasks-template.md"
     ).exists()
-    assert "showhand is execution-only for an already-locked plan" in (
-        output_dir / SAMPLE_STAGE_DIRS["flow"] / "scripts" / "forma-workflow.sh"
-    ).read_text(encoding="utf-8")
+    assert "showhand is execution-only for an already-locked plan" in flow_workflow_script
 
     report = verify(output_dir)
     assert report.passed, report.format_human()
@@ -1220,6 +1283,49 @@ skills:
     assert verify(output_dir).passed
 
 
+def test_profile_workflow_and_output_adds_render_in_stage_sections(
+    tmp_path: Path,
+) -> None:
+    profile_file = tmp_path / "stage-adds.yaml"
+    profile_file.write_text(
+        """
+profile:
+  id: stage-adds
+stages:
+  mend:
+    enabled: true
+workflow_adds:
+  mend:
+    - Resolve parent-thread handoff before stopping.
+output_adds:
+  mend:
+    - Include `Execution Handoff:` disposition.
+""".lstrip(),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "stage-adds-output"
+
+    build_bundle(
+        profile_file=profile_file,
+        output_dir=output_dir,
+        target_agent="codex",
+        methodology_dir=METHODOLOGY,
+    )
+
+    manifest = json.loads((output_dir / ".forma-manifest.json").read_text(encoding="utf-8"))
+    skill_dir = manifest["emitted_skills"]["mend"]["directory"]
+    text = (output_dir / skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    workflow = text.split("## Workflow", 1)[1].split("## Load As Needed", 1)[0]
+    requirements = text.split("## Requirements", 1)[1].split("## Output", 1)[0]
+    output = text.split("## Output", 1)[1]
+
+    assert "- Resolve parent-thread handoff before stopping." in workflow
+    assert "Resolve parent-thread handoff before stopping." not in requirements
+    assert "- Include `Execution Handoff:` disposition." in output
+    assert "Include `Execution Handoff:` disposition." not in requirements
+    assert verify(output_dir).passed
+
+
 def test_plugin_localization_supports_optional_mend_stage(tmp_path: Path) -> None:
     skills_dir = tmp_path / "skills"
     skill_dir = skills_dir / "forma-rework"
@@ -1285,6 +1391,10 @@ def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
     assert any("delivery-revision" in line for line in hone.workflow_lines)
     assert "## Target Resolution" in rules
     assert "## Stage Evaluation Frame" in rules
+    assert "## Quality Gate" in rules
+    assert "Passing tests" in rules
+    assert "Best practical outcome" in rules
+    assert "do not return `aligned`" in rules
     assert "`plans/issue-<id>/implement-notes.md`" in rules
     assert "`plans/issue-<id>/runs/task-*.md`" in rules
     assert "`delivery-revision`" in rules
@@ -1397,14 +1507,15 @@ conditional_overlays:
     assert verify(output_dir).passed
 
 
-def test_create_bundle_cli_requires_target_and_removes_old_create_command(
+def test_build_bundle_cli_requires_target_and_removes_old_create_command(
     tmp_path: Path,
 ) -> None:
     runner = CliRunner()
     default_profile = runner.invoke(
         main,
         [
-            "create-bundle",
+            "build",
+            "bundle",
             "--target",
             "codex",
             "--output",
@@ -1415,7 +1526,8 @@ def test_create_bundle_cli_requires_target_and_removes_old_create_command(
     )
     missing_target = runner.invoke(
         main,
-        ["create-bundle", "--profile", str(SAMPLE_PROFILE), "--output", str(tmp_path / "out")],
+        ["build",
+            "bundle", "--profile", str(SAMPLE_PROFILE), "--output", str(tmp_path / "out")],
     )
     old_create = runner.invoke(main, ["create", "--help"])
 
@@ -1428,9 +1540,13 @@ def test_create_bundle_cli_requires_target_and_removes_old_create_command(
 
 def test_explain_profile_outputs_canonical_guidance() -> None:
     runner = CliRunner()
-    result = runner.invoke(main, ["explain", "profile", "--target", "codex"])
+    result = runner.invoke(
+        main,
+        ["explain", "profile", "--format", "agent", "--target", "codex"],
+    )
 
     assert result.exit_code == 0
+    assert "ACTIONABLE REPORT" in result.output
     assert "# Forma Profile Guidance" in result.output
     assert "Target: `codex`" in result.output
     assert (
@@ -1465,27 +1581,29 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
 
     assert result.exit_code == 0
     payload = json.loads(result.output)
-    assert payload["topic"] == "temporary-injection"
-    assert payload["target"] == "codex"
+    assert payload["schema"] == "forma.actionable-report.v1"
+    assert payload["command"] == "forma explain temporary-injection"
+    assert payload["metadata"]["topic"] == "temporary-injection"
+    assert payload["metadata"]["target"] == "codex"
     assert [
         source["path"]
-        for source in payload["sources"]
+        for source in payload["metadata"]["sources"]
     ] == [
         "source/skill-creator/references/temporary-injection-generation.md",
         "source/skill-creator/references/profile-authoring-principles.md",
     ]
     assert (
         "Temporary Injection Generation Standard"
-        in payload["sources"][0]["content"]
+        in payload["metadata"]["sources"][0]["content"]
     )
-    assert "Stage Key Boundary" in payload["sources"][0]["content"]
-    assert "Profile Authoring Principles" in payload["sources"][1]["content"]
-    assert "Generated output names" in payload["sources"][1]["content"]
-    assert "classification table" in payload["markdown"]
-    assert "constraints.default" in payload["markdown"]
-    assert "Script Resource Injection Template" in payload["markdown"]
-    assert "resources.<stage>.scripts" in payload["markdown"]
-    assert "python3 scripts/adapter_tool.py" in payload["markdown"]
+    assert "Stage Key Boundary" in payload["metadata"]["sources"][0]["content"]
+    assert "Profile Authoring Principles" in payload["metadata"]["sources"][1]["content"]
+    assert "Generated output names" in payload["metadata"]["sources"][1]["content"]
+    assert "classification table" in payload["metadata"]["markdown"]
+    assert "constraints.default" in payload["metadata"]["markdown"]
+    assert "Script Resource Injection Template" in payload["metadata"]["markdown"]
+    assert "resources.<stage>.scripts" in payload["metadata"]["markdown"]
+    assert "python3 scripts/adapter_tool.py" in payload["metadata"]["markdown"]
 
 
 def test_create_rejects_unknown_target(tmp_path: Path) -> None:
@@ -1515,34 +1633,6 @@ def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) ->
     )
 
     assert _file_map(first) == _file_map(second)
-
-
-def test_committed_generated_outputs_match_creator(tmp_path: Path) -> None:
-    codex = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
-    claude = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
-    build_bundle(
-        profile_file=SAMPLE_PROFILE,
-        output_dir=codex,
-        target_agent="codex",
-        methodology_dir=METHODOLOGY,
-    )
-    build_bundle(
-        profile_file=SAMPLE_PROFILE,
-        output_dir=claude,
-        target_agent="claude-code",
-        methodology_dir=METHODOLOGY,
-    )
-
-    assert _file_map(COMMITTED_CODEX_OUTPUT) == _file_map(codex)
-    assert _file_map(COMMITTED_CLAUDE_OUTPUT) == _file_map(claude)
-
-
-def test_committed_generated_outputs_verify() -> None:
-    codex = verify(COMMITTED_CODEX_OUTPUT)
-    claude = verify(COMMITTED_CLAUDE_OUTPUT)
-
-    assert codex.passed, codex.format_human()
-    assert claude.passed, claude.format_human()
 
 
 def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:

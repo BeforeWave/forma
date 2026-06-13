@@ -179,5 +179,5 @@ generated output.
 - [Concepts](./concepts.md): compiler model and core terminology.
 - [Profile Schema](./profile-schema.md): durable workflow source format.
 - [Skill Bundle](./skill-bundle.md): generated output layout.
-- [Examples](./examples.md): sample profiles, generated baselines, and real runs.
+- [Examples](./examples.md): sample profiles, local build instructions, and real runs.
 - [Usage](./usage.md): command reference.

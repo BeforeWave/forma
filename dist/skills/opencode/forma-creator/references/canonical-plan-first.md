@@ -34,7 +34,7 @@ as-is into generated bundles.
 
 In Forma source form, these files are maintained only under sibling
 `source/methodology/` and copied into this creator bundle by
-`forma build-creator`. Do not maintain a second checked-in methodology copy
+`forma build creator`. Do not maintain a second checked-in methodology copy
 under `source/skill-creator/`.
 
 ## Stage Mapping

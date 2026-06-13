@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backend Plan-First Execute"
-  short_description: "Implement the current task for backend work without assuming a specific language stack."
-  default_prompt: "Implement the current task using the packaged workflow and report the outcome. Keep each task review-gated, and after an approved completion immediately continue to the next workflow task if one remains."

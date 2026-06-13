@@ -13,7 +13,7 @@ evidence surfaces:
 | Material | What to inspect |
 |---|---|
 | Sample profile | How long-term team rules are expressed: evidence priority, boundaries, validation, proof, stop conditions, tools, and source adapters. |
-| Generated baseline | What a compiled skill bundle looks like: skill names, references, scripts, and manifest. |
+| Local generated output | What a compiled skill bundle looks like after you run the build command yourself: skill names, references, scripts, and manifest. |
 | Tracked run | How one concrete task records `plan.md`, `tasks.md`, `runs/task-*.md`, and validation proof. |
 
 ## Sample Software Profile
@@ -76,30 +76,26 @@ The point of this sample is that "backend rules" are not one blob. API/stream
 impact, source adapters, Go validation, and stop conditions belong in different
 stages.
 
-## Generated Baselines
+## Build A Sample Locally
 
-The backend sample has committed Codex and Claude Code generated baselines:
+Generated sample outputs are not committed. Build a sample locally when you want
+to inspect compiled structure:
 
-```text
-examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
+```bash
+forma build bundle --target codex \
+  --profile examples/profiles/sample-backend/sample-backend-go-github-issue-tracked.yaml \
+  --output /tmp/forma-sample-backend-codex
+
+forma verify /tmp/forma-sample-backend-codex
 ```
 
-They are used for compiler drift checks, and they are useful for reading the
-compiled output:
+The generated output will show the same profile resource behavior:
 
 - stage skill directories are renamed to `backend-plan-first-*`;
 - `shape` and `seal` include the GitHub issue context script;
 - implementation and showhand stages do not include the GitHub helper unconditionally;
 - references are copied only into the stages that selected them;
 - `.forma-manifest.json` records target, emitted skill names, profile order, and source hashes.
-
-Verify them with:
-
-```bash
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
-```
 
 ## Real Forma Runs
 
@@ -113,7 +109,7 @@ Start with:
 |---|---|
 | `plans/issue-workflow-injection-contracts/` | The temporary injection classification contract: natural-language rules routed to defaults, stage constraints, or conditional overlays. |
 | `plans/issue-codex-plugin-profile-naming/` | Codex plugin identity, renamed skill propagation, verifier negative proof, and install boundaries. |
-| `plans/issue-bundle-plugin-install-surface/` | `create-bundle`, `create-plugin`, `install`, release surface, dist artifacts, and docs updates. |
+| `plans/issue-bundle-plugin-install-surface/` | `build bundle`, `build plugin`, `install`, release surface, dist artifacts, and docs updates. |
 
 Each issue contains:
 
@@ -136,7 +132,7 @@ passing test / verify commands, and risk notes.
 ## Common Misreads
 
 - A sample profile is not a schema tutorial. It is a sanitized shape of real team rules.
-- A generated baseline is not runtime success proof. It proves compiler output structure and drift.
+- Locally generated output is not runtime success proof. It only shows compiler output structure for the selected profile and target.
 - `plans/issue-*/runs/` is where this project records real task execution proof.
 - Exact commands and file boundaries in a task contract are not raw profile text; they are the result of applying profile rules to the current task.
 

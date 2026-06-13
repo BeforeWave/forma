@@ -1,0 +1,124 @@
+# Task Evidence
+
+- Task: [remove-generated-examples] Remove committed generated example baselines
+- Completed At (UTC): 2026-06-13T06:11:13Z
+- Commit Hash: Recorded in the commit that introduces this evidence file.
+
+## Changed Files
+- README.md
+- README.zh-CN.md
+- STRUCTURE.md
+- docs/AGENTS.md
+- docs/concepts.md
+- docs/concepts.zh-CN.md
+- docs/examples.md
+- docs/examples.zh-CN.md
+- docs/skill-bundle.md
+- docs/skill-bundle.zh-CN.md
+- docs/usage.md
+- docs/usage.zh-CN.md
+- docs/verifier.md
+- docs/verifier.zh-CN.md
+- docs/workflow-contract.md
+- docs/workflow-contract.zh-CN.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/.forma-manifest.json
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/execution-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/implement-notes.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/plan-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/task-runner.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/references/tasks-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-execute/scripts/forma-workflow.sh
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-ground/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-ground/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/finalization-decision-gate.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/plan-materialization.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/plan-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/planning-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/script-resource-adapter.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/task-structure.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/references/tasks-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/scripts/forma-workflow.sh
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-lock/scripts/github_issue_context.py
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/grounding-handoff.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/plan-stage-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/proposal-decision-gate.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/references/script-resource-adapter.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-plan/scripts/github_issue_context.py
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/automated-execution.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/execution-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/implement-notes.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/backend-plan-first-showhand/scripts/forma-workflow.sh
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/.forma-manifest.json
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/agents/openai.yaml
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/execution-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/implement-notes.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/plan-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/task-runner.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/references/tasks-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-execute/scripts/forma-workflow.sh
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-ground/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-ground/agents/openai.yaml
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-ground/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/agents/openai.yaml
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/finalization-decision-gate.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/plan-materialization.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/plan-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/planning-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/script-resource-adapter.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/task-structure.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/references/tasks-template.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/scripts/forma-workflow.sh
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-lock/scripts/github_issue_context.py
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/agents/openai.yaml
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/grounding-handoff.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/plan-stage-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/proposal-decision-gate.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/references/script-resource-adapter.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-plan/scripts/github_issue_context.py
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/SKILL.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/agents/openai.yaml
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/automated-execution.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/backend-review-checks.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/backend-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/execution-rules.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/implement-notes.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/references/output-format.md
+- examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/backend-plan-first-showhand/scripts/forma-workflow.sh
+- src/forma/cli.py
+- src/forma/drift.py
+- tests/test_cli.py
+- tests/test_creator.py
+
+## Validation Results
+- PASS [task]: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_docs_links.py
+
+## Risks / Unresolved Items
+- None recorded.

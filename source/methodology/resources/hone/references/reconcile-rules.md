@@ -14,7 +14,7 @@ matches the active Forma stage contract and the user's feedback.
   - A plugin-local or qualified trigger whose final component is `showhand` maps to `flow`, then the latest task/run evidence decides the concrete work item.
   - Direct skill triggers use the `forma-*` pattern and map by the same stage suffix.
   - A trigger whose final component is `reconcile` maps to the stage being reconciled, not to itself.
-- If `.forma-workflow/issue-<id>/review-state.env` exists, use its task number and task text as review-cache evidence.
+- If `.forma/state/workflow/issue-<id>/review-state.env` exists, use its task number and task text as review-cache evidence.
 - If all tasks are complete, use `tasks.md`, `runs/task-*.md`, current diff, and commit history to identify the delivered surface. Do not route to `showhand next` when no unchecked task exists.
 - When trigger context and issue evidence conflict, report the conflict and return `blocked` unless the user feedback clearly resolves it.
 
@@ -37,9 +37,39 @@ Do not treat the plan alone as the source of truth when stage constraints,
 profile rules, generated artifact boundaries, or validation evidence provide a
 more specific contract.
 
+## Quality Gate
+
+Do not use reconciliation as a low-bar completion check. Passing tests,
+finishing tasks, or satisfying the literal task contract is necessary but not
+sufficient for `aligned`.
+
+Return `aligned` only when both points hold:
+
+- Contract fit: the delivery satisfies the relevant stage frame, issue
+  contract, validation model, artifact boundary, and evidence requirements.
+- Best practical outcome: within the confirmed scope, the delivery uses the
+  right source layer, keeps long-term maintenance cost reasonable, reduces
+  future agent misunderstanding, matches the user's product mental model, keeps
+  product boundaries clear, and fixes recurring behavior at the durable source
+  rather than only patching one visible case.
+
+If a delivery is adequate enough to continue but is clearly not the best
+practical outcome, do not return `aligned`. Route it to:
+
+- `acceptable-deviation` when the tradeoff is explicit, bounded, and does not
+  change the goal, stage boundary, validation model, artifact boundary, or
+  required evidence.
+- `delivery-revision` when the completed same-issue delivery needs scoped
+  implementation correction.
+- `source-rework` when the durable source, generated artifact source, profile
+  source, or installed workflow surface must change before the result should be
+  accepted.
+- `plan-rework` when the better outcome would require changing Goal, Scope,
+  Approach, Validation, task structure, or issue-level acceptance.
+
 ## Conclusions
 
-- `aligned`: delivery matches the stage frame and no follow-up remains.
+- `aligned`: delivery matches the stage frame, satisfies the active contract, and is the best practical outcome within the current scope; no follow-up remains.
 - `acceptable-deviation`: a deviation exists but does not change the goal, stage boundary, validation model, artifact boundary, or required evidence.
 - `task-rework`: the current or next unchecked task must be changed and rerun through review-ready.
 - `delivery-revision`: all tasks are complete, but the same issue needs scoped implementation correction. The next execution must update `plans/issue-<id>/implement-notes.md` with a `## Delivery Revision: <topic>` section.

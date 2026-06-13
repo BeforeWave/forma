@@ -65,10 +65,10 @@ Plugin 和 direct skill bundle 的触发名不同：plugin 用 `forma:*`，direc
 
 不是每个 skill 都一定有每个子目录。只有当 methodology、profile 或 temporary injection 为某个阶段选择了 references 或 scripts，它们才会出现。
 
-一个已提交的真实 sample 长这样：
+本地生成的 sample 可以长这样：
 
 ```text
-examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
+/tmp/forma-sample-backend-codex/
   backend-plan-first-plan/
   backend-plan-first-ground/
   backend-plan-first-lock/

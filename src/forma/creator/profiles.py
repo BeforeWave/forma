@@ -32,6 +32,8 @@ ALLOWED_TOP_LEVEL_KEYS = {
     "validation_commands",
     "decision_gate_extras",
     "constraints",
+    "workflow_adds",
+    "output_adds",
     "conditional_overlays",
 }
 ALLOWED_PROFILE_KEYS = {"id", "description"}
@@ -132,6 +134,8 @@ class ProfileConfig:
     validation_commands: Mapping[str, List[str]]
     decision_gate_extras: List[str]
     constraints: Mapping[str, List[str]]
+    workflow_adds: Mapping[str, List[str]]
+    output_adds: Mapping[str, List[str]]
     skill_descriptions: Mapping[str, str]
     conditional_overlays: ConditionalOverlays | None
 
@@ -181,6 +185,8 @@ def load_profile(profile_file: Path) -> ProfileConfig:
         validation_commands=_copy_stage_mapping(merged["validation_commands"]),
         decision_gate_extras=list(merged["decision_gate_extras"]),
         constraints=_copy_stage_mapping(merged["constraints"]),
+        workflow_adds=_copy_stage_mapping(merged["workflow_adds"]),
+        output_adds=_copy_stage_mapping(merged["output_adds"]),
         skill_descriptions=dict(merged["skill_descriptions"]),
         conditional_overlays=_build_conditional_overlays(
             merged["conditional_overlays"],
@@ -257,6 +263,8 @@ def _load_profile_file(path: Path) -> Mapping[str, Any]:
     _load_stage_mapping(raw.get("validation_commands", {}), "validation_commands", path)
     _load_string_list(raw.get("decision_gate_extras", []), "decision_gate_extras", path)
     _load_constraints(raw.get("constraints", {}), path)
+    _load_stage_mapping(raw.get("workflow_adds", {}), "workflow_adds", path)
+    _load_stage_mapping(raw.get("output_adds", {}), "output_adds", path)
     _load_skills(raw.get("skills", {}), path)
     _load_conditional_overlay_fragment(raw.get("conditional_overlays"), path)
     return raw
@@ -282,6 +290,8 @@ def _empty_merged() -> Dict[str, Any]:
         "validation_commands": {},
         "decision_gate_extras": [],
         "constraints": {},
+        "workflow_adds": {},
+        "output_adds": {},
         "skill_descriptions": {},
         "conditional_overlays": {
             "used": False,
@@ -329,6 +339,14 @@ def _merge_profile(merged: Dict[str, Any], raw: Mapping[str, Any], path: Path) -
     _merge_stage_mapping(
         merged["constraints"],
         _load_constraints(raw.get("constraints", {}), None),
+    )
+    _merge_stage_mapping(
+        merged["workflow_adds"],
+        _load_stage_mapping(raw.get("workflow_adds", {}), "workflow_adds", None),
+    )
+    _merge_stage_mapping(
+        merged["output_adds"],
+        _load_stage_mapping(raw.get("output_adds", {}), "output_adds", None),
     )
     merged["skill_descriptions"].update(_load_skills(raw.get("skills", {}), None))
     _merge_conditional_overlays(
