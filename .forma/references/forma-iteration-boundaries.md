@@ -13,7 +13,7 @@ Use these boundaries when planning or executing changes in the Forma repository.
 ## Artifact Boundaries
 
 - Active issue planning state lives under `plans/issue-<id>/`.
-- Committed release artifacts under `dist/` are default Forma outputs with no tracked profile and no temporary injection unless a future issue explicitly changes the release contract.
+- Committed release artifacts under `dist/` are product default workflow outputs generated without an explicit `--profile` and with no temporary injection unless a future issue explicitly changes the release contract.
 - `.forma/` is durable self-profile source for this repository. Generated output from `.forma/` is for temporary checks or local installation only; do not commit that output into `dist/`.
 - Public examples are profile source by default. Do not commit `examples/generated/` output unless the active issue explicitly makes generated drift baselines part of the review surface.
 - Profile-only examples should remain profile-only unless the plan explicitly adds committed generated baselines for them.

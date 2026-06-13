@@ -87,7 +87,7 @@ conditional_overlays:
       description: Tracked profile stack rules.
       constraints:
         shape:
-          - Decide whether a profile is Forma-owned under profiles/, sanitized example content under examples/profiles/, or downstream-owned outside this repository.
+          - Decide whether a profile is Forma-owned under .forma/, sanitized example content under examples/profiles/, or downstream-owned outside this repository.
         pour:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md before changing Forma-owned profiles or generated self-iteration behavior.
           - Verify every affected top-level profile by running forma build bundle or forma build plugin into /tmp, /private/tmp, or $TMPDIR and then running forma verify for at least one target.
@@ -105,13 +105,10 @@ conditional_overlays:
           - State which committed generated output paths are drift baselines and why they must change.
         pour:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md before replacing generated baselines or release artifacts that affect documented workflow behavior.
-          - For dist release artifacts, regenerate default no-profile output unless a future issue explicitly changes the release contract; do not commit .forma output into dist.
-          - For committed example baselines, regenerate from the owning committed profile and stage removed old directories plus new generated directories together.
+          - For dist release artifacts, regenerate the product default workflow output by omitting --profile unless a future issue explicitly changes the release contract; do not commit .forma output into dist.
+          - For committed example baselines, require the plan to name the exact generated output paths and verification commands before execution, then regenerate from the owning committed profile and stage removed old directories plus new generated directories together.
         flow:
           - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and dist/AGENTS.md before automated generated baseline or release-artifact replacement.
       validation_commands:
-        pour:
-          - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-codex/
-          - uv run --extra dev forma verify examples/generated/sample-backend-go-github-issue-tracked-plan-first-claude-code/
         flow:
           - uv run --extra dev python -m pytest -p no:cacheprovider tests/
