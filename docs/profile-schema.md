@@ -226,7 +226,8 @@ conditional_overlays:
 ```
 
 Put heavier or scenario-specific rules here, such as docs-only, migration,
-generated-baseline, governance, backend, or cross-layer constraints.
+generated-baseline, governance, backend, or coordinated multi-surface
+constraints.
 
 ## Temporary Injection And Profile
 

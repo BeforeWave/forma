@@ -8,7 +8,7 @@ Use `Impact Profile` to name the main surface of the task, and `Impact Boundary`
 
 - `frontend`: changes user-visible UI, interaction, client state, visual presentation, content, or browser runtime behavior.
 - `backend`: changes server behavior, API/RPC/event contracts, data, permissions, validation, storage, background jobs, or operational behavior.
-- `fullstack`: changes frontend surface and backend/system contract in the same work item, or needs cross-layer validation.
+- `fullstack`: changes frontend surface and backend/system contract in the same work item, or needs integration validation across those surfaces.
 - `generic`: changes tooling, scripts, documentation, configuration, build/test infrastructure, or internal library behavior that is not clearly frontend or backend.
 
 Use `Secondary` only when it materially changes execution boundaries.

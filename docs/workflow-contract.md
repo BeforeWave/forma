@@ -169,7 +169,7 @@ Use profiles to add:
 - stage-specific constraints;
 - validation commands;
 - references and scripts selected by stage;
-- conditional overlays for routes such as docs-only, migration, generated-baseline, governance, backend, or cross-layer work.
+- conditional overlays for routes such as docs-only, migration, generated-baseline, governance, backend, or coordinated multi-surface work.
 
 Temporary injection is for on-the-spot rules that should affect only the current
 generated output.

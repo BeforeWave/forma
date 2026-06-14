@@ -18,7 +18,7 @@ This document maps the current Forma source tree and the role of each area.
 | `uv.lock` | uv dependency lockfile for local development | present |
 | `npm/` | Thin npm launcher package; the Python package remains the canonical implementation | present |
 | `plans/issue-<id>/` | Per-issue planning and execution state | present per issue |
-| `source/` | Canonical methodology source and Layer 1 meta skill source | present |
+| `source/` | Canonical methodology, agent-guide, and creator source | present |
 | `src/forma/` | Developer Python package and CLI | present |
 | `profiles/` | Project-owned tracked profiles for Forma itself | present |
 | `examples/` | Composable profile examples; generated example outputs are built locally when needed | present |
@@ -37,17 +37,17 @@ This document maps the current Forma source tree and the role of each area.
 | `source/methodology/resources/shared/` | Single source for identical fixed resources copied into multiple generated skills |
 | `source/agent-guide/` | Agent-facing explain guidance used by the CLI, separate from creator-bundled temporary injection rules |
 | `source/agent-guide/references/profile-authoring-principles.md` | Canonical profile authoring and constraint-placement guidance used by `forma explain profile` |
-| `source/skill-creator/` | Layer 1 meta skill source (`forma-creator`) |
+| `source/skill-creator/` | Self-contained `forma-creator` source |
 | `source/skill-creator/interfaces/codex/openai.yaml` | Codex UI metadata used when building the Codex creator |
-| `source/skill-creator/references/` | Bundled Layer 1 references for creator authoring and verifier guidance |
-| `source/skill-creator/references/temporary-injection-generation.md` | Layer 1 standard for classifying natural-language constraints into temporary injection JSON |
+| `source/skill-creator/references/` | Bundled references for creator authoring and verifier guidance |
+| `source/skill-creator/references/temporary-injection-generation.md` | Standard for classifying natural-language constraints into temporary injection JSON |
 | `source/skill-creator/scripts/verify.py` | Agent-side verification entrypoint; no pip install required |
-| `source/skill-creator/scripts/forma_verifier/` | Layer 2 verifier package, organizationally inside Layer 1 |
+| `source/skill-creator/scripts/forma_verifier/` | Bundled verifier package copied with creator source |
 
-Layer 2 lives organizationally inside Layer 1 so an installed creator skill can
-verify generated workflow bundles without depending on a separately installed developer
-package. The same `forma_verifier` package is also discovered by
-`pyproject.toml` for the developer CLI and tests.
+The bundled verifier lives inside the creator source so an installed creator
+skill can verify generated workflow bundles without depending on a separately
+installed developer package. The same `forma_verifier` package is also
+discovered by `pyproject.toml` for the developer CLI and tests.
 
 `source/skill-creator/` does not keep a second copy of
 `source/methodology/`. `forma build creator` injects that methodology tree into
@@ -153,15 +153,15 @@ binary, and are not Node.js implementations of Forma.
 | `.forma/` | Project-owned profile stack for generating skills that manage Forma's own development iterations |
 | `.forma/profile.yaml` | Top-level self-iteration profile with `Iteration Area` conditional routing |
 | `.forma/base.yaml` | Lightweight always-on self-profile constraints; governance docs are stage- or overlay-scoped, not default execution requirements |
-| `.forma/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-layer execution overlays |
-| `.forma/references/` | Forma-specific layer, validation, and profile policy references copied into generated self-iteration bundles |
+| `.forma/iteration-overlays.yaml` | Conditional docs/governance/methodology/verifier/creator/profile/generated/cross-surface execution overlays |
+| `.forma/references/` | Forma-specific source-boundary, validation, and profile policy references copied into generated self-iteration bundles |
 
 Project-owned profiles may contain Forma-specific workflow policy. They are
 separate from public examples under `examples/profiles/`.
 For self-iteration, `shape`, `gauge`, and `seal` may read root governance docs
 because they define boundaries and tasks. Routine `pour` / `flow` execution
 defaults stay narrow and only load root governance docs through docs-only,
-governance, profile, generated-baseline, or cross-layer `Iteration Area`
+governance, profile, generated-baseline, or cross-surface `Iteration Area`
 overlays.
 
 Sample profiles follow the same constraint classification principle: default
@@ -188,8 +188,8 @@ the output directory.
 
 | Path | Role |
 |---|---|
-| `tests/test_verifier.py` | Structural and methodology-rule coverage for Layer 2 |
-| `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained Layer 1 meta source |
+| `tests/test_verifier.py` | Structural and methodology-rule coverage for the bundled verifier |
+| `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained creator source |
 | `tests/test_creator_builder.py` | Codex, Claude Code, and OpenCode creator builder coverage |
 | `tests/test_workflow_build.py` | Workflow build integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |

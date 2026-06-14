@@ -206,7 +206,7 @@ conditional_overlays:
         - git diff --check
 ```
 
-docs-only、migration、generated-baseline、governance、backend、cross-layer 等较重或场景专用规则适合放在这里。
+docs-only、migration、generated-baseline、governance、backend、coordinated multi-surface 等较重或场景专用规则适合放在这里。
 
 ## Temporary Injection 和 Profile
 

@@ -74,7 +74,7 @@ Temporary injection 的 map 始终使用内部阶段键 `shape`、`gauge`、`sea
 | `constraints.seal` | 计划和任务定稿，包括 task 边界、验证 gate 和 proof 要求。 |
 | `constraints.pour` | 当前 task 执行、验证 gate 和 proof。 |
 | `constraints.flow` | 连续执行时的继续条件和停止条件。 |
-| `conditional_overlays` | docs-only、migration、generated-baseline、governance、backend、cross-layer 等场景规则。 |
+| `conditional_overlays` | docs-only、migration、generated-baseline、governance、backend、coordinated multi-surface 等场景规则。 |
 | `resources` | workflow 明确选中的 references、scripts 或支持文件。 |
 
 不要把 README、AGENTS、issue 原文或治理文档整段复制进 temporary injection。应该提取准则，再放到对应位置。

@@ -140,7 +140,7 @@ Profile 适合添加：
 - 阶段约束；
 - 验证命令；
 - 按阶段选择的 references 和 scripts；
-- docs-only、migration、generated-baseline、governance、backend、cross-layer 等路线的 conditional overlays。
+- docs-only、migration、generated-baseline、governance、backend、coordinated multi-surface 等路线的 conditional overlays。
 
 Temporary injection 适合只影响本次生成产物的临场准则。
 

@@ -1,6 +1,6 @@
 profile:
   id: sample-conditional-overlay
-  description: Sanitized sample profile equivalent to a Layer 1 conditional overlay injection.
+  description: Sanitized sample profile with a conditional overlay injection.
 bundle:
   name: sample-conditional-overlay
   description: Sample plan-first workflow bundle with a conditional work-type overlay.

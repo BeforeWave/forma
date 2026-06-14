@@ -29,6 +29,34 @@ Classifications:
 Deviations From Plan:
 - None.
 
+## Task 4: clean-docs-examples-structure
+
+Outcome:
+- Cleaned reader-facing docs, examples, and `STRUCTURE.md` so they explain product/schema/source concepts with public or path-level wording instead of old numbered architecture names or polluted cross-layer route language.
+
+Decision Notes:
+- Kept `conditional_overlays` in profile schema and creator docs because it is a real schema field being taught there. Replaced only the example route wording from `cross-layer` to coordinated multi-surface or integration language.
+- Reframed `STRUCTURE.md` around concrete source areas: methodology, agent-guide, creator source, bundled verifier, profiles, release artifacts, and tests.
+- Rewrote usage docs so install-path setup and diagnostics no longer use broad bootstrap phrasing.
+- Left historical `plans/**` and deferred `dist/skills/*/forma-creator` out of scope as required.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- public/product explanation: docs may teach `conditional_overlays`, profiles, workflow output, plugins, and install paths when those are actual user-facing concepts or schema fields.
+- execution-surface pollution: docs and structure maps should not ask readers or agents to reason in old numbered architecture names.
+- neutral-but-contaminated: full-stack examples can still describe integration across frontend and backend surfaces, but should not use `cross-layer` as a Forma route or profile taxonomy.
+
+Validations:
+- `rg -n "Layer [123]|Layer impact|Layer Boundaries|Layer 3 profile|Layer 1 temporary|\\bcross-layer\\b|generated suite|temporary generated suites" README.md README.zh-CN.md docs examples STRUCTURE.md AGENTS.md` returned no matches.
+- `rg -n "same-origin|bootstrap discovery|bootstrap state|bootstrapped|bootstrap decision|bootstrap success|approves bootstrap" README.md README.zh-CN.md docs examples STRUCTURE.md AGENTS.md` returned no matches.
+- `git diff --check`
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_docs_links.py`
+
+Deviations From Plan:
+- None.
+
 Follow-ups:
 - Later tasks must preserve existing unrelated doctor worktree changes in `docs/usage.md`, `docs/usage.zh-CN.md`, `src/forma/cli.py`, `src/forma/explain.py`, `src/forma/repo_doctor.py`, and `tests/test_cli.py`.
 

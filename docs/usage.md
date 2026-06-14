@@ -176,8 +176,9 @@ Next action: run `forma verify <output-dir>`, then install the verified local
 bundle with `forma install`. For profile-backed output, default `human` output
 stays concise; use `--format agent` when an agent needs the structured next
 actions. If the profile directory contains `reinstall-workflow.sh`, run that
-script before reconstructing build/install commands. If it is missing, that is a
-bootstrap state, not a reusable manual install path.
+script before reconstructing build/install commands. If it is missing, the
+reusable install path is incomplete; do not treat hand-assembled commands as a
+reusable manual install path.
 
 Profile format is documented in [Profile Schema](./profile-schema.md).
 
@@ -224,10 +225,10 @@ you intentionally postprocess the generated artifact, postprocess after drift
 and use `forma verify <output-dir>` as the final gate.
 
 Install Codex plugins through Codex marketplace/plugin UI, not `forma install`.
-During bootstrap discovery or diagnostics, inspect configured marketplaces as
-needed, ask the user to confirm the plugin id, marketplace name, marketplace
-source, install selector, and visibility check, ensure the confirmed marketplace
-catalog points to the generated plugin root, then install with a confirmed
+When the reusable install path is missing or incomplete, inspect configured
+marketplaces as needed, ask the user to confirm the plugin id, marketplace name,
+marketplace source, install selector, and visibility check, ensure the confirmed
+marketplace catalog points to the generated plugin root, then install with a confirmed
 `<plugin-id>@<marketplace>` selector. Stable profile-local reinstall scripts
 should not list marketplaces or leave plugin id, marketplace, selector, or
 source refresh decisions open at runtime.
@@ -371,9 +372,9 @@ OpenCode uses direct skill bundles. Generate an OpenCode bundle with
 plugin output.
 
 Codex plugin outputs are local plugin sources. Forma does not install Codex
-plugins. During bootstrap discovery or diagnostics, inspect configured
-marketplaces as needed, confirm the plugin id, marketplace name, marketplace
-source, install selector, and visibility check with the user, then run
+plugins. When the reusable install path is missing or incomplete, inspect
+configured marketplaces as needed, confirm the plugin id, marketplace name,
+marketplace source, install selector, and visibility check with the user, then run
 `codex plugin add <confirmed-plugin-id>@<confirmed-marketplace>` or install it
 from the Codex plugin UI. Start a new Codex thread after installing so the
 plugin skills are discovered. Stable profile-local reinstall scripts should use

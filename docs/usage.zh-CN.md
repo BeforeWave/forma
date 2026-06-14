@@ -152,7 +152,7 @@ forma build bundle --target codex --output /tmp/forma-codex-bundle
 bundle。对于 profile-backed 输出，默认 `human` 只输出简洁产物结果；需要 agent
 继续处理时，用 `--format agent` 查看结构化 next actions。如果 profile 目录包含
 `reinstall-workflow.sh`，先运行这个脚本，不要重新拼 build/install 命令；如果缺失，
-这是 bootstrap state，不是可复用的手动安装路径。
+说明可复用安装路径尚不完整，不应把临时手拼命令当成可复用安装路径。
 
 Profile 格式见 [Profile Schema](./profile-schema.zh-CN.md)。
 
@@ -189,7 +189,7 @@ postprocess 之前运行 `forma drift <output-dir> --profile <profile.yaml>`。
 用 `forma verify <output-dir>`，不要用 drift。
 
 Codex plugin 通过 Codex marketplace/plugin UI 安装，不用 `forma install`。
-在 bootstrap discovery 或诊断阶段，可以按需检查当前配置的 marketplaces；随后要和用户确认
+在补齐可复用安装路径或诊断安装问题时，可以按需检查当前配置的 marketplaces；随后要和用户确认
 plugin id、marketplace name、marketplace source、install selector 和 visibility check，
 确认 marketplace catalog 指向生成出的 plugin root 后，再用 confirmed
 `<plugin-id>@<marketplace>` selector 安装。稳定的 profile-local reinstall 脚本不应列出

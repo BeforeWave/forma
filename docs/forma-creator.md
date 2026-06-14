@@ -98,7 +98,7 @@ direct skill names using the `forma-*` pattern.
 | `constraints.seal` | Plan and task materialization, including task boundaries, validation gates, and proof requirements. |
 | `constraints.pour` | Current-task execution, validation gates, and proof. |
 | `constraints.flow` | Continuation conditions and stop conditions. |
-| `conditional_overlays` | Scenario rules such as docs-only, migration, generated-baseline, governance, backend, or cross-layer work. |
+| `conditional_overlays` | Scenario rules such as docs-only, migration, generated-baseline, governance, backend, or coordinated multi-surface work. |
 | `resources` | References, scripts, or support files explicitly selected by the workflow. |
 
 Do not copy README, AGENTS, issue text, or governance docs wholesale into

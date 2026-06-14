@@ -22,7 +22,7 @@ Depends: clean-self-profile-source
 Constraint: do not change creator, verifier, generator, installer, drift, adoption, or doctor behavior except wording/constants/tests required by this cleanup
 Constraint: keep schema/API field names such as `conditional_overlays` and `base_origin` where they are actual machine-readable fields; rewrite only inappropriate agent-facing or reader-facing prose
 
-- [ ] [clean-docs-examples-structure] Clean reader-facing docs, examples, and structure map
+- [x] [clean-docs-examples-structure] Clean reader-facing docs, examples, and structure map
 Accept: Task Type=step; `README*`, `docs/`, `examples/`, `STRUCTURE.md`, and `AGENTS.md` separate public product concepts from internal implementation structure, using plain reader language unless a schema/API/source-map term is explicitly being taught
 Validate: rg -n "Layer [123]|Layer impact|Layer Boundaries|Layer 3 profile|Layer 1 temporary|\\bcross-layer\\b|generated suite|temporary generated suites" README.md README.zh-CN.md docs examples STRUCTURE.md AGENTS.md && exit 1 || exit 0
 Use-Check: docs-links

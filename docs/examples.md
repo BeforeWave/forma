@@ -123,7 +123,7 @@ For example, `plans/issue-workflow-injection-contracts/plan.md` requires:
 - `constraints.default` stays minimal;
 - planning and materialization rules go into `shape`, `gauge`, or `seal`;
 - execution rules go into `pour` or `flow`;
-- broad docs, generated-baseline, migration, governance, and cross-layer rules go into conditional overlays;
+- broad docs, generated-baseline, migration, governance, and coordinated multi-surface rules go into conditional overlays;
 - source adapters such as GitHub issue fetching must be explicitly selected by a profile or temporary injection.
 
 The matching `runs/task-*.md` files record execution proof: changed files,

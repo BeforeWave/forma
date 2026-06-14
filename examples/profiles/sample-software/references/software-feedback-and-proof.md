@@ -9,7 +9,7 @@ Before implementation, identify the fastest trustworthy pass/fail signal:
 - bug/regression: establish a reproducible signal and root-cause sentence before patching.
 - UI/visual: lock the real rendered surface, viewport/state, and defect before editing.
 - backend contract: lock the source of truth and system-visible semantics before implementation.
-- fullstack: lock cross-layer mapping and integration validation before changing both sides.
+- fullstack: lock frontend/backend contract mapping and integration validation before changing both sides.
 - tooling/config: lock affected commands and repeatable execution paths before editing.
 
 ## Evidence Types
