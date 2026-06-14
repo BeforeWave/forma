@@ -1,4 +1,5 @@
 - If `./plans/issue-<id>/plan.md` or `./plans/issue-<id>/tasks.md` is missing, run `scripts/forma-workflow.sh init <issue-id>` instead of creating the files by hand.
+- Run `scripts/forma-workflow.sh check <issue-id>` after finalizing `plan.md` and `tasks.md` and before staging or asking for commit permission; if the check fails, fix the plan/task contract and rerun the check before continuing.
 - After writing the finalized files, run `git add -- ./plans/issue-<id>/plan.md ./plans/issue-<id>/tasks.md` so the user reviews a stable staged snapshot.
 - Show the staged diff for `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md` to the user before leaving the planning phase.
 - Commit only that staged plan/task snapshot after explicit user permission.

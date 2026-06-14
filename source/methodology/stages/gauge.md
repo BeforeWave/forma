@@ -19,7 +19,6 @@ Inspect repository facts read-only and produce a grounding handoff before plan f
 - Use this skill after the plan stage has settled intent and before the lock stage writes `plan.md` or `tasks.md`.
 - Inspect repository context read-only and produce known facts, options, relevant paths, validation surfaces, unresolved gaps, and a finalization handoff.
 - Keep facts, inferences, and recommendations separate so the lock stage can copy only confirmed facts.
-- Do not write `plan.md`, do not write `tasks.md`, and do not start implementation.
 
 ## Adds
 
@@ -30,7 +29,6 @@ Inspect repository facts read-only and produce a grounding handoff before plan f
 - Include `Source Material` with only the refs actually used, such as the current conversation, a GitHub issue URL, a reviewed solution package, or a prior grounding brief.
 - Use the generic ground stage only when no specialized grounding producer owns the domain. For activity solution work, direct activity requirement-to-solution replaces generic grounding; for Go refactor planning, direct Go refactor planning replaces generic grounding.
 - Do not treat a plan draft as the authoritative requirement source. Cite the original source material and any reviewed grounding handoff separately.
-- Do not write `plan.md`, do not write `tasks.md`, and do not start implementation.
 
 ## Output
 

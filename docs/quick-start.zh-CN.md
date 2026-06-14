@@ -4,6 +4,8 @@
 
 这页只讲从零跑通 Forma：让 agent 先提炼项目规则，确认后生成、验证并安装一套可试用 workflow。规则需要长期复用时，再把 profile 提交进仓库；只想试用时，profile 可以是临时文件。
 
+先创建一套可以试用的工作流。让 Agent 提炼项目规则，给你看建议的 profile；确认后，再生成、验证并安装。
+
 ## 1. 安装 CLI
 
 先安装 Forma CLI：
@@ -16,8 +18,8 @@ forma --help
 然后对 agent 说：
 
 ```text
-用 Forma 给这个项目生成一套 Codex workflow。
-先把你提炼出的项目规则给我看；确认后再生成并安装。
+用 Forma 把这个项目的工程规则管理成一套 Codex workflow。
+先提炼规则并给我看你建议的 profile；我确认后，再 build、verify 并安装这套 workflow。
 ```
 
 agent 会自己调用 Forma 的 profile 编写指南，先把项目规则整理成 profile：阶段约束、工具习惯、验证、proof 和停手条件。你确认后，它可以把 profile 存到临时路径，生成并验证 workflow 产物，再按 target 安装。
@@ -107,7 +109,7 @@ forma install --target opencode --scope project /tmp/bundle-opencode
 
 | 路径 | 适合 | 产物 |
 |---|---|---|
-| `forma explain profile` + agent | 先从项目规则生成一套 workflow，可临时试用，也可长期维护。 | profile + 已验证 workflow bundle 或 plugin。 |
+| `forma explain agent` -> profile authoring | 先从项目规则生成一套 workflow，可临时试用，也可长期维护。 | profile + 已验证 workflow bundle 或 plugin。 |
 | `forma build bundle` / `forma build plugin` | 已经有 review 过的 profile。 | 从 profile 重复生成的 workflow 产物。 |
 | `forma-creator` | 可选的临场生成路径，不想先处理 profile 文件时使用。 | 已验证的一次性 skill bundle 或 plugin。 |
 

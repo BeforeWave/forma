@@ -35,10 +35,11 @@ This document maps the current Forma source tree and the role of each area.
 | `source/methodology/fragments/` | Source-only reusable methodology fragments expanded inline before generated `SKILL.md` output |
 | `source/methodology/resources/` | Stage-local fixed resources copied into generated workflow bundles, including output formats, workflow rules, templates, helpers, and runner scripts |
 | `source/methodology/resources/shared/` | Single source for identical fixed resources copied into multiple generated skills |
+| `source/agent-guide/` | Agent-facing explain guidance used by the CLI, separate from creator-bundled temporary injection rules |
+| `source/agent-guide/references/profile-authoring-principles.md` | Canonical profile authoring and constraint-placement guidance used by `forma explain profile` |
 | `source/skill-creator/` | Layer 1 meta skill source (`forma-creator`) |
 | `source/skill-creator/interfaces/codex/openai.yaml` | Codex UI metadata used when building the Codex creator |
 | `source/skill-creator/references/` | Bundled Layer 1 references for creator authoring and verifier guidance |
-| `source/skill-creator/references/profile-authoring-principles.md` | Canonical profile authoring and constraint-placement guidance used by `forma explain profile` |
 | `source/skill-creator/references/temporary-injection-generation.md` | Layer 1 standard for classifying natural-language constraints into temporary injection JSON |
 | `source/skill-creator/scripts/verify.py` | Agent-side verification entrypoint; no pip install required |
 | `source/skill-creator/scripts/forma_verifier/` | Layer 2 verifier package, organizationally inside Layer 1 |
@@ -52,9 +53,10 @@ package. The same `forma_verifier` package is also discovered by
 `source/methodology/`. `forma build creator` injects that methodology tree into
 the built creator bundle at `resources/plan-first/methodology/`.
 
-Wheel builds copy `source/methodology/` and `source/skill-creator/` into
-`forma.assets` package data. Installed CLI commands use those packaged assets
-first and fall back to source-checkout paths only during editable development.
+Wheel builds copy `source/agent-guide/`, `source/methodology/`, and
+`source/skill-creator/` into `forma.assets` package data. Installed CLI
+commands use those packaged assets first and fall back to source-checkout paths
+only during editable development.
 
 Generated workflow bundles keep references inside each skill directory. Shared
 source resources are copied into each skill that needs them using consistent
@@ -189,7 +191,7 @@ the output directory.
 | `tests/test_verifier.py` | Structural and methodology-rule coverage for Layer 2 |
 | `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained Layer 1 meta source |
 | `tests/test_creator_builder.py` | Codex, Claude Code, and OpenCode creator builder coverage |
-| `tests/test_creator.py` | Layer 3 integration, profile resolver hardening, generated-output drift, and verifier dogfood |
+| `tests/test_workflow_build.py` | Workflow build integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |
 | `tests/fixtures/valid-bundle/` | Minimal valid plan-first bundle fixture |
 | `tests/fixtures/invalid-bundle/` | Minimal invalid bundle fixture with targeted rule failures |

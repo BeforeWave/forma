@@ -134,3 +134,13 @@ Depends: rework-007-profile-install-fact-bootstrap
 Constraint: the check is read-only; it must not run task validation commands, stage files, write review cache, mark tasks complete, or create run evidence
 Constraint: keep profile-specific lock/rework requirements injectable through profile workflow/output additions instead of changing shared methodology unless the user explicitly approves methodology changes
 Constraint: do not disturb the existing review-ready staged implementation snapshot while materializing this rework contract
+
+- [x] [rework-009-agent-guide-and-side-thread-handoff] Clarify agent routing and side-thread handoff injection
+Accept: Task Type=step; `forma explain agent` and public docs identify it as the agent-facing Forma CLI command guide, `forma explain profile` is routed profile-authoring guidance that does not inspect repos or create drafts by itself, `forma explain stage <stage>` is documented as the candidate-rule methodology comparison step before profile writes, and the self-profile hone/mend additions inject concrete side-thread reconcile plus parent-thread rework handoff behavior
+Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py::test_explain_agent_outputs_command_guide tests/test_cli.py::test_explain_agent_json_outputs_command_guide tests/test_cli.py::test_explain_profile_renderer_boundaries tests/test_workflow_build.py::test_load_profile_resolves_forma_self_iteration tests/test_docs_links.py
+Validate: uv run --extra dev forma build bundle --target codex --profile .forma/profile.yaml --output /private/tmp/forma-self-profile-test.5UdxVK/codex-bundle
+Validate: uv run --extra dev forma verify /private/tmp/forma-self-profile-test.5UdxVK/codex-bundle
+Validate: git diff --check
+Depends: rework-008-contract-schema-check
+Constraint: keep profile-specific hone/mend handoff behavior injectable through `.forma/project.yaml`; do not promote Codex host thread tooling into shared methodology as an assumed public API
+Constraint: keep public docs concise and route detailed agent execution policy through `forma explain agent`

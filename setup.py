@@ -14,7 +14,7 @@ class build_py(_build_py):
         super().run()
         root = Path(__file__).parent
         assets_root = Path(self.build_lib) / "forma" / "assets" / "source"
-        for name in ("methodology", "skill-creator"):
+        for name in ("agent-guide", "methodology", "skill-creator"):
             source = root / "source" / name
             target = assets_root / name
             if target.exists():

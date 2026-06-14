@@ -22,6 +22,7 @@ Record same-issue corrective feedback as a locked rework contract without implem
 - For same-issue implementation correction, write or update `plans/issue-<id>/rework.md` with feedback source, classification, same-issue rationale, confirmation state, and appended task ids.
 - Append rework tasks to the end of `plans/issue-<id>/tasks.md` as ordinary structured task blocks using `rework-*` task ids and the existing `Accept:` / `Validate:` / `Depends:` / `Constraint:` fields.
 - Do not add `## Rework Tasks`, `Source:`, `Feedback:`, grouping labels, or other non-task prose to `tasks.md`.
+- Run `scripts/forma-workflow.sh check <issue-id>` after updating `rework.md` and appending tasks and before staging or asking for commit permission; if the check fails, fix the rework task contract and rerun the check before continuing.
 - Stage only `plans/issue-<id>/rework.md` and `plans/issue-<id>/tasks.md`, show the staged diff, and commit the rework contract only after explicit user confirmation.
 - After the confirmed rework contract is committed and `plan.md` / `tasks.md` are clean, hand execution to `forma-execute` for one task or `forma-showhand` for the remaining appended tasks.
 
@@ -35,5 +36,5 @@ Record same-issue corrective feedback as a locked rework contract without implem
 ## Output
 
 - Use the exact heading `## rework-contract` when a rework contract is ready for user confirmation.
-- Include `Issue:`, `Source:`, `Classification:`, `Same-Issue Rationale:`, `Rework Ledger:`, `Tasks Appended:`, `Staged Diff:`, and `Required Confirmation:`.
+- Include `Issue:`, `Source:`, `Classification:`, `Same-Issue Rationale:`, `Rework Ledger:`, `Tasks Appended:`, `Contract Check:`, `Staged Diff:`, and `Required Confirmation:`.
 - Use the exact heading `## blocked` with `Missing:` and `Questions:` when the rework contract cannot be materialized safely.

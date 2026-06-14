@@ -25,6 +25,7 @@ SAMPLE_PROFILE = (
     / "sample-backend-go-github-issue-tracked.yaml"
 )
 INVALID_BUNDLE = ROOT / "tests" / "fixtures" / "invalid-bundle"
+VALID_BUNDLE = ROOT / "tests" / "fixtures" / "valid-bundle"
 META_SOURCE = ROOT / "source" / "skill-creator"
 
 
@@ -180,12 +181,13 @@ def test_command_help_includes_agent_next_steps() -> None:
         ),
         (
             ["init", "--help"],
-            [
-                "Plan or apply deterministic Forma repository initialization.",
-                "Default mode is a dry run.",
-                "Use --apply to create deterministic skeleton files.",
-                "still needs human review",
-            ],
+                [
+                    "Plan or apply deterministic Forma repository initialization.",
+                    "Default mode is a dry run.",
+                    "create deterministic workflow source files",
+                    "--from-report",
+                    "still needs human review",
+                ],
         ),
         (
             ["verify", "--help"],
@@ -198,10 +200,10 @@ def test_command_help_includes_agent_next_steps() -> None:
         (
             ["doctor", "--help"],
             [
-                "Diagnose generated artifacts or repository agent operability.",
-                "repo",
-                "whether",
-                "install route",
+                "Diagnose repository agent operability.",
+                "agent-operability",
+                "what to read, change, validate, and hand off",
+                "--format",
             ],
         ),
         (
@@ -214,22 +216,23 @@ def test_command_help_includes_agent_next_steps() -> None:
         ),
         (
             ["explain", "agent", "--help"],
-            [
-                "Explain the agent command path for workflow generation and maintenance.",
-                "profile authoring, workflow generation",
-                "plugin output, optional creator output, profile adoption, drift, doctor, and install",
-                "If no approved profile exists yet",
-            ],
-        ),
+                    [
+                        "Explain the agent command path for workflow generation and maintenance.",
+                        "profile authoring, workflow generation",
+                        "optional creator output, profile adoption",
+                        "doctor, init, verify, and install",
+                        "If no approved profile exists yet",
+                    ],
+                ),
         (
             ["explain", "profile", "--help"],
-            [
-                "Explain profile authoring and task-rule placement.",
-                "Profile YAML Proposal",
-                "Profile Review Packet",
-                "forma build bundle or forma build plugin",
-            ],
-        ),
+                [
+                    "Explain profile authoring and task-rule placement.",
+                    "Profile YAML",
+                    "Review Packet",
+                    "forma build bundle or forma build plugin",
+                ],
+            ),
         (
             ["explain", "temporary-injection", "--help"],
             [
@@ -262,6 +265,7 @@ def test_explain_agent_outputs_command_guide() -> None:
 
     assert result.exit_code == 0, result.output
     assert "# Forma Agent Guide" in result.output
+    assert "agent-facing command guide for Forma CLI surfaces" in result.output
     assert "Generation targets: `codex`, `claude-code`, `opencode`" in result.output
     assert "plugin targets: `codex`, `claude-code`" in result.output
     assert "install targets: `codex`, `claude-code`, `opencode`" in result.output
@@ -285,7 +289,14 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "final install report must include the profile-local reinstall state" in result.output
     assert "bootstrapped the script and ran it" in result.output
     assert "user requested one-off manual flow" in result.output
-    assert "forma doctor <path>" in result.output
+    assert "forma doctor --format json <repo>" in result.output
+    assert "forma init --from-report <report> --apply <repo>" in result.output
+    assert "not a generated artifact verifier" in result.output
+    assert "Forma workflow source is project-rule management" in result.output
+    assert "workflow source and Agent handoff files" in result.output
+    assert "owner confirmations" in result.output
+    assert "does not approve semantic rules" in result.output
+    assert "forma doctor <path>" not in result.output
     assert "## Draft project rules, then generate workflow output" in result.output
     assert "forma explain profile --target <generation-target>" in result.output
     assert "forma verify <dir>/<generation-target>/forma-creator" in result.output
@@ -336,14 +347,19 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert payload["metadata"]["topic"] == "agent"
     assert payload["metadata"]["target"] == "claude-code"
     assert "# Forma Agent Guide" in payload["metadata"]["markdown"]
+    assert "agent-facing command guide for Forma CLI surfaces" in payload["metadata"]["markdown"]
+    assert "doctor, init, verify, and install" in payload["metadata"]["markdown"]
     assert "## Profile write boundary" in payload["metadata"]["markdown"]
+    assert "Start from this Agent Guide" in payload["metadata"]["markdown"]
+    assert "does not inspect the repository" in payload["metadata"]["markdown"]
+    assert "run `forma explain stage <stage>`" in payload["metadata"]["markdown"]
     assert "candidate profile package" in payload["metadata"]["markdown"]
     assert "Generate a Claude Code plugin" in payload["metadata"]["markdown"]
     assert "forma install --target claude-code --scope project <dir>" in payload["metadata"]["markdown"]
-    assert any(
-        action["command"] == "forma doctor <path>"
-        for action in payload["next_actions"]
-    )
+    assert "workflow source and Agent handoff files" in payload["metadata"]["markdown"]
+    commands = {action["command"] for action in payload["next_actions"] if "command" in action}
+    assert "forma doctor --format json <repo>" in commands
+    assert "forma init --from-report <report> --apply <repo>" in commands
 
 
 def test_explain_profile_renderer_boundaries() -> None:
@@ -364,12 +380,15 @@ def test_explain_profile_renderer_boundaries() -> None:
 
     assert human.exit_code == 0, human.output
     assert "Profile Renderer Boundary" in human.output
+    assert "after `forma explain agent` routes the work" in human.output
+    assert "explains how to extract candidate rules" in human.output
     assert "Use `--format agent` for the full executable authoring contract" in human.output
     assert "## Constraint Placement" not in human.output
 
     assert agent.exit_code == 0, agent.output
     assert "ACTIONABLE REPORT" in agent.output
     assert "[guidance] Forma Profile Guidance" in agent.output
+    assert "## Candidate Draft From Project Facts" in agent.output
     assert "## Constraint Placement" in agent.output
     assert "settle reusable reinstall facts" in agent.output
     assert "artifact kind" in agent.output
@@ -1405,180 +1424,383 @@ def test_drift_release_surface_reports_known_paths() -> None:
     }
 
 
-def test_doctor_json_reports_forma_install_route_for_bundle(tmp_path: Path) -> None:
-    output = tmp_path / "bundle"
-    runner = CliRunner()
-    create = runner.invoke(
-        main,
-        [
-            "build",
-            "bundle",
-            "--target",
-            "codex",
-            "--output",
-            str(output),
-            "--methodology",
-            str(METHODOLOGY),
-        ],
-    )
-    assert create.exit_code == 0, create.output
-
-    result = runner.invoke(main, ["doctor", "--json", str(output)])
-
-    assert result.exit_code == 0, result.output
-    data = json.loads(result.output)
-    install_route = _report_section(data, "artifact-install-route")
-    verification = _report_section(data, "verification")
-    assert data["schema"] == "forma.actionable-report.v1"
-    assert data["status"] == "ready"
-    assert install_route["artifact_kind"] == "skill-bundle"
-    assert install_route["target"] == "codex"
-    assert verification["passed"] is True
-    assert install_route["forma_install_supported"] is True
-    assert install_route["installable_now"] is True
-    assert install_route["install_route"] == "forma-install:codex"
-    assert data["metadata"]["legacy_doctor"]["install_route"] == "forma-install:codex"
-
-
-def test_doctor_routes_codex_plugins_to_codex(tmp_path: Path) -> None:
-    output = tmp_path / "plugin"
-    runner = CliRunner()
-    create = runner.invoke(
-        main,
-        [
-            "build",
-            "plugin",
-            "--target",
-            "codex",
-            "--output",
-            str(output),
-            "--methodology",
-            str(METHODOLOGY),
-        ],
-    )
-    assert create.exit_code == 0, create.output
-
-    human = runner.invoke(main, ["doctor", str(output)])
-    result = runner.invoke(main, ["doctor", "--json", str(output)])
-
-    assert human.exit_code == 0, human.output
-    assert "artifact_kind: codex-plugin" in human.output
-    assert "forma_install_supported: False" in human.output
-    assert "install_route: codex-plugin" in human.output
-    data = json.loads(result.output)
-    assert result.exit_code == 0, result.output
-    install_route = _report_section(data, "artifact-install-route")
-    assert data["status"] == "needs-agent"
-    assert install_route["artifact_kind"] == "codex-plugin"
-    assert install_route["target"] == "codex"
-    assert install_route["forma_install_supported"] is False
-    assert install_route["installable_now"] is False
-    assert install_route["install_route"] == "codex-plugin"
-    assert "blockers" not in data
-    assert any(
-        "codex plugin add forma@<marketplace-name>" in step["title"]
-        for step in data["next_actions"]
-    )
-
-
-def test_doctor_routes_claude_code_plugins_to_forma_install(tmp_path: Path) -> None:
-    output = tmp_path / "plugin"
-    runner = CliRunner()
-    create = runner.invoke(
-        main,
-        [
-            "build",
-            "plugin",
-            "--target",
-            "claude-code",
-            "--output",
-            str(output),
-            "--methodology",
-            str(METHODOLOGY),
-        ],
-    )
-    assert create.exit_code == 0, create.output
-
-    human = runner.invoke(main, ["doctor", str(output)])
-    result = runner.invoke(main, ["doctor", "--json", str(output)])
-
-    assert human.exit_code == 0, human.output
-    assert "artifact_kind: claude-code-plugin" in human.output
-    assert "forma_install_supported: True" in human.output
-    assert "install_route: forma-install:claude-code" in human.output
-    data = json.loads(result.output)
-    assert result.exit_code == 0, result.output
-    install_route = _report_section(data, "artifact-install-route")
-    assert install_route["artifact_kind"] == "claude-code-plugin"
-    assert install_route["target"] == "claude-code"
-    assert install_route["forma_install_supported"] is True
-    assert install_route["installable_now"] is True
-    assert install_route["install_route"] == "forma-install:claude-code"
-    assert "blockers" not in data
-    assert any(
-        "forma install --target claude-code" in step["title"]
-        for step in data["next_actions"]
-    )
-
-
-def test_doctor_json_reports_invalid_bundle_blockers() -> None:
+def test_doctor_rejects_removed_subcommands(tmp_path: Path) -> None:
     runner = CliRunner()
 
-    result = runner.invoke(main, ["doctor", "--json", str(INVALID_BUNDLE)])
+    repo = runner.invoke(main, ["doctor", "repo", str(tmp_path)])
+    artifact = runner.invoke(main, ["doctor", "artifact", str(VALID_BUNDLE)])
 
-    assert result.exit_code == 1
-    data = json.loads(result.output)
-    install_route = _report_section(data, "artifact-install-route")
-    verification = _report_section(data, "verification")
-    assert install_route["artifact_kind"] == "skill-bundle"
-    assert verification["passed"] is False
-    assert "verification failed" in data["blockers"]
+    assert repo.exit_code != 0
+    assert artifact.exit_code != 0
 
 
-def test_doctor_repo_reports_ready_repo_from_static_signals(tmp_path: Path) -> None:
-    (tmp_path / "AGENTS.md").write_text("Use tests before completion.\n", encoding="utf-8")
-    (tmp_path / "STRUCTURE.md").write_text("source: src\n", encoding="utf-8")
+def test_doctor_reports_ready_without_forma_profile_when_core_contracts_exist(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+## Read First
+- README.md
+- STRUCTURE.md
+
+## Source Boundaries
+- Source lives in src.
+- Generated output lives in dist and should not be edited by default.
+
+## Validation
+- Run `uv run --extra dev python -m pytest -p no:cacheprovider tests/`.
+
+## Human Gates
+- Ask for human approval before destructive, release, credential, or external-write actions.
+
+## Handoff
+- Return findings and proof before completion.
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "STRUCTURE.md").write_text(
+        "source: src\ngenerated: dist\nwritable: tests\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text(
+        "Validate with `uv run --extra dev python -m pytest -p no:cacheprovider tests/`.\n",
+        encoding="utf-8",
+    )
     (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
-    profile_dir = tmp_path / ".forma"
-    profile_dir.mkdir()
-    (profile_dir / "profile.yaml").write_text(
-        "profile:\n  id: sample\n",
+    (tmp_path / "plans").mkdir()
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    validate = scripts / "validate.sh"
+    validate.write_text("#!/usr/bin/env sh\npytest\n", encoding="utf-8")
+    validate.chmod(0o755)
+    runner = CliRunner()
+
+    human = runner.invoke(main, ["doctor", str(tmp_path)])
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert human.exit_code == 0, human.output
+    assert "repo has core agent-operability contracts" in human.output
+    assert "status: ready" in human.output
+    assert "Hand the agent report" not in human.output
+    assert "Workflow adoption:" in human.output
+    assert "Forma adoption:" in human.output
+    assert "Forma turns this repository's engineering rules into a reusable agent workflow" in human.output
+    assert "work is less likely to drift, easier to review, and more consistently validated" in human.output
+    assert "Do not ask whether to keep `.forma`; keep it by default" in human.output
+    assert "Tell the owner Forma can manage this repo's engineering rules" in human.output
+    data = json.loads(result.output)
+    assert result.exit_code == 0, result.output
+    assert data["schema"] == "forma.repo-doctor.report.v1"
+    assert data["command"] == "forma doctor"
+    assert data["status"] == "ready"
+    assert data["agent_handoffs"] == []
+    assert data["programmatic_actions"]
+    assert data["facts"]["forma_adoption"]["status"] == "missing"
+    assert "create `.forma` workflow source" in data["facts"]["forma_adoption"][
+        "owner_confirmations"
+    ][0]
+    assert (
+        "reviewed project engineering rules can become an installable agent workflow"
+        in data["programmatic_actions"][0]["description"]
+    )
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["entrypoint"]["status"] == "contract"
+    assert findings["validation"]["status"] == "contract"
+    assert findings["agent-specific-integrations.forma"]["status"] == "optional"
+    assert findings["agent-specific-integrations.forma"]["evidence"] == []
+    assert "create it to manage project rules as an installable agent workflow" in findings[
+        "agent-specific-integrations.forma"
+    ]["summary"]
+    assert data["facts"]["agent_instruction_quality"]["status"] == "contract"
+    assert "OpenAI Codex AGENTS.md guidance" in data["facts"]["agent_instruction_quality"]["basis"]
+
+
+def test_doctor_follows_entrypoint_document_links_for_handoff_and_evidence(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+Before work, read [docs/INDEX.md](docs/INDEX.md).
+Ask for human approval before destructive, release, credential, or external-write actions.
+""",
+        encoding="utf-8",
+    )
+    docs = tmp_path / "docs"
+    references = docs / "references"
+    references.mkdir(parents=True)
+    (docs / "INDEX.md").write_text(
+        """# Docs Index
+
+| Document | Purpose |
+| --- | --- |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | source boundaries and dependency rules |
+| [references/OPERATIONS.md](./references/OPERATIONS.md) | validation commands |
+""",
+        encoding="utf-8",
+    )
+    (docs / "ARCHITECTURE.md").write_text(
+        """Source boundaries: source lives in src, generated output lives in dist.
+
+Read [deep boundary rules](./references/BOUNDARIES.md).
+""",
+        encoding="utf-8",
+    )
+    (references / "BOUNDARIES.md").write_text(
+        "Generated output rules live in [generated policy](./GENERATED.md).\n",
+        encoding="utf-8",
+    )
+    (references / "GENERATED.md").write_text(
+        """Do not edit generated output directly.
+
+Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go).
+""",
+        encoding="utf-8",
+    )
+    code_dir = tmp_path / "common" / "banner" / "handler"
+    code_dir.mkdir(parents=True)
+    (code_dir / "api_topic.go").write_text("package handler\n", encoding="utf-8")
+    (references / "OPERATIONS.md").write_text(
+        "Run `GOCACHE=/tmp/mimir-gocache go test <touched-packages> -count=1`.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("# sample\n", encoding="utf-8")
+    (tmp_path / "go.mod").write_text("module sample\n\ngo 1.23.7\n", encoding="utf-8")
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert "STRUCTURE.md" not in data["agent_handoffs"][0]["read_first"]
+    assert data["facts"]["entrypoint_references"] == [
+        "docs/INDEX.md",
+        "docs/ARCHITECTURE.md",
+        "docs/references/OPERATIONS.md",
+        "docs/references/BOUNDARIES.md",
+        "docs/references/GENERATED.md",
+    ]
+    assert "common/banner/handler/api_topic.go" not in data["facts"]["entrypoint_references"]
+    assert data["agent_handoffs"][0]["read_first"] == [
+        "AGENTS.md",
+        "README.md",
+        "docs/INDEX.md",
+        "docs/ARCHITECTURE.md",
+        "docs/references/OPERATIONS.md",
+        "docs/references/BOUNDARIES.md",
+        "docs/references/GENERATED.md",
+    ]
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["entrypoint"]["status"] == "contract"
+    assert "docs/INDEX.md" in findings["entrypoint"]["evidence"]
+    assert findings["entrypoint-reference-quality"]["status"] == "contract"
+    assert data["facts"]["entrypoint_reference_quality"]["status"] == "contract"
+    assert "reported references must be existing local Markdown files" in data["facts"][
+        "entrypoint_reference_quality"
+    ]["criteria"]
+    assert data["facts"]["agent_instruction_quality"]["status"] == "contract"
+    assert "provider discovery should be explicit" in " ".join(
+        data["facts"]["agent_instruction_quality"]["criteria"]
+    )
+    assert findings["source-boundaries"]["status"] == "contract"
+    assert "docs/ARCHITECTURE.md" in findings["source-boundaries"]["evidence"]
+    assert "docs/references/GENERATED.md" in findings["source-boundaries"]["evidence"]
+    assert findings["validation"]["status"] == "contract"
+    assert findings["validation"]["evidence"] == ["docs/references/OPERATIONS.md"]
+    agent = runner.invoke(main, ["doctor", "--format", "agent", str(tmp_path)])
+    assert agent.exit_code == 0, agent.output
+    assert "instruction_quality:" in agent.output
+    assert "standard: provider-informed heuristic, not a universal agent standard" in agent.output
+    assert "OpenAI Codex AGENTS.md guidance" in agent.output
+    assert "Claude Code reads CLAUDE.md" in agent.output
+    assert "reference_quality:" in agent.output
+    assert "standard: traversal-safety diagnostic for agent read-first Markdown" in agent.output
+    assert "reported references must be existing local Markdown files" in agent.output
+    assert "issues:" in agent.output
+    assert "forma_adoption:" in agent.output
+    assert "Forma turns this repository's engineering rules into a reusable agent workflow" in agent.output
+    assert "The agent no longer needs repeated reminders about boundaries" in agent.output
+
+
+def test_doctor_stops_entrypoint_document_cycles(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+Before work, read [docs/INDEX.md](docs/INDEX.md).
+Ask for human approval before destructive actions.
+""",
+        encoding="utf-8",
+    )
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "INDEX.md").write_text(
+        """# Docs Index
+
+Read [architecture](./ARCHITECTURE.md).
+""",
+        encoding="utf-8",
+    )
+    (docs / "ARCHITECTURE.md").write_text(
+        """Source boundaries: source lives in src, generated output lives in dist.
+
+Read [operations](./OPERATIONS.md).
+""",
+        encoding="utf-8",
+    )
+    (docs / "OPERATIONS.md").write_text(
+        """Run `go test <touched-packages>`.
+
+Read [architecture](./ARCHITECTURE.md).
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("# sample\n", encoding="utf-8")
+    (tmp_path / "go.mod").write_text("module sample\n\ngo 1.23.7\n", encoding="utf-8")
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["facts"]["entrypoint_references"] == [
+        "docs/INDEX.md",
+        "docs/ARCHITECTURE.md",
+        "docs/OPERATIONS.md",
+    ]
+    assert data["facts"]["entrypoint_reference_cycles"] == [
+        {
+            "path": [
+                "AGENTS.md",
+                "docs/INDEX.md",
+                "docs/ARCHITECTURE.md",
+                "docs/OPERATIONS.md",
+                "docs/ARCHITECTURE.md",
+            ]
+        }
+    ]
+    assert data["facts"]["entrypoint_references"].count("docs/ARCHITECTURE.md") == 1
+    assert data["facts"]["entrypoint_reference_quality"]["status"] == "warning"
+    assert data["facts"]["entrypoint_reference_quality"]["issues"] == [
+        "cycle(s) detected; repeated Markdown edges were skipped"
+    ]
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["entrypoint"]["status"] == "contract"
+    assert findings["entrypoint-reference-quality"]["status"] == "warning"
+    assert "docs/OPERATIONS.md" in findings["entrypoint-reference-quality"]["evidence"]
+
+
+def test_doctor_reports_provider_informed_instruction_quality_issues(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        "\n".join(["plain instruction text without Markdown structure"] * 201),
         encoding="utf-8",
     )
     runner = CliRunner()
 
-    human = runner.invoke(main, ["doctor", "repo", str(tmp_path)])
-    result = runner.invoke(main, ["doctor", "repo", "--format", "json", str(tmp_path)])
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
 
-    assert human.exit_code == 0, human.output
-    assert "forma doctor repo: repo is ready for agent operation" in human.output
-    assert "status: ready" in human.output
-    data = json.loads(result.output)
     assert result.exit_code == 0, result.output
-    assert data["schema"] == "forma.actionable-report.v1"
-    assert data["command"] == "forma doctor repo"
-    assert data["status"] == "ready"
-    findings = _report_section(data, "diagnostic-findings")
-    assert {item["id"] for item in findings["items"]} >= {
-        "agent-entry",
-        "source-boundaries",
-        "validation",
-        "forma-profile",
-    }
+    data = json.loads(result.output)
+    quality = data["facts"]["agent_instruction_quality"]
+    assert quality["status"] == "warning"
+    assert "AGENTS.md exceeds 200 lines" in quality["issues"]
+    assert "AGENTS.md is not clearly structured Markdown" in quality["issues"]
+    assert "no concrete validation command found in entrypoints or referenced Markdown" in quality[
+        "issues"
+    ]
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["instruction-quality"]["status"] == "warning"
+    assert "provider-informed criteria" in findings["instruction-quality"]["handoff"]
 
 
-def test_doctor_repo_reports_needs_human_for_sparse_repo(tmp_path: Path) -> None:
+def test_doctor_discovers_nested_agent_entrypoints(
+    tmp_path: Path,
+) -> None:
+    service = tmp_path / "services" / "checkout"
+    service.mkdir(parents=True)
+    (service / "AGENTS.md").write_text(
+        """# Checkout Agent Rules
+
+Read first: README.md.
+Validation: run `go test ./services/checkout -count=1`.
+Ask a human before destructive operations.
+""",
+        encoding="utf-8",
+    )
+    ignored = tmp_path / "vendor" / "pkg"
+    ignored.mkdir(parents=True)
+    (ignored / "AGENTS.md").write_text("Read first: ignored.\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("# sample\n", encoding="utf-8")
+    (tmp_path / "go.mod").write_text("module sample\n\ngo 1.23.7\n", encoding="utf-8")
     runner = CliRunner()
 
-    result = runner.invoke(main, ["doctor", "repo", "--format", "json", str(tmp_path)])
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
 
     assert result.exit_code == 0, result.output
     data = json.loads(result.output)
-    assert data["status"] == "needs-human"
-    assert "no obvious agent entrypoint found" in data["warnings"]
-    assert any(
-        "AGENTS.md" in action["description"] for action in data["next_actions"]
-    )
+    assert data["facts"]["root_entrypoints"] == []
+    assert data["facts"]["local_entrypoints"] == ["services/checkout/AGENTS.md"]
+    assert data["facts"]["entrypoints"] == ["services/checkout/AGENTS.md"]
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["entrypoint"]["status"] == "contract"
+    assert findings["validation"]["status"] == "contract"
+
+
+def test_doctor_does_not_treat_forma_profile_as_core_readiness(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+    profile_dir = tmp_path / ".forma"
+    profile_dir.mkdir()
+    (profile_dir / "profile.yaml").write_text("profile:\n  id: sample\n", encoding="utf-8")
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "needs-agent"
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["entrypoint"]["status"] == "missing"
+    assert findings["validation"]["status"] == "signal"
+    assert findings["agent-specific-integrations.forma"]["status"] == "optional"
+    assert findings["agent-specific-integrations.forma"]["evidence"] == [".forma/profile.yaml"]
+    assert data["facts"]["forma_adoption"]["status"] == "present"
+    assert "Do not ask whether to keep `.forma`; keep it by default" in data["facts"][
+        "forma_adoption"
+    ]["cleanup_policy"]
+    assert "confirm profile refinement from the current project rules" in data["facts"][
+        "forma_adoption"
+    ]["owner_confirmations"]
+
+
+def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "needs-agent"
+    assert data["schema"] == "forma.repo-doctor.report.v1"
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert {
+        "entrypoint",
+        "task-state",
+        "source-boundaries",
+        "validation",
+        "setup-contract",
+        "human-gates",
+        "noise-control",
+        "instruction-quality",
+        "tooling-signals",
+    } <= set(findings)
+    assert findings["entrypoint"]["status"] == "missing"
+    assert data["agent_handoffs"][0]["questions"]
 
 
 def test_init_dry_run_reports_git_trackable_profile_source_without_writing(
@@ -1639,6 +1861,123 @@ def test_init_apply_creates_draft_profile_skeletons(tmp_path: Path) -> None:
     data = json.loads(result.output)
     changes = _report_section(data, "applied-changes")
     assert all(item["action"] == "create" for item in changes["items"])
+
+
+def test_init_from_report_dry_run_plans_agent_operability_inputs(
+    tmp_path: Path,
+) -> None:
+    runner = CliRunner()
+    doctor = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+    report_path = tmp_path / "forma-doctor.json"
+    report_path.write_text(doctor.output, encoding="utf-8")
+
+    result = runner.invoke(
+        main,
+        [
+            "init",
+            "--from-report",
+            str(report_path),
+            "--format",
+            "json",
+            str(tmp_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert not (tmp_path / ".forma").exists()
+    data = json.loads(result.output)
+    assert data["status"] == "needs-agent"
+    assert any("workflow source and handoff files" in item for item in data["warnings"])
+    assert any("Agent remediation is still required" in item for item in data["warnings"])
+    changes = _report_section(data, "planned-changes")
+    paths = {item["path"] for item in changes["items"]}
+    assert ".forma/agent-operability/doctor-report.json" in paths
+    assert ".forma/agent-operability/agent-handoff.md" in paths
+    assert ".forma/agent-operability/human-decisions.md" in paths
+    handoff = _report_section(data, "agent-operability-handoff")
+    assert handoff["facts_file"] == ".forma/agent-operability/doctor-report.json"
+    assert handoff["agent_handoff"] == ".forma/agent-operability/agent-handoff.md"
+    assert handoff["human_decisions"] == ".forma/agent-operability/human-decisions.md"
+
+
+def test_init_from_report_apply_writes_sanitized_handoff_inputs(
+    tmp_path: Path,
+) -> None:
+    runner = CliRunner()
+    doctor = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+    report_path = tmp_path / "forma-doctor.json"
+    report_path.write_text(doctor.output, encoding="utf-8")
+
+    result = runner.invoke(
+        main,
+        [
+            "init",
+            "--from-report",
+            str(report_path),
+            "--apply",
+            "--format",
+            "json",
+            str(tmp_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / ".forma" / "profile.yaml").exists()
+    assert (tmp_path / ".forma" / ".gitignore").exists()
+    assert (tmp_path / ".forma" / "reinstall-workflow.sh").exists()
+    tracked_report = tmp_path / ".forma" / "agent-operability" / "doctor-report.json"
+    agent_handoff = tmp_path / ".forma" / "agent-operability" / "agent-handoff.md"
+    human_decisions = tmp_path / ".forma" / "agent-operability" / "human-decisions.md"
+    assert tracked_report.exists()
+    assert agent_handoff.exists()
+    assert human_decisions.exists()
+    report_text = tracked_report.read_text(encoding="utf-8")
+    report_data = json.loads(report_text)
+    assert report_data["subject"] == "."
+    assert str(tmp_path) not in report_text
+    handoff_text = agent_handoff.read_text(encoding="utf-8")
+    assert "handoff input for Agent remediation" in handoff_text
+    assert "not approved durable project rules" in handoff_text
+    assert "Owner confirmations" in handoff_text
+    assert (tmp_path / ".forma" / "agent-operability" / "human-decisions.md").read_text(
+        encoding="utf-8"
+    ).startswith("# Owner Confirmations")
+
+
+def test_init_from_report_rejects_wrong_schema(tmp_path: Path) -> None:
+    runner = CliRunner()
+    report_path = tmp_path / "forma-doctor.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "schema": "wrong",
+                "command": "forma doctor",
+                "subject": str(tmp_path),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(main, ["init", "--from-report", str(report_path), str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "unsupported doctor report schema" in result.output
+
+
+def test_init_from_report_rejects_subject_mismatch(tmp_path: Path) -> None:
+    runner = CliRunner()
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    source.mkdir()
+    target.mkdir()
+    doctor = runner.invoke(main, ["doctor", "--format", "json", str(source)])
+    report_path = tmp_path / "forma-doctor.json"
+    report_path.write_text(doctor.output, encoding="utf-8")
+
+    result = runner.invoke(main, ["init", "--from-report", str(report_path), str(target)])
+
+    assert result.exit_code == 1
+    assert "doctor report does not match init target" in result.output
 
 
 def test_build_plugin_emits_claude_code_plugin_layout(tmp_path: Path) -> None:

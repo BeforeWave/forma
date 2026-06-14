@@ -21,9 +21,9 @@ from forma.build_commands import (
     run_build_creator,
     run_build_plugin,
 )
-from forma.doctor import diagnose_artifact_report
 from forma.drift import drift_artifact, drift_release_surface
-from forma.explain import render_guidance
+from forma.creator.profiles import KINDS
+from forma.explain import render_guidance, render_stage_guidance
 from forma.init_remediation import plan_init
 from forma.install import INSTALL_TARGETS, install_artifact
 from forma.repo_doctor import diagnose_repo
@@ -70,17 +70,6 @@ class RawEpilogGroup(RawEpilogMixin, click.Group):
         super().__init__(*args, **kwargs)
 
 
-class DoctorGroup(RawEpilogGroup):
-    """Route legacy `forma doctor <path>` calls to the artifact subcommand."""
-
-    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
-        if args and not any(arg in {"-h", "--help"} for arg in args):
-            first_non_option = next((arg for arg in args if not arg.startswith("-")), None)
-            if first_non_option not in self.commands:
-                args = ["artifact", *args]
-        return super().parse_args(ctx, args)
-
-
 ROOT_HELP = """
 Agents:
 
@@ -105,8 +94,8 @@ Next:
 DOCTOR_HELP = """
 Next:
 
-  Use this before handoff when you need to know what an artifact is, whether
-  Forma can install it, and which install route is correct.
+  Use this to diagnose whether a repository has enough agent-operability
+  structure for a new agent to know what to read, change, validate, and hand off.
 """
 
 
@@ -183,7 +172,7 @@ Boundaries:
 INIT_HELP = """
 Behavior:
 
-  Default mode is a dry run. Use --apply to create deterministic skeleton files.
+  Default mode is a dry run. Use --apply to create deterministic workflow source files.
   Generated profile source is draft project source and still needs human review.
 """
 
@@ -205,27 +194,42 @@ Next:
 
 
 EXPLAIN_HELP = """
-Use this when an agent needs command-routing guidance, profile authoring rules, or
-temporary one-off workflow rules without reading Forma source files.
+Use this when an agent needs command-routing guidance, profile authoring rules,
+stage methodology boundaries, or temporary one-off workflow rules without
+reading Forma source files.
 """
 
 
 EXPLAIN_AGENT_HELP = """
 Next:
 
-  Read this before choosing between profile authoring, workflow generation,
-  plugin output, optional creator output, profile adoption, drift, doctor, and install.
-  If no approved profile exists yet, run forma explain profile and return a
-  proposal plus review packet first.
+  Read this as the agent-facing command guide for Forma CLI surfaces before
+  choosing between profile authoring, workflow generation, plugin output,
+  optional creator output, profile adoption, drift, doctor, init, verify, and install.
+  If no approved profile exists yet, this guide routes the agent to
+  forma explain profile before repo-specific profile drafting.
 """
 
 
 EXPLAIN_PROFILE_HELP = """
 Next:
 
-  Combine this guidance with project facts to return a Profile YAML Proposal
-  and Profile Review Packet. Write profile files only after user approval.
+  Use this only after forma explain agent routes the work to profile authoring.
+  This command explains how to combine project facts into source-backed
+  candidate rules, group them by touched stage, then return a Profile YAML
+  Proposal and Profile Review Packet. Write profile files only after user approval.
+  Use forma explain stage <stage> before placing stage-specific rules.
   Then generate output with forma build bundle or forma build plugin.
+"""
+
+
+EXPLAIN_STAGE_HELP = """
+Next:
+
+  Use this after drafting candidate profile rules and before writing profile
+  files. Omit rules that restate the base stage contract. If the base stage
+  contract is weak, propose a methodology change instead of hiding the fix in a
+  profile.
 """
 
 
@@ -277,50 +281,11 @@ def verify(ctx: click.Context, json_output: bool, path: Path) -> None:
         raise click.ClickException("verification failed")
 
 
-@main.group(
+@main.command(
     "doctor",
-    cls=DoctorGroup,
-    invoke_without_command=True,
+    cls=RawEpilogCommand,
     epilog=DOCTOR_HELP,
 )
-@click.pass_context
-def doctor(ctx: click.Context) -> None:
-    """Diagnose generated artifacts or repository agent operability."""
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
-
-
-@doctor.command("artifact", cls=RawEpilogCommand, hidden=True)
-@click.option(
-    "--json",
-    "json_output",
-    is_flag=True,
-    help="Emit a machine-readable artifact diagnosis.",
-)
-@click.option(
-    "--format",
-    "output_format",
-    default="human",
-    type=click.Choice(REPORT_FORMATS),
-    show_default=True,
-    help="Output format.",
-)
-@click.argument("path", type=click.Path(path_type=Path))
-@click.pass_context
-def doctor_artifact(
-    ctx: click.Context,
-    json_output: bool,
-    output_format: ReportFormat,
-    path: Path,
-) -> None:
-    """Diagnose a generated Forma artifact at PATH."""
-    report = diagnose_artifact_report(path)
-    click.echo(render_report(report, "json" if json_output else output_format))
-    if report.blockers:
-        ctx.exit(1)
-
-
-@doctor.command("repo", cls=RawEpilogCommand)
 @click.option(
     "--format",
     "output_format",
@@ -335,14 +300,14 @@ def doctor_artifact(
     type=click.Path(exists=True, file_okay=False, path_type=Path),
 )
 @click.pass_context
-def doctor_repo(
+def doctor(
     ctx: click.Context,
     output_format: ReportFormat,
     path: Path | None,
 ) -> None:
-    """Diagnose repository readiness for agent operation."""
+    """Diagnose repository agent operability."""
     report = diagnose_repo(path or Path.cwd())
-    click.echo(render_report(report, output_format))
+    click.echo(report.render(output_format))
     if report.status == "unsafe":
         ctx.exit(1)
 
@@ -579,13 +544,20 @@ def install_command(
     "--apply",
     "apply_changes",
     is_flag=True,
-    help="Create missing deterministic skeleton files instead of only planning.",
+    help="Create missing deterministic workflow source files instead of only planning.",
 )
 @click.option(
     "--profile-dir",
     required=False,
     type=click.Path(file_okay=False, path_type=Path),
     help="Repo-local profile directory (default: .forma under PATH).",
+)
+@click.option(
+    "--from-report",
+    "from_report",
+    required=False,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Repo doctor JSON report to materialize deterministic workflow source from.",
 )
 @click.option(
     "--format",
@@ -605,6 +577,7 @@ def init_command(
     ctx: click.Context,
     apply_changes: bool,
     profile_dir: Path | None,
+    from_report: Path | None,
     output_format: ReportFormat,
     path: Path | None,
 ) -> None:
@@ -613,6 +586,7 @@ def init_command(
         root=path or Path.cwd(),
         profile_dir=profile_dir,
         apply=apply_changes,
+        from_report=from_report,
     )
     click.echo(render_report(report, output_format))
     if report.status == "unsafe":
@@ -761,6 +735,38 @@ def explain_profile(output_format: str, target_agent: str | None) -> None:
     """Explain profile authoring and task-rule placement."""
     try:
         click.echo(render_guidance("profile", output_format, target_agent), nl=False)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@explain.command("stage", cls=RawEpilogCommand, epilog=EXPLAIN_STAGE_HELP)
+@click.option(
+    "--format",
+    "output_format",
+    default="human",
+    type=click.Choice(REPORT_FORMATS),
+    show_default=True,
+    help="Output format.",
+)
+@click.option(
+    "--target",
+    "target_agent",
+    required=False,
+    type=click.Choice(ADAPTER_TARGETS),
+    help="Optional agent target context.",
+)
+@click.argument("stage", type=click.Choice(KINDS))
+def explain_stage(
+    output_format: str,
+    target_agent: str | None,
+    stage: str,
+) -> None:
+    """Explain one stage's base methodology and profile injection boundary."""
+    try:
+        click.echo(
+            render_stage_guidance(stage, output_format, target_agent),
+            nl=False,
+        )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
 

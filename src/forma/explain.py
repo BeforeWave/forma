@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
+from forma.creator.composer import StageSource, load_stage_sources
+from forma.creator.manifest import methodology_dir_context
+from forma.creator.profiles import KINDS
 from forma.reports import (
     ActionableReport,
     NextAction,
@@ -35,12 +39,8 @@ TOPICS = {
         title="Forma Profile Guidance",
         sources=(
             GuidanceSource(
-                path="source/skill-creator/references/profile-authoring-principles.md",
+                path="source/agent-guide/references/profile-authoring-principles.md",
                 title="Profile authoring principles",
-            ),
-            GuidanceSource(
-                path="source/skill-creator/references/temporary-injection-generation.md",
-                title="Temporary injection generation standard",
             ),
         ),
     ),
@@ -51,10 +51,6 @@ TOPICS = {
             GuidanceSource(
                 path="source/skill-creator/references/temporary-injection-generation.md",
                 title="Temporary injection generation standard",
-            ),
-            GuidanceSource(
-                path="source/skill-creator/references/profile-authoring-principles.md",
-                title="Profile authoring principles",
             ),
         ),
     ),
@@ -123,6 +119,86 @@ def render_guidance(
     return render_report(report, output_format)
 
 
+def render_stage_guidance(
+    stage: str,
+    output_format: OutputFormat = "human",
+    target_agent: str | None = None,
+    methodology_dir: Path | None = None,
+) -> str:
+    """Render stage-specific methodology and profile-injection guidance."""
+    if output_format not in ("human", "agent", "json"):
+        raise ValueError("output_format must be human, agent, or json")
+    if stage not in KINDS:
+        allowed = ", ".join(KINDS)
+        raise ValueError(f"unsupported stage {stage!r}; use one of: {allowed}")
+    with methodology_dir_context(methodology_dir) as resolved_methodology_dir:
+        stage_source = load_stage_sources(resolved_methodology_dir, (stage,))[stage]
+        markdown = _render_stage_markdown(
+            stage=stage,
+            stage_source=stage_source,
+            target_agent=target_agent,
+        )
+        report = ActionableReport(
+            command=f"forma explain stage {stage}",
+            subject=target_agent or "all-targets",
+            status="ready",
+            summary=f"Forma stage guidance is available for {stage}",
+            sections=(
+                ReportSection(
+                    kind="guidance",
+                    title=f"Forma Stage Guidance: {stage}",
+                    payload=markdown,
+                ),
+                ReportSection(
+                    kind="sources",
+                    title="Sources",
+                    payload={
+                        "items": [
+                            {
+                                "path": f"source/methodology/stages/{stage}.md",
+                                "title": f"{stage} stage methodology",
+                            }
+                        ]
+                    },
+                ),
+            ),
+            next_actions=(
+                NextAction(
+                    title="filter candidate profile rules",
+                    description=(
+                        "Omit rules that restate this base stage contract; keep "
+                        "only project-specific durable adaptations or explicit "
+                        "environment integrations."
+                    ),
+                ),
+                NextAction(
+                    title="update methodology only when needed",
+                    description=(
+                        "If the base stage contract is weak or missing, propose a "
+                        "methodology change instead of duplicating the rule in a profile."
+                    ),
+                ),
+            ),
+            metadata={
+                "topic": "stage",
+                "stage": stage,
+                "target": target_agent,
+                "source": f"source/methodology/stages/{stage}.md",
+                "markdown": markdown,
+                "stage_contract": {
+                    "description": stage_source.description,
+                    "interaction_semantics": list(stage_source.interaction_lines),
+                    "mode_check": list(stage_source.mode_check_lines),
+                    "entry_gate": list(stage_source.entry_gate_lines),
+                    "workflow": list(stage_source.workflow_lines),
+                    "requirements": list(stage_source.adds),
+                    "output": list(stage_source.output_lines),
+                },
+            },
+        )
+    return render_report(report, output_format)
+
+
 def render_agent_guidance(
     output_format: OutputFormat = "human",
     target_agent: str | None = None,
@@ -159,9 +235,12 @@ def _topic_next_actions(topic: str, target_agent: str | None) -> tuple[NextActio
     if topic == "agent":
         return (
             NextAction(
-                title="draft project rules before generation",
+                title="load profile authoring guidance",
                 command=f"forma explain profile --target {target}",
-                description="Use when no approved profile exists yet.",
+                description=(
+                    "Use when no approved profile exists yet; the agent still "
+                    "has to read repository facts and draft candidate rules."
+                ),
             ),
             NextAction(
                 title="build from approved profile",
@@ -182,8 +261,20 @@ def _topic_next_actions(topic: str, target_agent: str | None) -> tuple[NextActio
                 ),
             ),
             NextAction(
-                title="diagnose artifact install route",
-                command="forma doctor <path>",
+                title="diagnose repository agent operability",
+                command="forma doctor --format json <repo>",
+                description=(
+                    "Use when a repository needs facts, findings, Agent handoff, "
+                    "and owner-decision routing before Forma init or remediation."
+                ),
+            ),
+            NextAction(
+                title="materialize deterministic repo workflow source",
+                command="forma init --from-report <report> --apply <repo>",
+                description=(
+                    "Creates draft .forma workflow source and report-derived "
+                    "handoff files; Agent remediation and owner confirmations still follow."
+                ),
             ),
         )
     if topic == "profile":
@@ -315,8 +406,10 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         target_line,
         "",
-        "Use this guide to choose the right Forma command path before reading "
-        "profile or injection authoring details.",
+        "This is the agent-facing command guide for Forma CLI surfaces. Use it "
+        "to choose between profile authoring, workflow generation, plugin "
+        "output, optional creator output, profile adoption, drift, doctor, init, "
+        "verify, and install before reading narrower command guidance.",
         "",
         "OpenCode uses native direct skill output. Generate an OpenCode bundle "
         "with `forma build bundle --target opencode`, verify it, then install "
@@ -331,10 +424,42 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "They can be temporary for a trial workflow or committed for long-term "
         "reuse.",
         "",
-        "Run `forma explain profile --target <target>` first, then return both a "
-        "`Profile YAML Proposal` and `Profile Review Packet` for human review. "
-        "Write profile files only after explicit user approval. Commit them only "
-        "when the rules should be reused.",
+        "Start from this Agent Guide. When no approved profile exists or repo "
+        "rules need to become durable Forma configuration, run "
+        "`forma explain profile --target <target>` next to load the profile "
+        "authoring contract. That command does not inspect the repository or "
+        "produce a draft by itself.",
+        "",
+        "## Profile semantic check before writing",
+        "",
+        "Use the `forma explain profile` guidance while reading repository "
+        "facts. The agent must produce source-backed candidate profile rules, "
+        "group them by touched stage, and return both a `Profile YAML Proposal` "
+        "and `Profile Review Packet` for human review. Treat that draft as "
+        "candidate semantics, not as permission to write the profile.",
+        "",
+        "After the candidate draft identifies touched stages and before writing "
+        "profile files, run `forma explain stage <stage>` for every touched "
+        "stage. Use the stage guide to compare each candidate rule with the "
+        "base methodology contract.",
+        "",
+        "For each candidate rule, decide one of these outcomes and record it in "
+        "the Profile Review Packet: keep in the profile at the narrowest target, "
+        "omit because the base methodology already owns it, keep as temporary "
+        "injection because it is generation-only, ask the user because the "
+        "durability or owner is unclear, or propose a methodology change because "
+        "the base stage contract is weak or missing.",
+        "",
+        "Do not use profile injection to restate a stage's base responsibility. "
+        "For example, do not inject that reconcile is read-only or that rework "
+        "does not implement code when those are already methodology contracts. "
+        "Use profile `constraints`, `workflow_adds`, `output_adds`, and "
+        "`resources` only for durable repository adaptations such as source "
+        "boundaries, validation surfaces, handoff conventions, host capabilities, "
+        "or project-owned adapters.",
+        "",
+        "Write profile files only after explicit user approval. Commit them "
+        "only when the rules should be reused.",
         "",
         "Creator and temporary injection outputs are generated workflow "
         "artifacts, not automatically approved profile source. `forma profile "
@@ -404,15 +529,23 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "user requested one-off manual flow, or blocked waiting for the "
         "bootstrap decision.",
         "",
-        "## If the artifact type or install route is unclear",
+        "## Diagnose repository agent-operability",
         "",
-        "Run `doctor` first. Do this before handoff when you do not know whether "
-        "a directory is a skill, skill bundle, creator, Codex plugin source, "
-        "or Claude Code plugin source.",
+        "`forma doctor` checks whether a repository gives a new Agent "
+        "enough structure to know what to read, what can change, how to "
+        "validate, when to stop, and how to hand off findings. It is not a "
+        "generated artifact verifier; Forma workflow source is project-rule "
+        "management, not a core readiness prerequisite.",
         "",
         "```bash",
-        "forma doctor <path>",
+        "forma doctor --format json <repo> > <report>",
+        "forma init --from-report <report> --apply <repo>",
         "```",
+        "",
+        "`init --from-report` materializes deterministic `.forma` workflow "
+        "source and Agent handoff files. It does not approve semantic rules or "
+        "make the repo agent-friendly by itself; profile approval, build/verify, "
+        "install target/scope, and commit remain separate owner confirmations.",
         "",
         "## Draft project rules, then generate workflow output",
         "",
@@ -489,7 +622,10 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "- `verify` checks generated artifact structure and required files.",
         "- `drift` checks whether generated output is fresh against its source "
         "profile, creator source, or release surface.",
-        "- `doctor` identifies artifact kind and the correct install route.",
+        "- `doctor` diagnoses repository agent-operability and can feed "
+        "`init --from-report`.",
+        "- Generated artifact handoff should use `forma verify`, build command "
+        "agent/json output, and the relevant install boundary.",
         "- `install` accepts verified local skills, skill bundles, and Claude "
         "Code plugin roots only; do not pass URLs, Codex plugin sources, or "
         "OpenCode JS/TS runtime plugins.",
@@ -549,9 +685,14 @@ def _render_human_markdown(
             [
                 "## Profile Renderer Boundary",
                 "",
+                "- Use this after `forma explain agent` routes the work to profile authoring.",
                 "- Use profiles for durable, repeated project workflow rules.",
+                "- This command explains how to extract candidate rules from project facts by workflow behavior.",
+                "- The agent must group candidate rules by touched stage before proposing YAML.",
                 "- Keep task-specific or one-off generation constraints out of the profile.",
                 "- Draft a `Profile YAML Proposal` and `Profile Review Packet` before writing files.",
+                "- Use `forma explain stage <stage>` to filter stage-specific rules against base methodology before writing profile files.",
+                "- Do not inject rules that merely repeat the base stage contract; propose a methodology change when the base contract is weak.",
                 "- Human review decides whether candidate rules become long-term profile source.",
                 "",
             ]
@@ -570,3 +711,82 @@ def _render_human_markdown(
     for source in sources:
         lines.append(f"- `{source['path']}`")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_stage_markdown(
+    stage: str,
+    stage_source: StageSource,
+    target_agent: str | None,
+) -> str:
+    lines = ["# Forma Stage Guidance", ""]
+    if target_agent is not None:
+        lines.extend([f"Target: `{target_agent}`", ""])
+    lines.extend(
+        [
+            f"Stage: `{stage}`",
+            f"Methodology source: `source/methodology/stages/{stage}.md`",
+            "",
+            "Use this after drafting candidate profile rules and before writing "
+            "the profile file. The goal is to filter candidate rules against the "
+            "base methodology contract for this stage.",
+            "",
+            "## Base Stage Contract",
+            "",
+            stage_source.description,
+            "",
+        ]
+    )
+    _append_stage_section(lines, "Interaction Semantics", stage_source.interaction_lines)
+    _append_stage_section(lines, "Mode Check", stage_source.mode_check_lines)
+    _append_stage_section(lines, "Entry Gate", stage_source.entry_gate_lines)
+    _append_stage_section(lines, "Workflow", stage_source.workflow_lines)
+    _append_stage_section(lines, "Requirements", stage_source.adds)
+    _append_stage_section(lines, "Output", stage_source.output_lines)
+    lines.extend(
+        [
+            "## Profile Injection Boundary",
+            "",
+            f"- Use `constraints.{stage}` only for durable project rules that adapt this stage to the owning repository.",
+            f"- Use `workflow_adds.{stage}` only when the project adds an ordered workflow step, gate, handoff, or stop condition that belongs in this stage's execution path.",
+            f"- Use `output_adds.{stage}` only when the project requires an additional final-response field for this stage.",
+            f"- Use `resources.{stage}` only for project-owned references, scripts, or support files this stage must load.",
+            f"- Use `validation_commands.{stage}` only for validation commands that are actually relevant to this stage.",
+            "- Do not inject rules that merely restate the base stage contract above.",
+            "- If the base methodology is weak, missing, or ambiguous, propose a methodology update instead of hiding the fix in a profile.",
+            "- If the rule is one-off generation context, keep it in temporary injection rather than durable profile source.",
+            "",
+            "## Filtering Questions",
+            "",
+            "- Is this rule already covered by the base stage contract?",
+            "- Is this rule durable for the owning repository, or only true for the current generation?",
+            "- Does this rule change a stage stop condition, handoff, or output field?",
+            "- Does this rule need a project-owned reference, script, or adapter?",
+            "- Should this be a methodology improvement rather than a profile injection?",
+        ]
+    )
+    if stage in {"hone", "mend"}:
+        lines.extend(
+            [
+                "",
+                "## Optional Stage Note",
+                "",
+                f"`{stage}` is an optional stage. A profile must enable it with `stages.{stage}.enabled: true` before `{stage}` constraints, workflow additions, output additions, or resources can affect generated output.",
+            ]
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _append_stage_section(
+    lines: list[str],
+    title: str,
+    items: tuple[str, ...],
+) -> None:
+    if not items:
+        return
+    lines.extend([f"### {title}", ""])
+    for item in items:
+        if item.startswith(("-", "```", "#", ">", "|", " ")):
+            lines.append(item)
+        else:
+            lines.append(f"- {item}")
+    lines.append("")

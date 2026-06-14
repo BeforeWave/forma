@@ -44,8 +44,9 @@ plugin root 后，再交给 Codex 安装和启用：运行
 如果 Codex CLI 输出或 marketplace 行为和这里不一致，再看当前 Codex 官方文档或
 `codex plugin marketplace --help`。
 
-把 plugin 交给其他用户或 agent 前，可以运行 `forma doctor <plugin-root>`。它会确认
-artifact 是 Codex plugin，验证输出，并说明安装应交给 Codex，而不是 `forma install`。
+把 plugin 交给其他用户或 agent 前，先运行 `forma verify <plugin-root>`。需要结构化
+安装 handoff 时，使用 `forma build plugin --format agent|json` 的输出，并把安装路线
+说清楚：Codex plugin 交给 Codex 安装，不通过 `forma install`。
 
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)

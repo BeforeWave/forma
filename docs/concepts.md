@@ -17,14 +17,18 @@ code, tests, and conventions, then turns those rules into workflow skills.
 When a task starts, those skills make the agent produce a task contract:
 evidence, boundaries, validation, proof, and stop conditions.
 
+Forma adds a workflow layer between project instructions and implementation.
+The agent first applies the project rules to the task, states what can change
+and how to check it, then works from that plan.
+
 ## Generate A Workflow In One Sentence
 
 The lightweight entrypoint is to have the agent extract project rules, show them
 for review, then generate the workflow:
 
 ```text
-Use Forma to generate a Codex workflow for this project.
-Show me the project rules you extracted first; after I approve them, generate and install it.
+Use Forma to manage this project's engineering rules as a Codex workflow.
+Extract the rules, show me the profile you propose, then after I approve it, build, verify, and install the workflow.
 ```
 
 The agent should organize extracted rules into a profile. The profile can be
@@ -88,7 +92,7 @@ Four core stages manage the task contract lifecycle:
 
 | Stage | Purpose | Boundary |
 |---|---|---|
-| `plan` | Align the goal with project rules and produce a proposal. | Do not write files or execute work. |
+| `plan` | Check the goal against project rules and produce a proposal. | Do not write files or execute work. |
 | `ground` | Gather the facts required by the rules. | Read-only; do not decide final tasks. |
 | `lock` | Write `plan.md` and `tasks.md`, locking the task contract. | Materialize only the accepted approach. |
 | `execute` | Execute one accepted task, run validation, and record proof. | Do not cross task boundaries or bypass stop conditions. |
@@ -107,7 +111,7 @@ same.
 
 | Path | Best for | Result |
 |---|---|---|
-| `forma explain profile` + agent | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow output. |
+| `forma explain agent` -> profile authoring | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow output. |
 | `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Deterministic workflow bundle or plugin. |
 | `forma-creator` | Optional on-the-spot path when you do not want to handle a profile file first. | One-off workflow output you can install and try. |
 

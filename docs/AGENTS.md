@@ -22,8 +22,8 @@ into a dump of internal workflow mechanics.
 
 ## Agent-Facing Rules
 
-- `forma explain agent` is the authoritative surface for agent execution
-  routing, bootstrap, reuse, and completion rules.
+- `forma explain agent` is the authoritative agent-facing command guide for
+  Forma CLI routing, bootstrap, reuse, and completion rules.
 - Keep detailed agent-only requirements there, not in reader-facing docs.
 - Reader-facing docs may link to or name `forma explain agent` when an agent
   needs those rules, but should not repeat its full operational policy.

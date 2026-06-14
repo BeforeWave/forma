@@ -198,16 +198,45 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert not any("README.md" in item for item in profile.constraints["default"])
     assert any("dirty worktree" in item for item in profile.constraints["default"])
     assert any("active issue plan and tasks" in item for item in profile.constraints["default"])
+    assert any("structured user-input" in item for item in profile.constraints["default"])
     assert any("README.md" in item for item in profile.constraints["shape"])
     assert any(
         "Layer 1 temporary injection" in item
         for item in profile.constraints["shape"]
     )
     assert any(".forma" in item for item in profile.constraints["gauge"])
-    assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["pour"])
-    assert any("scripts/forma-workflow.sh next" in item for item in profile.constraints["flow"])
-    assert any("recent Forma skill trigger context" in item for item in profile.constraints["hone"])
-    assert any("rework.md" in item for item in profile.constraints["mend"])
+    assert any("asking for another confirmation" in item for item in profile.constraints["seal"])
+    assert not any(
+        "scripts/forma-workflow.sh next" in item
+        for item in profile.constraints.get("pour", ())
+    )
+    assert not any(
+        "scripts/forma-workflow.sh next" in item
+        for item in profile.constraints.get("flow", ())
+    )
+    assert not any(
+        "recent Forma skill trigger context" in item
+        for item in profile.constraints.get("hone", ())
+    )
+    assert not any(
+        "rework.md" in item for item in profile.constraints.get("mend", ())
+    )
+    assert not profile.constraints.get("hone")
+    assert not profile.workflow_adds.get("hone")
+    assert not profile.output_adds.get("hone")
+    assert any("report the committed contract path" in item for item in profile.workflow_adds["mend"])
+    assert any("commit only the rework contract file(s)" in item for item in profile.workflow_adds["mend"])
+    assert any("forked_from_thread_id" in item for item in profile.workflow_adds["mend"])
+    assert any("do not list or search recent threads" in item for item in profile.workflow_adds["mend"])
+    assert any("blocked-no-parent-thread" in item for item in profile.workflow_adds["mend"])
+    assert any("blocked-no-thread-tool" in item for item in profile.workflow_adds["mend"])
+    assert any("rework-result report" in item for item in profile.workflow_adds["mend"])
+    assert any("originating host" in item for item in profile.workflow_adds["mend"])
+    assert any("do not implement the rework" in item for item in profile.workflow_adds["mend"])
+    assert not any("bounded host-thread search" in item for item in profile.workflow_adds["mend"])
+    assert not any("search-authorized-not-found" in item for item in profile.workflow_adds["mend"])
+    assert any("blocked-no-parent-thread" in item for item in profile.output_adds["mend"])
+    assert not any("search-authorized-not-found" in item for item in profile.output_adds["mend"])
     assert profile.conditional_overlays is not None
     assert profile.conditional_overlays.decision.name == "Iteration Area"
     assert [route.id for route in profile.conditional_overlays.routes] == [
@@ -619,7 +648,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "references/forma-iteration-boundaries.md" in shape_text
     assert "Settle `Iteration Area`" in shape_text
     assert "If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint" in pour_text
-    assert "Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>" in pour_text
+    assert "Use `scripts/forma-workflow.sh next <issue-id>`" in pour_text
     assert "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface." not in pour_text
     assert "If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md" in pour_text
     assert "If `Iteration Area` is `governance`, apply `governance` overlay constraint: Read README.md" in pour_text
@@ -635,6 +664,9 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert "plans/issue-<id>/rework.md" in mend_text
     assert "rework-*" in mend_text
     assert "forma-showhand" in mend_text
+    assert (
+        codex_dir / FORMA_SELF_STAGE_DIRS["mend"] / "scripts" / "forma-workflow.sh"
+    ).is_file()
 
     manifest = json.loads(codex_manifest_path.read_text(encoding="utf-8"))
     assert manifest["profile"]["top_level_id"] == "forma-self-iteration"
@@ -682,10 +714,10 @@ def test_forma_self_workflow_adds_require_contract_check_before_commits(
         output_dir / FORMA_SELF_STAGE_DIRS["mend"] / "SKILL.md"
     ).read_text(encoding="utf-8")
 
-    assert "bundled workflow runner with `check <issue-id>`" in seal_text
+    assert "`scripts/forma-workflow.sh check <issue-id>`" in seal_text
     assert "before staging or asking for commit permission" in seal_text
     assert "Contract Check:" in seal_text
-    assert "bundled workflow runner with `check <issue-id>`" in mend_text
+    assert "`scripts/forma-workflow.sh check <issue-id>`" in mend_text
     assert "before staging or asking for commit permission" in mend_text
     assert "Contract Check:" in mend_text
 
@@ -694,7 +726,7 @@ def test_find_methodology_dir_accepts_explicit_path() -> None:
     assert find_methodology_dir(METHODOLOGY) == METHODOLOGY.resolve()
 
 
-def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
+def test_workflow_build_emits_valid_codex_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
 
     manifest_path = build_bundle(
@@ -913,7 +945,7 @@ def test_creator_pipeline_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert manifest["skills"] == list(KINDS)
 
 
-def test_creator_pipeline_emits_valid_claude_code_bundle(tmp_path: Path) -> None:
+def test_workflow_build_emits_valid_claude_code_bundle(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-claude-code"
 
     build_bundle(
@@ -1150,7 +1182,9 @@ def test_workflow_adapter_rejects_opencode_plugin_target() -> None:
         workflow_adapter("opencode").assert_plugin_supported()
 
 
-def test_creator_honors_custom_stage_names_and_enabled_matrix(tmp_path: Path) -> None:
+def test_workflow_build_honors_custom_stage_names_and_enabled_matrix(
+    tmp_path: Path,
+) -> None:
     profile_file = tmp_path / "custom.yaml"
     profile_file.write_text(
         """
@@ -1411,6 +1445,7 @@ def test_mend_methodology_defines_rework_contract_rules() -> None:
     assert any("explicit human feedback first" in line for line in mend.workflow_lines)
     assert any("plans/issue-<id>/rework.md" in line for line in mend.workflow_lines)
     assert any("rework-*" in line for line in mend.workflow_lines)
+    assert any("scripts/forma-workflow.sh check <issue-id>" in line for line in mend.workflow_lines)
     assert any("explicit user confirmation" in line for line in mend.workflow_lines)
     assert any("forma-execute" in line for line in mend.workflow_lines)
     assert any("forma-showhand" in line for line in mend.workflow_lines)
@@ -1418,12 +1453,13 @@ def test_mend_methodology_defines_rework_contract_rules() -> None:
     assert "`plans/issue-<id>/rework.md`" in rules
     assert "`plans/issue-<id>/tasks.md`" in rules
     assert "do not add a `## Rework Tasks` heading" in rules
+    assert "scripts/forma-workflow.sh check <issue-id>" in rules
     assert "require explicit user confirmation before committing" in rules
     assert "`forma-execute`" in rules
     assert "`forma-showhand`" in rules
 
 
-def test_creator_profile_supports_conditional_overlays(tmp_path: Path) -> None:
+def test_workflow_profile_supports_conditional_overlays(tmp_path: Path) -> None:
     backend_ref = tmp_path / "backend-rules.md"
     backend_ref.write_text("Backend overlay rules.\n", encoding="utf-8")
     profile_file = tmp_path / "conditional.yaml"
@@ -1550,19 +1586,46 @@ def test_explain_profile_outputs_canonical_guidance() -> None:
     assert "# Forma Profile Guidance" in result.output
     assert "Target: `codex`" in result.output
     assert (
-        "source/skill-creator/references/profile-authoring-principles.md"
+        "source/agent-guide/references/profile-authoring-principles.md"
         in result.output
     )
-    assert (
-        "source/skill-creator/references/temporary-injection-generation.md"
-        in result.output
+    assert "source/skill-creator/references/temporary-injection-generation.md" not in (
+        result.output
     )
+    assert "Candidate Draft From Project Facts" in result.output
+    assert "does not inspect the repository" in result.output
+    assert "source-backed" in result.output
+    assert "candidate profile rules" in result.output
+    assert "already owned by base methodology" in result.output
     assert "Stage Key Boundary" in result.output
+    assert "`hone` and `mend` are optional stages." in result.output
     assert "Generated output names" in result.output
     assert "`constraints.default`: Keep this minimal." in result.output
+    assert "`constraints.hone`: Read-only reconciliation" in result.output
     assert "`conditional_overlays`: Heavy route-specific rules" in result.output
-    assert "| User constraint | Injection/profile target |" in result.output
+    assert "| Candidate rule | Profile target or omitted route |" in result.output
     assert "does not maintain a second copy of the guidance" in result.output
+
+
+def test_explain_stage_outputs_methodology_boundary() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        ["explain", "stage", "hone", "--format", "agent", "--target", "codex"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "ACTIONABLE REPORT" in result.output
+    assert "# Forma Stage Guidance" in result.output
+    assert "Target: `codex`" in result.output
+    assert "Stage: `hone`" in result.output
+    assert "source/methodology/stages/hone.md" in result.output
+    assert "## Base Stage Contract" in result.output
+    assert "## Profile Injection Boundary" in result.output
+    assert "Use `constraints.hone` only for durable project rules" in result.output
+    assert "Do not inject rules that merely restate the base stage contract" in result.output
+    assert "propose a methodology update instead of hiding the fix in a profile" in result.output
+    assert "`hone` is an optional stage." in result.output
 
 
 def test_explain_temporary_injection_json_outputs_sources() -> None:
@@ -1590,15 +1653,13 @@ def test_explain_temporary_injection_json_outputs_sources() -> None:
         for source in payload["metadata"]["sources"]
     ] == [
         "source/skill-creator/references/temporary-injection-generation.md",
-        "source/skill-creator/references/profile-authoring-principles.md",
     ]
     assert (
         "Temporary Injection Generation Standard"
         in payload["metadata"]["sources"][0]["content"]
     )
     assert "Stage Key Boundary" in payload["metadata"]["sources"][0]["content"]
-    assert "Profile Authoring Principles" in payload["metadata"]["sources"][1]["content"]
-    assert "Generated output names" in payload["metadata"]["sources"][1]["content"]
+    assert "`hone`, and `mend`" in payload["metadata"]["sources"][0]["content"]
     assert "classification table" in payload["metadata"]["markdown"]
     assert "constraints.default" in payload["metadata"]["markdown"]
     assert "Script Resource Injection Template" in payload["metadata"]["markdown"]
@@ -1616,7 +1677,9 @@ def test_create_rejects_unknown_target(tmp_path: Path) -> None:
         )
 
 
-def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) -> None:
+def test_workflow_build_output_is_deterministic_except_manifest_time(
+    tmp_path: Path,
+) -> None:
     first = tmp_path / "first"
     second = tmp_path / "second"
     build_bundle(
@@ -1635,7 +1698,7 @@ def test_creator_output_is_deterministic_except_manifest_time(tmp_path: Path) ->
     assert _file_map(first) == _file_map(second)
 
 
-def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:
+def test_workflow_build_refuses_non_forma_output_files(tmp_path: Path) -> None:
     output_dir = tmp_path / "not-empty"
     output_dir.mkdir()
     (output_dir / "notes.txt").write_text("keep me\n", encoding="utf-8")
@@ -1649,7 +1712,7 @@ def test_creator_refuses_non_forma_output_files(tmp_path: Path) -> None:
         )
 
 
-def test_creator_can_replace_known_generated_paths(tmp_path: Path) -> None:
+def test_workflow_build_can_replace_known_generated_paths(tmp_path: Path) -> None:
     output_dir = tmp_path / "sample-backend-go-github-issue-tracked-plan-first-codex"
     build_bundle(
         profile_file=SAMPLE_PROFILE,

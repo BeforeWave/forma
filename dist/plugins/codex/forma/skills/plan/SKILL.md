@@ -21,8 +21,6 @@ Clarify goals, constraints, boundaries, and acceptance criteria.
 
 ## Workflow
 
-- First determine whether the current collaboration mode is plan-oriented.
-- If the agent is not in plan mode, stop and tell the user to switch to plan mode before any deeper plan shaping.
 - Load bundled planning references only from the current triggered skill package; never switch to same-named resources in sibling skill directories.
 - Always load `references/output-format.md` and `references/plan-stage-rules.md` before deciding whether to clarify, block, propose, or hand off.
 - If the user context is still incomplete, continue clarification with the user instead of exploring the repository or writing repo files.
@@ -44,10 +42,7 @@ Clarify goals, constraints, boundaries, and acceptance criteria.
 ## Requirements
 
 - Treat the plan stage as the convergence step before lock, not as a plan-file-writing skill.
-- First determine whether the current collaboration mode is plan-oriented. If the current agent is not in plan mode, stop and tell the user to switch to plan mode before continuing deeper plan shaping.
-- Do not claim that you switched modes unless the host environment explicitly confirms it.
 - When loading bundled planning references, resolve them relative to the current triggered skill package only; do not borrow same-named resources from sibling skill directories.
-- Always load `references/output-format.md` and `references/plan-stage-rules.md` before deciding whether to clarify, block, propose, or hand off.
 - Treat user-provided source references as planning context only after their relevant contents are available in the current session or through an explicitly injected/profile-owned source adapter.
 - Do not assume GitHub, `gh`, network access, or any other source-context tool is a base plan-first capability. If a generated bundle includes an injected/profile-owned source adapter, follow that adapter's stage-specific reference and script instructions; otherwise ask the user to paste the authoritative source material needed for planning.
 - While the user context is still incomplete, stay in clarification mode. Ask only for the missing planning information needed to converge Goal, Scope, Approach, and the validation model for tasks, shared checks, and final issue closure.

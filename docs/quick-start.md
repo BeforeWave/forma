@@ -7,6 +7,9 @@ review them, then generate, verify, and install a workflow you can try. Commit
 the profile only when the rules need long-term reuse; for a trial workflow, the
 profile can be temporary.
 
+Start with a workflow you can try. Ask the agent to extract the project rules,
+show the proposed profile, then build, verify, and install it after approval.
+
 ## 1. Install The CLI
 
 Install the Forma CLI:
@@ -19,8 +22,8 @@ forma --help
 Then tell the agent:
 
 ```text
-Use Forma to generate a Codex workflow for this project.
-Show me the project rules you extracted first; after I approve them, generate and install it.
+Use Forma to manage this project's engineering rules as a Codex workflow.
+Extract the rules, show me the profile you propose, then after I approve it, build, verify, and install the workflow.
 ```
 
 The agent should load Forma's profile guidance itself, then turn project rules
@@ -118,7 +121,7 @@ forma install --target opencode --scope project /tmp/bundle-opencode
 
 | Path | Best for | Output |
 |---|---|---|
-| `forma explain profile` + agent | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow bundle or plugin. |
+| `forma explain agent` -> profile authoring | Extract project rules into a workflow; keep the profile temporary or commit it later. | Profile plus verified workflow bundle or plugin. |
 | `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Repeatable workflow output from profile source. |
 | `forma-creator` | Optional on-the-spot generation when you do not want to handle a profile file first. | Verified one-off skill bundle or plugin. |
 

@@ -128,7 +128,7 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     )
     assert "forma-shape/" not in codex_target
     assert "temporary-injection-generation.md" in codex_target
-    assert "profile-authoring-principles.md" in codex_target
+    assert "profile-authoring-principles.md" not in codex_target
     assert "classification table" in codex_target
     assert "constraints.default" in codex_target
     assert "routine `pour` / `flow`" in codex_target
@@ -136,12 +136,9 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "--artifact plugin" in codex_target
     assert ".codex-plugin/plugin.json" in codex_target
     assert "Do not install generated outputs from this creator" in codex_target
-    assert (codex / "references" / "profile-authoring-principles.md").is_file()
+    assert not (codex / "references" / "profile-authoring-principles.md").exists()
     temp_standard = (
         codex / "references" / "temporary-injection-generation.md"
-    ).read_text(encoding="utf-8")
-    profile_principles = (
-        codex / "references" / "profile-authoring-principles.md"
     ).read_text(encoding="utf-8")
     assert "Do not copy README, AGENTS" in temp_standard
     assert "constraints.default" in temp_standard
@@ -150,10 +147,6 @@ def test_build_creator_emits_codex_target(tmp_path: Path) -> None:
     assert "source adapter" in temp_standard
     assert "Script Resource Injection Template" in temp_standard
     assert "resources.<stage>.scripts" in temp_standard
-    assert "Profile Authoring Principles" in profile_principles
-    assert "Keep this minimal" in profile_principles
-    assert "Source Context Adapters" in profile_principles
-    assert "python3 scripts/adapter_tool.py" in profile_principles
     assert not (output_root / "claude-code").exists()
     assert verify(codex).passed
 
@@ -166,7 +159,8 @@ def test_build_creator_defaults_to_runtime_asset_source(tmp_path: Path) -> None:
     codex = output_root / "codex" / SKILL_NAME
     assert output == codex
     assert (codex / "SKILL.md").is_file()
-    assert (codex / "references" / "profile-authoring-principles.md").is_file()
+    assert (codex / "references" / "temporary-injection-generation.md").is_file()
+    assert not (codex / "references" / "profile-authoring-principles.md").exists()
     assert (
         codex / "resources" / "plan-first" / "methodology" / "stages" / "shape.md"
     ).is_file()
@@ -212,7 +206,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert "rename.stages" in claude_target
     assert "one-off special constraints" in claude_target
     assert "temporary-injection-generation.md" in claude_target
-    assert "profile-authoring-principles.md" in claude_target
+    assert "profile-authoring-principles.md" not in claude_target
     assert "classification table" in claude_target
     assert "source-context helper scripts" in claude_target
     assert "--artifact bundle" in claude_target
@@ -220,7 +214,7 @@ def test_build_creator_emits_claude_code_target(tmp_path: Path) -> None:
     assert ".claude-plugin/plugin.json" in claude_target
     assert "plugin-local `plan`" in claude_target
     assert "Do not install generated outputs from this creator" in claude_target
-    assert (claude / "references" / "profile-authoring-principles.md").is_file()
+    assert not (claude / "references" / "profile-authoring-principles.md").exists()
     manifest = json.loads(
         (claude / ".forma-manifest.json").read_text(encoding="utf-8")
     )

@@ -20,6 +20,46 @@ a one-off request belongs in temporary injection.
   the owning repository that owns those workflow constraints. Keep Forma
   examples sanitized.
 
+## Candidate Draft From Project Facts
+
+Use this guidance after `forma explain agent` routes the work to profile
+authoring. The `forma explain profile` command does not inspect the repository
+or produce a draft by itself. It tells the agent how to turn repository facts
+into a candidate profile draft.
+
+Read the repository's agent-facing and workflow-facing sources first:
+
+- agent entrypoints, such as `AGENTS.md`, `CLAUDE.md`, Copilot instructions,
+  Cursor rules, or OpenHands microagents;
+- project structure, source/generated/docs/vendor boundaries, and local-state
+  rules;
+- setup, bootstrap, build, validation, release, and CI documentation;
+- task-state, plan, issue, ADR, review-note, run-log, and evidence locations;
+- human-gate rules for destructive operations, credentials, publishing,
+  external writes, large refactors, or durable rule adoption;
+- generated-artifact, deprecated-doc, example, fixture, and noise-control
+  policy.
+
+Extract candidate profile rules from those facts by workflow behavior, not by
+the file that happened to contain the wording. Keep each candidate short,
+source-backed, and marked as candidate until review.
+
+For each candidate rule, record:
+
+- source file, section, and line number when available;
+- the workflow behavior it changes;
+- the likely profile target, such as `constraints.<stage>`,
+  `workflow_adds.<stage>`, `output_adds.<stage>`,
+  `validation.shared_checks`, `resources.<stage>`, or
+  `conditional_overlays.<overlay>`;
+- durability: durable, task-specific, generation-only, or uncertain;
+- whether the rule may already be owned by base methodology and therefore
+  needs stage comparison before writing.
+
+Group the candidate rules by touched stage before proposing YAML. The draft
+should make it easy to run the later stage semantic check against only the
+affected stages instead of rereading the whole repository.
+
 ## Profile Proposal Review
 
 When proposing a profile from repository rules, do not answer with only YAML.
@@ -65,7 +105,8 @@ For each omitted rule, include:
 - source file, section, and line number when available;
 - source wording summary;
 - reason omitted, such as task-specific, already covered by a broader rule,
-  too local for this profile, needs user decision, or not workflow policy.
+  already owned by base methodology, too local for this profile, needs user
+  decision, or not workflow policy.
 
 ### Profile Review Packet: Validation Command Mapping
 
@@ -83,8 +124,12 @@ of silently promoting it into the profile.
 
 ## Stage Key Boundary
 
-Profiles and temporary injection use internal stage keys as schema keys:
-`shape`, `gauge`, `seal`, `pour`, and `flow`.
+Profiles use internal stage keys as schema keys:
+`shape`, `gauge`, `seal`, `pour`, `flow`, `hone`, and `mend`.
+
+`hone` and `mend` are optional stages. Their constraints, workflow additions,
+output additions, and resources affect generated output only when the profile
+enables the stage with `stages.<stage>.enabled: true`.
 
 Generated output names, such as plugin-local `plan`/`showhand` names or direct
 skill names using the `forma-*` pattern, are output names and trigger names.
@@ -98,9 +143,8 @@ triggers.
 
 ## Constraint Placement
 
-- `constraints.default`: Keep this minimal. It applies to every
-  `shape`, `gauge`, `seal`, `pour`, and `flow` stage, so use it only for
-  lightweight bottom lines that are always true.
+- `constraints.default`: Keep this minimal. It applies to every enabled stage,
+  so use it only for lightweight bottom lines that are always true.
 - `constraints.shape`: Planning, proposal convergence, and decisions the user
   must settle before finalization.
 - `constraints.gauge`: Read-only grounding and repository inspection.
@@ -108,6 +152,10 @@ triggers.
   and evidence-materialization rules.
 - `constraints.pour`: Daily current-task execution.
 - `constraints.flow`: Automated remaining-task execution.
+- `constraints.hone`: Read-only reconciliation of delivered work, feedback,
+  evidence, and next-route recommendations.
+- `constraints.mend`: Same-issue rework contract materialization without
+  implementing the rework.
 - `workflow_adds.<stage>`: Additional ordered workflow steps, completion
   gates, or stop conditions that must appear in the generated stage's
   `## Workflow` section instead of the weaker `## Requirements` section.
@@ -182,12 +230,12 @@ yet been accepted as durable workflow policy.
 
 ## Required Classification Table
 
-When producing a temporary injection or proposing profile changes from natural
-language, show the user a short table before generation or commit:
+When proposing profile changes from natural language or repository facts, show
+the user a short table before writing or committing profile files:
 
-| User constraint | Injection/profile target | Rationale | Durable? | Track as profile? |
+| Candidate rule | Profile target or omitted route | Rationale | Durable? | Track as profile? |
 | --- | --- | --- | --- | --- |
-| Original or summarized user constraint | `constraints.<stage>` or `conditional_overlays.<overlay>` | Why this is the narrowest correct scope | yes/no | yes/no/later |
+| Original or summarized rule | `constraints.<stage>`, `workflow_adds.<stage>`, `output_adds.<stage>`, `conditional_overlays.<overlay>`, base methodology, temporary injection, or omitted | Why this is the narrowest correct route | yes/no | yes/no/later |
 
 ## Common Optimizations
 

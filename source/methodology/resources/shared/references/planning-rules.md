@@ -26,6 +26,7 @@ Use these rules for plan-finalization skills in projects that follow the plan-fi
 - After the gate passes, write only confirmed facts from the plan stage, approved grounding handoffs, source material, and the current user confirmation. Do not run repository exploration from the lock stage to invent missing scope, approach, validation, or source precedence.
 - Fill in `plan.md` before writing or changing `tasks.md`.
 - Rewrite `tasks.md` into the final task checklist for the issue; do not leave template guidance, example text, or append tasks below them.
+- Run `scripts/forma-workflow.sh check <issue-id>` after finalizing `plan.md` and `tasks.md` and before staging or asking for commit permission. If the check fails, fix the plan/task contract and rerun the check; do not stage or commit the locked plan while the check is failing.
 - Stage only the current issue's finalized `plan.md` and `tasks.md`, then show the staged diff to the user before leaving planning.
 - Commit only that staged plan/task snapshot after explicit user permission.
 - The planning commit must contain only the current issue's planning files, not implementation changes.

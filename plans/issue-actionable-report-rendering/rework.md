@@ -171,3 +171,25 @@ User Confirmation:
 
 Appended Tasks:
 - rework-008-contract-schema-check
+
+## Rework 009: Clarify agent routing and side-thread handoff injection
+
+Source:
+- direct-human-feedback
+
+Feedback:
+- `forma explain agent` should be the agent-facing command guide for Forma CLI surfaces, not a profile-specific guide. It should route agents to `forma explain profile` only when profile authoring is needed, and profile authoring should use `forma explain stage <stage>` to compare candidate rules against base methodology before writing profile source.
+- The self-profile hone/mend injection should be concrete enough for Forma-generated Plan-First profiles: reconciliation routed through a side conversation first creates/forks a child thread, injects the trusted parent thread id, and then runs reconcile in the child; rework completion resolves and reports the execution handoff to the parent thread or reports a blocked disposition.
+
+Classification:
+- task-rework
+
+Same-Issue Rationale:
+- This remains inside the active actionable-report-rendering issue because the issue owns structured `human|agent|json` command output, `forma explain` agent handoff behavior, reader-facing usage docs, profile-authored workflow additions, and rework-stage completion output.
+- The correction can be recorded as ordinary task work because it tightens command routing docs/CLI guidance and self-profile injected workflow rules without changing the issue-level task model.
+
+User Confirmation:
+- confirmed: user explicitly requested committing the completed changes and backfilling this rework record.
+
+Appended Tasks:
+- rework-009-agent-guide-and-side-thread-handoff

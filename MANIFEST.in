@@ -1,3 +1,4 @@
+graft source/agent-guide
 graft source/methodology
 graft source/skill-creator
 graft profiles/default

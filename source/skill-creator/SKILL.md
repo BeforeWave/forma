@@ -12,8 +12,7 @@ stages using the `forma-*` naming pattern. If this installed creator includes a
 fixed target reference, that reference is the hard contract for any additional
 artifact type.
 
-Before generating any bundle, load `references/canonical-plan-first.md`,
-`references/profile-authoring-principles.md`, and
+Before generating any bundle, load `references/canonical-plan-first.md` and
 `references/temporary-injection-generation.md`. If this installed creator
 includes a fixed agent-target reference, load it too and treat it as the fixed
 target contract.
@@ -32,10 +31,9 @@ target contract.
    - Unclear scenario: do not invent conditional routing. Ask first whether the
      user wants a fixed injection or a conditional overlay decision.
    - Within either scenario, classify every natural-language constraint using
-    `references/profile-authoring-principles.md` and
-    `references/temporary-injection-generation.md`; keep
-    `constraints.default` minimal and put broad or expensive execution
-    requirements into stage-specific constraints or `conditional_overlays`.
+     `references/temporary-injection-generation.md`; keep
+     `constraints.default` minimal and put broad or expensive execution
+     requirements into stage-specific constraints or `conditional_overlays`.
    - If the user asks the generated bundle to fetch planning context from an
      external source through a helper script, treat that as a source-context
      adapter. Add stage-specific constraints and resources only when the

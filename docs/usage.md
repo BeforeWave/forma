@@ -14,13 +14,14 @@ can start there when it is unsure which command path to use.
 
 | Goal | Command path | Next action |
 |---|---|---|
-| Read or hand off profile authoring rules | `forma explain profile --format human|agent|json --target codex` | Use `human` for concise reader guidance, `agent` for an executable authoring contract, and `json` for tools. Combine the guidance with project facts before drafting a profile. |
+| Choose the agent-facing Forma CLI route | `forma explain agent --format human|agent|json --target codex` | Start here when an agent needs to choose between profile authoring, stage guidance, temporary injection, doctor/init, build, verify, drift, install, creator, or profile adoption. |
+| Read or hand off profile authoring rules | `forma explain profile --format human|agent|json --target codex` | Use only after `forma explain agent` routes the work to profile authoring. It does not inspect the repo or create a draft; the agent combines this guidance with project facts before proposing profile rules. |
+| Compare candidate rules with stage methodology | `forma explain stage <stage> --format human|agent|json --target codex` | Use after candidate profile rules identify touched stages and before writing profile files. Omit rules already owned by base methodology, or propose a methodology change when the base contract is weak. |
 | Build a skill bundle from a reviewed tracked profile | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; human output is a concise artifact result. Use `--format agent` or `--format json` when another agent or tool needs structured next actions. |
 | Build the default Plan-First skill bundle | `forma build bundle --target <target> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; run `forma verify <dir>`, then install with the matching target. |
 | Build plugin source | `forma build plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | Human output is a concise artifact result. Use `--format agent` or `--format json` for install handoff; Codex plugins install through Codex, and Claude Code plugin roots install with `forma install --target claude-code`. |
-| Diagnose repo agent-operability | `forma doctor repo [path] --format human|agent|json` | Read-only check for agent entrypoints, boundaries, validation signals, profile presence, and instruction weight. |
-| Diagnose a generated artifact before handoff | `forma doctor <dir> --format human|agent|json` or `forma doctor --json <dir>` | Use the result to identify artifact kind, target, verification status, Forma installability, install route, blockers, and next actions. |
-| Initialize deterministic Forma source | `forma init [path] --format human|agent|json` | Dry-run remediation by default; use `--apply` to create `.forma/` profile source and a bootstrap-incomplete reinstall workflow skeleton. |
+| Diagnose repo agent-operability | `forma doctor [path] --format human|agent|json` | Read-only check for agent entrypoints, source boundaries, validation contracts, setup contracts, task state, human gates, noise control, and optional agent integrations. |
+| Initialize deterministic Forma source from repo facts | `forma init [path] --from-report <report> --format human|agent|json` | Dry-run remediation by default; use `--apply` to create `.forma/` workflow source plus report-derived Agent handoff files. |
 | Build optional creator for on-the-spot generation | `forma build creator --target <target> --output <dir>` | Use only for the creator path; run `forma verify <dir>/<target>/forma-creator`, then install with the matching target. |
 | Give an agent temporary-injection rules | `forma explain temporary-injection --target codex` | Use only for optional creator/on-the-spot generation flows. |
 
@@ -70,8 +71,9 @@ Next action:
 - If a Codex plugin verifies, install it through Codex, not `forma install`.
 - If a Claude Code plugin verifies, install the plugin root with
   `forma install --target claude-code`.
-- If the path is ambiguous, run `forma doctor <path>` to get the install route
-  and next actions.
+- If the artifact install route is ambiguous, use the build command's
+  `--format agent|json` handoff and the install boundary below; `doctor` is for
+  repository agent-operability, not generated artifact inspection.
 
 `forma verify` checks structure and methodology rules. It does not replace
 profile review or product judgment. See [Verifier](./verifier.md) for the
@@ -89,37 +91,28 @@ actions; `json` is for tools. The command shape is shared, but the content is
 command-specific: `doctor` reports findings and evidence, while `explain`
 reports authoring guidance and handoff rules.
 
-### `forma doctor <path>`
-
-Diagnoses a generated artifact before handoff or installation:
-
-```bash
-forma doctor /tmp/settings-workflow-codex
-forma doctor --json /tmp/forma-codex-plugin
-forma doctor --format agent /tmp/forma-codex-plugin
-```
-
-The doctor output identifies the artifact kind, target, verification status,
-whether `forma install` supports the artifact, whether it is installable now,
-the correct install route, blockers, and next actions.
-
-Use it when a user or agent is unsure whether the current path is a skill, skill
-bundle, Codex plugin, Claude Code plugin, broken artifact, or unsupported
-directory.
-
-### `forma doctor repo [path]`
+### `forma doctor [path]`
 
 Runs a read-only repository agent-operability check:
 
 ```bash
-forma doctor repo
-forma doctor repo --format json /path/to/repo
+forma doctor
+forma doctor --format json /path/to/repo
+forma doctor --format agent /path/to/repo
 ```
 
-It reports whether the repository is `ready`, `needs-agent`, `needs-human`, or
-`unsafe` based on static signals such as agent entrypoints, source/write
-boundaries, validation commands, Forma profile presence, and instruction
-weight. It does not create files, review a profile, or run installs.
+It reports whether a new Agent can understand what to read, what can change,
+what must not change, how to validate, when to ask a human, and where to hand
+off task state and evidence. Core readiness is based on repository
+agent-operability contracts. Forma profile presence is an optional integration
+signal, not a readiness prerequisite.
+
+The JSON renderer emits a repo-doctor schema with `facts`, `findings`,
+`evidence`, `confidence`, `programmatic_actions`, `agent_handoffs`,
+`human_decisions`, and `unsafe_blockers`. Adoption guidance inside `facts`
+uses `owner_confirmations` for the approval points around profile refinement,
+build/verify, install target/scope, and commit. Use the report as input to
+`forma init --from-report`.
 
 ### `forma init [path]`
 
@@ -128,22 +121,32 @@ Plans deterministic remediation for a repository:
 ```bash
 forma init
 forma init --format agent
+forma doctor --format json . > /tmp/forma-doctor.json
+forma init --from-report /tmp/forma-doctor.json
 forma init --apply
+forma init --from-report /tmp/forma-doctor.json --apply
 ```
 
 Default mode is a dry run. With `--apply`, Forma creates missing deterministic
-skeleton files under a git-trackable `.forma/` directory:
+workflow source files under a git-trackable `.forma/` directory:
 `.forma/profile.yaml`, `.forma/reinstall-workflow.sh`, and `.forma/.gitignore`.
 The `.gitignore` ignores only `/state/`, so profile source and reinstall
 workflow stay trackable while runtime workflow state lives under `.forma/state/`.
-These are draft project
-source files; `forma init` does not claim the profile has been reviewed. Agents
-can use profile-authoring principles to draft candidate rules, but review is a
-human durability decision about which rules become long-term project workflow
-source. The generated `reinstall-workflow.sh` is bootstrap-incomplete until
-install facts are confirmed and written into a fixed-fact script. If a review
-packet is generated during profile authoring, ask the user whether to keep it;
-do not leave it in the repo by default.
+When `--from-report` is provided, init also materializes
+`.forma/agent-operability/doctor-report.json`,
+`.forma/agent-operability/agent-handoff.md`, and
+`.forma/agent-operability/human-decisions.md`.
+
+These are draft project workflow source and handoff files. `forma init` does
+not claim the profile has been reviewed, does not approve semantic repo rules,
+and does not make the repo agent-friendly by itself. Agents can use the
+report-derived handoff plus profile-authoring principles to propose remediation,
+but owner confirmations remain separate for profile approval, build/verify,
+install target/scope, and committing workflow source. The generated
+`reinstall-workflow.sh` is bootstrap-incomplete until install facts are
+confirmed and written into a fixed-fact script. If a review packet is generated
+during profile authoring, ask the user whether to keep it; do not leave it in
+the repo by default.
 
 ### `forma build bundle`
 
@@ -295,14 +298,21 @@ start a new agent thread so the installed skills are discovered.
 
 ### `forma explain`
 
-Prints canonical authoring guidance without requiring an external agent to read
-Forma source files:
+Prints agent-facing command guidance and narrower authoring guidance without
+requiring an external agent to read Forma source files:
 
 ```bash
+forma explain agent --target codex
 forma explain profile --target codex
+forma explain stage shape --target codex
 forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
+
+`forma explain agent` is the agent-facing command guide for Forma CLI surfaces.
+It is the first `explain` command an agent should read when it needs to choose
+between profile authoring, workflow generation, plugin output, optional creator
+output, profile adoption, drift, doctor, init, verify, or install.
 
 `forma explain profile` is useful both for people and for agents, but the
 renderer changes the handoff:
@@ -314,23 +324,31 @@ renderer changes the handoff:
   may be proposed, and when to stop for user review.
 - `--format json` gives tools the same guidance as structured data.
 
-This command does not create profile files and does not claim a profile has been
-reviewed. Use `forma init --apply` when deterministic skeleton files are needed,
-then combine `forma explain profile` with project facts to draft rules for human
-review.
+`forma explain profile` does not inspect the repository, create profile files,
+or claim a profile has been reviewed. Use `forma init --apply` when
+deterministic workflow source files are needed, then combine
+`forma explain profile` with project facts to draft rules for human review.
+
+Before writing profile files, run `forma explain stage <stage>` for every stage
+touched by the candidate rules. Stage guidance lets the agent compare candidate
+profile rules against the base methodology: omit rules already owned by the
+base stage contract, keep only durable project adaptations in the profile, and
+propose a methodology change when the base contract is weak or missing.
 
 When another agent needs to draft a profile or temporary injection, use this
-command to give it the rules. For the normal profile-first path, you can simply
-say:
+command family to give it the rules. For the normal profile-first path, you can
+simply say:
 
 ```text
 Use Forma to generate a Codex workflow for this project.
 Show me the project rules you extracted first; after I approve them, generate and install it.
 ```
 
-The agent uses `forma explain profile --target codex` to load the authoring
-standard, then combines it with project facts to propose profile YAML. Commit
-that profile only when the rules need long-term reuse.
+The agent starts with `forma explain agent --target codex`, then uses
+`forma explain profile --target codex` to load the authoring standard. After it
+combines that guidance with project facts, it uses `forma explain stage <stage>`
+for each touched stage before proposing profile YAML. Commit that profile only
+when the rules need long-term reuse.
 
 Next action: after the profile is reviewed, use `forma build bundle` for a
 skill bundle or `forma build plugin` for plugin source.

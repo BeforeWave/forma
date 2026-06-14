@@ -33,9 +33,11 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
     assert "ACTIONABLE REPORT" in profile.stdout
     assert "# Forma Profile Guidance" in profile.stdout
     assert (
-        "source/skill-creator/references/profile-authoring-principles.md"
+        "source/agent-guide/references/profile-authoring-principles.md"
         in profile.stdout
     )
+    assert "Candidate Draft From Project Facts" in profile.stdout
+    assert "does not inspect the repository" in profile.stdout
     assert "Stage Key Boundary" in profile.stdout
     assert "Generated output names" in profile.stdout
 
@@ -91,7 +93,7 @@ def test_wheel_cli_uses_packaged_assets_from_non_repo_cwd(tmp_path: Path) -> Non
         env=env,
     )
     creator = creator_dist / "codex" / "forma-creator"
-    assert (creator / "references" / "profile-authoring-principles.md").is_file()
+    assert (creator / "references" / "temporary-injection-generation.md").is_file()
     assert (
         creator
         / "resources"
@@ -120,7 +122,7 @@ def test_sdist_includes_runtime_asset_sources(tmp_path: Path) -> None:
     assert any(name.endswith("source/methodology/stages/shape.md") for name in names)
     assert any(
         name.endswith(
-            "source/skill-creator/references/profile-authoring-principles.md"
+            "source/agent-guide/references/profile-authoring-principles.md"
         )
         for name in names
     )
@@ -197,7 +199,7 @@ def _assert_wheel_assets(wheel: Path) -> None:
         names = set(archive.namelist())
     assert "forma/assets/source/methodology/stages/shape.md" in names
     assert (
-        "forma/assets/source/skill-creator/references/profile-authoring-principles.md"
+        "forma/assets/source/agent-guide/references/profile-authoring-principles.md"
         in names
     )
     assert (

@@ -12,13 +12,14 @@
 
 | 目标 | 命令路径 | 下一步 |
 |---|---|---|
-| 阅读或交接 profile 编写规则 | `forma explain profile --format human|agent|json --target codex` | `human` 给人看简洁说明，`agent` 给可执行编写契约，`json` 给工具链；起草 profile 前仍要结合项目事实。 |
+| 选择 agent-facing Forma CLI 路线 | `forma explain agent --format human|agent|json --target codex` | agent 需要在 profile authoring、stage guidance、temporary injection、doctor/init、build、verify、drift、install、creator 或 profile adoption 之间选路时，先从这里开始。 |
+| 阅读或交接 profile 编写规则 | `forma explain profile --format human|agent|json --target codex` | 只在 `forma explain agent` 把任务路由到 profile authoring 后使用。它不检查 repo，也不会自动生成草稿；agent 仍要把这份规则和项目事实结合起来，再提出 profile rules。 |
+| 把 candidate rules 和 stage methodology 对照 | `forma explain stage <stage> --format human|agent|json --target codex` | candidate profile rules 已经识别出 touched stages 后、真正写 profile 前使用。base methodology 已经负责的规则要删掉；如果 base contract 弱，则提 methodology 修改。 |
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；human 输出是简洁产物结果。需要给 agent 或工具链交接下一步时，用 `--format agent` 或 `--format json`。 |
 | 生成默认 Plan-First skill bundle | `forma build bundle --target <target> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；运行 `forma verify <dir>`，再用匹配的 target 安装。 |
 | 生成 plugin source | `forma build plugin --target codex|claude-code --profile <profile.yaml> --output <dir>` | human 输出是简洁产物结果。安装 handoff 用 `--format agent` 或 `--format json`；Codex plugin 通过 Codex 安装，Claude Code plugin root 用 `forma install --target claude-code` 安装。 |
-| 诊断 repo 是否 agent 友好 | `forma doctor repo [path] --format human|agent|json` | 只读检查 agent 入口、边界、验证信号、profile 和 instructions 负担。 |
-| handoff 前诊断生成产物 | `forma doctor <dir> --format human|agent|json` 或 `forma doctor --json <dir>` | 用结果确认 artifact kind、target、验证状态、Forma 是否能安装、安装路线、blockers 和 next actions。 |
-| 初始化确定性的 Forma 源文件 | `forma init [path] --format human|agent|json` | 默认 dry-run；用 `--apply` 创建 `.forma/` profile source 和 bootstrap-incomplete reinstall workflow skeleton。 |
+| 诊断 repo 是否 agent 友好 | `forma doctor [path] --format human|agent|json` | 只读检查 agent 入口、source 边界、验证契约、setup 契约、任务状态、human gates、噪音控制和可选 agent integrations。 |
+| 从 repo facts 初始化确定性的 Forma 源文件 | `forma init [path] --from-report <report> --format human|agent|json` | 默认 dry-run；用 `--apply` 创建 `.forma/` workflow source 和 report-derived Agent handoff 文件。 |
 | 构建可选 creator 临场路径 | `forma build creator --target <target> --output <dir>` | 只在 creator 路径使用；运行 `forma verify <dir>/<target>/forma-creator`，再用匹配的 target 安装。 |
 | 给 agent 提供 temporary-injection 规则 | `forma explain temporary-injection --target codex` | 只用于可选 creator / 临场生成路径。 |
 
@@ -62,7 +63,8 @@ forma verify --json /tmp/settings-workflow-codex
 - 如果 skill bundle 或 creator 验证通过，用 `forma install` 安装 verified 本地路径。
 - 如果 Codex plugin 验证通过，通过 Codex 安装，不要用 `forma install`。
 - 如果 Claude Code plugin 验证通过，用 `forma install --target claude-code` 安装 plugin root。
-- 如果路径含义不清楚，运行 `forma doctor <path>` 查看安装路线和 next actions。
+- 如果产物安装路线不清楚，用 build 命令的 `--format agent|json` handoff 和下面的
+  install 边界判断；`doctor` 用于诊断 repo 是否 agent-friendly，不再检查生成产物。
 
 `forma verify` 检查结构和方法规则。它不替代 profile 评审，也不替代产品判断。验证边界见 [Verifier](./verifier.zh-CN.md)。
 
@@ -74,32 +76,25 @@ agent-only handoff 细节；`agent` 包含可执行 next actions、stop conditio
 forbidden actions；`json` 给工具链使用。命令外形可以共用，但内容按命令语义区分：
 `doctor` 输出 findings 和 evidence，`explain` 输出编写指南和 handoff 规则。
 
-### `forma doctor <path>`
-
-handoff 或安装前诊断一个生成产物：
-
-```bash
-forma doctor /tmp/settings-workflow-codex
-forma doctor --json /tmp/forma-codex-plugin
-forma doctor --format agent /tmp/forma-codex-plugin
-```
-
-doctor 输出会说明 artifact kind、target、验证状态、`forma install` 是否支持、当前是否可安装、正确安装路线、blockers 和 next actions。
-
-当用户或 agent 不确定当前路径是 skill、skill bundle、Codex plugin、Claude Code plugin、损坏产物还是不支持的目录时，先运行这个命令。
-
-### `forma doctor repo [path]`
+### `forma doctor [path]`
 
 只读诊断一个 repo 是否适合 agent 操作：
 
 ```bash
-forma doctor repo
-forma doctor repo --format json /path/to/repo
+forma doctor
+forma doctor --format json /path/to/repo
+forma doctor --format agent /path/to/repo
 ```
 
-它会基于静态信号报告 `ready`、`needs-agent`、`needs-human` 或 `unsafe`，包括
-agent 入口、source/write 边界、验证命令、Forma profile 和 instructions
-负担。它不会创建文件、review profile 或执行安装。
+它会回答一个新 Agent 是否能知道先读什么、哪些能改、哪些不能改、怎么验证、
+什么时候问人、任务状态和证据放哪里。核心 readiness 来自 repo 的
+agent-operability 契约；Forma profile 只是可选 integration，不是 ready 的前提。
+
+JSON renderer 会输出 repo-doctor schema，包含 `facts`、`findings`、`evidence`、
+`confidence`、`programmatic_actions`、`agent_handoffs`、`human_decisions` 和
+`unsafe_blockers`。`facts` 里的 adoption guidance 用 `owner_confirmations`
+表达 profile 规整、build/verify、install target/scope 和 commit 等确认点。这个
+report 可以作为 `forma init --from-report` 的输入。
 
 ### `forma init [path]`
 
@@ -108,18 +103,29 @@ agent 入口、source/write 边界、验证命令、Forma profile 和 instructio
 ```bash
 forma init
 forma init --format agent
+forma doctor --format json . > /tmp/forma-doctor.json
+forma init --from-report /tmp/forma-doctor.json
 forma init --apply
+forma init --from-report /tmp/forma-doctor.json --apply
 ```
 
 默认是 dry-run。加 `--apply` 后，Forma 会在可被 Git 跟踪的 `.forma/` 目录下创建
-结构化 skeleton 文件：`.forma/profile.yaml`、
+确定性的 workflow source 文件：`.forma/profile.yaml`、
 `.forma/reinstall-workflow.sh`，以及 `.forma/.gitignore`。`.gitignore` 只 ignore
 `/state/`，所以 profile source 和 reinstall workflow 仍可被 Git 跟踪，runtime workflow state
-放在 `.forma/state/` 下。这些是 draft project source；`forma init` 不会声称 profile 已经 review。Agent 可以按
-profile-authoring principles 生成候选规则草稿，但 review 是人的长期采纳决策：决定
-哪些规则可以成为 long-term project workflow source。生成的 `reinstall-workflow.sh`
-在 install facts 被确认并写入 fixed-fact 脚本之前都是 bootstrap-incomplete。如果
-profile authoring 过程中生成了 review packet，应询问用户是否保留；不要默认留在 repo 里。
+放在 `.forma/state/` 下。传入 `--from-report` 时，init 还会生成
+`.forma/agent-operability/doctor-report.json`、
+`.forma/agent-operability/agent-handoff.md` 和
+`.forma/agent-operability/human-decisions.md`。
+
+这些是 draft project workflow source 和 handoff 文件。`forma init` 不会声称
+profile 已经 review，不会批准语义 repo 规则，也不会单靠自己把 repo 变成
+agent-friendly。Agent 可以结合 report-derived handoff 和 profile-authoring
+principles 生成 remediation proposal，但 profile approval、build/verify、install
+target/scope 和是否提交 workflow source 都仍然是独立 owner confirmations。生成的
+`reinstall-workflow.sh` 在 install facts 被确认并写入 fixed-fact 脚本之前都是
+bootstrap-incomplete。如果 profile authoring 过程中生成了 review packet，应询问用户
+是否保留；不要默认留在 repo 里。
 
 ### `forma build bundle`
 
@@ -245,13 +251,19 @@ forma install --target claude-code --scope project /tmp/forma-claude-code-plugin
 
 ### `forma explain`
 
-输出标准编写指南，让外部 agent 不需要阅读 Forma 源码：
+输出 agent-facing 命令指南和更窄的编写指南，让外部 agent 不需要阅读 Forma 源码：
 
 ```bash
+forma explain agent --target codex
 forma explain profile --target codex
+forma explain stage shape --target codex
 forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
+
+`forma explain agent` 是 Forma CLI 各个 agent-facing 命令面的总指南。agent 需要在
+profile authoring、workflow generation、plugin output、可选 creator output、
+profile adoption、drift、doctor、init、verify 或 install 之间选路时，应该先读它。
 
 `forma explain profile` 既可以给人看，也可以给 agent 用，但 renderer 的交接重点不同：
 
@@ -259,18 +271,26 @@ forma explain temporary-injection --format json --target codex
 - `--format agent` 给出可执行编写契约：需要收集哪些项目事实，如何区分长期规则和任务规则，可以提出哪些文件，以及什么时候必须停下来让用户 review。
 - `--format json` 把同一类指导转成结构化数据，供工具链消费。
 
-这个命令不创建 profile 文件，也不能声称 profile 已经 review。需要确定性 skeleton
-时用 `forma init --apply`；之后再把 `forma explain profile` 的规则和项目事实结合起来，
-起草给人 review 的 profile。
+`forma explain profile` 不检查 repo，不创建 profile 文件，也不能声称 profile 已经
+review。需要确定性 skeleton 时用 `forma init --apply`；之后再把
+`forma explain profile` 的规则和项目事实结合起来，起草给人 review 的 profile。
 
-当另一个 agent 需要起草 profile 或 temporary injection 时，用这个命令给它规则。正常 profile-first 路径可以直接说：
+真正写 profile 文件前，对 candidate rules 涉及的每个 stage 运行
+`forma explain stage <stage>`。stage guidance 用来把 candidate profile rules 和
+base methodology 对照：base stage contract 已经负责的规则不要放进 profile；profile
+里只保留长期的项目适配；如果 base contract 本身弱或缺失，就提出 methodology 修改。
+
+当另一个 agent 需要起草 profile 或 temporary injection 时，用这一组命令给它规则。正常 profile-first 路径可以直接说：
 
 ```text
 用 Forma 给这个项目生成一套 Codex workflow。
 先把你提炼出的项目规则给我看；确认后再生成并安装。
 ```
 
-agent 会用 `forma explain profile --target codex` 读取 profile 编写标准，再结合项目事实提出 profile YAML。只有这些规则需要长期复用时，才把 profile 提交进版本控制。
+agent 先用 `forma explain agent --target codex` 判断路线，再用
+`forma explain profile --target codex` 读取 profile 编写标准。它把这些规则和项目事实
+结合起来后，还要对每个 touched stage 使用 `forma explain stage <stage>`，然后再提出
+profile YAML。只有这些规则需要长期复用时，才把 profile 提交进版本控制。
 
 下一步：profile review 通过后，用 `forma build bundle` 生成 skill bundle，或用
 `forma build plugin` 生成 plugin source。

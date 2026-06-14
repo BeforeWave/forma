@@ -9,9 +9,14 @@
 AGENTS.md, custom skills, and Superpowers can give an agent rules and process.
 For lightweight projects, that is usually enough.
 
-Forma turns project rules into workflow skills. Those skills make the agent
-preview how the rules apply to the current task before implementation, then
-execute against a task contract and leave proof.
+Forma turns project rules into workflow skills. Before editing files, the agent
+uses those skills to show how the rules apply to the current task: what it will
+change, how it will check the result, and when it should stop for review.
+
+The rules are not applied ad hoc during execution. They first become the task
+boundary; after confirmation, the agent works within that boundary and leaves
+validation records. That means less repeated explanation, less drift, and work
+that is easier to review.
 
 Once Forma is installed, one sentence can have the agent generate that workflow
 from the current project.
@@ -51,9 +56,9 @@ Most users see three things:
 
 | Name | What it does |
 |---|---|
-| `profile` | A structured description of extracted engineering rules: stage constraints, tool habits, validation, proof, and stop conditions. |
+| `profile` | A structured description of extracted engineering rules: stage constraints, tool habits, validation evidence, and stop conditions. |
 | `workflow bundle / plugin` | Generated from the profile and installed into Codex, Claude Code, or OpenCode so the agent follows the same rules. |
-| `task contract` | The task boundary the agent writes before implementation: goal, scope, validation, and proof. |
+| `task contract` | The task boundary the agent writes before implementation: goal, scope, validation, and evidence expectations. |
 
 Commit the profile only when the rules need long-term reuse. For a trial
 workflow, it can be a temporary file and does not need to be kept.
@@ -63,10 +68,10 @@ lifecycle, plus one continuous execution entrypoint:
 
 | Stage | Purpose |
 |---|---|
-| `plan` | Align the goal with project rules and produce a reviewable proposal; do not write files or execute work. |
+| `plan` | Check the goal against project rules and produce a reviewable proposal; do not write files or execute work. |
 | `ground` | Gather the evidence required by the rules from code, docs, issues, tests, and related sources. |
 | `lock` | Write the accepted approach into `plan.md` and `tasks.md`, locking the task contract. |
-| `execute` | Execute one accepted task, run validation, record proof, and stop when review is needed. |
+| `execute` | Execute one accepted task, run validation, record the result, and stop when review is needed. |
 
 `showhand` is the continuous execution entrypoint: once a plan is locked,
 it continues remaining tasks until blocked, validation fails, or human input is
@@ -77,7 +82,8 @@ stages like `plan` and supports Codex-qualified triggers such as `forma:plan`.
 A direct skill bundle is installed as standalone skills with the `forma-*`
 prefix.
 
-When the team updates a profile, it updates which rules the workflow guards.
+When the team updates a profile, it updates which rules the workflow asks the
+agent to enforce.
 
 ---
 
@@ -110,7 +116,7 @@ Validation:
 ```
 
 This is not a note added after implementation. It is the task boundary the agent
-locks before editing code. The task list and execution proof are recorded in
+locks before editing code. The task list and execution records live in
 [`plans/issue-cli-agent-facing-help/`](./plans/issue-cli-agent-facing-help/).
 
 ---
@@ -127,14 +133,14 @@ pipx install forma-cli
 Then tell the agent:
 
 ```text
-Use Forma to generate a Codex workflow for this project.
-Show me the project rules you extracted first; after I approve them, generate and install it.
+Use Forma to manage this project's engineering rules as a Codex workflow.
+Extract the rules, show me the profile you propose, then after I approve it, build, verify, and install the workflow.
 ```
 
 The agent should load Forma's profile guidance itself, then generate, verify,
 and install the workflow after you approve the rules.
 
-After the generated workflow is installed, start a new thread:
+After the generated workflow is installed, start a fresh conversation:
 
 ```text
 Use forma:plan to plan this issue first.
@@ -146,7 +152,7 @@ Issue:
 If you installed a direct skill bundle rather than a plugin, use the matching
 `forma-*` skill trigger instead.
 
-The first useful response should be a proposal, not a patch.
+The first useful response should be a proposal before file edits.
 
 > **If the agent edits files immediately**, the workflow was not loaded or was
 > not triggered; Forma is not running.
@@ -180,7 +186,7 @@ The repository contains more than concept docs.
 
 `examples/profiles/` contains sanitized profiles derived from real workflow
 families. They show how teams express engineering rules, source-reading rules,
-validation depth, proof, and stop conditions.
+validation depth, evidence records, and stop conditions.
 
 Generated example output is no longer committed. If a sample profile is useful,
 build it locally with `forma build bundle` or `forma build plugin` and inspect
@@ -188,7 +194,7 @@ the generated output in a temporary or project-chosen path.
 
 `plans/issue-*/` is Forma's own development record. Each issue records `plan.md`,
 `tasks.md`, and `runs/task-*.md` with real task contracts, validation results,
-and proof. Judge a run by those records.
+and execution records. Judge a run by those records.
 
 ---
 
@@ -198,7 +204,8 @@ Forma is still early. It supports skill bundles for Codex, Claude Code, and
 OpenCode today. Plugin source is supported for Codex and Claude Code.
 
 It helps agents plan before they act and leave evidence after they act. Each run
-still needs to be judged by the contract and proof it leaves behind.
+still needs to be judged by the task contract and validation records it leaves
+behind.
 
 Current focus: easier profile generation, smoother bundle/plugin installation,
 stronger verification, and more real runs.
@@ -217,7 +224,7 @@ repository's profile source lives in
 |---|---|
 | [Quick Start](./docs/quick-start.md) | First run, workflow generation, verification, and installation. |
 | [Concepts](./docs/concepts.md) | Project rules, workflow outputs, task contracts, and stage boundaries. |
-| [Workflow Contract](./docs/workflow-contract.md) | How task contracts organize evidence, boundaries, validation, and proof. |
+| [Workflow Contract](./docs/workflow-contract.md) | How task contracts organize evidence, boundaries, validation, and execution records. |
 
 **Reference:**
 

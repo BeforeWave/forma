@@ -7,7 +7,10 @@ artifact, not a tracked Layer 3 profile.
 ## Stage Key Boundary
 
 Temporary injection JSON must address stages only by internal stage keys:
-`shape`, `gauge`, `seal`, `pour`, and `flow`.
+`shape`, `gauge`, `seal`, `pour`, `flow`, `hone`, and `mend`.
+
+`hone` and `mend` are optional stages. Temporary injection for those stages
+affects generated output only when the generation also enables the stage.
 
 Do not use generated output names such as plugin-local `plan`/`showhand` names
 or direct skill names using the `forma-*` pattern as JSON keys. Generated output
@@ -25,7 +28,7 @@ final generated skill name on the right side, for example
   verbatim into the injection.
 - Extract only workflow constraints, validation preferences, local references,
   display text, final installable skill names, plugin display metadata, and
-  conditional route decisions that affect the generated five-skill bundle or
+  conditional route decisions that affect the generated workflow bundle or
   plugin.
 - Keep source-specific examples concise and sanitized. Do not include private
   paths, credentials, business secrets, or organization-only commands unless
@@ -52,6 +55,8 @@ Classify every extracted constraint before writing JSON.
   plan-level decisions.
 - `constraints.pour`: Daily current-task execution rules.
 - `constraints.flow`: Automated remaining-task execution rules.
+- `constraints.hone`: Read-only reconciliation rules.
+- `constraints.mend`: Same-issue rework contract rules.
 - `conditional_overlays`: Heavy rules that should apply only after `shape`
   records a selected scenario in `plan.md`, such as docs-only,
   generated-baseline, migration, governance, backend, frontend, or cross-layer

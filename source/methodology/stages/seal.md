@@ -24,6 +24,7 @@ Materialize an already-settled plan into plan.md and task-level execution contra
 - Resolve bundled workflow scripts and references relative to the current triggered skill package; never switch to same-named resources in sibling skill directories, even if their contents match.
 - Fill in `plan.md` for the issue, including explicit `Plan Strategy` for new plans; legacy plans without it default to `step-execution`.
 - Finalize `tasks.md` for the issue, encoding each task's accepted surface, validation gates, proof obligations, dependencies, and constraints while preserving the structured task schema.
+- Run `scripts/forma-workflow.sh check <issue-id>` after finalizing `plan.md` and `tasks.md` and before staging or asking for commit permission; if the check fails, fix the plan/task contract and rerun the check before continuing.
 - Stage only the finalized `plan.md` and `tasks.md`, show the staged diff to the user, then commit only that staged snapshot after explicit user permission.
 
 ## Adds
@@ -39,3 +40,4 @@ Materialize an already-settled plan into plan.md and task-level execution contra
 ## Output
 
 - Follow `references/output-format.md`.
+- Include `Contract Check:` with the latest `scripts/forma-workflow.sh check <issue-id>` result before asking for commit permission.

@@ -227,7 +227,6 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
         [
             "- Before generating a bundle, load "
             "`references/canonical-plan-first.md` and "
-            "`references/profile-authoring-principles.md` and "
             "`references/temporary-injection-generation.md`; preserve the "
             "bundled canonical plan-first semantics and "
             "classify natural-language constraints before writing JSON.",

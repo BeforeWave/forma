@@ -58,6 +58,7 @@ METHODOLOGY_RESOURCES: Mapping[str, Tuple[Tuple[str, str, bool], ...]] = {
     "mend": (
         ("resources/mend/references/rework-rules.md", "references/rework-rules.md", False),
         ("resources/shared/references/output-format.md", "references/output-format.md", False),
+        ("resources/shared/scripts/forma-workflow.sh", "scripts/forma-workflow.sh", True),
     ),
 }
 

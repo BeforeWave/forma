@@ -30,13 +30,16 @@ them, those rules enter the generated workflow output for this run.
 | Path | Best for | Input | Output |
 |---|---|---|---|
 | `forma-creator` | On-the-spot customization; try a project workflow first. | Project facts, user additions, confirmed rules. | Verified one-off skill bundle or plugin. |
-| `forma explain profile` + agent | Durable source from the start. | Profile authoring standard, project facts, team review. | Tracked profile YAML, then compiled workflow. |
+| `forma explain agent` -> profile authoring | Durable source from the start. | Agent command routing, profile authoring standard, project facts, team review. | Tracked profile YAML, then compiled workflow. |
 | `forma build bundle` / `forma build plugin` | A reviewed profile already exists. | Tracked profile YAML. | Repeatable workflow bundle or plugin. |
 
-`forma explain profile` is the default path for making project rules visible as
-a profile before generation. `forma-creator` is the optional "hide the profile
-file and try a workflow now" path. `forma build bundle` and
-`forma build plugin` are deterministic build commands after a profile exists.
+`forma explain agent` is the command-routing entrypoint for the normal profile
+path. It routes the agent to `forma explain profile` for the profile authoring
+standard and to `forma explain stage <stage>` when candidate rules need to be
+checked against base methodology before writing profile files. `forma-creator`
+is the optional "hide the profile file and try a workflow now" path.
+`forma build bundle` and `forma build plugin` are deterministic build commands
+after a profile exists.
 
 ## Fixed Target Contract
 

@@ -11,7 +11,6 @@ constraints:
     - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
     - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
     - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
-    - When asking whether a proposal is ready to hand off to lock, use structured user input when available; otherwise use a textual confirmation and stop until the user confirms.
   gauge:
     - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
     - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
@@ -22,45 +21,34 @@ constraints:
     - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
     - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
     - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
-    - After staging finalized plan files and showing the staged diff, use structured user input when available for commit permission; after the user confirms, commit the locked plan without asking for a second confirmation.
+    - When the staged plan diff is ready, ask for commit permission once. If the user confirms, commit that staged plan snapshot directly instead of asking for another confirmation.
   pour:
-    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
-    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
     - Run the narrowest relevant test first, then the shared validation gate before review-ready.
     - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
   flow:
-    - Read the active plans/issue-<id>/plan.md, tasks.md, current task from scripts/forma-workflow.sh next <issue-id>, relevant source files, and only the references necessary for the current task.
-    - Record meaningful execution decisions in plans/issue-<id>/implement-notes.md when they affect later tasks or review.
     - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
     - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
-  hone:
-    - Resolve the reconciliation target from explicit feedback first, then recent Forma skill trigger context, review cache, task run evidence, and current diff or commit evidence.
-    - Evaluate feedback against the current stage constraints and bundled references before deciding whether it is implementation rework, delivery revision, plan rework, source rework, aligned, acceptable deviation, or blocked.
-    - For task implementation rework, require `plans/issue-<id>/implement-notes.md` to record how feedback changed implementation, validation, generated artifacts, or commit/history.
-    - For plan-level feedback, return to planning without recording the finding as implementation notes.
-    - When reconciliation needs the user to choose whether to materialize same-issue rework or notify a parent thread, prefer structured user input when available; otherwise present the route choices in text and wait for explicit confirmation.
-  mend:
-    - Resolve rework intake from explicit human feedback first, then from `forma-reconcile` output when present.
-    - Write feedback source, classification, same-issue rationale, confirmation state, and appended task ids to `plans/issue-<id>/rework.md`.
-    - Append only ordinary structured `rework-*` task blocks to `plans/issue-<id>/tasks.md`; keep grouping and source prose out of `tasks.md`.
-    - Do not implement source changes, complete tasks, or write run evidence while materializing a rework contract.
-    - For rework contract confirmation, prefer structured user input when available; otherwise use the required `## rework-contract` output with `Required Confirmation:` and wait for explicit user confirmation.
 workflow_adds:
-  seal:
-    - Run the bundled workflow runner with `check <issue-id>` after finalizing `plan.md` and `tasks.md` and before staging or asking for commit permission.
-    - If the contract check fails, fix the plan/task contract and rerun the check; do not stage or commit the locked plan while the check is failing.
+  gauge:
+    - 'When running in a Codex app-hosted side or forked conversation, resolve the parent thread id from host request metadata first: `x-codex-turn-metadata.forked_from_thread_id`.'
+    - 'After producing the grounding handoff, send one compact grounding-result message back to the parent thread when a thread-messaging capability is available.'
+    - 'Do not guess, search, or infer the parent thread. If metadata is absent, report `Parent Handoff: blocked-no-parent-thread`. If messaging is unavailable, report `Parent Handoff: blocked-no-thread-tool`.'
+    - 'The parent message is planning input only. It must report landing points, confirmed facts, plan implications, validation surfaces, blocking gaps, and source material; it must not ask the parent thread to implement, write plan files, or proceed without user confirmation.'
+    - 'Use the parent message shape `GROUNDING RESULT FOR PLAN`, `Intent`, `Landing Points`, `Recommended Plan Frame`, `Validation Surfaces`, `Blocking Gaps`, `Source Material`, and `Next Step For Main Thread`.'
+    - 'Each landing point must separate `Fact`, `Plan implication`, and `Confidence`; use `Inference` or `Recommendation` labels when the item is not a confirmed fact.'
+    - 'Prefer one structured parent message with multiple landing points instead of sending one message per fact, unless the grounding naturally splits into separate independent packages.'
   mend:
-    - Run the bundled workflow runner with `check <issue-id>` after updating `rework.md` and appending tasks and before staging or asking for commit permission.
-    - If the contract check fails, fix the rework task contract and rerun the check; do not stage or commit the rework contract while the check is failing.
-    - After the user confirms a staged rework contract, commit only `plans/issue-<id>/rework.md` and `plans/issue-<id>/tasks.md`; then do not stop until the execution handoff disposition is resolved and reported.
-    - If a trusted parent thread id and host thread-messaging capability are available, send the execution handoff to that thread. If no trusted parent thread id was injected, ask the user whether to provide one or authorize a bounded host-thread search; when authorized, use host thread listing/search tools to locate the likely parent instead of guessing.
-    - "Rework completion requires an `Execution Handoff` disposition: `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, `search-authorized-not-found`, or `declined-by-user`."
+    - 'After the confirmed rework contract is committed, report the committed contract path, appended task ids, and recommended execution route back to the originating host or parent thread; do not implement the rework inside the rework stage.'
+    - 'After the user confirms a staged rework contract, commit only the rework contract file(s) and `plans/issue-<id>/tasks.md`; then resolve and report the execution handoff before stopping.'
+    - 'When running in a Codex app-hosted side or forked conversation, resolve the parent thread id from host request metadata first: `x-codex-turn-metadata.forked_from_thread_id`.'
+    - 'Treat the metadata parent thread id as an optional host capability. If it is absent, do not guess, do not list or search recent threads, and do not infer the parent from thread title or history; ask the user for the parent thread id or report `Execution Handoff: blocked-no-parent-thread`.'
+    - 'If the parent thread id is present and a host thread-messaging capability is available, send the rework-result report and recommended execution route to that parent thread. If no thread-messaging capability is available, report `Execution Handoff: blocked-no-thread-tool`.'
+    - "Rework completion requires an `Execution Handoff` disposition: `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, or `declined-by-user`."
 output_adds:
-  seal:
-    - "Include `Contract Check:` with the result of the bundled workflow runner `check <issue-id>` command before asking for commit permission."
+  gauge:
+    - "Include `Parent Handoff:` with one of `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, or `declined-by-user` when grounding ran in a side or forked conversation."
   mend:
-    - "Include `Contract Check:` with the result of the bundled workflow runner `check <issue-id>` command before asking for commit permission."
-    - "Include `Execution Handoff:` with one of `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, `search-authorized-not-found`, or `declined-by-user` after the rework contract is committed or the handoff is blocked."
+    - "Include `Execution Handoff:` with one of `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, or `declined-by-user` after the rework contract is committed or the handoff is blocked."
 resources:
   default:
     references:

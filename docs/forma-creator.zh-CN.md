@@ -20,10 +20,14 @@
 | 路径 | 适合 | 输入 | 输出 |
 |---|---|---|---|
 | `forma-creator` | 临场定制，先试一套项目 workflow。 | 项目事实、用户补充、确认后的准则。 | 已验证的一次性 skill bundle 或 plugin。 |
-| `forma explain profile` + agent | 一开始就要长期维护源码。 | profile 编写标准、项目事实、团队 review。 | tracked profile YAML，再编译成 workflow。 |
+| `forma explain agent` -> profile authoring | 一开始就要长期维护源码。 | agent 命令路由、profile 编写标准、项目事实、团队 review。 | tracked profile YAML，再编译成 workflow。 |
 | `forma build bundle` / `forma build plugin` | 已经有 review 过的 profile。 | tracked profile YAML。 | 可重复生成的 workflow bundle 或 plugin。 |
 
-`forma explain profile` 是默认路径：先把项目规则整理成可 review 的 profile，再生成 workflow。`forma-creator` 是可选路径：隐藏 profile 文件处理，先临场试一套 workflow。`forma build bundle` 和 `forma build plugin` 是 profile 已经存在后的确定性生成命令。
+`forma explain agent` 是正常 profile 路径的命令路由入口。它把 agent 路由到
+`forma explain profile` 读取 profile 编写标准；candidate rules 真正写进 profile 前，
+还要用 `forma explain stage <stage>` 和 base methodology 对照。`forma-creator`
+是可选路径：隐藏 profile 文件处理，先临场试一套 workflow。`forma build bundle` 和
+`forma build plugin` 是 profile 已经存在后的确定性生成命令。
 
 ## 固定目标契约
 

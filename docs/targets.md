@@ -49,9 +49,10 @@ to the generated plugin root, then install and enable it through Codex with
 a new thread after install. If Codex CLI output or marketplace behavior differs,
 consult current Codex docs or `codex plugin marketplace --help`.
 
-Run `forma doctor <plugin-root>` when handing a plugin to another user or agent.
-It confirms the artifact is a Codex plugin, verifies the output, and reports
-that installation belongs to Codex rather than `forma install`.
+Run `forma verify <plugin-root>` before handing a plugin to another user or
+agent. For structured install handoff, use the `forma build plugin --format
+agent|json` output and keep the install route explicit: Codex plugin
+installation belongs to Codex rather than `forma install`.
 
 - [Install a local plugin manually](https://developers.openai.com/codex/plugins/build#install-a-local-plugin-manually)
 - [Add a marketplace from the CLI](https://developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli)
