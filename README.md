@@ -9,9 +9,9 @@
 AGENTS.md, custom skills, and Superpowers can give an agent rules and process.
 For lightweight projects, that is usually enough.
 
-Forma turns project rules into workflow skills. Before editing files, the agent
-uses those skills to show how the rules apply to the current task: what it will
-change, how it will check the result, and when it should stop for review.
+Forma turns project rules into workflows that agents can execute. Before working
+on a task, the agent explains how those rules apply: what it will do, how it will
+check the result, and when it should stop for review.
 
 The rules are not applied ad hoc during execution. They first become the task
 boundary; after confirmation, the agent works within that boundary and leaves
