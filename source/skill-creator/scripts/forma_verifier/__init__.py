@@ -1,4 +1,4 @@
-"""Layer 2 verifier — organizationally inside Layer 1's meta skill source.
+"""Bundled Forma verifier for creator and developer CLI use.
 
 Stdlib-only. The same package is also pip-installable via the root pyproject.toml's
 `tool.setuptools.packages.find` configuration so that the developer-facing

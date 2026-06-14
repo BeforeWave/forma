@@ -42,7 +42,7 @@ def codex_plugin_install_hint(plugin_root: Path) -> str:
             "  and use `forma verify` as the final gate for the postprocessed artifact.",
             "",
             "Recommended Codex install path:",
-            "  During bootstrap discovery or diagnostics, inspect configured marketplaces as needed.",
+            "  When the reusable install path is missing or incomplete, inspect configured marketplaces as needed.",
             "  Ask the user to confirm the plugin id, marketplace name, marketplace source,",
             "  install selector, and visibility check.",
             "  Ensure the confirmed marketplace catalog points to the generated plugin root.",

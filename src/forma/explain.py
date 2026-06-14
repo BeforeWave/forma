@@ -325,7 +325,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
             "as the final gate for the postprocessed artifact.",
             "",
             "Codex plugin install state belongs to Codex, not `forma install`. "
-            "During bootstrap discovery or diagnostics, inspect configured "
+            "When the reusable install path is missing or incomplete, inspect configured "
             "marketplaces as needed, then ask the user to confirm plugin id, "
             "marketplace name, marketplace source, install selector, and "
             "visibility check. Stable reinstall scripts must encode those "
@@ -482,17 +482,17 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "verify or drift exactly as the script specifies.",
         "",
         "If the profile-local reinstall script is missing or "
-        "bootstrap-incomplete, treat that as a bootstrap state, not a normal "
-        "manual build/install path. Before running hand-assembled build or "
-        "install commands, ask the user whether to complete "
+        "bootstrap-incomplete, treat the reusable install path as incomplete, "
+        "not as a normal manual build/install path. Before running "
+        "hand-assembled build or install commands, ask the user whether to complete "
         "`reinstall-workflow.sh` with confirmed install facts and then run the "
         "workflow through that script. Only proceed with a one-off manual flow "
         "when the user explicitly says not to keep scripts for this profile or "
         "explicitly asks for a temporary one-time run.",
         "",
-        "Bootstrap goal: explore whatever local environment details are needed "
-        "to make this profile build/install repeatable, then preserve that "
-        "verified local process beside the profile. This is where target-specific "
+        "Reusable install setup goal: explore whatever local environment details "
+        "are needed to make this profile build/install repeatable, then preserve "
+        "that verified local process beside the profile. This is where target-specific "
         "marketplace paths, plugin selectors, output directories, remove/add "
         "steps, and installation checks belong. Do not make future agents "
         "rediscover those details from scratch.",
@@ -502,7 +502,7 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "marketplace source when the install route uses a marketplace, install "
         "selector, and visibility check.",
         "",
-        "When the user approves bootstrap, write one real script, not notes. "
+        "When the user approves reusable install setup, write one real script, not notes. "
         "`reinstall-workflow.sh` must reproduce generation and freshness gates "
         "for the same profile, including `forma build bundle` or `forma build "
         "plugin`, `forma drift` when a profile-backed artifact is produced, "
@@ -514,20 +514,20 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "Stable reinstall scripts must encode fixed facts. They must not run "
         "`codex plugin marketplace list`, ask the user which marketplace to use, "
         "or leave plugin id, marketplace, selector, or source refresh decisions "
-        "open at runtime. Marketplace listing belongs only to bootstrap "
+        "open at runtime. Marketplace listing belongs only to install-path "
         "discovery or diagnostics before those facts are written.",
         "",
         "Script authoring rules: resolve the repository root and profile path "
         "relative to the script directory; keep output paths configurable with "
         "environment variables while preserving the just-used defaults; include "
         "`set -euo pipefail`; do not write placeholder commands; make scripts "
-        "executable; and run the new script once before reporting bootstrap "
-        "success.",
+        "executable; and run the new script once before reporting reusable "
+        "install setup success.",
         "",
         "Your final install report must include the profile-local reinstall "
-        "state: reused existing script, bootstrapped the script and ran it, "
-        "user requested one-off manual flow, or blocked waiting for the "
-        "bootstrap decision.",
+        "state: reused existing script, completed and ran the script, user "
+        "requested one-off manual flow, or blocked waiting for the install-script "
+        "decision.",
         "",
         "## Diagnose repository agent-operability",
         "",
@@ -598,9 +598,10 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         f"forma install --target {install_target} --scope project <dir>/{generation_target}/forma-creator",
         "```",
         "",
-        "## Adopt a same-origin creator artifact into a candidate profile package",
+        "## Adopt a Forma-provenance creator artifact into a candidate profile package",
         "",
-        "Use this only when the artifact carries same-origin Forma metadata. "
+        "Use this only when the artifact carries Forma provenance metadata that "
+        "matches the current creator baseline. "
         "Adoption writes a candidate profile package, not approved source of "
         "truth. Regenerate from the candidate and compare before presenting it "
         "for human review; promote it only after explicit approval.",

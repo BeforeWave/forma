@@ -1,8 +1,8 @@
 """Composable profile loading and merge rules for generated skill bundles.
 
 Profiles are durable source artifacts. Agents may help draft or refactor them,
-but Forma must not treat ad hoc Layer 1 constraints as tracked profile source
-unless the user explicitly promotes and reviews the profile file.
+but Forma must not treat ad hoc creator-injection constraints as tracked profile
+source unless the user explicitly promotes and reviews the profile file.
 """
 
 from __future__ import annotations

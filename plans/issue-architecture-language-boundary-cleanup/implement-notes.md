@@ -54,3 +54,30 @@ Deviations From Plan:
 
 Follow-ups:
 - Later test cleanup still needs to rename broader dogfood test terminology and add the final terminology gate.
+
+## Task 3: clean-runtime-guidance
+
+Outcome:
+- Cleaned current source and runtime guidance strings under `source/` and `src/forma/` so creator, agent-guide, CLI, and runtime explanations no longer expose old numbered architecture labels or polluted cross-layer routing language.
+
+Decision Notes:
+- Replaced old `Layer 3 profile` wording with `tracked profile` or `reviewed profile` depending on whether the guidance is talking about durable source tracking or human-approved promotion.
+- Replaced creator/runtime `cross-layer` route wording with coordinated multi-surface wording. This preserves the concept that some rules affect multiple work surfaces without tying it to old numbered architecture labels.
+- Replaced broad agent-facing bootstrap/same-origin wording with reusable install path and Forma provenance wording. Machine fields such as `base_origin` remain unchanged because they are schema/code fields, not user-facing operating language.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- execution-surface pollution: source guidance, creator SKILL text, agent guide profile-authoring guidance, CLI help/docstrings, and runtime guidance are current execution surfaces and must not instruct agents with old numbered architecture names.
+- neutral-but-contaminated: `conditional_overlays` remains valid schema/profile terminology where the schema is being taught. The polluted part was the route label and example language bound to `cross-layer`.
+- public/product explanation: Forma provenance is acceptable public command guidance when phrased as what the agent can verify or compare, not as a raw internal field name.
+
+Validations:
+- `rg -n "Layer [123]|Layer impact|Layer Boundaries|Layer 3 profile|Layer 1 temporary|\\bcross-layer\\b|generated suite|temporary generated suites" source src` returned no matches.
+- `rg -n "same-origin|bootstrap discovery|bootstrap state|bootstrapped|bootstrap decision|bootstrap success|approves bootstrap" src/forma/explain.py src/forma/cli.py src/forma/plugin_guidance.py source` returned no matches.
+- `git diff --check`
+- `uv run --extra dev forma verify source/skill-creator/`
+
+Deviations From Plan:
+- None.

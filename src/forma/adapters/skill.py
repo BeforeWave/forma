@@ -234,7 +234,7 @@ def _target_reference(target_agent: str, descriptions: Mapping[str, str]) -> str
             "temporary JSON file and run `python scripts/create.py --artifact "
             "bundle --output <generated-bundle-path> --injection-json "
             "<temporary-injection.json>` for workflow-bundle output; do not "
-            "use Layer 3 profiles from this installed creator.",
+            "use tracked profiles from this installed creator.",
             "- Copy fixed generated-skill resources from "
             "`resources/plan-first/methodology/resources/shared/` and any "
             "stage-local resource directory into each generated skill "
@@ -278,17 +278,17 @@ def _interactive_constraint_contract() -> List[str]:
         "- Classify every natural-language constraint before writing JSON: "
         "`constraints.default` is only for minimal always-on bottom lines; "
         "planning rules go under `shape` / `gauge` / `seal`; daily execution "
-        "rules go under `pour` / `flow`; broad docs, generated-baseline, "
-        "migration, governance, or cross-layer rules belong in "
-        "`conditional_overlays`.",
+            "rules go under `pour` / `flow`; broad docs, generated-baseline, "
+            "migration, governance, or coordinated multi-surface rules belong in "
+            "`conditional_overlays`.",
         "- Treat issue tracker readers, document exporters, private source "
         "loaders, and similar source-context helper scripts as optional source "
         "adapters. Inject their stage-specific constraints and resources only "
         "when explicitly requested; do not treat them as base capability or "
         "place them in `constraints.default`.",
         "- Output the temporary injection file path plus a short classification "
-        "table with user constraint, injection target, rationale, durability, "
-        "and whether it should later become a tracked Layer 3 profile.",
+            "table with user constraint, injection target, rationale, durability, "
+            "and whether it should later become a tracked profile.",
         "- Do not copy user docs verbatim, do not put governance/root-doc "
         "reading requirements in `constraints.default`, and do not make "
         "routine `pour` / `flow` read broad docs, all runs, generated "
@@ -302,8 +302,8 @@ def _interactive_constraint_contract() -> List[str]:
         "- Do not install generated outputs from this creator. Report the "
         "output path and install hint only.",
         "- Do not represent one-off constraints as tracked source. If the user "
-        "wants durable tracking, help them promote the constraints into a "
-        "Layer 3 profile in the owning repository.",
+            "wants durable tracking, help them promote the constraints into a "
+            "reviewed profile in the owning repository.",
     ]
 
 

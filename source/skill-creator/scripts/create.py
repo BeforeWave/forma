@@ -2,7 +2,7 @@
 """Standalone installed Forma creator builder.
 
 This script is bundled inside the installed `forma-creator` skill. It does not
-load Layer 3 profiles. Agents convert the current conversation's one-off
+load tracked profiles. Agents convert the current conversation's one-off
 natural-language injection into a temporary JSON file, then this script renders
 the fixed target workflow bundle from bundled methodology resources and verifies it.
 """

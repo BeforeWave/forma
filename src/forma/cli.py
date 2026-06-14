@@ -1,10 +1,8 @@
 """Forma CLI dispatcher.
 
-`verify` wires through `forma_verifier`, the Python package that ships
-organizationally inside Layer 1's meta skill source at
-`source/skill-creator/scripts/forma_verifier/`. `explain` is a read-only
-stdout surface for agent command routing plus canonical profile and injection
-guidance.
+`verify` wires through `forma_verifier`, the Python package that ships in
+Forma's bundled verifier source. `explain` is a read-only stdout surface for
+agent command routing plus canonical profile and injection guidance.
 
 """
 
@@ -115,13 +113,13 @@ Profile-local reinstall workflow:
   composing commands. If reinstall-workflow.sh exists there, run the script
   from that directory instead of rebuilding the command chain.
 
-  If the script is missing, treat the profile as needing bootstrap. Before
-  hand-assembling build/install commands, ask whether to create the missing
-  profile-local reinstall script and then run the workflow through it. Only
-  use a one-off manual flow when the user explicitly asks not to keep scripts
-  for this profile or explicitly requests a temporary one-time run.
+  If the script is missing, treat the reusable install path as incomplete.
+  Before hand-assembling build/install commands, ask whether to create the
+  missing profile-local reinstall script and then run the workflow through it.
+  Only use a one-off manual flow when the user explicitly asks not to keep
+  scripts for this profile or explicitly requests a temporary one-time run.
 
-  A bootstrapped reinstall script should cover generation, drift when
+  A completed reinstall script should cover generation, drift when
   profile-backed, verify, the local install route, marketplace or install-target
   refresh, and the final visibility check.
 """
@@ -669,7 +667,7 @@ def profile_adopt_command(
     replace: bool,
     json_output: bool,
 ) -> None:
-    """Convert a same-origin creator artifact into a candidate profile package."""
+    """Convert a Forma-provenance creator artifact into a candidate profile package."""
     try:
         result = adopt_profile(
             artifact_path=artifact_path,

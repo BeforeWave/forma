@@ -2,7 +2,7 @@
 
 Use this standard when converting user natural language into a temporary
 injection JSON for `scripts/create.py`. The injection is a one-off generated
-artifact, not a tracked Layer 3 profile.
+artifact, not a tracked profile.
 
 ## Stage Key Boundary
 
@@ -59,8 +59,8 @@ Classify every extracted constraint before writing JSON.
 - `constraints.mend`: Same-issue rework contract rules.
 - `conditional_overlays`: Heavy rules that should apply only after `shape`
   records a selected scenario in `plan.md`, such as docs-only,
-  generated-baseline, migration, governance, backend, frontend, or cross-layer
-  routes.
+  generated-baseline, migration, governance, backend, frontend, or coordinated
+  multi-surface routes.
 - `resources`: Adapter references, scripts, or support files needed by an
   explicitly selected source-context integration. Add these only when the
   current generation needs that adapter.
@@ -150,5 +150,5 @@ and a short classification table with these columns:
 | Original or summarized user constraint | `constraints.<stage>` or `conditional_overlays.<overlay>` | Why this location is the narrowest correct scope | yes/no | yes/no/later |
 
 Use `Track as profile? = yes` only when the constraint is repeated behavior
-that belongs in the owning repository's reviewed Layer 3 profile. Use `later`
-when the user has not decided whether the behavior should become durable.
+that belongs in the owning repository's reviewed profile. Use `later` when the
+user has not decided whether the behavior should become durable.

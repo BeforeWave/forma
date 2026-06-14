@@ -173,8 +173,8 @@ skill carries the rule in the stage's execution path.
 
 Use conditional overlays for rules that are expensive, scenario-specific, or
 only valid after a plan decision. Typical overlay routes include docs-only,
-generated-baseline, migration, governance, backend, frontend, and cross-layer
-work.
+generated-baseline, migration, governance, backend, frontend, and coordinated
+multi-surface work.
 
 Do not put broad root-doc reads, generated baseline reads, all-run evidence
 reads, full profile-stack reads, or broad governance requirements in
@@ -242,8 +242,8 @@ the user a short table before writing or committing profile files:
 - Keep daily execution defaults narrow so routine `pour` and `flow` read only
   the active plan, task checklist, current task, relevant source files, and
   necessary references.
-- Move docs, generated-baseline, migration, governance, and cross-layer rules
-  into conditional overlays.
+- Move docs, generated-baseline, migration, governance, and coordinated
+  multi-surface rules into conditional overlays.
 - Use stage-specific constraints for planning and materialization rules instead
   of making execution stages rediscover broad context.
 - Prefer committing a profile only after repeated behavior is clear. Otherwise

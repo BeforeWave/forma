@@ -133,7 +133,7 @@ expansion.
 
 One-off user constraints are supplied to `scripts/create.py` through a
 temporary injection JSON generated from the current conversation. That JSON is
-not a Layer 3 profile and must not contain `profile`, `includes`, tracked
+not a tracked profile and must not contain `profile`, `includes`, tracked
 profile ids, or `stages.<kind>.name` / `stages.<kind>.directory` overrides. It
 may add local requirements, stage display text, validation preferences,
 additional references, and final installable skill names under
@@ -148,7 +148,7 @@ natural-language constraint by its narrowest injection target. Keep
 grounding, plan-materialization, execution, and automated-execution rules under
 their matching stage keys. Put heavy scenario-specific requirements, including
 root-doc reading, generated-baseline inspection, migration rules, governance
-rules, or cross-layer work, behind `conditional_overlays`.
+rules, or coordinated multi-surface work, behind `conditional_overlays`.
 
 The agent must output the temporary injection file path plus a classification
 table that shows the original user constraint, structured injection target,

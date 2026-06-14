@@ -220,7 +220,7 @@ When converting user natural language into temporary injection JSON:
     grounding, and plan materialization rules.
   - `constraints.pour` and `constraints.flow`: daily task execution rules.
   - `conditional_overlays`: heavy rules for selected scenarios such as docs,
-    generated-baseline, migration, governance, or cross-layer work.
+    generated-baseline, migration, governance, or coordinated multi-surface work.
 - If a constraint would make daily `pour` or `flow` read broad docs, all runs,
   generated outputs, or full profile stacks, do not place it in
   `constraints.default`.

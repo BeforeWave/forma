@@ -14,7 +14,7 @@ Depends: inventory-language-boundaries
 Constraint: keep `.forma` default constraints lightweight; heavy governance/docs/generated-output reads must remain route-specific
 Constraint: generated self-profile output must stay under `/tmp`, `/private/tmp`, or `$TMPDIR` and must not be committed to `dist/`
 
-- [ ] [clean-runtime-guidance] Clean source and runtime guidance strings
+- [x] [clean-runtime-guidance] Clean source and runtime guidance strings
 Accept: Task Type=step; `source/agent-guide/`, `source/skill-creator/`, relevant `source/methodology/` text, and `src/forma/` docstrings or generated guidance strings use product/schema/path language at the right boundary without exposing implementation maintenance labels as user or agent protocol
 Validate: rg -n "Layer [123]|Layer impact|Layer Boundaries|Layer 3 profile|Layer 1 temporary|\\bcross-layer\\b|generated suite|temporary generated suites" source src && exit 1 || exit 0
 Use-Check: creator-source-verify
