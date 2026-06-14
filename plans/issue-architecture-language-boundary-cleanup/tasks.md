@@ -5,7 +5,7 @@ Depends: none
 Constraint: do not edit source/docs/tests in this task except the active issue implement-notes inventory
 Constraint: inventory must include layer and non-layer residues: old numbered architecture terms, polluted cross-layer route, suite wording, stage-key leakage, conditional_overlays wording, same-origin/base_origin agent-facing wording, and bootstrap wording boundary
 
-- [ ] [clean-self-profile-source] Clean `.forma` execution source and self-profile references
+- [x] [clean-self-profile-source] Clean `.forma` execution source and self-profile references
 Accept: Task Type=step; `.forma` self-profile source uses neutral path-level, command-level, and surface-level language, introduces `cross-surface` for coordinated multi-surface work, and no longer emits old numbered architecture or polluted cross-layer route guidance
 Validate: rg -n "Layer [123]|Layer impact|Layer Boundaries|Layer 3 profile|Layer 1 temporary|\\bcross-layer\\b|generated suite|temporary generated suites" .forma && exit 1 || exit 0
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_workflow_build.py

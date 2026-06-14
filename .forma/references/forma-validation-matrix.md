@@ -21,11 +21,11 @@ profile-only edits unless the task contract asks for it.
 uv run --extra dev forma verify source/skill-creator/
 ```
 
-Use this when creator skill source, bundled verifier behavior, or Layer 1/Layer
-2 packaging is in scope. Do not treat it as a universal gate for unrelated docs,
+Use this when creator skill source, bundled verifier behavior, or verifier
+packaging is in scope. Do not treat it as a universal gate for unrelated docs,
 profile, or CLI-only changes.
 
-## Layer 1 And Layer 2
+## Creator Source And Bundled Verifier
 
 ```bash
 uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
@@ -34,7 +34,7 @@ uv run --extra dev forma verify source/skill-creator/
 
 Use this for creator skill source, verifier rules, target-layout rules, and agent-side verification behavior.
 
-## Layer 3 Creator
+## Profile Composer And Target Adapters
 
 ```bash
 uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py

@@ -10,7 +10,7 @@ terminology:
   issue: Forma issue
   repository: Forma workspace
   profile: tracked Forma profile
-  generated suite: target-specific Plan-First workflow output
+  workflow output: target-specific Plan-First workflow output
 constraints:
   default:
     - Treat this profile stack as Forma-owned project source, not a sanitized public example.
@@ -22,15 +22,15 @@ constraints:
   shape:
     - Identify whether README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, or active plans/issue-<id>/ files are needed to settle Forma governance, scope, validation, or boundary decisions; if repository facts are needed, hand off to the ground stage instead of exploring from the plan stage.
     - For new or changed Forma functionality, plan the developer CLI surface first; if behavior is creator-visible, include the matching forma-creator and bundled-verifier sync in the same issue.
-    - For Layer 1 temporary injection work, classify natural-language constraints into minimal default, stage-specific execution, or conditional overlay targets before writing examples or tasks.
-    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
+    - For creator-side temporary injection work, classify natural-language constraints into minimal default, stage-specific execution, or conditional overlay targets before writing examples or tasks.
+    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated workflow output.
   gauge:
     - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plan/task files, pyproject.toml, relevant source directories, tests, and examples read-only before finalization.
   seal:
     - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plans/issue-<id>/ files, and dist/AGENTS.md when release artifacts are in scope before writing final tasks that affect Forma governance, profile ownership, generated baselines, or documentation policy.
     - For creator-visible functionality changes, write tasks that validate both the developer CLI path and the bundled forma-creator path.
     - If .forma changes, validate self-profile output by generating it under /tmp, /private/tmp, or $TMPDIR and running forma verify; do not write self-profile output into dist.
-    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated suites.
+    - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated workflow output.
 validation_commands:
   default:
     - uv run --extra dev python -m pytest -p no:cacheprovider tests/

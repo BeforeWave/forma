@@ -2,12 +2,12 @@
 
 Use these boundaries when planning or executing changes in the Forma repository.
 
-## Layer Boundaries
+## Source Boundaries
 
-- Layer 1 lives under `source/skill-creator/`. It is the self-contained creator skill source and must remain usable after `forma build creator` injects methodology resources.
-- Layer 2 lives under `source/skill-creator/scripts/forma_verifier/`. It must stay stdlib-only for agent-side verification, while remaining importable by the developer CLI.
-- Layer 3 lives under `src/forma/creator/` and `src/forma/adapters/`. It composes canonical methodology and tracked profiles into target-specific Plan-First workflow output.
-- Canonical methodology lives under `source/methodology/`. Do not duplicate source-of-truth methodology content inside Layer 1.
+- `source/skill-creator/` is the self-contained creator skill source and must remain usable after `forma build creator` injects methodology resources.
+- `source/skill-creator/scripts/forma_verifier/` is the bundled verifier package. It must stay stdlib-only for agent-side verification, while remaining importable by the developer CLI.
+- `src/forma/creator/` and `src/forma/adapters/` compose canonical methodology and tracked profiles into target-specific Plan-First workflow output.
+- Canonical methodology lives under `source/methodology/`. Do not duplicate source-of-truth methodology content inside `source/skill-creator/`.
 - Forma's self-profile source lives under `.forma/`. Sanitized public examples live under `examples/profiles/`. Downstream-specific profiles belong in the downstream repository that owns their constraints.
 
 ## Artifact Boundaries
@@ -17,7 +17,7 @@ Use these boundaries when planning or executing changes in the Forma repository.
 - `.forma/` is durable self-profile source for this repository. Generated output from `.forma/` is for temporary checks or local installation only; do not commit that output into `dist/`.
 - Public examples are profile source by default. Do not commit `examples/generated/` output unless the active issue explicitly makes generated drift baselines part of the review surface.
 - Profile-only examples should remain profile-only unless the plan explicitly adds committed generated baselines for them.
-- Temporary generated suites should go under `/tmp` or another transient output path and should not be committed.
+- Temporary generated workflow output should go under `/tmp` or another transient output path and should not be committed.
 
 ## Review Boundaries
 

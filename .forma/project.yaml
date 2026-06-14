@@ -1,24 +1,24 @@
 profile:
   id: forma-self-project
-  description: Forma-specific layer, artifact, documentation, and validation boundaries.
+  description: Forma-specific source, artifact, documentation, and validation boundaries.
 constraints:
   default:
     - When a Forma workflow step requires explicit user confirmation, prefer a host-provided structured user-input or choice capability when it is available in the current thread; otherwise ask with a concise textual `Required Confirmation:` prompt.
     - Treat structured user-input support as an optional host capability, not a hard dependency; do not block solely because an experimental or mode-limited confirmation UI is unavailable.
   shape:
-    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
-    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
-    - Decide whether the iteration touches Layer 1 creator behavior, Layer 2 verifier rules, Layer 3 profile composition, methodology resources, examples, generated baselines, docs, or tests.
+    - Keep affected Forma source surfaces explicit in plans and implementation notes.
+    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
+    - Decide whether the iteration touches creator skill source, bundled verifier rules, profile composition, methodology resources, examples, generated baselines, docs, or tests.
     - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
-    - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-layer.
+    - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-surface.
   gauge:
-    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in plans and implementation notes.
-    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Keep affected Forma source surfaces explicit in plans and implementation notes.
+    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
     - Confirm whether profile changes belong under .forma, examples/profiles, or a downstream repository.
     - Confirm current generated baselines before recommending any delete/add replacement.
   seal:
-    - Keep Layer 1, Layer 2, and Layer 3 responsibilities explicit in finalized plans and tasks.
-    - Do not pre-lock future Layer 2 or Layer 3 implementation decisions outside the current issue scope.
+    - Keep affected Forma source surfaces explicit in finalized plans and tasks.
+    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
     - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
     - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
     - When the staged plan diff is ready, ask for commit permission once. If the user confirms, commit that staged plan snapshot directly instead of asking for another confirmation.
@@ -27,7 +27,7 @@ constraints:
     - For generated baseline replacements, stage deletions and additions together and verify the committed output path.
   flow:
     - Use showhand only when source-of-truth docs, profile ownership, generated baseline policy, and validation commands are all explicit.
-    - Stop for plan correction when a change crosses Layer 1, Layer 2, Layer 3, docs, and generated outputs without a task boundary.
+    - Stop for plan correction when a change crosses multiple Forma work surfaces, docs, tests, and generated outputs without a task boundary.
 workflow_adds:
   gauge:
     - 'When running in a Codex app-hosted side or forked conversation, resolve the parent thread id from host request metadata first: `x-codex-turn-metadata.forked_from_thread_id`.'
@@ -60,7 +60,7 @@ resources:
         dest: forma-profile-policy.md
 skills:
   shape:
-    description: Converge a Forma self-iteration plan, including layer impact, profile ownership, generated-output policy, and validation boundaries.
+    description: Converge a Forma self-iteration plan, including affected surfaces, profile ownership, generated-output policy, and validation boundaries.
   gauge:
     description: Read Forma repository facts and produce grounding for a self-iteration plan.
   seal:
@@ -68,13 +68,13 @@ skills:
   pour:
     description: Execute one Forma self-iteration task through focused validation and review.
   flow:
-    description: Execute a finalized Forma self-iteration plan automatically when all layer and validation gates pass.
+    description: Execute a finalized Forma self-iteration plan automatically when all surface and validation gates pass.
   hone:
     description: Reconcile Forma delivery feedback against stage contracts, issue evidence, and workflow boundaries.
   mend:
     description: Materialize same-issue Forma feedback into a locked rework contract.
 decision_gate_extras:
-  - Layer impact
+  - Affected surfaces
   - Profile ownership
   - Generated baseline policy
   - Documentation update requirement

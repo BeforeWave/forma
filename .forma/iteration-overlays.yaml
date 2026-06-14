@@ -14,16 +14,16 @@ conditional_overlays:
       description: Repository governance, AGENTS instructions, workflow policy, or self-management rule changes.
       overlays: [governance]
     - id: methodology-verifier
-      description: Canonical methodology or Layer 2 verifier changes.
+      description: Canonical methodology or bundled verifier changes.
       overlays: [methodology, verifier]
     - id: creator-profile
-      description: Layer 3 creator, profile schema, or profile stack changes.
+      description: Profile composer, target adapter, profile schema, or profile stack changes.
       overlays: [creator, profiles]
     - id: generated-baseline
       description: Committed generated output replacement or drift baseline update.
       overlays: [generated]
-    - id: cross-layer
-      description: Coordinated Layer 1, Layer 2, Layer 3, docs, tests, and generated output work.
+    - id: cross-surface
+      description: Coordinated work across multiple Forma source, docs, tests, profile, verifier, creator, and generated-output surfaces.
       overlays: [methodology, verifier, creator, profiles, generated, docs]
   overlays:
     docs:
@@ -64,17 +64,17 @@ conditional_overlays:
           - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py
           - uv run --extra dev forma verify source/skill-creator/
     verifier:
-      description: Layer 2 verifier rules.
+      description: Bundled verifier rules.
       constraints:
         shape:
-          - Define the rule being added, relaxed, or tightened and the target suite shape it protects.
+          - Define the rule being added, relaxed, or tightened and the target workflow-output shape it protects.
         pour:
           - Add paired positive and negative verifier coverage for rule changes.
       validation_commands:
         pour:
           - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
     creator:
-      description: Layer 3 composer, emitter, manifest, adapter, and CLI rules.
+      description: Profile composer, emitter, manifest, adapter, and CLI rules.
       constraints:
         shape:
           - Identify whether the change affects profile loading, composition, target emission, manifest provenance, output replacement, or creator builder behavior.

@@ -15,7 +15,7 @@ stages:
     display_name: Forma Plan
     short_description: Converge a Forma development issue into a scoped Plan-First contract.
     default_prompt: >-
-      $forma-plan: 为 Forma 仓库收敛一个自我迭代计划，明确 Layer impact、profile ownership、generated baseline policy、文档更新和验证边界；不要读仓库或写计划文件。
+      $forma-plan: 为 Forma 仓库收敛一个自我迭代计划，明确 affected surfaces、profile ownership、generated baseline policy、文档更新和验证边界；不要读仓库或写计划文件。
   gauge:
     name: forma-ground
     directory: forma-ground
@@ -43,7 +43,7 @@ stages:
     display_name: Forma Showhand
     short_description: Complete remaining finalized Forma tasks when boundaries and gates are clear.
     default_prompt: >-
-      $forma-showhand: 在 Layer、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。
+      $forma-showhand: 在 affected surfaces、profile ownership、generated baseline、docs 和验证门禁都清楚时，自动执行已 finalize 的 Forma 自我迭代计划。
   hone:
     enabled: true
     name: forma-reconcile

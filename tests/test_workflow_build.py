@@ -194,14 +194,14 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
     assert profile.stages["mend"].enabled is True
     assert profile.stages["mend"].directory == "forma-rework"
     assert "$forma-rework" in profile.stages["mend"].default_prompt
-    assert "Layer impact" in profile.decision_gate_extras
+    assert "Affected surfaces" in profile.decision_gate_extras
     assert not any("README.md" in item for item in profile.constraints["default"])
     assert any("dirty worktree" in item for item in profile.constraints["default"])
     assert any("active issue plan and tasks" in item for item in profile.constraints["default"])
     assert any("structured user-input" in item for item in profile.constraints["default"])
     assert any("README.md" in item for item in profile.constraints["shape"])
     assert any(
-        "Layer 1 temporary injection" in item
+        "creator-side temporary injection" in item
         for item in profile.constraints["shape"]
     )
     assert any(".forma" in item for item in profile.constraints["gauge"])
@@ -245,7 +245,7 @@ def test_load_profile_resolves_forma_self_iteration() -> None:
         "methodology-verifier",
         "creator-profile",
         "generated-baseline",
-        "cross-layer",
+        "cross-surface",
     ]
     assert {
         resource.dest
@@ -647,7 +647,7 @@ def test_forma_self_iteration_profile_emits_valid_bundles(tmp_path: Path) -> Non
     assert 'name: "forma-plan"' in shape_text
     assert "references/forma-iteration-boundaries.md" in shape_text
     assert "Settle `Iteration Area`" in shape_text
-    assert "If `Iteration Area` is `cross-layer`, apply `generated` overlay constraint" in pour_text
+    assert "If `Iteration Area` is `cross-surface`, apply `generated` overlay constraint" in pour_text
     assert "Use `scripts/forma-workflow.sh next <issue-id>`" in pour_text
     assert "Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, and the active plans/issue-<id>/ files as the project governance surface." not in pour_text
     assert "If `Iteration Area` is `docs-only`, apply `docs` overlay constraint: Read README.md" in pour_text
@@ -1038,7 +1038,7 @@ def test_forma_self_profile_and_codex_plugin_metadata(tmp_path: Path) -> None:
         plugin_dir / "skills" / "lock" / "references" / "plan-template.md"
     ).read_text(encoding="utf-8")
     assert "## Iteration Area" in plan_template
-    assert "`creator-profile`: Layer 3 creator, profile schema, or profile stack changes." in plan_template
+    assert "`creator-profile`: Profile composer, target adapter, profile schema, or profile stack changes." in plan_template
     assert "{{ conditional_decision_section }}" not in plan_template
     plugin = json.loads(plugin_json.read_text(encoding="utf-8"))
     assert plugin["id"] == "forma"

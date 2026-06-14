@@ -31,3 +31,26 @@ Deviations From Plan:
 
 Follow-ups:
 - Later tasks must preserve existing unrelated doctor worktree changes in `docs/usage.md`, `docs/usage.zh-CN.md`, `src/forma/cli.py`, `src/forma/explain.py`, `src/forma/repo_doctor.py`, and `tests/test_cli.py`.
+
+## Task 2: clean-self-profile-source
+
+Outcome:
+- Cleaned `.forma` self-profile source and self-profile references so generated self-iteration guidance uses affected-surface and path-level language instead of old numbered architecture terms.
+
+Decision Notes:
+- Replaced the polluted Forma self-iteration route `cross-layer` with `cross-surface`. Options considered were keeping `cross-layer` with a new definition, dropping the route, or renaming it. Renaming was selected because the route still represents real coordinated work across multiple Forma work surfaces, but the old name now carries the wrong numbered-architecture meaning.
+- Replaced `generated suite` / `temporary generated suites` in self-profile references with workflow-output wording. This keeps the current product term aligned with `build bundle`, `workflow output`, and `skill bundle` language.
+- Rewrote self-profile validation and boundary references around concrete surfaces: `source/skill-creator/`, bundled verifier package, profile composer, target adapters, docs/examples, tests, generated output, and release artifacts.
+
+Plan Gaps Found:
+- None.
+
+Classifications:
+- execution-surface pollution: `.forma` route ids, prompts, decision gates, validation matrix headings, and self-profile references are execution surfaces and must not use old architecture labels.
+- neutral-but-contaminated: `cross-surface` now owns Forma self-iteration coordination. Generic software examples may still use ordinary cross-layer integration wording until the docs/examples task classifies them.
+
+Deviations From Plan:
+- Updated the direct `.forma` expectations in `tests/test_workflow_build.py` during this task so the required focused test could pass with the cleaned profile source.
+
+Follow-ups:
+- Later test cleanup still needs to rename broader dogfood test terminology and add the final terminology gate.

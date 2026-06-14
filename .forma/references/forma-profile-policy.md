@@ -10,7 +10,7 @@ Profiles are durable behavior source. Treat them like code.
 
 ## Promotion Rules
 
-- One-off user constraints from the installed creator path stay local to the generated suite unless explicitly promoted to a profile file.
+- One-off user constraints from the installed creator path stay local to the generated workflow output unless explicitly promoted to a profile file.
 - Promote repeated behavior into a tracked profile only after review.
 - Keep conditional behavior in `conditional_overlays` when execution must follow a recorded route instead of re-deciding during implementation.
 
