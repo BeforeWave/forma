@@ -1,4 +1,4 @@
-- [ ] [inventory-language-boundaries] Produce the current language-boundary inventory
+- [x] [inventory-language-boundaries] Produce the current language-boundary inventory
 Accept: Task Type=gate; current terminology residues are classified as public/product explanation, execution-surface pollution, historical/deferred residue, or neutral-but-contaminated wording before source cleanup begins
 Validate: python3 -c "from pathlib import Path; p=Path('plans/issue-architecture-language-boundary-cleanup/implement-notes.md'); text=p.read_text(encoding='utf-8'); required=['public/product explanation','execution-surface pollution','historical/deferred residue','neutral-but-contaminated']; missing=[item for item in required if item not in text]; raise SystemExit('missing inventory categories: '+', '.join(missing) if missing else 0)"
 Depends: none
