@@ -30,7 +30,7 @@ Depends: clean-runtime-guidance
 Constraint: do not remove legitimate schema/API terminology from schema docs; instead explain it as schema where it appears
 Constraint: do not refresh or edit `dist/skills/*/forma-creator` in this task
 
-- [ ] [update-current-tests-and-gate] Update tests and terminology gate
+- [x] [update-current-tests-and-gate] Update tests and terminology gate
 Accept: Task Type=step; current tests assert the cleaned terminology, renamed route, renamed dogfood concepts, and a gate that excludes historical `plans/**` plus deferred `dist/skills/*/forma-creator` while checking active source/docs/tests surfaces
 Validate: uv run --extra dev python -m pytest -p no:cacheprovider tests/test_workflow_build.py tests/test_docs_links.py
 Validate: python3 -c "import pathlib,re,sys; roots=[pathlib.Path(p) for p in ['.forma','source','src','docs','examples','tests','README.md','README.zh-CN.md','STRUCTURE.md','AGENTS.md']]; patterns=[r'Layer [123]',r'Layer impact',r'Layer Boundaries',r'Layer 3 profile',r'Layer 1 temporary',r'\\bcross-layer\\b',r'generated suite',r'temporary generated suites']; offenders=[]; [offenders.append(f'{path}:{i}:{line.strip()}') for root in roots for path in ([root] if root.is_file() else root.rglob('*')) if path.is_file() and '.git' not in path.parts and path.suffix not in {'.pyc'} for i,line in enumerate(path.read_text(encoding='utf-8',errors='ignore').splitlines(),1) if any(re.search(p,line) for p in patterns)]; print('\\n'.join(offenders)); sys.exit(1 if offenders else 0)"

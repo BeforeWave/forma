@@ -218,7 +218,7 @@ def _drift_with_creator_source(
                 if base_status == STATUS_FRESH:
                     status = STATUS_UNKNOWN_SOURCE
                     message = (
-                        "same-origin creator base is fresh, but injected/profile "
+                        "Forma creator provenance is fresh, but injected/profile "
                         "source is required for full drift proof"
                     )
                 else:

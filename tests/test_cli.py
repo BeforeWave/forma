@@ -132,7 +132,7 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Build Forma workflow artifacts from profile or creator source.",
                 "Profile-local reinstall workflow:",
                 "If reinstall-workflow.sh exists",
-                "treat the profile as needing bootstrap",
+                "treat the reusable install path as incomplete",
                 "explicitly requests a temporary one-time run",
             ],
         ),
@@ -152,8 +152,8 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "forma install --target codex|claude-code|opencode --scope user|project <output-dir>",
                 "Profile-local reinstall workflow:",
                 "If reinstall-workflow.sh exists",
-                "treat the profile as needing bootstrap",
-                "A bootstrapped reinstall script should cover generation",
+                "treat the reusable install path as incomplete",
+                "A completed reinstall script should cover generation",
             ],
         ),
         (
@@ -167,7 +167,7 @@ def test_command_help_includes_agent_next_steps() -> None:
                 "Install Claude Code plugin roots with forma install --target claude-code.",
                 "Profile-local reinstall workflow:",
                 "If reinstall-workflow.sh exists",
-                "treat the profile as needing bootstrap",
+                "treat the reusable install path as incomplete",
                 "the local install route",
             ],
         ),
@@ -244,7 +244,7 @@ def test_command_help_includes_agent_next_steps() -> None:
         (
             ["profile", "adopt", "-h"],
             [
-                "Convert a same-origin creator artifact into a candidate profile package.",
+                "Convert a Forma-provenance creator artifact into a candidate profile package.",
                 "Directory to write the candidate profile package.",
                 "Treat the profile as approved project source only after human review",
             ],
@@ -275,19 +275,19 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "## Profile-local workflow scripts" in result.output
     assert "`reinstall-workflow.sh`" in result.output
     assert "instead of assembling `forma build bundle`" in result.output
-    assert "treat that as a bootstrap state" in result.output
+    assert "treat the reusable install path as incomplete" in result.output
     assert "Before running hand-assembled build or install commands" in result.output
     assert "Only proceed with a one-off manual flow" in result.output
-    assert "Bootstrap goal: explore whatever local environment details" in result.output
+    assert "Reusable install setup goal: explore whatever local environment details" in result.output
     assert "Required install facts before reusable success" in result.output
     assert "artifact kind, target" in result.output
     assert "Stable reinstall scripts must encode fixed facts" in result.output
     assert "must not run `codex plugin marketplace list`" in result.output
     assert "write one real script, not notes" in result.output
     assert "`reinstall-workflow.sh` must reproduce generation" in result.output
-    assert "run the new script once before reporting bootstrap success" in result.output
+    assert "run the new script once before reporting reusable install setup success" in result.output
     assert "final install report must include the profile-local reinstall state" in result.output
-    assert "bootstrapped the script and ran it" in result.output
+    assert "completed and ran the script" in result.output
     assert "user requested one-off manual flow" in result.output
     assert "forma doctor --format json <repo>" in result.output
     assert "forma init --from-report <report> --apply <repo>" in result.output
@@ -2330,7 +2330,7 @@ def test_install_rejects_codex_plugin_artifacts(tmp_path: Path, monkeypatch) -> 
     assert "use `forma verify` as the final gate" in install.output
     assert "codex plugin marketplace list" not in install.output
     assert "Ask the user to choose an existing marketplace" not in install.output
-    assert "During bootstrap discovery or diagnostics" in install.output
+    assert "When the reusable install path is missing or incomplete" in install.output
     assert "marketplace source" in install.output
     assert "developers.openai.com/codex/plugins/build#install-a-local-plugin-manually" in install.output
     assert "developers.openai.com/codex/plugins/build#add-a-marketplace-from-the-cli" in install.output

@@ -38,8 +38,8 @@ the install facts with the user and complete the script before reporting a
 reusable reinstall flow. Fixed-fact reinstall scripts should encode artifact
 kind, target, plugin id when relevant, marketplace source when relevant, install
 selector, and visibility check.
-See `forma explain agent` for the agent-side bootstrap and reuse rules for that
-process.
+See `forma explain agent` for the agent-side reusable install setup and reuse
+rules for that process.
 
 ## Commands
 

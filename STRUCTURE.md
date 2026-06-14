@@ -189,7 +189,7 @@ the output directory.
 | Path | Role |
 |---|---|
 | `tests/test_verifier.py` | Structural and methodology-rule coverage for the bundled verifier |
-| `tests/test_layer_1_dogfood.py` | Verifies `source/skill-creator/` as a self-contained creator source |
+| `tests/test_creator_source_dogfood.py` | Verifies `source/skill-creator/` as a self-contained creator source |
 | `tests/test_creator_builder.py` | Codex, Claude Code, and OpenCode creator builder coverage |
 | `tests/test_workflow_build.py` | Workflow build integration, profile resolver hardening, generated-output drift, and verifier dogfood |
 | `tests/test_docs_links.py` | Lightweight relative Markdown document link check for README, STRUCTURE, and `docs/` |

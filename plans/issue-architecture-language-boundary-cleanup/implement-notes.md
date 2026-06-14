@@ -29,6 +29,33 @@ Classifications:
 Deviations From Plan:
 - None.
 
+## Task 5: update-current-tests-and-gate
+
+Outcome:
+- Updated current tests to assert cleaned guidance wording, renamed the creator dogfood test file and symbols, and verified the final terminology gate across active source/docs/tests surfaces.
+
+Decision Notes:
+- Renamed `tests/test_layer_1_dogfood.py` to `tests/test_creator_source_dogfood.py` and replaced file-local `LAYER_1` / `test_layer_1_*` symbols with creator-source terminology.
+- Updated CLI tests from bootstrap/same-origin assertions to reusable install path and Forma-provenance assertions.
+- Cleaned remaining non-layer guidance residues found while updating tests: source strings now say install-path discovery or Forma provenance instead of broad bootstrap discovery or same-origin wording.
+- Kept `base_origin`, `base_origin_status`, and `bootstrap-incomplete` where they are real schema/API/state fields. The cleanup removes inappropriate operating language, not machine-readable compatibility fields.
+
+Plan Gaps Found:
+- The task 3 hard regex did not catch every non-layer residue. During test cleanup, additional current source strings in build/adoption/drift/provenance wording were found and cleaned under the same boundary rule.
+
+Classifications:
+- execution-surface pollution: current test expectations must not lock old architecture names or polluted operating language back into the CLI/help/runtime output.
+- neutral-but-contaminated: schema/status names remain allowed where they are concrete contract fields or compatibility states.
+- historical/deferred residue: the final gate scans active roots and explicitly does not scan historical `plans/**` or deferred `dist/skills/*/forma-creator`.
+
+Validations:
+- `uv run --extra dev python -m pytest -p no:cacheprovider tests/test_workflow_build.py tests/test_docs_links.py tests/test_cli.py tests/test_creator_source_dogfood.py`
+- `python3 -c "import pathlib,re,sys; roots=[pathlib.Path(p) for p in ['.forma','source','src','docs','examples','tests','README.md','README.zh-CN.md','STRUCTURE.md','AGENTS.md']]; patterns=[r'Layer [123]',r'Layer impact',r'Layer Boundaries',r'Layer 3 profile',r'Layer 1 temporary',r'\\bcross-layer\\b',r'generated suite',r'temporary generated suites']; offenders=[]; [offenders.append(f'{path}:{i}:{line.strip()}') for root in roots for path in ([root] if root.is_file() else root.rglob('*')) if path.is_file() and '.git' not in path.parts and path.suffix not in {'.pyc'} for i,line in enumerate(path.read_text(encoding='utf-8',errors='ignore').splitlines(),1) if any(re.search(p,line) for p in patterns)]; print('\\n'.join(offenders)); sys.exit(1 if offenders else 0)"`
+- `git diff --check`
+
+Deviations From Plan:
+- Added focused `tests/test_cli.py` and `tests/test_creator_source_dogfood.py` validation because this task changed CLI expectations and renamed the dogfood test file.
+
 ## Task 4: clean-docs-examples-structure
 
 Outcome:

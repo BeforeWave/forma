@@ -42,8 +42,8 @@ forma install --target codex --scope project /tmp/myproject-workflow
 
 If the profile's directory already contains `reinstall-workflow.sh`, run that
 profile-local script instead of reconstructing build, verify, drift, install, or
-marketplace commands from the guide. Agent-side bootstrap and reuse rules for a
-manual build/install process live in `forma explain agent`.
+marketplace commands from the guide. Agent-side reusable install setup and reuse
+rules for a manual build/install process live in `forma explain agent`.
 
 ## 2. Try The Generated Workflow
 

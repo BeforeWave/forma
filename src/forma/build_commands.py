@@ -173,8 +173,8 @@ class BuildPluginCommandResult:
                         description=(
                             "Settle plugin id, marketplace name, marketplace source, "
                             "install selector, and visibility check with the user. "
-                            "Use marketplace listing only as bootstrap discovery or "
-                            "diagnostics, not inside a stable reinstall script."
+                            "Use marketplace listing only for install-path discovery "
+                            "or diagnostics, not inside a stable reinstall script."
                         ),
                         stop_condition=(
                             "plugin id, marketplace, marketplace source, selector, "

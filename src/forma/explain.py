@@ -372,8 +372,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         plugin_lines = [
             "## Generate plugin output from an approved profile",
             "",
-            "Codex plugin install state belongs to Codex. During bootstrap "
-            "discovery or diagnostics, inspect configured marketplaces as "
+            "Codex plugin install state belongs to Codex. When the reusable "
+            "install path is missing or incomplete, inspect configured marketplaces as "
             "needed, then ask the user to confirm plugin id, marketplace name, "
             "marketplace source, install selector, and visibility check. Stable "
             "reinstall scripts must encode those facts and must not list "

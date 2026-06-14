@@ -39,7 +39,7 @@ def normalized_payload_digest(root: Path) -> str:
 
 
 def build_base_origin(root: Path, target: str, artifact_kind: str) -> dict[str, str]:
-    """Build same-origin metadata for a normalized runtime payload."""
+    """Build base-origin provenance metadata for a normalized runtime payload."""
     return {
         "schema": BASE_ORIGIN_SCHEMA,
         "target": target,

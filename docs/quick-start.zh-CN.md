@@ -34,7 +34,7 @@ forma install --target codex --scope project /tmp/myproject-workflow
 
 如果 profile 所在目录已有 `reinstall-workflow.sh`，优先运行这个 profile-local
 脚本，不要从指南重新拼 build、verify、drift、install 或 marketplace 命令。agent
-侧关于 bootstrap 和复用手动 build/install 流程的规则在 `forma explain agent` 里。
+侧关于可复用安装设置和复用手动 build/install 流程的规则在 `forma explain agent` 里。
 
 ## 2. 试用生成的 Workflow
 
