@@ -115,6 +115,13 @@ off task state and evidence. Core readiness is based on repository
 agent-operability contracts. Forma profile presence is an optional integration
 signal, not a readiness prerequisite.
 
+Doctor readiness is not profile completeness. Before authoring a durable
+profile, the agent must still summarize the repository purpose and maintenance
+model: primary deliverables, runtime or artifact model, validation model,
+source/generated/release boundaries, relevant compatibility or safety risks, and
+review/handoff expectations. A profile that only encodes doctor findings should
+be labeled operability-only, not project-ready.
+
 The JSON renderer emits a repo-doctor schema with `facts`, `findings`,
 `evidence`, `confidence`, `programmatic_actions`, `agent_handoffs`,
 `human_decisions`, and `unsafe_blockers`. Adoption guidance inside `facts`

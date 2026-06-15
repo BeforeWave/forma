@@ -44,6 +44,29 @@ Extract candidate profile rules from those facts by workflow behavior, not by
 the file that happened to contain the wording. Keep each candidate short,
 source-backed, and marked as candidate until review.
 
+## Project Purpose And Maintenance Semantics
+
+Before proposing profile YAML, summarize the repository's purpose and
+maintenance model from source-backed facts. Doctor `ready` means the repository
+is operable by an agent; it does not mean a profile is complete or project-ready.
+
+The summary must cover:
+
+- repository kind and primary deliverables, described from the repo's own
+  sources instead of a fixed technology template;
+- runtime, artifact, package, publishing, or documentation model;
+- source-of-truth, generated-output, release, and local-state boundaries;
+- validation model for routine changes and higher-risk changes;
+- compatibility, migration, data, security, privacy, API, contract, or user
+  impact risks that are relevant to this repository;
+- review, evidence, handoff, and owner-decision model.
+
+Use those dimensions to find durable delivery semantics. Do not write a profile
+that only preserves doctor findings such as entrypoints, task state, validation
+presence, or human gates. If the candidate rules only cover those operability
+contracts, label the draft `operability-only` and ask whether the user wants a
+project-ready profile before promoting it.
+
 For each candidate rule, record:
 
 - source file, section, and line number when available;
@@ -70,6 +93,17 @@ Include both:
 
 The review packet lets the user review source coverage, classification, and
 placement decisions without rereading the whole repository.
+
+### Profile Review Packet: Project Understanding
+
+Start the review packet with a source-backed project understanding section:
+
+- project purpose and primary deliverables;
+- maintenance model: what makes changes correct, safe, and sustainable here;
+- durable semantic layers included in the profile, such as base workflow,
+  language/runtime, product/domain, validation/evidence, source/artifact
+  boundary, release/deployment, security/privacy, or review/handoff;
+- semantic layers intentionally omitted and why.
 
 ### Write Boundary
 

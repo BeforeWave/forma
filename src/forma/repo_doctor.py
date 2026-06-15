@@ -69,6 +69,14 @@ ENTRYPOINT_SCAN_SKIP_DIRS = {
     "node_modules",
     "vendor",
 }
+MAINTENANCE_SEMANTIC_PROMPTS = (
+    "repository purpose and primary deliverables",
+    "runtime, artifact, or publishing model",
+    "source-of-truth, generated-output, release, and local-state boundaries",
+    "validation model for ordinary changes and high-risk changes",
+    "compatibility, migration, data, security, privacy, or contract risks that fit this repo",
+    "review, evidence, handoff, and owner-decision model",
+)
 
 FindingStatus = Literal["contract", "signal", "missing", "warning", "optional"]
 
@@ -239,6 +247,7 @@ def _collect_facts(root: Path) -> dict[str, Any]:
             "profiles",
         ),
     )
+    purpose_sources = _purpose_sources(root, entrypoints, entrypoint_references, tooling)
     return {
         "entrypoints": list(entrypoints),
         "root_entrypoints": list(root_entrypoints),
@@ -253,6 +262,8 @@ def _collect_facts(root: Path) -> dict[str, Any]:
             validation_sources,
         ),
         "tooling_signals": list(tooling),
+        "purpose_sources": list(purpose_sources),
+        "maintenance_semantic_prompts": list(MAINTENANCE_SEMANTIC_PROMPTS),
         "setup_scripts": list(setup_scripts),
         "validation_sources": list(validation_sources),
         "task_state_paths": list(task_state),
@@ -263,6 +274,27 @@ def _collect_facts(root: Path) -> dict[str, Any]:
         },
         "forma_adoption": _forma_adoption(bool(forma_paths)),
     }
+
+
+def _purpose_sources(
+    root: Path,
+    entrypoints: tuple[str, ...],
+    entrypoint_references: tuple[str, ...],
+    tooling: tuple[str, ...],
+) -> tuple[str, ...]:
+    candidates = _dedupe(
+        [
+            *entrypoints,
+            "README.md",
+            "README",
+            "docs/README.md",
+            "docs/INDEX.md",
+            "STRUCTURE.md",
+            *entrypoint_references,
+            *tooling,
+        ]
+    )
+    return tuple(item for item in candidates if (root / item).exists())
 
 
 def _entrypoint_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
@@ -857,6 +889,7 @@ def _render_human(report: RepoDoctorReport) -> str:
         "  Read `forma explain agent` before interpreting this report.",
         "  Use `forma explain agent --target codex|claude-code|opencode` when the consuming agent target is known.",
         "  Use `forma doctor --format agent <repo>` for the executable handoff.",
+        "  Doctor readiness covers operability; profile authoring must still extract project purpose and maintenance semantics.",
         "",
         "Core findings:",
     ]
@@ -931,9 +964,37 @@ def _render_agent(report: RepoDoctorReport) -> str:
         "- Valid dispositions: confirmed, resolved, not applicable, blocked by unavailable evidence, or owner decision required.",
         "- Stop only when every finding has a disposition, an owner decision is required, evidence is unavailable, or an unsafe blocker is present.",
         "- Do not return this handoff unchanged as the final user answer.",
+        "- Before profile authoring, summarize the repository purpose and maintenance model from source-backed facts; doctor-ready operability is not a project-ready profile.",
         "",
-        "findings:",
+        "project_understanding:",
+        "  purpose_sources:",
     ]
+    purpose_sources = report.facts.get("purpose_sources", [])
+    if purpose_sources:
+        lines.extend(f"  - {source}" for source in purpose_sources)
+    else:
+        lines.append("  - none discovered by doctor; request or inspect project source material before profile authoring")
+    lines.extend(
+        [
+            "  required_summary:",
+            "  - what this repository is for and what it delivers",
+            "  - what makes changes correct, safe, and maintainable for this project",
+            "  - which durable maintenance rules belong in a profile beyond operability findings",
+            "  semantic_dimensions:",
+        ]
+    )
+    prompts = report.facts.get("maintenance_semantic_prompts", [])
+    if prompts:
+        lines.extend(f"  - {prompt}" for prompt in prompts)
+    else:
+        lines.append("  - repository purpose and maintenance model")
+    lines.extend(
+        [
+            "  profile_boundary: if a candidate profile only encodes doctor findings, label it operability-only, not project-ready",
+            "",
+            "findings:",
+        ]
+    )
     for finding in report.findings:
         lines.append(f"- {finding.domain}: {finding.status}")
         lines.append(f"  summary: {finding.summary}")

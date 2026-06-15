@@ -96,6 +96,12 @@ forma doctor --format agent /path/to/repo
 什么时候问人、任务状态和证据放哪里。核心 readiness 来自 repo 的
 agent-operability 契约；Forma profile 只是可选 integration，不是 ready 的前提。
 
+Doctor ready 不等于 profile complete。编写长期 profile 前，agent 仍必须归纳 repo
+purpose 和 maintenance model：主要交付物、runtime 或 artifact 模型、validation
+模型、source/generated/release 边界、相关 compatibility 或 safety risk，以及
+review/handoff 预期。只编码 doctor findings 的 profile 应标记为 operability-only，
+不能当作 project-ready。
+
 JSON renderer 会输出 repo-doctor schema，包含 `facts`、`findings`、`evidence`、
 `confidence`、`programmatic_actions`、`agent_handoffs`、`human_decisions` 和
 `unsafe_blockers`。`facts` 里的 adoption guidance 用 `owner_confirmations`

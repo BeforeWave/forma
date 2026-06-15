@@ -303,6 +303,9 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "Do not copy unresolved findings into the final answer and stop" in result.output
     assert "Stop only when every finding has a disposition" in result.output
     assert "Finish all agent-resolvable investigation" in result.output
+    assert "Doctor-ready operability is not the same as a project-ready profile" in result.output
+    assert "what the repository is for" in result.output
+    assert "durable maintenance semantics" in result.output
     assert "workflow source and Agent handoff files" in result.output
     assert "owner confirmations" in result.output
     assert "does not approve semantic rules" in result.output
@@ -362,6 +365,9 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert "## Profile write boundary" in payload["metadata"]["markdown"]
     assert "Start from this Agent Guide" in payload["metadata"]["markdown"]
     assert "does not inspect the repository" in payload["metadata"]["markdown"]
+    assert "Doctor-ready operability is not the same as a project-ready profile" in payload[
+        "metadata"
+    ]["markdown"]
     assert "run `forma explain stage <stage>`" in payload["metadata"]["markdown"]
     assert "candidate profile package" in payload["metadata"]["markdown"]
     assert "Generate a Claude Code plugin" in payload["metadata"]["markdown"]
@@ -399,6 +405,11 @@ def test_explain_profile_renderer_boundaries() -> None:
     assert "ACTIONABLE REPORT" in agent.output
     assert "[guidance] Forma Profile Guidance" in agent.output
     assert "## Candidate Draft From Project Facts" in agent.output
+    assert "## Project Purpose And Maintenance Semantics" in agent.output
+    assert "Doctor `ready` means" in agent.output
+    assert "project-ready" in agent.output
+    assert "label the draft `operability-only`" in agent.output
+    assert "### Profile Review Packet: Project Understanding" in agent.output
     assert "## Constraint Placement" in agent.output
     assert "settle reusable reinstall facts" in agent.output
     assert "artifact kind" in agent.output
@@ -1494,6 +1505,7 @@ def test_doctor_reports_ready_without_forma_profile_when_core_contracts_exist(
     assert "status: ready" in human.output
     assert "forma explain agent --target codex|claude-code|opencode" in human.output
     assert "forma doctor --format agent <repo>" in human.output
+    assert "Doctor readiness covers operability" in human.output
     assert "Hand the agent report" not in human.output
     assert "Workflow adoption:" in human.output
     assert "Forma adoption:" in human.output
@@ -1526,6 +1538,11 @@ def test_doctor_reports_ready_without_forma_profile_when_core_contracts_exist(
     ]["summary"]
     assert data["facts"]["agent_instruction_quality"]["status"] == "contract"
     assert "OpenAI Codex AGENTS.md guidance" in data["facts"]["agent_instruction_quality"]["basis"]
+    assert "purpose_sources" in data["facts"]
+    assert "maintenance_semantic_prompts" in data["facts"]
+    assert "repository purpose and primary deliverables" in data["facts"][
+        "maintenance_semantic_prompts"
+    ]
 
 
 def test_doctor_follows_entrypoint_document_links_for_handoff_and_evidence(
@@ -1603,6 +1620,8 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
         "docs/references/BOUNDARIES.md",
         "docs/references/GENERATED.md",
     ]
+    assert "docs/INDEX.md" in data["facts"]["purpose_sources"]
+    assert "docs/ARCHITECTURE.md" in data["facts"]["purpose_sources"]
     findings = {item["domain"]: item for item in data["findings"]}
     assert findings["entrypoint"]["status"] == "contract"
     assert "docs/INDEX.md" in findings["entrypoint"]["evidence"]
@@ -1826,6 +1845,11 @@ def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
     assert "Treat findings as investigation inputs" in agent.output
     assert "Assign a disposition to every non-contract core finding" in agent.output
     assert "Valid dispositions: confirmed, resolved, not applicable" in agent.output
+    assert "project_understanding:" in agent.output
+    assert "semantic_dimensions:" in agent.output
+    assert "what this repository is for and what it delivers" in agent.output
+    assert "profile_boundary: if a candidate profile only encodes doctor findings" in agent.output
+    assert "actions:" in agent.output
     assert "Do not return this handoff unchanged as the final user answer" in agent.output
 
 

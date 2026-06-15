@@ -438,6 +438,12 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "and `Profile Review Packet` for human review. Treat that draft as "
         "candidate semantics, not as permission to write the profile.",
         "",
+        "Doctor-ready operability is not the same as a project-ready profile. "
+        "Before drafting profile rules, summarize what the repository is for, "
+        "what it delivers, what makes changes safe and maintainable, and which "
+        "durable maintenance semantics belong in workflow rules beyond doctor "
+        "findings.",
+        "",
         "After the candidate draft identifies touched stages and before writing "
         "profile files, run `forma explain stage <stage>` for every touched "
         "stage. Use the stage guide to compare each candidate rule with the "
@@ -566,6 +572,9 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "source and Agent handoff files. It does not approve semantic rules or "
         "make the repo agent-friendly by itself; profile approval, build/verify, "
         "install target/scope, and commit remain separate owner confirmations.",
+        "If doctor reports `ready`, treat that as operability readiness only; "
+        "profile authoring still needs project purpose, maintenance semantics, "
+        "validation model, risk model, and source/artifact boundaries.",
         "",
         "## Draft project rules, then generate workflow output",
         "",
