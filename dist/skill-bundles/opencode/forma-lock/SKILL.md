@@ -19,18 +19,10 @@ Lock the execution plan and task contract.
 
 ## Entry Gate
 
-- Use only the current user-agent conversation to decide whether planning can begin.
-- Confirm from the current user-agent conversation alone that Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer or confirmed grounding handoff, and any applicable Artifact/Evidence Boundary are decision-complete before loading references or taking any planning action.
+- Use only the current user-agent conversation and already-present confirmed grounding handoffs or source-adapter outputs to decide whether finalization can begin.
+- Before loading planning references, exploring the repository, running `scripts/forma-workflow.sh init <issue-id>`, or writing `plan.md` / `tasks.md`, confirm at summary level that Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer or confirmed grounding handoff, and any applicable Artifact/Evidence Boundary are decision-complete.
 - Fail closed. If any unanswered question could still change the deliverable, module scope, implementation shape, artifact/evidence boundary, or acceptance criteria, stop and tell the user what still needs to be clarified.
-- Do not infer that the task is documentation-only, analysis-only, or eligible for `# no-programmatic-validation: <reason>` unless the current conversation explicitly settles that no code behavior, code-owned definitions, or runtime logic needs to change.
-- Treat Goal as unconverged unless the current conversation explicitly settles the concrete deliverable to produce.
-- Treat Scope as unconverged unless the current conversation explicitly settles both what is included and what is excluded.
-- Treat Approach as unconverged unless the current conversation explicitly settles the intended deliverable shape, the concrete surfaces to touch, and whether the work adds new assets or edits existing ones.
-- Treat Validation as unconverged unless the current conversation explicitly settles the task-local validation contract, any reusable task-safe shared checks, and the issue-level final validation or explicit review-only acceptance standard.
-- Treat the execution contract as unconverged if the handoff is missing concrete names, paths, defaults, unsupported cases, artifact state, mutation boundary, compatibility policy, or validation proof.
-- Treat any broad phrase such as "support", "generate", "install", "update docs", "make it easy", "targeted version", or "release artifact" as unconverged unless it is expanded into exact behavior and paths.
-- If finalization would need to choose a command name, API name, function name, skill id, plugin id, file name, directory name, manifest field, argument, default, unsupported value, error behavior, output path, output layout, install destination, scope, overwrite behavior, mutation boundary, target support matrix, artifact state, compatibility policy, validation proof, or negative proof, the gate has not passed.
-- If repository exploration would still need to choose a concrete file path or target file, create-versus-edit behavior, single-versus-multi-file output, touched interface, validation mode, source precedence, or whether a specialized grounding producer should replace the generic ground stage, the gate has not passed yet.
+- After this entry gate passes, `references/planning-rules.md` is the canonical detailed finalization gate. If any detailed planning rule fails, stop in the same blocked format instead of filling gaps through repository exploration.
 - Before the gate passes, do not read planning references, do not explore the repository, do not run `scripts/forma-workflow.sh init <issue-id>`, and do not draft `plan.md` or `tasks.md`.
 
 ## Workflow

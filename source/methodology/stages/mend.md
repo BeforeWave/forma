@@ -19,10 +19,11 @@ Record same-issue corrective feedback as a locked rework contract without implem
 
 - Resolve the rework target from explicit human feedback first, then from `forma-reconcile` output when present, then from the active issue plan, tasks, runs, review cache, current diff, or commit evidence.
 - Load and follow `references/rework-rules.md` before deciding whether the feedback is `task-rework`, `delivery-revision`, `plan-rework`, `source-rework`, or `blocked`.
+- Run every `scripts/forma-workflow.sh ...` command from this installed skill package; resolve the script relative to the current triggered skill package, never relative to the target repository.
 - For same-issue implementation correction, write or update `plans/issue-<id>/rework.md` with feedback source, classification, same-issue rationale, confirmation state, and appended task ids.
 - Append rework tasks to the end of `plans/issue-<id>/tasks.md` as ordinary structured task blocks using `rework-*` task ids and the existing `Accept:` / `Validate:` / `Depends:` / `Constraint:` fields.
 - Do not add `## Rework Tasks`, `Source:`, `Feedback:`, grouping labels, or other non-task prose to `tasks.md`.
-- Run `scripts/forma-workflow.sh check <issue-id>` after updating `rework.md` and appending tasks and before staging or asking for commit permission; if the check fails, fix the rework task contract and rerun the check before continuing.
+- Run the bundled `scripts/forma-workflow.sh check <issue-id>` after updating `rework.md` and appending tasks and before staging or asking for commit permission; if the check fails, fix the rework task contract and rerun the check before continuing.
 - Stage only `plans/issue-<id>/rework.md` and `plans/issue-<id>/tasks.md`, show the staged diff, and commit the rework contract only after explicit user confirmation.
 - After the confirmed rework contract is committed and `plan.md` / `tasks.md` are clean, hand execution to `forma-execute` for one task or `forma-showhand` for the remaining appended tasks.
 

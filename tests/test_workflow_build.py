@@ -748,6 +748,9 @@ def test_workflow_build_emits_valid_codex_bundle(tmp_path: Path) -> None:
     shape_text = (
         output_dir / SAMPLE_STAGE_DIRS["shape"] / "SKILL.md"
     ).read_text(encoding="utf-8")
+    gauge_text = (
+        output_dir / SAMPLE_STAGE_DIRS["gauge"] / "SKILL.md"
+    ).read_text(encoding="utf-8")
     seal_text = (
         output_dir / SAMPLE_STAGE_DIRS["seal"] / "SKILL.md"
     ).read_text(encoding="utf-8")
@@ -833,8 +836,16 @@ def test_workflow_build_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "stage-local helper script" in adapter_text
     assert "gh issue view" not in adapter_text
     assert "GitHub issue URLs are source-of-truth refs" in shape_text
+    assert "Source Material`, `Confirmed Facts`, `Inferences`" in gauge_text
+    assert "Every confirmed fact must name the exact source path or ref" in gauge_text
+    assert "every inference or recommendation is non-authoritative" in gauge_text
+    assert "Recommended Lock Handoff" in gauge_text
     assert "Stage only the finalized `plan.md` and `tasks.md`" in seal_text
     assert "show the staged diff to the user" in seal_text
+    assert (
+        "After this entry gate passes, `references/planning-rules.md` is the canonical detailed finalization gate"
+        in seal_text
+    )
     assert "Mandatory Decision Gate" in decision_gate
     assert (
         output_dir / SAMPLE_STAGE_DIRS["seal"] / "references" / "task-structure.md"
@@ -881,11 +892,21 @@ def test_workflow_build_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "Before review, decide whether `plans/issue-<id>/implement-notes.md` is required" in pour_text
     assert "Before `review-ready`, decide whether `implement-notes.md` is required" in task_runner
     assert "absence of notes means no such decision occurred" in task_runner
+    assert "canonical detailed finalization gate" in seal_planning_rules
+    assert "if another lock-stage" in seal_planning_rules
+    assert "this reference wins" in seal_planning_rules
+    assert "confirmed grounding handoffs or source-adapter outputs" in seal_planning_rules
     assert "show the staged diff to the user before leaving planning" in seal_planning_rules
     assert "Commit only that staged plan/task snapshot" in seal_planning_rules
     assert "Each `## Final Validation` command line must be self-contained" in seal_planning_rules
     assert "standalone variable assignment, `cd`, or `export` lines" in seal_plan_template
     assert "already-locked plan" in flow_text
+    assert (
+        "Run every `scripts/forma-workflow.sh ...` command from this installed skill package"
+        in flow_text
+    )
+    assert "never relative to the target repository" in flow_text
+    assert "Run the bundled `scripts/forma-workflow.sh next <issue-id>`" in flow_text
     assert "Do not run `scripts/forma-workflow.sh init <issue-id>`" in flow_text
     assert "The workflow runner is mandatory for task selection" in flow_text
     assert "do not recover by parsing `tasks.md` manually" in flow_text
@@ -893,6 +914,7 @@ def test_workflow_build_emits_valid_codex_bundle(tmp_path: Path) -> None:
     assert "references/automated-execution.md" in flow_text
     assert "record the options, selected best choice, and rationale" in flow_text
     assert "Treat `scripts/forma-workflow.sh next <issue-id>` as the only task selector" in automated_execution
+    assert "do not require a target-repository `scripts/forma-workflow.sh`" in automated_execution
     assert "Do not compensate for a failed `review-ready` or `complete`" in automated_execution
     assert "Do not run `git add`, `git rm`, or any other index-mutating command" in automated_execution
     assert "include `Recorded Decisions` only when this invocation recorded autonomous execution choices" in automated_execution
@@ -1427,11 +1449,20 @@ def test_hone_methodology_defines_stage_aware_reconcile_rules() -> None:
     assert "## Stage Evaluation Frame" in rules
     assert "## Quality Gate" in rules
     assert "Passing tests" in rules
+    assert "a literal" in rules
+    assert "`Accept:` line alone" in rules
+    assert "low-standard completion" in rules
+    assert "weaker surrogate" in rules
+    assert "browser-only evidence where real runtime or" in rules
+    assert "wrong source layer" in rules
     assert "Best practical outcome" in rules
     assert "do not return `aligned`" in rules
     assert "`plans/issue-<id>/implement-notes.md`" in rules
     assert "`plans/issue-<id>/runs/task-*.md`" in rules
     assert "`delivery-revision`" in rules
+    assert "standard current-task `implement-notes.md` section" in rules
+    assert "not a custom top-level section" in rules
+    assert "## Delivery Revision" not in rules
 
 
 def test_mend_methodology_defines_rework_contract_rules() -> None:
@@ -1445,7 +1476,15 @@ def test_mend_methodology_defines_rework_contract_rules() -> None:
     assert any("explicit human feedback first" in line for line in mend.workflow_lines)
     assert any("plans/issue-<id>/rework.md" in line for line in mend.workflow_lines)
     assert any("rework-*" in line for line in mend.workflow_lines)
-    assert any("scripts/forma-workflow.sh check <issue-id>" in line for line in mend.workflow_lines)
+    assert any(
+        "Run every `scripts/forma-workflow.sh ...` command from this installed skill package"
+        in line
+        for line in mend.workflow_lines
+    )
+    assert any(
+        "the bundled `scripts/forma-workflow.sh check <issue-id>`" in line
+        for line in mend.workflow_lines
+    )
     assert any("explicit user confirmation" in line for line in mend.workflow_lines)
     assert any("forma-execute" in line for line in mend.workflow_lines)
     assert any("forma-showhand" in line for line in mend.workflow_lines)
@@ -1453,7 +1492,8 @@ def test_mend_methodology_defines_rework_contract_rules() -> None:
     assert "`plans/issue-<id>/rework.md`" in rules
     assert "`plans/issue-<id>/tasks.md`" in rules
     assert "do not add a `## Rework Tasks` heading" in rules
-    assert "scripts/forma-workflow.sh check <issue-id>" in rules
+    assert "do not require or use a target-repository `scripts/forma-workflow.sh`" in rules
+    assert "the bundled `scripts/forma-workflow.sh check <issue-id>`" in rules
     assert "require explicit user confirmation before committing" in rules
     assert "`forma-execute`" in rules
     assert "`forma-showhand`" in rules

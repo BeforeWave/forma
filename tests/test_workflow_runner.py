@@ -27,6 +27,7 @@ def test_next_rejects_unlocked_plan_with_showhand_stop_message(tmp_path: Path) -
     init_result = _run(["bash", str(workflow), "init", "unlocked"], cwd=repo)
     assert "stage only those files" in init_result.stdout
     assert "show the staged diff for user confirmation" in init_result.stdout
+    assert "its bundled scripts/forma-workflow.sh complete unlocked" in init_result.stdout
 
     result = subprocess.run(
         ["bash", str(workflow), "next", "unlocked"],

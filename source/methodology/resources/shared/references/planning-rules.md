@@ -1,10 +1,12 @@
 # Planning Rules
 
-Use these rules for plan-finalization skills in projects that follow the plan-first workflow.
+Use these rules as the canonical detailed finalization gate for plan-first lock
+skills. Stage entry text is only the quick precheck; if another lock-stage
+instruction seems looser, this reference wins.
 
 - Resolve bundled `scripts/*` and `references/*` relative to the current triggered skill package. Never substitute a same-named resource from a sibling skill directory, even if the contents are identical.
 - Use the lock stage only after the current conversation has already converged on an executable plan.
-- Before reading planning references, initializing the workspace, or writing the final plan, confirm from the current user-agent conversation alone that Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer or confirmed grounding handoff, and any applicable Artifact/Evidence Boundary are decision-complete.
+- Before initializing the workspace or writing the final plan, confirm from the current user-agent conversation and already-present confirmed grounding handoffs or source-adapter outputs that Goal, Scope, Approach, Validation, Plan Strategy, selected grounding producer or confirmed grounding handoff, and any applicable Artifact/Evidence Boundary are decision-complete.
 - Fail closed. If any unanswered question could still change the deliverable, module scope, implementation shape, or acceptance criteria, do not read planning references, do not inspect the repository to fill in missing decisions, do not run `scripts/forma-workflow.sh init <issue-id>`, and do not write `plan.md` or `tasks.md`; instead, tell the user what still needs to be clarified.
 - When planning is blocked, answer in the compact `blocked` format from `references/output-format.md`: one sentence stating planning cannot begin yet, a `Missing:` line naming only the unconverged dimensions, and up to 3 short clarifying questions. Do not restate settled context or explain the workflow at length.
 - Do not infer that a task is documentation-only, analysis-only, or eligible for `# no-programmatic-validation: <reason>` unless the current conversation explicitly settles that no code behavior, code-owned definitions, or runtime logic needs to change.

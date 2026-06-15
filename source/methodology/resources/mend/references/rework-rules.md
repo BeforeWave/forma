@@ -96,7 +96,8 @@ Rules:
 
 After updating `rework.md` and `tasks.md`:
 
-- run `scripts/forma-workflow.sh check <issue-id>` before staging or asking for commit permission
+- resolve `scripts/forma-workflow.sh` relative to the current triggered skill package; do not require or use a target-repository `scripts/forma-workflow.sh`
+- run the bundled `scripts/forma-workflow.sh check <issue-id>` before staging or asking for commit permission
 - if the check fails, fix the rework task contract and rerun the check; do not stage or commit the rework contract while the check is failing
 - stage only `plans/issue-<id>/rework.md` and `plans/issue-<id>/tasks.md`
 - show the staged diff

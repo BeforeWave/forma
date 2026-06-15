@@ -43,6 +43,18 @@ Do not use reconciliation as a low-bar completion check. Passing tests,
 finishing tasks, or satisfying the literal task contract is necessary but not
 sufficient for `aligned`.
 
+Compare the delivery against `plan.md` Scope, Approach, Constraints,
+Acceptance Criteria, Validation, task `Accept:` / `Validate:` lines, stage and
+profile constraints, generated artifact boundaries, and required evidence. Do
+not return `aligned` from task checkboxes, passing tests, or a literal
+`Accept:` line alone.
+
+Treat low-standard completion as not aligned when the implementation proves a
+weaker surrogate, uses mock or browser-only evidence where real runtime or
+sidecar proof was required, changes the wrong source layer, patches only one
+visible case while the plan required durable source behavior, or leaves the
+reviewer to infer that a stricter plan requirement was satisfied.
+
 Return `aligned` only when both points hold:
 
 - Contract fit: the delivery satisfies the relevant stage frame, issue
@@ -72,7 +84,7 @@ practical outcome, do not return `aligned`. Route it to:
 - `aligned`: delivery matches the stage frame, satisfies the active contract, and is the best practical outcome within the current scope; no follow-up remains.
 - `acceptable-deviation`: a deviation exists but does not change the goal, stage boundary, validation model, artifact boundary, or required evidence.
 - `task-rework`: the current or next unchecked task must be changed and rerun through review-ready.
-- `delivery-revision`: all tasks are complete, but the same issue needs scoped implementation correction. The next execution must update `plans/issue-<id>/implement-notes.md` with a `## Delivery Revision: <topic>` section.
+- `delivery-revision`: all tasks are complete, but the same issue needs scoped implementation correction. Route it to the rework stage to append ordinary rework tasks; the later execution must record `delivery-revision` inside the standard current-task `implement-notes.md` section, not a custom top-level section.
 - `plan-rework`: the feedback changes Goal, Scope, Approach, Validation, task structure, or issue-level acceptance. Return to the planning workflow and do not record it as implementation notes.
 - `source-rework`: an upstream source, grounding handoff, generated artifact source, profile source, or installed workflow surface needs correction before execution continues.
 - `blocked`: the conclusion would be speculative because target, stage, evidence, validation, or feedback is missing or contradictory.
@@ -80,7 +92,7 @@ practical outcome, do not return `aligned`. Route it to:
 ## Route Requirements
 
 - For `task-rework`, name the execution skill or automated workflow to resume, the task id, the feedback to apply, the required validation, and the review-ready requirement.
-- For `delivery-revision`, name the completed task or delivered surface, require an `implement-notes.md` delivery revision section, rerun relevant validation, and handle commit/history cleanup according to the issue workflow.
+- For `delivery-revision`, name the completed task or delivered surface, route to the rework stage for ordinary appended tasks, require the later execution task's standard `implement-notes.md` section to record `delivery-revision`, rerun relevant validation, and handle commit/history cleanup according to the issue workflow.
 - For `plan-rework`, name the planning stage to resume and the exact planning dimension that changed.
 - For `source-rework`, name the owning source producer or generated artifact surface that must be corrected.
 - For `blocked`, list only the missing or conflicting evidence and ask at most three concrete questions.

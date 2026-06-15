@@ -1567,7 +1567,7 @@ Initialized plan workspace:
 Next:
 1. Use the lock stage to fill in plan.md and tasks.md, stage only those files, show the staged diff for user confirmation, and commit that snapshot only after explicit user permission.
 2. Use the execution skill to implement the current task and present it for review.
-3. After user approval, use the same execution skill again to run scripts/forma-workflow.sh complete $1
+3. After user approval, trigger the same execution skill again; it must run its bundled scripts/forma-workflow.sh complete $1
 EOF
 }
 
