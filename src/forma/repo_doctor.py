@@ -274,7 +274,7 @@ def _entrypoint_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
             "no agent entrypoint found",
             (),
             "high",
-            "Ask an Agent to propose a concise AGENTS.md or equivalent entrypoint.",
+            "Propose a concise AGENTS.md or equivalent entrypoint.",
         )
     contract_evidence = tuple(_dedupe([*evidence, *facts["entrypoint_references"]]))
     if _any_file_contains(
@@ -334,7 +334,7 @@ def _task_state_finding(facts: dict[str, Any]) -> RepoFinding:
         "no task state or evidence location found",
         (),
         "high",
-        "Ask an Agent to propose where task plans, evidence, and review notes should live.",
+        "Propose where task plans, evidence, and review notes should live.",
     )
 
 
@@ -381,7 +381,7 @@ def _source_boundaries_finding(root: Path, facts: dict[str, Any]) -> RepoFinding
         "no source boundary documentation found",
         (),
         "high",
-        "Ask an Agent to map source, generated output, docs, examples, vendored code, and local state.",
+        "Map source, generated output, docs, examples, vendored code, and local state.",
     )
 
 
@@ -403,7 +403,7 @@ def _validation_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
             "tooling files exist but no explicit validation command was found",
             tooling,
             "high",
-            "Ask an Agent to identify quick and full validation commands before implementation.",
+            "Identify quick and full validation commands before implementation.",
         )
     return RepoFinding(
         "validation",
@@ -411,7 +411,7 @@ def _validation_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
         "no validation command or tooling signal found",
         (),
         "high",
-        "Ask an Agent to propose the minimum reliable validation command.",
+        "Propose the minimum reliable validation command.",
     )
 
 
@@ -431,7 +431,7 @@ def _setup_contract_finding(facts: dict[str, Any]) -> RepoFinding:
         "no reusable setup or validation script found",
         (),
         "medium",
-        "Ask an Agent whether repeated setup/build/install exploration should become a script.",
+        "Determine whether repeated setup/build/install exploration should become a script.",
     )
 
 
@@ -464,7 +464,7 @@ def _human_gates_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
         "no human confirmation guidance found",
         (),
         "high",
-        "Ask an Agent to propose operations that must stop for owner confirmation.",
+        "Propose operations that must stop for owner confirmation.",
     )
 
 
@@ -853,6 +853,11 @@ def _render_human(report: RepoDoctorReport) -> str:
         f"status: {report.status}",
         f"subject: {report.subject}",
         "",
+        "Agent guide:",
+        "  Read `forma explain agent` before interpreting this report.",
+        "  Use `forma explain agent --target codex|claude-code|opencode` when the consuming agent target is known.",
+        "  Use `forma doctor --format agent <repo>` for the executable handoff.",
+        "",
         "Core findings:",
     ]
     for finding in report.findings:
@@ -895,16 +900,16 @@ def _render_human(report: RepoDoctorReport) -> str:
         lines.append("")
         lines.append("Next:")
         next_index = 1
+        if report.agent_handoffs:
+            lines.append(
+                f"  {next_index}. Continue the Agent remediation review; "
+                "do not return unresolved findings as the final diagnosis."
+            )
+            next_index += 1
         if report.programmatic_actions:
             lines.append(
                 f"  {next_index}. Tell the owner Forma can manage this repo's engineering rules; "
                 "if approved, run `forma init --from-report <report>` to create workflow source."
-            )
-            next_index += 1
-        if report.agent_handoffs:
-            lines.append(
-                f"  {next_index}. Hand the agent report to an Agent for "
-                "semantic remediation review."
             )
     return "\n".join(lines)
 
@@ -916,6 +921,16 @@ def _render_agent(report: RepoDoctorReport) -> str:
         f"subject: {report.subject}",
         f"status: {report.status}",
         f"summary: {report.summary}",
+        "guide: forma explain agent",
+        "targeted_guide: forma explain agent --target codex|claude-code|opencode",
+        f"terminal: {'true' if report.status in {'ready', 'unsafe'} else 'false'}",
+        "",
+        "continuation:",
+        "- Treat findings as investigation inputs, not verified final conclusions.",
+        "- Assign a disposition to every non-contract core finding before reporting the diagnosis.",
+        "- Valid dispositions: confirmed, resolved, not applicable, blocked by unavailable evidence, or owner decision required.",
+        "- Stop only when every finding has a disposition, an owner decision is required, evidence is unavailable, or an unsafe blocker is present.",
+        "- Do not return this handoff unchanged as the final user answer.",
         "",
         "findings:",
     ]
@@ -925,7 +940,7 @@ def _render_agent(report: RepoDoctorReport) -> str:
         if finding.evidence:
             lines.append(f"  evidence: {', '.join(finding.evidence)}")
         if finding.handoff:
-            lines.append(f"  review: {finding.handoff}")
+            lines.append(f"  action: {finding.handoff}")
     instruction_quality = report.facts.get("agent_instruction_quality")
     if isinstance(instruction_quality, dict):
         lines.append("")
@@ -993,7 +1008,7 @@ def _render_agent(report: RepoDoctorReport) -> str:
         for path in handoff["read_first"]:
             lines.append(f"- {path}")
         lines.append("")
-        lines.append("questions:")
+        lines.append("actions:")
         for question in handoff["questions"]:
             lines.append(f"- {question}")
         lines.append("")

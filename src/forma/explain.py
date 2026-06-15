@@ -539,6 +539,26 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         "```bash",
         "forma doctor --format json <repo> > <report>",
+        "forma doctor --format agent <repo>",
+        "```",
+        "",
+        "The doctor report is an investigation input, not the final user "
+        "diagnosis. When the status is `needs-agent`, inspect the reported "
+        "evidence and repository guidance, assign a disposition to every "
+        "non-contract core finding, and classify it as confirmed, resolved, "
+        "not applicable, blocked by unavailable evidence, or requiring an "
+        "owner decision. Do not copy unresolved findings into the final answer "
+        "and stop.",
+        "",
+        "Stop only when every finding has a disposition, an owner decision is "
+        "required, required evidence is unavailable, or an unsafe blocker is "
+        "present. Finish all agent-resolvable investigation before asking the "
+        "owner.",
+        "",
+        "If the owner wants Forma workflow source after the diagnosis, preserve "
+        "the JSON report and run:",
+        "",
+        "```bash",
         "forma init --from-report <report> --apply <repo>",
         "```",
         "",

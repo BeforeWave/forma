@@ -86,6 +86,12 @@ forma doctor --format json /path/to/repo
 forma doctor --format agent /path/to/repo
 ```
 
+默认输出会把 agent 路由到 `forma explain agent`；如果已知消费端 agent target，则使用
+`forma explain agent --target codex|claude-code|opencode`。agent 应先读取该指南，再用
+`--format agent` 或 `--format json` 继续处理。`needs-agent` 是调查输入，不是最终诊断：
+报告前必须给每个非 `contract` 的核心 finding 明确 disposition；只有需要 owner 决策、
+所需证据不可用、存在 unsafe blocker，或所有 finding 都已有明确 disposition 时才能停止。
+
 它会回答一个新 Agent 是否能知道先读什么、哪些能改、哪些不能改、怎么验证、
 什么时候问人、任务状态和证据放哪里。核心 readiness 来自 repo 的
 agent-operability 契约；Forma profile 只是可选 integration，不是 ready 的前提。

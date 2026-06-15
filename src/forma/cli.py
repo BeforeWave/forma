@@ -92,8 +92,13 @@ Next:
 DOCTOR_HELP = """
 Next:
 
-  Use this to diagnose whether a repository has enough agent-operability
-  structure for a new agent to know what to read, change, validate, and hand off.
+  Agents should read the Forma command guide before interpreting findings:
+    forma explain agent
+    forma explain agent --target codex|claude-code|opencode
+
+  Then use --format agent or --format json. A needs-agent result requires
+  follow-up investigation and finding dispositions; it is not a final
+  diagnosis to return unchanged.
 """
 
 

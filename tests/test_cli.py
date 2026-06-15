@@ -201,8 +201,12 @@ def test_command_help_includes_agent_next_steps() -> None:
             ["doctor", "--help"],
             [
                 "Diagnose repository agent operability.",
-                "agent-operability",
-                "what to read, change, validate, and hand off",
+                "forma explain agent",
+                "forma explain agent --target codex|claude-code|opencode",
+                "A needs-agent result requires",
+                "finding dispositions",
+                "not a final",
+                "diagnosis to return unchanged",
                 "--format",
             ],
         ),
@@ -290,9 +294,15 @@ def test_explain_agent_outputs_command_guide() -> None:
     assert "completed and ran the script" in result.output
     assert "user requested one-off manual flow" in result.output
     assert "forma doctor --format json <repo>" in result.output
+    assert "forma doctor --format agent <repo>" in result.output
     assert "forma init --from-report <report> --apply <repo>" in result.output
     assert "not a generated artifact verifier" in result.output
     assert "Forma workflow source is project-rule management" in result.output
+    assert "investigation input, not the final user diagnosis" in result.output
+    assert "assign a disposition to every non-contract core finding" in result.output
+    assert "Do not copy unresolved findings into the final answer and stop" in result.output
+    assert "Stop only when every finding has a disposition" in result.output
+    assert "Finish all agent-resolvable investigation" in result.output
     assert "workflow source and Agent handoff files" in result.output
     assert "owner confirmations" in result.output
     assert "does not approve semantic rules" in result.output
@@ -1482,6 +1492,8 @@ def test_doctor_reports_ready_without_forma_profile_when_core_contracts_exist(
     assert human.exit_code == 0, human.output
     assert "repo has core agent-operability contracts" in human.output
     assert "status: ready" in human.output
+    assert "forma explain agent --target codex|claude-code|opencode" in human.output
+    assert "forma doctor --format agent <repo>" in human.output
     assert "Hand the agent report" not in human.output
     assert "Workflow adoption:" in human.output
     assert "Forma adoption:" in human.output
@@ -1801,6 +1813,20 @@ def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
     } <= set(findings)
     assert findings["entrypoint"]["status"] == "missing"
     assert data["agent_handoffs"][0]["questions"]
+
+    human = runner.invoke(main, ["doctor", str(tmp_path)])
+    agent = runner.invoke(main, ["doctor", "--format", "agent", str(tmp_path)])
+    assert human.exit_code == 0, human.output
+    assert "Continue the Agent remediation review" in human.output
+    assert "do not return unresolved findings as the final diagnosis" in human.output
+    assert agent.exit_code == 0, agent.output
+    assert "guide: forma explain agent" in agent.output
+    assert "targeted_guide: forma explain agent --target codex|claude-code|opencode" in agent.output
+    assert "terminal: false" in agent.output
+    assert "Treat findings as investigation inputs" in agent.output
+    assert "Assign a disposition to every non-contract core finding" in agent.output
+    assert "Valid dispositions: confirmed, resolved, not applicable" in agent.output
+    assert "Do not return this handoff unchanged as the final user answer" in agent.output
 
 
 def test_init_dry_run_reports_git_trackable_profile_source_without_writing(

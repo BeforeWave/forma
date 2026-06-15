@@ -101,6 +101,14 @@ forma doctor --format json /path/to/repo
 forma doctor --format agent /path/to/repo
 ```
 
+The default output routes agents to `forma explain agent`, with
+`forma explain agent --target codex|claude-code|opencode` available when the
+consuming agent target is known. Read that guide before interpreting findings,
+then use `--format agent` or `--format json` for continuation. A `needs-agent`
+result is investigation input, not a final diagnosis: assign a disposition to
+every non-contract core finding before reporting, and stop only for an owner
+decision, unavailable evidence, an unsafe blocker, or completed dispositions.
+
 It reports whether a new Agent can understand what to read, what can change,
 what must not change, how to validate, when to ask a human, and where to hand
 off task state and evidence. Core readiness is based on repository
