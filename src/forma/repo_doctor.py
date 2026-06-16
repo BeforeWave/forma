@@ -9,7 +9,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from forma.reports import ReportFormat
+from forma.reports import HandoffAction, INTERACTION_CHOICE, NextAction, ReportFormat
+from forma.routes import (
+    HANDOFF_KIND_AGENT_OPERABILITY,
+    HANDOFF_KIND_PROFILE_REFINEMENT,
+    HANDOFF_TITLE_AGENT_OPERABILITY,
+    HANDOFF_TITLE_PROFILE_REFINEMENT,
+)
 
 REPO_DOCTOR_SCHEMA = "forma.repo-doctor.report.v1"
 REPO_DOCTOR_STATUSES = ("ready", "needs-agent", "needs-human", "unsafe")
@@ -113,11 +119,39 @@ class RepoDoctorReport:
     evidence: dict[str, list[str]]
     confidence: str
     programmatic_actions: tuple[dict[str, Any], ...] = ()
-    agent_handoffs: tuple[dict[str, Any], ...] = ()
+    agent_handoffs: tuple[HandoffAction, ...] = ()
     human_decisions: tuple[dict[str, Any], ...] = ()
     unsafe_blockers: tuple[str, ...] = ()
     command: str = "forma doctor"
     schema: str = REPO_DOCTOR_SCHEMA
+
+    @property
+    def terminal(self) -> bool:
+        return self.status in {"ready", "unsafe"} and not self.agent_handoffs
+
+    @property
+    def terminal_reason(self) -> str:
+        if self.agent_handoffs:
+            return "primary_handoff_required"
+        if self.status == "unsafe":
+            return "unsafe_blocker"
+        if self.status == "needs-human":
+            return "owner_decision_required"
+        if self.status == "needs-agent":
+            return "agent_disposition_required"
+        return "no_required_action"
+
+    @property
+    def next_required_action(self) -> str:
+        if self.agent_handoffs:
+            return self.agent_handoffs[0].handoff_kind
+        if self.status == "unsafe":
+            return "stop_for_unsafe_blocker"
+        if self.status == "needs-human":
+            return "owner_decision"
+        if self.status == "needs-agent":
+            return "agent_disposition"
+        return "none"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -126,12 +160,15 @@ class RepoDoctorReport:
             "subject": self.subject,
             "status": self.status,
             "summary": self.summary,
+            "terminal": self.terminal,
+            "terminal_reason": self.terminal_reason,
+            "next_required_action": self.next_required_action,
             "facts": self.facts,
             "findings": [finding.to_dict() for finding in self.findings],
             "evidence": self.evidence,
             "confidence": self.confidence,
             "programmatic_actions": list(self.programmatic_actions),
-            "agent_handoffs": list(self.agent_handoffs),
+            "agent_handoffs": [handoff.to_dict() for handoff in self.agent_handoffs],
             "human_decisions": list(self.human_decisions),
             "unsafe_blockers": list(self.unsafe_blockers),
         }
@@ -199,11 +236,12 @@ def _unsafe_report(root: Path, message: str) -> RepoDoctorReport:
         confidence="high",
         unsafe_blockers=(message,),
         agent_handoffs=(
-            {
-                "title": "provide repository directory",
-                "prompt": "Run `forma doctor <repo-path>` with an existing directory.",
-                "return_shape": "existing repository path",
-            },
+            HandoffAction(
+                title="provide repository directory",
+                handoff_kind=HANDOFF_KIND_AGENT_OPERABILITY,
+                questions=("Run `forma doctor <repo-path>` with an existing directory.",),
+                return_shape={"path": "existing repository path"},
+            ),
         ),
     )
 
@@ -828,7 +866,7 @@ def _programmatic_actions(facts: dict[str, Any]) -> tuple[dict[str, Any], ...]:
 def _agent_handoffs(
     findings: tuple[RepoFinding, ...],
     facts: dict[str, Any],
-) -> tuple[dict[str, Any], ...]:
+) -> tuple[HandoffAction, ...]:
     read_first = _dedupe(
         [
             rel
@@ -840,6 +878,16 @@ def _agent_handoffs(
             if rel
         ]
     )
+    profile_read_first = _dedupe(
+        [
+            *read_first,
+            *(
+                rel
+                for rel in facts["forma"]["paths"]
+                if rel.endswith((".yaml", ".yml"))
+            ),
+        ]
+    )
     review_questions = [
         finding.handoff
         for finding in findings
@@ -847,25 +895,68 @@ def _agent_handoffs(
         and finding.status != "contract"
         and finding.handoff
     ]
-    if not review_questions:
-        return ()
-    return (
-        {
-            "title": "agent-operability remediation review",
-            "read_first": _dedupe(read_first),
-            "questions": review_questions,
-            "forbidden": [
-                "Do not treat tooling file presence as a validation contract.",
-                "Do not treat Forma profile presence as core repo readiness.",
-                "Do not approve durable project rules without owner review.",
-            ],
-            "return_shape": {
-                "programmatic": "deterministic file or checklist changes",
-                "semantic": "repo rule or documentation proposals for Agent review",
-                "owner_confirmations": "owner confirmations required before durable adoption",
-            },
-        },
-    )
+    handoffs: list[HandoffAction] = []
+    if facts["forma"]["present"] and profile_read_first:
+        handoffs.append(
+            HandoffAction(
+                title=HANDOFF_TITLE_PROFILE_REFINEMENT,
+                handoff_kind=HANDOFF_KIND_PROFILE_REFINEMENT,
+                read_first=tuple(profile_read_first),
+                questions=(
+                    "Load `forma explain profile --format agent --target <target>` and follow its existing-profile incremental review guidance.",
+                    "Compare existing Forma profile source against this handoff's read_first sources.",
+                    "Return the incremental profile review with the exact headings required by `forma explain profile`; do not collapse it into generic findings or suggestions.",
+                    "End `Recommended Next Step` with exactly two child lines: `Recommendation: <one concrete next action>` and `Offer: Should I <perform that action> now?`.",
+                    "If the host provides structured user-input, choice, or command-approval UI for the recommended action, use it; otherwise end with `Required Confirmation: <yes/no question>`.",
+                    "Assign dispositions to non-contract core findings after the profile review; do not let setup or tooling findings replace it.",
+                ),
+                forbidden=(
+                    "Do not treat doctor readiness or artifact validation as proof that profile rules cover project semantics.",
+                    "Do not approve durable project rules without owner review.",
+                ),
+                return_shape={
+                    "profile_review": "incremental review from `forma explain profile`: Covered, Missing, Stale, Redundant, and Stage Placement",
+                    "proposal": "minimal Profile YAML Proposal plus Profile Review Packet for owner approval",
+                    "core_findings": "disposition for every non-contract core finding",
+                    "recommended_next_step": "exactly two child lines: Recommendation and Offer, where Offer is an explicit question to do the one action now",
+                    "user_interaction": "use host structured confirmation for the recommended action when available; otherwise emit Required Confirmation",
+                    "owner_confirmations": "owner confirmations required before durable profile adoption",
+                },
+                next_action=NextAction(
+                    title="apply reviewed profile delta",
+                    description="Apply the one approved profile change after the coverage review.",
+                    requires_confirmation=True,
+                    confirmation_prompt="Should I apply the reviewed profile delta now?",
+                    interaction=INTERACTION_CHOICE,
+                    handoff_kind=HANDOFF_KIND_PROFILE_REFINEMENT,
+                ),
+            )
+        )
+    if review_questions:
+        handoffs.append(
+            HandoffAction(
+                title=HANDOFF_TITLE_AGENT_OPERABILITY,
+                handoff_kind=HANDOFF_KIND_AGENT_OPERABILITY,
+                read_first=tuple(_dedupe(read_first)),
+                questions=tuple(review_questions),
+                forbidden=(
+                    "Do not treat tooling file presence as a validation contract.",
+                    "Do not treat Forma profile presence as core repo readiness.",
+                    "Do not approve durable project rules without owner review.",
+                ),
+                return_shape={
+                    "programmatic": "deterministic file or checklist changes",
+                    "semantic": "repo rule or documentation proposals for Agent review",
+                    "owner_confirmations": "owner confirmations required before durable adoption",
+                },
+                next_action=NextAction(
+                    title="resolve operability findings",
+                    description="Resolve or disposition the non-contract core findings before reporting readiness.",
+                    handoff_kind=HANDOFF_KIND_AGENT_OPERABILITY,
+                ),
+            )
+        )
+    return tuple(handoffs)
 
 
 def _human_decisions(findings: tuple[RepoFinding, ...]) -> tuple[dict[str, Any], ...]:
@@ -934,9 +1025,24 @@ def _render_human(report: RepoDoctorReport) -> str:
         lines.append("Next:")
         next_index = 1
         if report.agent_handoffs:
+            primary_handoff = report.agent_handoffs[0]
+            if primary_handoff.handoff_kind == HANDOFF_KIND_PROFILE_REFINEMENT:
+                lines.append(
+                    f"  {next_index}. Continue the profile refinement review with "
+                    "`forma doctor --format agent <repo>`, then follow "
+                    "`forma explain profile --format agent --target <target>`."
+                )
+                lines.append(
+                    "     End with a recommended next step and ask whether the "
+                    "user wants you to do it."
+                )
+            else:
+                lines.append(
+                    f"  {next_index}. Continue the Agent remediation review; "
+                    "do not return unresolved findings as the final diagnosis."
+                )
             lines.append(
-                f"  {next_index}. Continue the Agent remediation review; "
-                "do not return unresolved findings as the final diagnosis."
+                "     Do not return unresolved findings as the final diagnosis."
             )
             next_index += 1
         if report.programmatic_actions:
@@ -948,6 +1054,7 @@ def _render_human(report: RepoDoctorReport) -> str:
 
 
 def _render_agent(report: RepoDoctorReport) -> str:
+    primary_handoff = report.agent_handoffs[0] if report.agent_handoffs else None
     lines = [
         "REPO DOCTOR AGENT HANDOFF",
         f"command: {report.command}",
@@ -956,19 +1063,48 @@ def _render_agent(report: RepoDoctorReport) -> str:
         f"summary: {report.summary}",
         "guide: forma explain agent",
         "targeted_guide: forma explain agent --target codex|claude-code|opencode",
-        f"terminal: {'true' if report.status in {'ready', 'unsafe'} else 'false'}",
-        "",
-        "continuation:",
-        "- Treat findings as investigation inputs, not verified final conclusions.",
-        "- Assign a disposition to every non-contract core finding before reporting the diagnosis.",
-        "- Valid dispositions: confirmed, resolved, not applicable, blocked by unavailable evidence, or owner decision required.",
-        "- Stop only when every finding has a disposition, an owner decision is required, evidence is unavailable, or an unsafe blocker is present.",
-        "- Do not return this handoff unchanged as the final user answer.",
-        "- Before profile authoring, summarize the repository purpose and maintenance model from source-backed facts; doctor-ready operability is not a project-ready profile.",
-        "",
-        "project_understanding:",
-        "  purpose_sources:",
+        f"terminal: {'true' if report.terminal else 'false'}",
+        f"terminal_reason: {report.terminal_reason}",
+        f"next_required_action: {report.next_required_action}",
     ]
+    if primary_handoff is not None:
+        lines.extend(
+            [
+                f"primary_handoff: {primary_handoff.title}",
+                f"primary_handoff_kind: {primary_handoff.handoff_kind}",
+                "",
+                "continuation:",
+                "- Follow the primary handoff before summarizing findings or chasing secondary gaps.",
+                f"- If the primary handoff is {HANDOFF_TITLE_PROFILE_REFINEMENT}, load `forma explain profile --format agent --target <target>` next; do not reroute back through `forma explain agent`.",
+                f"- For {HANDOFF_TITLE_PROFILE_REFINEMENT}, the final answer must use the exact section headings required by `forma explain profile`, including `Recommended Next Step`.",
+                "- When the recommended next step needs user confirmation, use a host structured user-input, choice, or command-approval UI if available; otherwise end with `Required Confirmation:`.",
+                "- Treat findings as investigation inputs, not verified final conclusions.",
+                "- Assign dispositions to non-contract core findings after the primary handoff; valid dispositions are confirmed, resolved, not applicable, blocked by unavailable evidence, or owner decision required.",
+                "- Stop only when the primary handoff is complete and every required finding has a disposition, an owner decision is required, evidence is unavailable, or an unsafe blocker is present.",
+                "- Do not return this handoff unchanged as the final user answer.",
+                "- Before profile authoring, summarize the repository purpose and maintenance model from source-backed facts; doctor-ready operability is not a project-ready profile.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "continuation:",
+                "- Treat findings as investigation inputs, not verified final conclusions.",
+                "- Assign a disposition to every non-contract core finding before reporting the diagnosis.",
+                "- Valid dispositions: confirmed, resolved, not applicable, blocked by unavailable evidence, or owner decision required.",
+                "- Stop only when every finding has a disposition, an owner decision is required, evidence is unavailable, or an unsafe blocker is present.",
+                "- Do not return this handoff unchanged as the final user answer.",
+                "- Before profile authoring, summarize the repository purpose and maintenance model from source-backed facts; doctor-ready operability is not a project-ready profile.",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "project_understanding:",
+            "  purpose_sources:",
+        ]
+    )
     purpose_sources = report.facts.get("purpose_sources", [])
     if purpose_sources:
         lines.extend(f"  - {source}" for source in purpose_sources)
@@ -992,6 +1128,44 @@ def _render_agent(report: RepoDoctorReport) -> str:
         [
             "  profile_boundary: if a candidate profile only encodes doctor findings, label it operability-only, not project-ready",
             "",
+        ]
+    )
+    for handoff in report.agent_handoffs:
+        lines.append(f"handoff: {handoff.title}")
+        lines.append(f"handoff_kind: {handoff.handoff_kind}")
+        lines.append("read_first:")
+        for path in handoff.read_first:
+            lines.append(f"- {path}")
+        lines.append("")
+        lines.append("actions:")
+        for question in handoff.questions:
+            lines.append(f"- {question}")
+        lines.append("")
+        lines.append("forbidden:")
+        for forbidden in handoff.forbidden:
+            lines.append(f"- {forbidden}")
+        lines.append("")
+        lines.append("return_shape:")
+        for key, value in handoff.return_shape.items():
+            lines.append(f"- {key}: {value}")
+        if handoff.next_action is not None:
+            action = handoff.next_action
+            lines.append("")
+            lines.append("next_action:")
+            lines.append(f"- title: {action.title}")
+            if action.handoff_kind is not None:
+                lines.append(f"- handoff_kind: {action.handoff_kind}")
+            if action.description is not None:
+                lines.append(f"- description: {action.description}")
+            if action.interaction is not None:
+                lines.append(f"- interaction: {action.interaction}")
+            if action.requires_confirmation:
+                lines.append("- requires_confirmation: true")
+            if action.confirmation_prompt is not None:
+                lines.append(f"- confirmation_prompt: {action.confirmation_prompt}")
+        lines.append("")
+    lines.extend(
+        [
             "findings:",
         ]
     )
@@ -1062,24 +1236,6 @@ def _render_agent(report: RepoDoctorReport) -> str:
                 lines.append(f"  - {issue}")
         else:
             lines.append("  - none")
-    if report.agent_handoffs:
-        handoff = report.agent_handoffs[0]
-        lines.append("")
-        lines.append("read_first:")
-        for path in handoff["read_first"]:
-            lines.append(f"- {path}")
-        lines.append("")
-        lines.append("actions:")
-        for question in handoff["questions"]:
-            lines.append(f"- {question}")
-        lines.append("")
-        lines.append("forbidden:")
-        for forbidden in handoff["forbidden"]:
-            lines.append(f"- {forbidden}")
-        lines.append("")
-        lines.append("return_shape:")
-        for key, value in handoff["return_shape"].items():
-            lines.append(f"- {key}: {value}")
     return "\n".join(lines)
 
 

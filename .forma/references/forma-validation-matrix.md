@@ -15,32 +15,21 @@ Use this when source behavior changed broadly enough that focused tests are not
 sufficient. Do not run the full test suite by default for docs-only or
 profile-only edits unless the task contract asks for it.
 
-## Creator Or Verifier Gate
+## Verifier Rules
 
 ```bash
-uv run --extra dev forma verify source/skill-creator/
+uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py
 ```
 
-Use this when creator skill source, bundled verifier behavior, or verifier
-packaging is in scope. Do not treat it as a universal gate for unrelated docs,
-profile, or CLI-only changes.
+Use this for verifier rules, target-layout checks, and workflow-output verification behavior.
 
-## Creator Source And Bundled Verifier
+## Workflow Build And Target Output
 
 ```bash
-uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
-uv run --extra dev forma verify source/skill-creator/
+uv run --extra dev python -m pytest -p no:cacheprovider tests/test_workflow_build.py
 ```
 
-Use this for creator skill source, verifier rules, target-layout rules, and agent-side verification behavior.
-
-## Profile Composer And Target Adapters
-
-```bash
-uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
-```
-
-Use this for profile loading, composition, emission, manifest provenance, output replacement, target adapters, and creator builder behavior.
+Use this for canonical methodology, profile loading, target output, manifest provenance, and output replacement behavior.
 
 ## Committed Generated Baselines
 

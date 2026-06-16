@@ -6,6 +6,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Dict, List
 
+INTERACTION_CHOICE = "choice"
+
 
 FAILURE_CLASS_BY_RULE_ID: Dict[str, str] = {
     "R000": "artifact_shape",
@@ -91,10 +93,49 @@ class Report:
                 "total": len(self.results),
             },
             "results": [r.to_dict() for r in self.results],
+            "next_actions": self.next_actions(),
         }
 
     def format_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
+
+    def next_actions(self) -> List[Dict[str, str]]:
+        if self.errors:
+            return [
+                {
+                    "title": "fix verifier errors",
+                    "description": (
+                        "Resolve the listed errors, rerun `forma verify`, and "
+                        "ask whether the user wants you to apply the concrete fixes."
+                    ),
+                    "requires_confirmation": True,
+                    "confirmation_prompt": "Should I fix the verifier errors now?",
+                    "interaction": INTERACTION_CHOICE,
+                }
+            ]
+        if self.warnings:
+            return [
+                {
+                    "title": "review verifier warnings",
+                    "description": (
+                        "Decide whether the warnings should be fixed now or "
+                        "accepted as owner-reviewed residual risk."
+                    ),
+                    "requires_confirmation": True,
+                    "confirmation_prompt": "Should I fix the verifier warnings now?",
+                    "interaction": INTERACTION_CHOICE,
+                }
+            ]
+        return [
+            {
+                "title": "no verification remediation required",
+                "description": (
+                    "The artifact passes verification; if the user asked for "
+                    "installation, publishing, or semantic profile coverage, "
+                    "offer to run that next step explicitly."
+                ),
+            }
+        ]
 
     def format_human(self) -> str:
         lines = [
@@ -114,4 +155,10 @@ class Report:
         elif self.passed:
             lines.append("")
             lines.append("  ok - no errors (warnings only)")
+        lines.append("")
+        lines.append("Next:")
+        for action in self.next_actions():
+            lines.append(f"  - {action['title']}: {action['description']}")
+            if action.get("requires_confirmation") and action.get("confirmation_prompt"):
+                lines.append(f"    confirmation: {action['confirmation_prompt']}")
         return "\n".join(lines)

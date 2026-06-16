@@ -4,10 +4,8 @@ Use these boundaries when planning or executing changes in the Forma repository.
 
 ## Source Boundaries
 
-- `source/skill-creator/` is the self-contained creator skill source and must remain usable after `forma build creator` injects methodology resources.
-- `source/skill-creator/scripts/forma_verifier/` is the bundled verifier package. It must stay stdlib-only for agent-side verification, while remaining importable by the developer CLI.
-- `src/forma/creator/` and `src/forma/adapters/` compose canonical methodology and tracked profiles into target-specific Plan-First workflow output.
-- Canonical methodology lives under `source/methodology/`. Do not duplicate source-of-truth methodology content inside `source/skill-creator/`.
+- `source/methodology/` is the canonical workflow methodology source.
+- `src/forma/` contains the developer CLI, profile loading, target emitters, installer, verifier integration, and drift checks.
 - Forma's self-profile source lives under `.forma/`. Sanitized public examples live under `examples/profiles/`. Downstream-specific profiles belong in the downstream repository that owns their constraints.
 
 ## Artifact Boundaries
@@ -23,6 +21,6 @@ Use these boundaries when planning or executing changes in the Forma repository.
 
 - Source behavior changes need tests.
 - Verifier rule changes need positive and negative rule coverage.
-- Profile schema changes need resolver and creator integration tests.
+- Profile schema changes need focused CLI/profile loading and target-output tests.
 - Generated baseline replacements need create/verify evidence and status review that includes both deletions and additions.
 - Documentation changes should keep README.md, README.zh-CN.md, STRUCTURE.md, and AGENTS.md consistent when their topic overlaps.

@@ -8,6 +8,15 @@ from typing import Any, Literal, Mapping, Sequence
 
 ReportFormat = Literal["human", "agent", "json"]
 REPORT_FORMATS: tuple[ReportFormat, ...] = ("human", "agent", "json")
+Interaction = Literal["choice", "required_confirmation", "command_approval"]
+INTERACTION_CHOICE: Interaction = "choice"
+INTERACTION_REQUIRED_CONFIRMATION: Interaction = "required_confirmation"
+INTERACTION_COMMAND_APPROVAL: Interaction = "command_approval"
+INTERACTIONS: tuple[Interaction, ...] = (
+    INTERACTION_CHOICE,
+    INTERACTION_REQUIRED_CONFIRMATION,
+    INTERACTION_COMMAND_APPROVAL,
+)
 
 
 @dataclass(frozen=True)
@@ -31,9 +40,22 @@ class NextAction:
     description: str | None = None
     stop_condition: str | None = None
     forbidden: tuple[str, ...] = ()
+    requires_confirmation: bool = False
+    confirmation_prompt: str | None = None
+    interaction: Interaction | None = None
+    handoff_kind: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.interaction is not None and self.interaction not in INTERACTIONS:
+            raise ValueError(
+                f"unsupported interaction {self.interaction!r}; "
+                f"expected one of {', '.join(INTERACTIONS)}"
+            )
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {"title": self.title}
+        if self.handoff_kind is not None:
+            data["handoff_kind"] = self.handoff_kind
         if self.command is not None:
             data["command"] = self.command
         if self.description is not None:
@@ -42,6 +64,36 @@ class NextAction:
             data["stop_condition"] = self.stop_condition
         if self.forbidden:
             data["forbidden"] = list(self.forbidden)
+        if self.requires_confirmation:
+            data["requires_confirmation"] = True
+        if self.confirmation_prompt is not None:
+            data["confirmation_prompt"] = self.confirmation_prompt
+        if self.interaction is not None:
+            data["interaction"] = self.interaction
+        return data
+
+
+@dataclass(frozen=True)
+class HandoffAction:
+    title: str
+    handoff_kind: str
+    read_first: tuple[str, ...] = ()
+    questions: tuple[str, ...] = ()
+    forbidden: tuple[str, ...] = ()
+    return_shape: Mapping[str, str] = field(default_factory=dict)
+    next_action: NextAction | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        data: dict[str, Any] = {
+            "title": self.title,
+            "handoff_kind": self.handoff_kind,
+            "read_first": list(self.read_first),
+            "questions": list(self.questions),
+            "forbidden": list(self.forbidden),
+            "return_shape": dict(self.return_shape),
+        }
+        if self.next_action is not None:
+            data["next_action"] = self.next_action.to_dict()
         return data
 
 
@@ -169,6 +221,14 @@ def render_agent(report: ActionableReport) -> str:
                 lines.append(f"   command: {action.command}")
             if action.description is not None:
                 lines.append(f"   detail: {action.description}")
+            if action.handoff_kind is not None:
+                lines.append(f"   handoff_kind: {action.handoff_kind}")
+            if action.interaction is not None:
+                lines.append(f"   interaction: {action.interaction}")
+            if action.requires_confirmation:
+                lines.append("   requires_confirmation: true")
+            if action.confirmation_prompt is not None:
+                lines.append(f"   confirmation_prompt: {action.confirmation_prompt}")
             if action.stop_condition is not None:
                 lines.append(f"   stop_condition: {action.stop_condition}")
             for forbidden in action.forbidden:

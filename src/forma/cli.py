@@ -71,11 +71,15 @@ class RawEpilogGroup(RawEpilogMixin, click.Group):
 ROOT_HELP = """
 Agents:
 
-  Read the workflow command guide first:
+  Start with the workflow command guide:
     forma explain agent
     forma explain agent --target codex
     forma explain agent --target claude-code
     forma explain agent --target opencode
+
+  For repository diagnosis or "is this project ready for agents":
+    forma doctor --format agent <repo>
+    forma doctor --format json <repo>
 """
 
 

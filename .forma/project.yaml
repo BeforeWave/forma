@@ -8,7 +8,7 @@ constraints:
   shape:
     - Keep affected Forma source surfaces explicit in plans and implementation notes.
     - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
-    - Decide whether the iteration touches creator skill source, bundled verifier rules, profile composition, methodology resources, examples, generated baselines, docs, or tests.
+    - Decide whether the iteration touches verifier rules, profile composition, methodology resources, examples, generated baselines, docs, or tests.
     - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
     - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-surface.
   gauge:

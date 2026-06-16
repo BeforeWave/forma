@@ -16,15 +16,15 @@ conditional_overlays:
     - id: methodology-verifier
       description: Canonical methodology or bundled verifier changes.
       overlays: [methodology, verifier]
-    - id: creator-profile
-      description: Profile composer, target adapter, profile schema, or profile stack changes.
-      overlays: [creator, profiles]
+    - id: profile-stack
+      description: Profile schema, profile loading, or tracked profile stack changes.
+      overlays: [profiles]
     - id: generated-baseline
       description: Committed generated output replacement or drift baseline update.
       overlays: [generated]
     - id: cross-surface
-      description: Coordinated work across multiple Forma source, docs, tests, profile, verifier, creator, and generated-output surfaces.
-      overlays: [methodology, verifier, creator, profiles, generated, docs]
+      description: Coordinated work across multiple Forma source, docs, tests, profile, verifier, and generated-output surfaces.
+      overlays: [methodology, verifier, profiles, generated, docs]
   overlays:
     docs:
       description: Documentation update rules.
@@ -58,11 +58,10 @@ conditional_overlays:
         shape:
           - State which canonical methodology stage, fragment, or fixed resource changes and how it affects generated skills.
         pour:
-          - Keep source/methodology as the canonical source and do not duplicate methodology truth inside source/skill-creator.
+          - Keep source/methodology as the canonical workflow methodology source.
       validation_commands:
         pour:
-          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_verifier.py tests/test_layer_1_dogfood.py
-          - uv run --extra dev forma verify source/skill-creator/
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_workflow_build.py tests/test_verifier.py
     verifier:
       description: Bundled verifier rules.
       constraints:
@@ -72,17 +71,7 @@ conditional_overlays:
           - Add paired positive and negative verifier coverage for rule changes.
       validation_commands:
         pour:
-          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py tests/test_layer_1_dogfood.py
-    creator:
-      description: Profile composer, emitter, manifest, adapter, and CLI rules.
-      constraints:
-        shape:
-          - Identify whether the change affects profile loading, composition, target emission, manifest provenance, output replacement, or creator builder behavior.
-        pour:
-          - Keep generated skill bodies deterministic except for generated_at unless a plan explicitly changes that contract.
-      validation_commands:
-        pour:
-          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py tests/test_creator_builder.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_verifier.py
     profiles:
       description: Tracked profile stack rules.
       constraints:
@@ -97,7 +86,7 @@ conditional_overlays:
           - After automated .forma changes, generate self-profile output only into a transient path and verify it; install through Codex only when the issue explicitly requires refreshing the local self-iteration workflow.
       validation_commands:
         pour:
-          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_creator.py
+          - uv run --extra dev python -m pytest -p no:cacheprovider tests/test_cli.py
     generated:
       description: Committed generated output baseline rules.
       constraints:

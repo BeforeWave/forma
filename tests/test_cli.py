@@ -11,7 +11,17 @@ from click.testing import CliRunner
 from forma.adapters import build_creator
 from forma.cli import main
 from forma.origin import normalized_payload_digest
-from forma.reports import ActionableReport, NextAction, ReportSection, render_report
+from forma.reports import (
+    ActionableReport,
+    INTERACTION_CHOICE,
+    NextAction,
+    ReportSection,
+    render_report,
+)
+from forma.routes import (
+    HANDOFF_KIND_PROFILE_REFINEMENT,
+    HANDOFF_TITLE_PROFILE_REFINEMENT,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -121,6 +131,9 @@ def test_root_help_guides_agents_and_no_args_exits_zero() -> None:
         assert "forma explain agent --target codex" in result.output
         assert "forma explain agent --target claude-code" in result.output
         assert "forma explain agent --target opencode" in result.output
+        assert 'For repository diagnosis or "is this project ready for agents"' in result.output
+        assert "forma doctor --format agent <repo>" in result.output
+        assert "forma doctor --format json <repo>" in result.output
 
 
 def test_command_help_includes_agent_next_steps() -> None:
@@ -370,6 +383,10 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert "Doctor-ready operability is not the same as a project-ready profile" in payload[
         "metadata"
     ]["markdown"]
+    assert HANDOFF_TITLE_PROFILE_REFINEMENT in payload["metadata"]["markdown"]
+    assert "load `forma explain profile --format agent --target <target>` next" in payload[
+        "metadata"
+    ]["markdown"]
     assert "run `forma explain stage <stage>`" in payload["metadata"]["markdown"]
     assert "candidate profile package" in payload["metadata"]["markdown"]
     assert "Generate a Claude Code plugin" in payload["metadata"]["markdown"]
@@ -378,6 +395,12 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     commands = {action["command"] for action in payload["next_actions"] if "command" in action}
     assert "forma doctor --format json <repo>" in commands
     assert "forma init --from-report <report> --apply <repo>" in commands
+    profile_action = next(
+        action
+        for action in payload["next_actions"]
+        if action.get("command") == "forma explain profile --target claude-code"
+    )
+    assert "existing-profile incremental review" in profile_action["description"]
 
 
 def test_explain_profile_renderer_boundaries() -> None:
@@ -400,6 +423,16 @@ def test_explain_profile_renderer_boundaries() -> None:
     assert "Profile Renderer Boundary" in human.output
     assert "after `forma explain agent` routes the work" in human.output
     assert "explains how to extract candidate rules" in human.output
+    assert "incremental coverage review" in human.output
+    assert "must use these exact headings" in human.output
+    assert "`Covered`, `Missing`, `Stale`, `Redundant`, `Stage Placement`" in human.output
+    assert "`Recommended Next Step`" in human.output
+    assert "exactly two child lines" in human.output
+    assert "`Recommendation: <one concrete next action>`" in human.output
+    assert "`Offer: Should I <perform that action> now?`" in human.output
+    assert "structured user-input" in human.output
+    assert "Required Confirmation" in human.output
+    assert "Stop after that incremental review" in human.output
     assert "Use `--format agent` for the full executable authoring contract" in human.output
     assert "## Constraint Placement" not in human.output
 
@@ -407,6 +440,17 @@ def test_explain_profile_renderer_boundaries() -> None:
     assert "ACTIONABLE REPORT" in agent.output
     assert "[guidance] Forma Profile Guidance" in agent.output
     assert "## Candidate Draft From Project Facts" in agent.output
+    assert "## Existing Profile Incremental Review" in agent.output
+    assert "`Covered`" in agent.output
+    assert "`Missing`" in agent.output
+    assert "minimal YAML delta" in agent.output
+    assert "`Recommended Next Step`" in agent.output
+    assert "Do not collapse" in agent.output
+    assert "passive note" in agent.output
+    assert "multi-part list" in agent.output
+    assert "command approval UI is" in agent.output
+    assert "actual tool or shell actions" in agent.output
+    assert "do not run build, verify, or drift" in agent.output
     assert "## Project Purpose And Maintenance Semantics" in agent.output
     assert "Doctor `ready` means" in agent.output
     assert "project-ready" in agent.output
@@ -514,6 +558,16 @@ def test_actionable_report_rejects_unsupported_format() -> None:
         raise AssertionError("expected unsupported format to raise")
 
 
+def test_next_action_rejects_unknown_interaction() -> None:
+    try:
+        NextAction(title="bad", interaction="modal")  # type: ignore[arg-type]
+    except ValueError as exc:
+        assert "unsupported interaction" in str(exc)
+        assert INTERACTION_CHOICE in str(exc)
+    else:
+        raise AssertionError("expected invalid interaction to raise")
+
+
 def _report_section(payload: dict[str, object], kind: str) -> dict[str, object]:
     for section in payload["sections"]:  # type: ignore[index]
         if section["kind"] == kind:
@@ -532,6 +586,11 @@ def test_verify_json_emits_machine_readable_report_for_failures() -> None:
     assert data["passed"] is False
     assert data["summary"]["errors"] > 0
     assert data["results"][0]["failure_class"]
+    assert data["next_actions"][0]["title"] == "fix verifier errors"
+    assert "ask whether the user wants you to apply" in data["next_actions"][0]["description"]
+    assert data["next_actions"][0]["requires_confirmation"] is True
+    assert data["next_actions"][0]["interaction"] == INTERACTION_CHOICE
+    assert "verifier errors" in data["next_actions"][0]["confirmation_prompt"]
     assert "Error:" not in result.output
 
 
@@ -1370,6 +1429,7 @@ def test_drift_with_profile_reports_fresh_and_stale(tmp_path: Path) -> None:
     fresh_data = json.loads(fresh.output)
     assert fresh_data["status"] == "fresh"
     assert fresh_data["artifacts"][0]["source_kind"] == "profile"
+    assert fresh_data["next_actions"][0]["title"] == "no drift remediation required"
 
     skill = artifact / "backend-plan-first-ground" / "SKILL.md"
     skill.write_text(
@@ -1385,6 +1445,10 @@ def test_drift_with_profile_reports_fresh_and_stale(tmp_path: Path) -> None:
     stale_data = json.loads(stale.output)
     assert stale_data["status"] == "stale"
     assert stale_data["artifacts"][0]["status"] == "stale"
+    assert stale_data["next_actions"][0]["title"] == "regenerate stale artifact"
+    assert stale_data["next_actions"][0]["requires_confirmation"] is True
+    assert stale_data["next_actions"][0]["interaction"] == INTERACTION_CHOICE
+    assert "regenerate and verify" in stale_data["next_actions"][0]["confirmation_prompt"]
 
 
 def test_drift_without_source_reports_unknown_source_base_origin(
@@ -1405,6 +1469,7 @@ def test_drift_without_source_reports_unknown_source_base_origin(
     assert item["status"] == "unknown-source"
     assert item["source_kind"] == "none"
     assert item["base_origin_status"] == "fresh"
+    assert data["next_actions"][0]["title"] == "provide source for full drift proof"
 
 
 def test_drift_creator_source_reports_unknown_for_injected_artifact(
@@ -1445,6 +1510,7 @@ def test_drift_release_surface_reports_known_paths() -> None:
         "invalid",
         "unknown-source",
     }
+    assert data["next_actions"]
 
 
 def test_doctor_rejects_removed_subcommands(tmp_path: Path) -> None:
@@ -1811,6 +1877,154 @@ def test_doctor_does_not_treat_forma_profile_as_core_readiness(
     ]["owner_confirmations"]
 
 
+def test_doctor_routes_existing_forma_profile_to_coverage_review(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+Read first: [docs/AGENTS.md](docs/AGENTS.md).
+
+## Source Boundaries
+- Source lives in src.
+- Generated output lives in dist.
+
+## Validation
+- Run `pytest`.
+
+## Human Gates
+- Ask for human approval before destructive, release, credential, or external-write actions.
+
+## Handoff
+- Return findings and proof before completion.
+""",
+        encoding="utf-8",
+    )
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "AGENTS.md").write_text(
+        """# Docs Rules
+
+Read [frontend constraints](dev/frontend.md) before frontend work.
+Generated output belongs in dist.
+Ask for approval before durable rule adoption.
+""",
+        encoding="utf-8",
+    )
+    (docs / "dev").mkdir()
+    (docs / "dev" / "frontend.md").write_text(
+        "Run rendered UI checks before accepting frontend work.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("Validate with `pytest`.\n", encoding="utf-8")
+    (tmp_path / "STRUCTURE.md").write_text(
+        "source: src\ngenerated: dist\nwritable: tests\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "plans").mkdir()
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    validate = scripts / "validate.sh"
+    validate.write_text("#!/usr/bin/env sh\nexit 0\n", encoding="utf-8")
+    validate.chmod(0o755)
+    profile_dir = tmp_path / ".forma"
+    profile_dir.mkdir()
+    (profile_dir / "profile.yaml").write_text(
+        "profile:\n  id: sample\nconstraints:\n  default:\n    - Keep source and generated output separate.\n",
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["status"] == "ready"
+    assert data["terminal"] is False
+    assert data["terminal_reason"] == "primary_handoff_required"
+    assert data["next_required_action"] == HANDOFF_KIND_PROFILE_REFINEMENT
+    assert data["agent_handoffs"][0]["title"] == HANDOFF_TITLE_PROFILE_REFINEMENT
+    assert data["agent_handoffs"][0]["handoff_kind"] == HANDOFF_KIND_PROFILE_REFINEMENT
+    assert data["agent_handoffs"][0]["read_first"] == [
+        "AGENTS.md",
+        "docs/AGENTS.md",
+        "README.md",
+        "docs/dev/frontend.md",
+        ".forma/profile.yaml",
+    ]
+    assert (
+        "forma explain profile --format agent --target <target>"
+        in data["agent_handoffs"][0]["questions"][0]
+    )
+    assert "Compare existing Forma profile source" in data["agent_handoffs"][0]["questions"][1]
+    assert "exact headings" in data["agent_handoffs"][0]["questions"][2]
+    assert "generic findings or suggestions" in data["agent_handoffs"][0]["questions"][2]
+    assert "exactly two child lines" in data["agent_handoffs"][0]["questions"][3]
+    assert "Offer: Should I <perform that action> now?" in data["agent_handoffs"][0][
+        "questions"
+    ][3]
+    assert "structured user-input" in data["agent_handoffs"][0]["questions"][4]
+    assert "Required Confirmation" in data["agent_handoffs"][0]["questions"][4]
+    assert "artifact validation" in data["agent_handoffs"][0]["forbidden"][0]
+    assert data["agent_handoffs"][0]["return_shape"]["profile_review"].startswith(
+        "incremental review"
+    )
+    assert data["agent_handoffs"][0]["return_shape"]["proposal"].startswith(
+        "minimal Profile YAML Proposal"
+    )
+    assert data["agent_handoffs"][0]["return_shape"]["recommended_next_step"].startswith(
+        "exactly two child lines"
+    )
+    assert "Offer is an explicit question" in data["agent_handoffs"][0]["return_shape"][
+        "recommended_next_step"
+    ]
+    assert data["agent_handoffs"][0]["return_shape"]["user_interaction"].startswith(
+        "use host structured confirmation"
+    )
+    assert data["agent_handoffs"][0]["next_action"]["handoff_kind"] == HANDOFF_KIND_PROFILE_REFINEMENT
+    assert data["agent_handoffs"][0]["next_action"]["requires_confirmation"] is True
+    assert data["agent_handoffs"][0]["next_action"]["interaction"] == INTERACTION_CHOICE
+    assert "profile delta" in data["agent_handoffs"][0]["next_action"][
+        "confirmation_prompt"
+    ]
+
+    agent = runner.invoke(main, ["doctor", "--format", "agent", str(tmp_path)])
+
+    assert agent.exit_code == 0, agent.output
+    assert "terminal: false" in agent.output
+    assert "terminal_reason: primary_handoff_required" in agent.output
+    assert f"next_required_action: {HANDOFF_KIND_PROFILE_REFINEMENT}" in agent.output
+    assert f"primary_handoff: {HANDOFF_TITLE_PROFILE_REFINEMENT}" in agent.output
+    assert f"primary_handoff_kind: {HANDOFF_KIND_PROFILE_REFINEMENT}" in agent.output
+    assert "Follow the primary handoff before summarizing findings" in agent.output
+    assert "load `forma explain profile --format agent --target <target>` next" in agent.output
+    assert "final answer must use the exact section headings" in agent.output
+    assert "host structured user-input" in agent.output
+    assert "do not reroute back through `forma explain agent`" in agent.output
+    assert f"handoff: {HANDOFF_TITLE_PROFILE_REFINEMENT}" in agent.output
+    assert f"handoff_kind: {HANDOFF_KIND_PROFILE_REFINEMENT}" in agent.output
+    assert agent.output.index(f"primary_handoff: {HANDOFF_TITLE_PROFILE_REFINEMENT}") < agent.output.index(
+        "continuation:"
+    )
+    assert agent.output.index(f"handoff: {HANDOFF_TITLE_PROFILE_REFINEMENT}") < agent.output.index(
+        "findings:"
+    )
+    assert "Load `forma explain profile --format agent --target <target>`" in agent.output
+    assert "profile_review: incremental review from `forma explain profile`" in agent.output
+    assert "recommended_next_step: exactly two child lines" in agent.output
+    assert "user_interaction: use host structured confirmation" in agent.output
+    assert "next_action:" in agent.output
+    assert "requires_confirmation: true" in agent.output
+    assert "confirmation_prompt: Should I apply the reviewed profile delta now?" in agent.output
+    assert "Offer is an explicit question" in agent.output
+
+    human = runner.invoke(main, ["doctor", str(tmp_path)])
+
+    assert human.exit_code == 0, human.output
+    assert "Continue the profile refinement review" in human.output
+    assert "End with a recommended next step" in human.output
+
+
 def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
     runner = CliRunner()
 
@@ -1845,8 +2059,9 @@ def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
     assert "targeted_guide: forma explain agent --target codex|claude-code|opencode" in agent.output
     assert "terminal: false" in agent.output
     assert "Treat findings as investigation inputs" in agent.output
-    assert "Assign a disposition to every non-contract core finding" in agent.output
-    assert "Valid dispositions: confirmed, resolved, not applicable" in agent.output
+    assert "Follow the primary handoff before summarizing findings" in agent.output
+    assert "Assign dispositions to non-contract core findings after the primary handoff" in agent.output
+    assert "valid dispositions are confirmed, resolved, not applicable" in agent.output
     assert "project_understanding:" in agent.output
     assert "semantic_dimensions:" in agent.output
     assert "what this repository is for and what it delivers" in agent.output

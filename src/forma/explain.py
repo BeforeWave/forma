@@ -15,6 +15,7 @@ from forma.reports import (
     ReportSection,
     render_report,
 )
+from forma.routes import HANDOFF_TITLE_PROFILE_REFINEMENT
 from forma.runtime_assets import read_runtime_text
 
 OutputFormat = ReportFormat
@@ -238,8 +239,10 @@ def _topic_next_actions(topic: str, target_agent: str | None) -> tuple[NextActio
                 title="load profile authoring guidance",
                 command=f"forma explain profile --target {target}",
                 description=(
-                    "Use when no approved profile exists yet; the agent still "
-                    "has to read repository facts and draft candidate rules."
+                    "Use for new profile authoring or existing-profile "
+                    "incremental review; the agent still has to read "
+                    "repository facts, compare current profile coverage, and "
+                    "draft candidate rule changes."
                 ),
             ),
             NextAction(
@@ -567,6 +570,11 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "present. Finish all agent-resolvable investigation before asking the "
         "owner.",
         "",
+        f"When the report includes a `{HANDOFF_TITLE_PROFILE_REFINEMENT}` "
+        "handoff, load `forma explain profile --format agent --target <target>` next and use "
+        "its existing-profile incremental review guidance. Doctor routes the "
+        "work; profile guidance owns the review semantics.",
+        "",
         "If the owner wants Forma workflow source after the diagnosis, preserve "
         "the JSON report and run:",
         "",
@@ -724,6 +732,14 @@ def _render_human_markdown(
                 "- Use this after `forma explain agent` routes the work to profile authoring.",
                 "- Use profiles for durable, repeated project workflow rules.",
                 "- This command explains how to extract candidate rules from project facts by workflow behavior.",
+                "- When a profile already exists, use this guidance for incremental coverage review: compare current profile rules with source-backed repository instructions before proposing a minimal YAML delta.",
+                "- Existing-profile review must use these exact headings: `Covered`, `Missing`, `Stale`, `Redundant`, `Stage Placement`, `Profile YAML Proposal`, `Profile Review Packet`, and `Recommended Next Step`.",
+                "- Do not collapse the review into generic prose headings such as findings, conclusion, or suggestions.",
+                "- `Recommended Next Step` must contain exactly two child lines: `Recommendation: <one concrete next action>` and `Offer: Should I <perform that action> now?`.",
+                "- The offer must be an explicit question, not a passive note such as this needs confirmation or a multi-part list of possible decisions.",
+                "- After writing the offer, use a host-provided structured user-input, choice, or command-approval UI when available; otherwise end with `Required Confirmation: <yes/no question>`.",
+                "- In Codex-like hosts, command approval UI is for actual tool or shell actions that require permission; use structured choice/user-input for non-command decisions when the host exposes it.",
+                "- Stop after that incremental review unless the user explicitly asks to write the profile, validate generated artifacts, or reinstall workflow output.",
                 "- The agent must group candidate rules by touched stage before proposing YAML.",
                 "- Keep task-specific or one-off generation constraints out of the profile.",
                 "- Draft a `Profile YAML Proposal` and `Profile Review Packet` before writing files.",

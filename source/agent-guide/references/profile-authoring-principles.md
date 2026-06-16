@@ -83,6 +83,57 @@ Group the candidate rules by touched stage before proposing YAML. The draft
 should make it easy to run the later stage semantic check against only the
 affected stages instead of rereading the whole repository.
 
+## Existing Profile Incremental Review
+
+Use this path when `forma doctor` reports an existing `.forma/profile.yaml` or
+another tracked profile and asks for profile refinement or coverage review.
+This is still profile authoring, but the task is incremental review rather than
+starting from a blank profile.
+
+Read the current profile and the doctor handoff's `read_first` sources. Compare
+the existing profile against source-backed repository instructions. Do not
+replace the profile wholesale, and do not run build, verify, or drift just to
+prove the current profile artifact is fresh.
+
+Return an incremental review with these exact section headings. Do not collapse
+the review into generic prose headings such as "findings", "conclusion", or
+"suggestions":
+
+- `Covered`: durable repository rules already represented by the profile, with
+  the profile path and source evidence.
+- `Missing`: source-backed durable rules that should be proposed for profile
+  addition, with the narrowest target such as `constraints.gauge`,
+  `workflow_adds.seal`, or `output_adds.pour`.
+- `Stale`: profile rules whose source evidence is gone, contradicted, or
+  superseded.
+- `Redundant`: profile rules that merely restate base methodology or duplicate
+  another profile rule.
+- `Stage Placement`: touched stages and why each candidate rule belongs there.
+- `Profile YAML Proposal`: only the minimal YAML delta or replacement snippet
+  needed for review.
+- `Profile Review Packet`: source evidence, rule classification, omitted rules,
+  open questions, and owner confirmations.
+- `Recommended Next Step`: exactly one next action. Format it as two child
+  lines: `Recommendation: <one concrete next action>` and `Offer: Should I
+  <perform that action> now?`. The offer must be an explicit question, not a
+  passive note such as "this needs confirmation" or a multi-part list of
+  possible decisions.
+
+After writing `Recommended Next Step`, request confirmation through the host's
+structured interaction capability when one is available, such as a choice,
+user-input, or command-approval UI. In Codex-like hosts, command approval UI is
+for actual tool or shell actions that require permission; use a structured
+choice/user-input capability for non-command decisions when the host exposes
+one. If no structured interaction capability is available in the current
+thread, end with `Required Confirmation: <yes/no question>` instead of only
+leaving the offer as passive prose.
+
+Stop after the incremental review unless the user explicitly asks to write the
+profile, validate generated artifacts, or reinstall workflow output. Validation
+commands such as `forma build`, `forma verify`, and `forma drift` belong after
+approved profile edits or explicit artifact validation requests; they do not
+answer whether the existing profile semantically covers the repository rules.
+
 ## Profile Proposal Review
 
 When proposing a profile from repository rules, do not answer with only YAML.

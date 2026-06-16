@@ -23,6 +23,7 @@ from forma.adopt import (
 from forma.creator import build_bundle
 from forma.origin import normalized_payload_digest
 from forma.plugins import build_plugin
+from forma.reports import INTERACTION_CHOICE, NextAction
 from forma_verifier import verify
 
 
@@ -83,10 +84,65 @@ class DriftReport:
             "schema": DRIFT_REPORT_SCHEMA,
             "status": self.status,
             "artifacts": [artifact.to_dict() for artifact in self.artifacts],
+            "next_actions": [action.to_dict() for action in self.next_actions],
         }
 
     def format_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
+
+    @property
+    def next_actions(self) -> tuple[NextAction, ...]:
+        if self.status == STATUS_FRESH:
+            return (
+                NextAction(
+                    title="no drift remediation required",
+                    description=(
+                        "The checked artifact is fresh; if the user asked for "
+                        "semantic profile coverage, run doctor/profile review "
+                        "instead of treating drift as that proof."
+                    ),
+                ),
+            )
+        if self.status == STATUS_STALE:
+            return (
+                NextAction(
+                    title="regenerate stale artifact",
+                    description=(
+                        "Regenerate the artifact from its approved source, run "
+                        "`forma verify`, then ask whether the user wants the "
+                        "fresh artifact installed, committed, or published."
+                    ),
+                    requires_confirmation=True,
+                    confirmation_prompt="Should I regenerate and verify the stale artifact now?",
+                    interaction=INTERACTION_CHOICE,
+                ),
+            )
+        if self.status == STATUS_UNKNOWN_SOURCE:
+            return (
+                NextAction(
+                    title="provide source for full drift proof",
+                    description=(
+                        "Rerun drift with `--profile` or `--creator-source`, "
+                        "or ask the user for the owning source before making a "
+                        "fresh/stale claim."
+                    ),
+                    requires_confirmation=True,
+                    confirmation_prompt="Should I rerun drift with the owning source now?",
+                    interaction=INTERACTION_CHOICE,
+                ),
+            )
+        return (
+            NextAction(
+                title="fix invalid artifact before drift",
+                description=(
+                    "Resolve verifier or manifest errors, rerun `forma verify`, "
+                    "then rerun `forma drift` and offer to apply the next concrete fix."
+                ),
+                requires_confirmation=True,
+                confirmation_prompt="Should I inspect and fix the invalid artifact now?",
+                interaction=INTERACTION_CHOICE,
+            ),
+        )
 
     def format_human(self) -> str:
         lines = [f"forma drift: {self.status}"]
@@ -103,6 +159,12 @@ class DriftReport:
             )
             if artifact.message:
                 lines.append(f"    {artifact.message}")
+        lines.append("")
+        lines.append("Next:")
+        for action in self.next_actions:
+            lines.append(f"  - {action.title}: {action.description}")
+            if action.requires_confirmation and action.confirmation_prompt:
+                lines.append(f"    confirmation: {action.confirmation_prompt}")
         return "\n".join(lines)
 
 
