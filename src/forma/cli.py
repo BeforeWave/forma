@@ -206,9 +206,11 @@ reading Forma source files.
 EXPLAIN_AGENT_HELP = """
 Next:
 
-  Read this as the agent-facing command guide for Forma CLI surfaces before
+  Read this as the read-only command-routing guide for agents using Forma before
   choosing between profile authoring, workflow generation, plugin output,
   optional creator output, profile adoption, drift, doctor, init, verify, and install.
+  It does not inspect a repository, create profile drafts, build artifacts, or
+  install workflows.
   If no approved profile exists yet, this guide routes the agent to
   forma explain profile before repo-specific profile drafting.
 """

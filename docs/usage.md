@@ -14,7 +14,7 @@ can start there when it is unsure which command path to use.
 
 | Goal | Command path | Next action |
 |---|---|---|
-| Choose the agent-facing Forma CLI route | `forma explain agent --format human|agent|json --target codex` | Start here when an agent needs to choose between profile authoring, stage guidance, temporary injection, doctor/init, build, verify, drift, install, creator, or profile adoption. |
+| Choose the agent-facing Forma CLI route | `forma explain agent --format human|agent|json --target codex` | Start here when an agent needs the read-only command-routing guide before choosing between profile authoring, stage guidance, temporary injection, doctor/init, build, verify, drift, install, creator, or profile adoption. |
 | Read or hand off profile authoring rules | `forma explain profile --format human|agent|json --target codex` | Use only after `forma explain agent` routes the work to profile authoring. It does not inspect the repo or create a draft; the agent combines this guidance with project facts before proposing profile rules. |
 | Compare candidate rules with stage methodology | `forma explain stage <stage> --format human|agent|json --target codex` | Use after candidate profile rules identify touched stages and before writing profile files. Omit rules already owned by base methodology, or propose a methodology change when the base contract is weak. |
 | Build a skill bundle from a reviewed tracked profile | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | Use generation `target` as `codex`, `claude-code`, or `opencode`; human output is a concise artifact result. Use `--format agent` or `--format json` when another agent or tool needs structured next actions. |
@@ -325,10 +325,13 @@ forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-`forma explain agent` is the agent-facing command guide for Forma CLI surfaces.
-It is the first `explain` command an agent should read when it needs to choose
-between profile authoring, workflow generation, plugin output, optional creator
-output, profile adoption, drift, doctor, init, verify, or install.
+`forma explain agent` is the read-only command-routing guide for agents using
+Forma. It is the first `explain` command an agent should read when it needs to
+choose between profile authoring, workflow generation, plugin output, optional
+creator output, profile adoption, drift, doctor, init, verify, or install. It
+does not inspect a repository, create profile drafts, build artifacts, or
+install workflows; it explains the next command path, required facts, and stop
+conditions.
 
 `forma explain profile` is useful both for people and for agents, but the
 renderer changes the handoff:

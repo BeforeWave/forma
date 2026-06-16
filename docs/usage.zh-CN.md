@@ -12,7 +12,7 @@
 
 | 目标 | 命令路径 | 下一步 |
 |---|---|---|
-| 选择 agent-facing Forma CLI 路线 | `forma explain agent --format human|agent|json --target codex` | agent 需要在 profile authoring、stage guidance、temporary injection、doctor/init、build、verify、drift、install、creator 或 profile adoption 之间选路时，先从这里开始。 |
+| 选择 agent-facing Forma CLI 路线 | `forma explain agent --format human|agent|json --target codex` | agent 需要只读命令路由指南，并在 profile authoring、stage guidance、temporary injection、doctor/init、build、verify、drift、install、creator 或 profile adoption 之间选路时，先从这里开始。 |
 | 阅读或交接 profile 编写规则 | `forma explain profile --format human|agent|json --target codex` | 只在 `forma explain agent` 把任务路由到 profile authoring 后使用。它不检查 repo，也不会自动生成草稿；agent 仍要把这份规则和项目事实结合起来，再提出 profile rules。 |
 | 把 candidate rules 和 stage methodology 对照 | `forma explain stage <stage> --format human|agent|json --target codex` | candidate profile rules 已经识别出 touched stages 后、真正写 profile 前使用。base methodology 已经负责的规则要删掉；如果 base contract 弱，则提 methodology 修改。 |
 | 从已经 review 的 tracked profile 生成 skill bundle | `forma build bundle --target <target> --profile <profile.yaml> --output <dir>` | 生成 `target` 填 `codex`、`claude-code` 或 `opencode`；human 输出是简洁产物结果。需要给 agent 或工具链交接下一步时，用 `--format agent` 或 `--format json`。 |
@@ -273,9 +273,10 @@ forma explain profile --format agent --target codex
 forma explain temporary-injection --format json --target codex
 ```
 
-`forma explain agent` 是 Forma CLI 各个 agent-facing 命令面的总指南。agent 需要在
+`forma explain agent` 是给 agent 使用 Forma 时的只读命令路由指南。agent 需要在
 profile authoring、workflow generation、plugin output、可选 creator output、
 profile adoption、drift、doctor、init、verify 或 install 之间选路时，应该先读它。
+它不检查仓库、不生成 profile 草稿、不构建产物，也不安装 workflow；它解释下一步该走哪条命令路径、需要从仓库或用户那里带入哪些事实，以及这条路径必须在哪里停止。
 
 `forma explain profile` 既可以给人看，也可以给 agent 用，但 renderer 的交接重点不同：
 

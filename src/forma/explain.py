@@ -406,10 +406,16 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "",
         target_line,
         "",
-        "This is the agent-facing command guide for Forma CLI surfaces. Use it "
-        "to choose between profile authoring, workflow generation, plugin "
-        "output, optional creator output, profile adoption, drift, doctor, init, "
-        "verify, and install before reading narrower command guidance.",
+        "This is the read-only command-routing guide for agents using Forma. "
+        "Use it to choose the next Forma command path between profile "
+        "authoring, workflow generation, plugin output, optional creator "
+        "output, profile adoption, drift, doctor, init, verify, and install "
+        "before reading narrower command guidance.",
+        "",
+        "It does not inspect a repository, create profile drafts, build "
+        "artifacts, or install workflows. It explains what route to use next, "
+        "what facts the agent must bring from the repository or user, and "
+        "where that route must stop.",
         "",
         "OpenCode uses native direct skill output. Generate an OpenCode bundle "
         "with `forma build bundle --target opencode`, verify it, then install "
@@ -424,8 +430,8 @@ def _render_agent_markdown(target_agent: str | None) -> str:
         "They can be temporary for a trial workflow or committed for long-term "
         "reuse.",
         "",
-        "Start from this Agent Guide. When no approved profile exists or repo "
-        "rules need to become durable Forma configuration, run "
+        "Start from this command-routing guide. When no approved profile exists "
+        "or repo rules need to become durable Forma configuration, run "
         "`forma explain profile --target <target>` next to load the profile "
         "authoring contract. That command does not inspect the repository or "
         "produce a draft by itself.",

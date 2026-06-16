@@ -269,7 +269,9 @@ def test_explain_agent_outputs_command_guide() -> None:
 
     assert result.exit_code == 0, result.output
     assert "# Forma Agent Guide" in result.output
-    assert "agent-facing command guide for Forma CLI surfaces" in result.output
+    assert "read-only command-routing guide for agents using Forma" in result.output
+    assert "does not inspect a repository" in result.output
+    assert "what facts the agent must bring from the repository or user" in result.output
     assert "Generation targets: `codex`, `claude-code`, `opencode`" in result.output
     assert "plugin targets: `codex`, `claude-code`" in result.output
     assert "install targets: `codex`, `claude-code`, `opencode`" in result.output
@@ -360,10 +362,10 @@ def test_explain_agent_json_outputs_command_guide() -> None:
     assert payload["metadata"]["topic"] == "agent"
     assert payload["metadata"]["target"] == "claude-code"
     assert "# Forma Agent Guide" in payload["metadata"]["markdown"]
-    assert "agent-facing command guide for Forma CLI surfaces" in payload["metadata"]["markdown"]
+    assert "read-only command-routing guide for agents using Forma" in payload["metadata"]["markdown"]
     assert "doctor, init, verify, and install" in payload["metadata"]["markdown"]
     assert "## Profile write boundary" in payload["metadata"]["markdown"]
-    assert "Start from this Agent Guide" in payload["metadata"]["markdown"]
+    assert "Start from this command-routing guide" in payload["metadata"]["markdown"]
     assert "does not inspect the repository" in payload["metadata"]["markdown"]
     assert "Doctor-ready operability is not the same as a project-ready profile" in payload[
         "metadata"
