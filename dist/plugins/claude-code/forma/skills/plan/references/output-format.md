@@ -11,18 +11,20 @@ The plan stage may output only these statuses:
 - `proposal-ready`: all blocking decisions are resolved and the skill has enough information to present a reviewable plan proposal in chat, but final plan files have not been written.
 - `handoff`: the current skill should stop and recommend the lock stage or another workflow.
 
-Do not use `success` for the plan stage. This skill does not write files, so it must not output `Files Changed`, `Validation Commands` as completed work, `Evidence Path`, or a planning success report.
+The plan stage does not use `success`. Its work is chat-only, so it reports
+`blocked`, `clarifying`, `proposal-ready`, or `handoff` instead of completed
+files, validation runs, evidence paths, or planning success.
 
 ## Default Rules
 
 - Lead with the result, not process narration.
 - Omit empty sections.
-- Do not repeat the same point across sections.
-- Do not restate settled context, repo rules, or workflow explanations.
-- Do not include `Risks` unless there is a concrete unresolved risk.
-- Do not include `Next Step` unless the user must take an action now.
-- Do not claim that `plan.md` or `tasks.md` were written.
-- Do not include blocking questions in `proposal-ready`.
+- Put each point in one section only.
+- Keep settled context, repo rules, and workflow explanations out of routine output.
+- Include `Risks` only for concrete unresolved risks.
+- Include `Next Step` only when the user must act now.
+- Mention `plan.md` or `tasks.md` only to say that the lock stage will write them later.
+- Keep `proposal-ready` free of questions that could block execution.
 
 ## `blocked`
 
@@ -31,12 +33,8 @@ Use this compact shape:
 - One sentence stating that the skill cannot continue yet.
 - `Missing:` followed by only the unsettled items.
 - Up to 3 short clarifying questions.
-
-Do not:
-
-- Re-list settled decisions.
-- Explain the workflow at length.
-- Repeat the same blocker in multiple phrasings.
+Keep settled decisions and workflow explanations out of `blocked`; state each
+blocker once.
 
 ## `clarifying`
 
@@ -62,12 +60,11 @@ Optional:
 - Open Questions, limited to non-blocking notes that cannot change deliverable, scope, implementation shape, contracts, artifact location, validation, or review-only status.
 - Risks
 
-Do not:
-
-- Include `Files Changed`; this skill writes no files.
-- Include `Validation Commands` as already executed.
-- Include Open Questions that could change execution.
-- Omit required execution-boundary details for artifact paths, evidence paths, output policy, state or environment assumptions, proof gates, metadata/provenance, or write boundaries.
+Keep `proposal-ready` chat-only: no changed-file report, no completed
+validation report, no execution-changing open questions, and no missing
+execution-boundary details for artifact paths, evidence paths, output policy,
+state or environment assumptions, proof gates, metadata/provenance, or write
+boundaries.
 
 ## `handoff`
 

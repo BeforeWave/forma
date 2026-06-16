@@ -12,8 +12,9 @@ git diff --check
 ```
 
 Use this when source behavior changed broadly enough that focused tests are not
-sufficient. Do not run the full test suite by default for docs-only or
-profile-only edits unless the task contract asks for it.
+sufficient. Docs-only and profile-only edits default to their narrow gates; run
+the full test suite when the task contract asks for it or the change touches
+shared behavior.
 
 ## Verifier Rules
 

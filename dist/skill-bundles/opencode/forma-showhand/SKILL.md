@@ -24,8 +24,9 @@ Continue remaining tasks, but stop when evidence is insufficient.
 
 - Read `./plans/issue-<id>/plan.md` and `./plans/issue-<id>/tasks.md`; if either file is missing or still a template, stop and hand off to the lock stage instead of creating or editing plan files.
 - Run every `scripts/forma-workflow.sh ...` command from this installed skill package; resolve the script relative to the current triggered skill package, never relative to the target repository.
-- Do not run `scripts/forma-workflow.sh init <issue-id>`, do not write `plan.md`, do not write `tasks.md`, and do not commit plan files from `showhand`.
-- The workflow runner is mandatory for task selection, review staging, task completion, evidence recording, and task commits. If `next`, `review-ready`, or `complete` fails, stop and report the runner failure; do not recover by parsing `tasks.md` manually, editing checkboxes, creating run evidence, or committing outside the runner.
+- Showhand consumes already-locked plan files. Lock owns `scripts/forma-workflow.sh init <issue-id>`, `plan.md`, `tasks.md`, and plan commits.
+- Do not run `scripts/forma-workflow.sh init <issue-id>` from showhand.
+- The workflow runner is mandatory for task selection, review staging, task completion, evidence recording, and task commits. If `next`, `review-ready`, or `complete` fails, stop and report the runner failure; do not recover by parsing `tasks.md` manually or reconstructing workflow state.
 - Loop through all remaining unchecked tasks sequentially. For each task:
   1. Run the bundled `scripts/forma-workflow.sh next <issue-id>` to get the source of truth for the current task. If `next` reports that `plan.md` or `tasks.md` is missing, templated, untracked, modified, staged, or otherwise not locked, stop and hand off to the lock stage for user-confirmed plan commit.
   2. Before implementation, preflight the likely tools, runtimes, connectors, network/filesystem/process permissions, validation commands, and whether the current workspace can grant them; request expected permission grants before starting task execution.

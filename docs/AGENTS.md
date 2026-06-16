@@ -1,8 +1,9 @@
 # AGENTS
 
 This directory contains reader-facing Forma documentation. Keep it useful for
-people choosing, trying, operating, or extending Forma. Do not turn public docs
-into a dump of internal workflow mechanics.
+people choosing, trying, operating, or extending Forma. Public docs explain
+reader tasks; internal workflow mechanics belong in `forma explain ...`,
+methodology references, or maintainer-facing source docs.
 
 ## Documentation Boundaries
 
@@ -24,9 +25,10 @@ into a dump of internal workflow mechanics.
 
 - `forma explain agent` is the authoritative agent-facing command guide for
   Forma CLI routing, bootstrap, reuse, and completion rules.
-- Keep detailed agent-only requirements there, not in reader-facing docs.
+- Keep detailed agent-only requirements there.
 - Reader-facing docs may link to or name `forma explain agent` when an agent
-  needs those rules, but should not repeat its full operational policy.
+  needs those rules; they should summarize routing instead of repeating the full
+  operational policy.
 - Profile-local `reinstall-workflow.sh` may be mentioned in `quick-start` and
   `usage` only as an external routing rule: if present beside the profile, run
   it before reconstructing commands.
@@ -35,9 +37,9 @@ into a dump of internal workflow mechanics.
 
 - Prefer public concepts and reader tasks over source-layer names.
 - Keep command snippets current and minimal for the page's purpose.
-- Avoid non-temporary absolute filesystem paths in tracked docs. Temporary paths
-  under `/tmp` or `/private/tmp` are allowed only when they are part of the
-  documented behavior.
+- Use relative paths or placeholders in tracked docs. Temporary paths under
+  `/tmp` or `/private/tmp` are allowed only when they are part of the documented
+  behavior.
 - Keep English and Chinese versions aligned when editing paired documents.
 - If a detail is mainly for maintainers or generated-output authors, put it in
   the narrowest relevant reference doc or in `forma explain agent`, not in the

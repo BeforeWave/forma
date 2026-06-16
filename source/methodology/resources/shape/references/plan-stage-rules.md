@@ -2,15 +2,15 @@
 
 Use these rules only for the plan stage, the chat-only convergence step before lock.
 
-- Resolve bundled `references/*` relative to the current triggered skill package. Never substitute a same-named resource from a sibling skill directory.
-- Do not execute any bundled script from this skill. `forma-workflow.sh` is not part of plan-stage operation.
-- Do not write `plan.md`, do not write `tasks.md`, do not initialize issue state, and do not start execution work.
+- Resolve bundled `references/*` relative to the current triggered skill package.
+- Keep this stage chat-only. Its output is clarification, a proposal, or a handoff; repository inspection belongs to the selected grounding producer, and plan materialization belongs to lock.
+- `forma-workflow.sh`, `plan.md`, `tasks.md`, issue-state initialization, and execution work are outside plan-stage operation.
 
 ## Mode And Boundary
 
 - Use only in Plan mode. If the current agent is not in Plan mode, stop with `blocked` and ask the user to switch modes.
 - Stay chat-only until the user confirms a proposal is ready to hand off.
-- Before the user confirms that the context is sufficient, do not inspect the repository.
+- Before the user confirms that the context is sufficient, continue conversation-level clarification.
 
 ## Decision-Complete Gate
 
@@ -24,10 +24,10 @@ Use these rules only for the plan stage, the chat-only convergence step before l
 - Use `hybrid` when a loop-exploration objective also needs deterministic setup, gate, or promote tasks.
 - For `loop-exploration` or `hybrid`, settle baseline metric, target metric or convergence threshold, batch selection, batch size, artifact path/type, stop/skip/retry rules, no-full-rerun guard, formal/destructive write boundary, and final validation.
 - The Artifact/Evidence Boundary is complete only if the proposal states the exact artifact paths, evidence paths, committed/gitignored/transient output policy, source-of-truth status, relevant state or environment cleanliness assumptions, validation gates that must run before `review-ready`, gates that are intentionally post-commit or manual, and what metadata proves the artifact or evidence came from the intended source revision.
-- When multiple requirement or design inputs are present, `Source-of-truth refs` must state precedence only for the sources actually present. Examples include a concrete GitHub issue URL, OpenSpec change, formal contract handoff, PRD, reviewed solution package, grounding brief, or current user conversation; do not list absent source categories just to cover every scenario.
-- If any validation command depends on generated output, repository state, local credentials, external services, sibling repositories, a clean source tree, or other external prerequisites, settle that prerequisite explicitly before `proposal-ready`; do not leave it as an implementation-time decision.
-- If any gate dimension is incomplete, output `clarifying` or `blocked`; do not enter `proposal-ready`.
-- Do not infer that a task is documentation-only, analysis-only, or review-only unless the conversation explicitly settles that no code behavior, code-owned definitions, runtime logic, or executable validation needs to change.
+- When multiple requirement or design inputs are present, `Source-of-truth refs` states precedence only for the sources actually present, such as a concrete GitHub issue URL, OpenSpec change, formal contract handoff, PRD, reviewed solution package, grounding brief, or current user conversation.
+- If any validation command depends on generated output, repository state, local credentials, external services, sibling repositories, a clean source tree, or other external prerequisites, settle that prerequisite explicitly before `proposal-ready`.
+- If any gate dimension is incomplete, output `clarifying` or `blocked`.
+- Treat documentation-only, analysis-only, and review-only plans as explicit conversation decisions; infer them only when the conversation settles that no code behavior, code-owned definitions, runtime logic, or executable validation needs to change.
 
 ## Execution Contract Completeness
 
@@ -35,7 +35,7 @@ Before `proposal-ready`, the plan must be concrete enough that the executor can 
 
 - Block `proposal-ready` if the executor would still need to decide any exact CLI command, API name, function name, skill id, plugin id, file name, directory name, manifest field, argument, default, unsupported value, error behavior, output paths and output layout, install destination, scope, overwrite behavior, mutation boundary, target support matrix, artifact state, compatibility policy, validation proof, or important negative proof.
 - For CLI or API work, name the concrete command or API shape, input flags or parameters, default behavior, output location, unsupported cases, and at least one direct behavior check.
-- For generated outputs, name every generated path and classify it as committed, transient, ignored, evidence-only, or source-of-truth; if an output must not be produced as a side effect, name the forbidden path explicitly.
+- For generated outputs, name every generated path and classify it as committed, transient, ignored, evidence-only, or source-of-truth. If an output would be unsafe as a side effect, name that forbidden path explicitly.
 - For multi-target work, provide a target support matrix where each target is supported, unsupported with a clear failure, or explicitly out of scope.
 - For installation or other filesystem mutation, name the source artifact shape, destination path, user/project scope behavior, overwrite policy, verification-before-write rule, and rollback or partial-write expectation when relevant.
 - For validation, require direct create/install/verify commands or file assertions for the primary success path and the most important negative path when direct behavior can be checked.
@@ -72,24 +72,24 @@ When the user or issue context contains any of these terms, convert it into an e
 - review-only
 - coverage or quality gate
 
-Do not use repository exploration to decide these terms on the user's behalf.
+Clarify these terms with the user or route them to the selected grounding producer.
 
 ## Grounding Producer Selection
 
 - The plan stage chooses the needed producer; it does not perform repository grounding itself.
 - Use the generic ground stage when the plan intent is settled but repository facts, path landing, validation surfaces, or option tradeoffs still need read-only grounding.
 - Use a specialized grounding producer instead of the generic ground stage when one owns the domain: direct activity requirement-to-solution for activity solution packages, direct Go refactor planning for Go refactor briefs, or another explicitly named producer.
-- Use direct contract work only as a contract/source producer for API or stream-visible contract facts; do not treat it as a generic repository-grounding producer.
-- If the current conversation already contains a reviewed solution package, refactor brief, contract handoff, or other confirmed grounding handoff, cite that handoff as source material and do not require another grounding pass unless gaps remain.
+- Use direct contract work only as a contract/source producer for API or stream-visible contract facts. Generic repository facts belong to the generic ground stage or a specialized grounding producer.
+- If the current conversation already contains a reviewed solution package, refactor brief, contract handoff, or other confirmed grounding handoff, cite that handoff as source material; run another grounding pass only when gaps remain.
 - If repository facts are needed, state which producer must confirm them and block or hand off instead of exploring the repository from the plan stage.
 
 ## Validation Reality Check
 
 - Before `proposal-ready`, identify the validation runner, exact command or review-only marker, and prerequisites.
 - If validation depends on environment setup, name the setup requirement, such as `.venv` activation, `uv run`, tox environment, service dependency, or dry-run-only scope.
-- If the issue requires proof beyond ordinary unit/static checks, state whether that proof is task-local, a shared check, a final gate, or explicitly post-commit/manual; do not replace it with a weaker surrogate unless the user has accepted that boundary.
+- If the issue requires proof beyond ordinary unit/static checks, state whether that proof is task-local, a shared check, a final gate, or explicitly post-commit/manual. Weaker surrogate proof requires an accepted boundary.
 - If the issue produces derived outputs, state whether they are committed, gitignored, transient, or source of truth, and name where reviewable evidence will be recorded.
-- Do not propose commands that look plausible but have no confirmed executable path or prerequisites.
+- Propose only commands with a confirmed executable path and prerequisites.
 
 ## Proposal-Ready
 
@@ -98,7 +98,7 @@ Do not use repository exploration to decide these terms on the user's behalf.
 - Include an `Artifact/Evidence Boundary` section for `loop-exploration`, `hybrid`, generated-artifact, import/export, migration, batch-processing, formal/destructive write, or evidence-producing plans.
 - Include `Source-of-truth refs` when more than one source is present or when a downstream agent could confuse a plan, handoff, or evidence artifact with the authoritative requirement source.
 - Include the selected grounding producer and the exact facts or handoff it must supply before lock, or state that existing confirmed source material is already sufficient.
-- Keep the proposal in chat. Do not write files.
+- Keep the proposal in chat.
 
 The `Artifact/Evidence Boundary` section must be specific enough for the lock stage to copy into `plan.md` / `tasks.md` without inventing:
 

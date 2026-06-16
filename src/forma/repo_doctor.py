@@ -24,10 +24,10 @@ CORE_DOMAINS = (
     "task-state",
     "source-boundaries",
     "validation",
-    "setup-contract",
     "human-gates",
     "noise-control",
     "instruction-quality",
+    "instruction-polarity",
     "tooling-signals",
 )
 CORE_CONTRACT_DOMAINS = (
@@ -35,10 +35,10 @@ CORE_CONTRACT_DOMAINS = (
     "task-state",
     "source-boundaries",
     "validation",
-    "setup-contract",
     "human-gates",
     "noise-control",
     "instruction-quality",
+    "instruction-polarity",
 )
 TOOLING_SIGNAL_FILES = (
     "pyproject.toml",
@@ -57,14 +57,18 @@ ENTRYPOINT_FILES = (
     ".openhands/microagents",
 )
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+AT_REFERENCE_RE = re.compile(r"(?<![\w/.-])@([A-Za-z0-9_./~+-][^\s`<>()\[\]{}'\",;:]*)")
+INSTRUCTION_REFERENCE_SUFFIXES = {".md", ".markdown", ".mdc"}
 MAX_ENTRYPOINT_REFERENCES = 128
 ENTRYPOINT_REFERENCE_WARNING_LIMIT = 24
 MAX_AGENT_INSTRUCTION_LINES = 200
 MAX_CODEX_PROJECT_DOC_BYTES = 32 * 1024
 MAX_LOCAL_ENTRYPOINTS = 64
-LOCAL_ENTRYPOINT_NAMES = {"AGENTS.md", "CLAUDE.md"}
+LOCAL_ENTRYPOINT_NAMES = {"agents.md", "claude.md"}
 ENTRYPOINT_SCAN_SKIP_DIRS = {
     ".git",
+    ".forma",
+    ".forma-profile",
     ".hg",
     ".svn",
     ".venv",
@@ -75,6 +79,54 @@ ENTRYPOINT_SCAN_SKIP_DIRS = {
     "node_modules",
     "vendor",
 }
+MARKDOWN_COVERAGE_SKIP_DIRS = {
+    ".git",
+    ".forma",
+    ".forma-profile",
+    ".hg",
+    ".svn",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "generated",
+    "node_modules",
+    "plans",
+    "source",
+    "vendor",
+}
+RULE_MARKDOWN_HINT_TERMS = (
+    "agent",
+    "approval",
+    "avoid",
+    "boundary",
+    "constraint",
+    "credential",
+    "do not",
+    "don't",
+    "generated",
+    "handoff",
+    "human approval",
+    "must",
+    "never",
+    "publish",
+    "release",
+    "rule",
+    "security",
+    "setup",
+    "should",
+    "source",
+    "task contract",
+    "test",
+    "validation",
+    "workflow",
+    "不要",
+    "不能",
+    "不得",
+    "规则",
+    "规范",
+    "验证",
+)
 MAINTENANCE_SEMANTIC_PROMPTS = (
     "repository purpose and primary deliverables",
     "runtime, artifact, or publishing model",
@@ -82,6 +134,79 @@ MAINTENANCE_SEMANTIC_PROMPTS = (
     "validation model for ordinary changes and high-risk changes",
     "compatibility, migration, data, security, privacy, or contract risks that fit this repo",
     "review, evidence, handoff, and owner-decision model",
+)
+NEGATIVE_RULE_RE = re.compile(
+    r"\b(?:do not|don't|must not|should not|avoid|never)\b|stop instead|不要|不能|不得|不应|禁止",
+    re.IGNORECASE,
+)
+HARD_RISK_RULE_TERMS = (
+    "approval",
+    "approve",
+    "ask",
+    "boundary",
+    "checkout",
+    "commit",
+    "credential",
+    "delete",
+    "destructive",
+    "dist",
+    "evidence",
+    "external-write",
+    "generated",
+    "git add",
+    "git rm",
+    "human",
+    "irreversible",
+    "key",
+    "owner",
+    "password",
+    "permission",
+    "private",
+    "publish",
+    "release",
+    "remove",
+    "reset",
+    "rm ",
+    "secret",
+    "security",
+    "source",
+    "stage",
+    "token",
+    "安全",
+    "审批",
+    "发布",
+    "凭证",
+    "密钥",
+    "删除",
+    "确认",
+)
+POSITIVE_CONTRACT_TERMS = (
+    "ask",
+    "confirm",
+    "execute",
+    "generate",
+    "include",
+    "keep",
+    "prefer",
+    "record",
+    "report",
+    "resolve",
+    "return",
+    "run",
+    "select",
+    "source",
+    "treat",
+    "use",
+    "verify",
+    "write",
+    "使用",
+    "运行",
+    "记录",
+    "保持",
+    "确认",
+    "报告",
+    "写入",
+    "验证",
 )
 
 FindingStatus = Literal["contract", "signal", "missing", "warning", "optional"]
@@ -198,11 +323,12 @@ def diagnose_repo(path: Path) -> RepoDoctorReport:
             _task_state_finding(facts),
             _source_boundaries_finding(root, facts),
             _validation_finding(root, facts),
-            _setup_contract_finding(facts),
             _human_gates_finding(root, facts),
             _noise_control_finding(root, facts),
             _instruction_quality_finding(facts),
+            _instruction_polarity_finding(facts),
             _entrypoint_reference_quality_finding(facts),
+            _markdown_rule_coverage_finding(facts),
             _tooling_signals_finding(facts),
             _forma_integration_finding(facts),
         )
@@ -247,7 +373,7 @@ def _unsafe_report(root: Path, message: str) -> RepoDoctorReport:
 
 
 def _collect_facts(root: Path) -> dict[str, Any]:
-    root_entrypoints = _existing(root, ENTRYPOINT_FILES)
+    root_entrypoints = _existing_entrypoints(root, ENTRYPOINT_FILES)
     local_entrypoints = _local_entrypoints(root, root_entrypoints)
     entrypoints = tuple(_dedupe([*root_entrypoints, *local_entrypoints]))
     entrypoint_references, entrypoint_reference_cycles = _entrypoint_reference_docs(root, entrypoints)
@@ -257,17 +383,6 @@ def _collect_facts(root: Path) -> dict[str, Any]:
         entrypoint_reference_cycles,
     )
     tooling = _existing(root, TOOLING_SIGNAL_FILES)
-    setup_scripts = _existing(
-        root,
-        (
-            "scripts/bootstrap.sh",
-            "scripts/setup.sh",
-            "scripts/validate.sh",
-            ".openhands/setup.sh",
-            "Makefile",
-            "justfile",
-        ),
-    )
     validation_sources = _validation_evidence(
         root,
         tuple(_dedupe([*entrypoints, *entrypoint_references])),
@@ -299,10 +414,18 @@ def _collect_facts(root: Path) -> dict[str, Any]:
             entrypoint_references,
             validation_sources,
         ),
+        "instruction_polarity": _instruction_polarity(
+            root,
+            tuple(_dedupe([*entrypoints, *entrypoint_references])),
+        ),
+        "markdown_rule_coverage": _markdown_rule_coverage(
+            root,
+            entrypoints,
+            entrypoint_references,
+        ),
         "tooling_signals": list(tooling),
         "purpose_sources": list(purpose_sources),
         "maintenance_semantic_prompts": list(MAINTENANCE_SEMANTIC_PROMPTS),
-        "setup_scripts": list(setup_scripts),
         "validation_sources": list(validation_sources),
         "task_state_paths": list(task_state),
         "generated_candidates": list(generated_candidates),
@@ -345,6 +468,15 @@ def _entrypoint_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
             (),
             "high",
             "Propose a concise AGENTS.md or equivalent entrypoint.",
+        )
+    if not facts["root_entrypoints"] and facts["local_entrypoints"]:
+        return RepoFinding(
+            "entrypoint",
+            "signal",
+            "path-scoped agent entrypoints exist but no repo-level entrypoint was found",
+            tuple(facts["local_entrypoints"]),
+            "high",
+            "Add a concise root AGENTS.md or equivalent repo-level entrypoint that points agents to the path-scoped rules.",
         )
     contract_evidence = tuple(_dedupe([*evidence, *facts["entrypoint_references"]]))
     if _any_file_contains(
@@ -485,26 +617,6 @@ def _validation_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
     )
 
 
-def _setup_contract_finding(facts: dict[str, Any]) -> RepoFinding:
-    evidence = tuple(facts["setup_scripts"])
-    if evidence:
-        return RepoFinding(
-            "setup-contract",
-            "contract",
-            "setup or reusable validation entrypoint is present",
-            evidence,
-            "medium",
-        )
-    return RepoFinding(
-        "setup-contract",
-        "missing",
-        "no reusable setup or validation script found",
-        (),
-        "medium",
-        "Determine whether repeated setup/build/install exploration should become a script.",
-    )
-
-
 def _human_gates_finding(root: Path, facts: dict[str, Any]) -> RepoFinding:
     evidence = tuple(facts["entrypoints"])
     if evidence and _any_file_contains(
@@ -605,6 +717,31 @@ def _instruction_quality_finding(facts: dict[str, Any]) -> RepoFinding:
     )
 
 
+def _instruction_polarity_finding(facts: dict[str, Any]) -> RepoFinding | None:
+    polarity = facts["instruction_polarity"]
+    if not polarity["analyzed_docs"]:
+        return None
+    evidence = tuple(
+        f"{item['path']}:{item['line']}" for item in polarity["sample_locations"]
+    )
+    if polarity["status"] == "warning":
+        return RepoFinding(
+            "instruction-polarity",
+            "warning",
+            "ordinary workflow prohibitions lack nearby positive contracts",
+            evidence,
+            "medium",
+            "Rewrite ordinary process prohibitions as executable positive contracts; keep hard-risk prohibitions for destructive, security, release, approval, and source-boundary gates.",
+        )
+    return RepoFinding(
+        "instruction-polarity",
+        "contract",
+        "ordinary workflow rules prefer positive contracts while hard-risk prohibitions remain explicit",
+        evidence,
+        "medium",
+    )
+
+
 def _tooling_signals_finding(facts: dict[str, Any]) -> RepoFinding:
     evidence = tuple(facts["tooling_signals"])
     if evidence:
@@ -634,7 +771,7 @@ def _entrypoint_reference_quality_finding(facts: dict[str, Any]) -> RepoFinding 
         return RepoFinding(
             "entrypoint-reference-quality",
             "contract",
-            "entrypoint Markdown reference graph is bounded, local, and Markdown-only",
+            "entrypoint reference graph is bounded, local, and agent-readable",
             evidence,
             "high",
         )
@@ -650,17 +787,40 @@ def _entrypoint_reference_quality_finding(facts: dict[str, Any]) -> RepoFinding 
     )
 
 
+def _markdown_rule_coverage_finding(facts: dict[str, Any]) -> RepoFinding | None:
+    coverage = facts["markdown_rule_coverage"]
+    if not coverage["analyzed_markdown_count"]:
+        return None
+    evidence = tuple(item["path"] for item in coverage["sample_locations"])
+    if coverage["status"] == "warning":
+        return RepoFinding(
+            "markdown-rule-coverage",
+            "warning",
+            "rule-like Markdown is not reachable from the agent read-first graph",
+            evidence,
+            "medium",
+            "Review unreferenced rule-like Markdown with the owner; link valuable norms from AGENTS.md or a routed read-first index, and mark stale or informational docs as intentionally unreferenced.",
+        )
+    return RepoFinding(
+        "markdown-rule-coverage",
+        "contract",
+        "rule-like Markdown is reachable from the agent read-first graph or intentionally absent",
+        evidence,
+        "medium",
+    )
+
+
 def _entrypoint_reference_quality(
     entrypoints: tuple[str, ...],
     references: tuple[str, ...],
     cycles: tuple[dict[str, list[str]], ...],
 ) -> dict[str, Any]:
     criteria = [
-        "reported references must be existing local Markdown files",
+        "reported references must be existing local agent-readable instruction files",
         "reported references must stay inside the repository",
-        "code and non-Markdown links must not enter read-first evidence",
-        "recursive Markdown traversal must stop when a cycle is detected",
-        f"read-first reference lists should stay at or below {ENTRYPOINT_REFERENCE_WARNING_LIMIT} Markdown files",
+        "code and unsupported file links must not enter read-first evidence",
+        "recursive instruction-reference traversal must stop when a cycle is detected",
+        f"read-first reference lists should stay at or below {ENTRYPOINT_REFERENCE_WARNING_LIMIT} instruction files",
     ]
     issues: list[str] = []
     if cycles:
@@ -733,6 +893,111 @@ def _agent_instruction_quality(
         "entrypoint_lines": entrypoint_lines,
         "entrypoint_bytes": entrypoint_bytes,
         "validation_sources": list(validation_sources),
+    }
+
+
+def _instruction_polarity(root: Path, rel_paths: tuple[str, ...]) -> dict[str, Any]:
+    criteria = [
+        "ordinary workflow rules should be phrased as positive executable contracts",
+        "hard-risk prohibitions may remain explicit for destructive, security, release, approval, or source-boundary gates",
+        "ordinary prohibitions should have a nearby positive contract that tells the agent what to do instead",
+    ]
+    analyzed_docs: list[str] = []
+    matches: list[dict[str, Any]] = []
+    ordinary_unpaired: list[dict[str, Any]] = []
+    hard_risk_count = 0
+    ordinary_count = 0
+
+    for rel in rel_paths:
+        path = root / rel
+        if not path.is_file():
+            continue
+        text = _read_text(path)
+        if not text:
+            continue
+        analyzed_docs.append(rel)
+        lines = text.splitlines()
+        for index, line in enumerate(lines):
+            stripped = line.strip()
+            if not stripped or NEGATIVE_RULE_RE.search(stripped) is None:
+                continue
+            hard_risk = _has_any_term(stripped, HARD_RISK_RULE_TERMS)
+            paired_positive_contract = _has_nearby_positive_contract(lines, index)
+            category = "hard-risk" if hard_risk else "ordinary-process"
+            if hard_risk:
+                hard_risk_count += 1
+            else:
+                ordinary_count += 1
+            item = {
+                "path": rel,
+                "line": index + 1,
+                "text": _trim_text(stripped, 220),
+                "category": category,
+                "paired_positive_contract": paired_positive_contract,
+            }
+            matches.append(item)
+            if not hard_risk and not paired_positive_contract:
+                ordinary_unpaired.append(item)
+
+    return {
+        "status": "warning" if ordinary_unpaired else "contract",
+        "criteria": criteria,
+        "analyzed_docs": analyzed_docs,
+        "negative_rule_count": len(matches),
+        "ordinary_prohibition_count": ordinary_count,
+        "hard_risk_prohibition_count": hard_risk_count,
+        "unpaired_ordinary_count": len(ordinary_unpaired),
+        "sample_locations": (ordinary_unpaired or matches)[:8],
+    }
+
+
+def _markdown_rule_coverage(
+    root: Path,
+    entrypoints: tuple[str, ...],
+    references: tuple[str, ...],
+) -> dict[str, Any]:
+    criteria = [
+        "agent-relevant rule Markdown should be reachable from AGENTS.md, CLAUDE.md, or a routed read-first Markdown index",
+        "nested AGENTS.md and CLAUDE.md files are path-scoped entrypoints and do not need another Markdown document to reference them",
+        "unreferenced rule-like Markdown should be reviewed with the owner before being linked, rewritten, archived, or left informational",
+        "generated output, Forma profile source, source methodology internals, plans, vendored files, and dependency directories are outside this coverage scan",
+    ]
+    markdown_docs = _candidate_markdown_docs(root, entrypoints)
+    implicit_roots = tuple(
+        rel
+        for rel in ("README.md", "README.zh-CN.md", "README", "docs/README.md")
+        if rel in markdown_docs
+    )
+    plain_mentions = _plain_mentioned_markdown_docs(root, entrypoints, markdown_docs)
+    plain_mention_references, _cycles = _entrypoint_reference_docs(root, plain_mentions)
+    reachable_docs = set(
+        _dedupe(
+            [
+                *entrypoints,
+                *references,
+                *implicit_roots,
+                *plain_mentions,
+                *plain_mention_references,
+            ]
+        )
+    )
+    unreferenced: list[dict[str, Any]] = []
+
+    for rel in markdown_docs:
+        if rel in reachable_docs:
+            continue
+        rule_signal = _markdown_rule_signal(root, rel)
+        if rule_signal is None:
+            continue
+        unreferenced.append(rule_signal)
+
+    return {
+        "status": "warning" if unreferenced else "contract",
+        "criteria": criteria,
+        "analyzed_markdown_count": len(markdown_docs),
+        "reachable_markdown_count": len(reachable_docs),
+        "unreferenced_rule_markdown_count": len(unreferenced),
+        "sample_locations": unreferenced[:8],
     }
 
 
@@ -891,7 +1156,10 @@ def _agent_handoffs(
     review_questions = [
         finding.handoff
         for finding in findings
-        if finding.domain in CORE_CONTRACT_DOMAINS
+        if (
+            finding.domain in CORE_CONTRACT_DOMAINS
+            or finding.domain == "markdown-rule-coverage"
+        )
         and finding.status != "contract"
         and finding.handoff
     ]
@@ -1206,6 +1474,62 @@ def _render_agent(report: RepoDoctorReport) -> str:
                 lines.append(f"  - {issue}")
         else:
             lines.append("  - none")
+    instruction_polarity = report.facts.get("instruction_polarity")
+    if isinstance(instruction_polarity, dict):
+        lines.append("")
+        lines.append("instruction_polarity:")
+        lines.append("  standard: positive-contract heuristic for agent-facing rules")
+        lines.append(f"  status: {instruction_polarity.get('status')}")
+        lines.append(f"  analyzed_doc_count: {len(instruction_polarity.get('analyzed_docs', []))}")
+        lines.append(f"  negative_rule_count: {instruction_polarity.get('negative_rule_count')}")
+        lines.append(
+            f"  ordinary_prohibition_count: {instruction_polarity.get('ordinary_prohibition_count')}"
+        )
+        lines.append(
+            f"  hard_risk_prohibition_count: {instruction_polarity.get('hard_risk_prohibition_count')}"
+        )
+        lines.append(f"  unpaired_ordinary_count: {instruction_polarity.get('unpaired_ordinary_count')}")
+        lines.append("  criteria:")
+        for criterion in instruction_polarity.get("criteria", []):
+            lines.append(f"  - {criterion}")
+        lines.append("  sample_locations:")
+        samples = instruction_polarity.get("sample_locations", [])
+        if samples:
+            for sample in samples:
+                lines.append(
+                    "  - "
+                    f"{sample.get('path')}:{sample.get('line')} "
+                    f"{sample.get('category')} "
+                    f"paired={sample.get('paired_positive_contract')}"
+                )
+        else:
+            lines.append("  - none")
+    markdown_coverage = report.facts.get("markdown_rule_coverage")
+    if isinstance(markdown_coverage, dict):
+        lines.append("")
+        lines.append("markdown_rule_coverage:")
+        lines.append("  standard: read-first reachability heuristic for rule-like Markdown")
+        lines.append(f"  status: {markdown_coverage.get('status')}")
+        lines.append(f"  analyzed_markdown_count: {markdown_coverage.get('analyzed_markdown_count')}")
+        lines.append(f"  reachable_markdown_count: {markdown_coverage.get('reachable_markdown_count')}")
+        lines.append(
+            "  unreferenced_rule_markdown_count: "
+            f"{markdown_coverage.get('unreferenced_rule_markdown_count')}"
+        )
+        lines.append("  criteria:")
+        for criterion in markdown_coverage.get("criteria", []):
+            lines.append(f"  - {criterion}")
+        lines.append("  sample_locations:")
+        samples = markdown_coverage.get("sample_locations", [])
+        if samples:
+            for sample in samples:
+                lines.append(
+                    "  - "
+                    f"{sample.get('path')}:{sample.get('line')} "
+                    f"terms={','.join(sample.get('matched_terms', []))}"
+                )
+        else:
+            lines.append("  - none")
     forma_adoption = report.facts.get("forma_adoption")
     if isinstance(forma_adoption, dict):
         lines.append("")
@@ -1314,7 +1638,7 @@ def _local_entrypoints(root: Path, root_entrypoints: tuple[str, ...]) -> tuple[s
         for filename in sorted(filenames):
             if len(discovered) >= MAX_LOCAL_ENTRYPOINTS:
                 return tuple(discovered)
-            if filename not in LOCAL_ENTRYPOINT_NAMES:
+            if filename.casefold() not in LOCAL_ENTRYPOINT_NAMES:
                 continue
             path = Path(dirpath) / filename
             try:
@@ -1327,6 +1651,51 @@ def _local_entrypoints(root: Path, root_entrypoints: tuple[str, ...]) -> tuple[s
     return tuple(sorted(discovered))
 
 
+def _candidate_markdown_docs(root: Path, entrypoints: tuple[str, ...]) -> tuple[str, ...]:
+    docs: list[str] = []
+    entrypoint_set = set(entrypoints)
+    for dirpath, dirnames, filenames in os.walk(root):
+        rel_dir = Path(dirpath).relative_to(root)
+        parts = set(rel_dir.parts)
+        dirnames[:] = sorted(
+            dirname
+            for dirname in dirnames
+            if dirname not in MARKDOWN_COVERAGE_SKIP_DIRS
+            and dirname not in {".mypy_cache", ".pytest_cache", ".ruff_cache"}
+        )
+        if parts & MARKDOWN_COVERAGE_SKIP_DIRS:
+            continue
+        for filename in sorted(filenames):
+            path = Path(dirpath) / filename
+            if path.suffix.lower() not in {".md", ".markdown"}:
+                continue
+            rel = path.relative_to(root).as_posix()
+            if (
+                rel in entrypoint_set
+                or "/" not in rel
+                or rel.startswith(("docs/", ".github/"))
+            ):
+                docs.append(rel)
+    return tuple(_dedupe(docs))
+
+
+def _plain_mentioned_markdown_docs(
+    root: Path,
+    entrypoints: tuple[str, ...],
+    markdown_docs: tuple[str, ...],
+) -> tuple[str, ...]:
+    mentioned: list[str] = []
+    entrypoint_text = "\n".join(_read_text(root / rel) for rel in entrypoints).lower()
+    if not entrypoint_text:
+        return ()
+    for rel in markdown_docs:
+        rel_lower = rel.lower()
+        name_lower = Path(rel).name.lower()
+        if rel_lower in entrypoint_text or name_lower in entrypoint_text:
+            mentioned.append(rel)
+    return tuple(_dedupe(mentioned))
+
+
 def _local_markdown_links(root: Path, source_rel: str) -> tuple[str, ...]:
     source = root / source_rel
     text = _read_text(source)
@@ -1336,11 +1705,16 @@ def _local_markdown_links(root: Path, source_rel: str) -> tuple[str, ...]:
         rel = _normalize_local_reference(root, source_rel, target)
         if rel is not None and rel not in links:
             links.append(rel)
+    for match in AT_REFERENCE_RE.finditer(text):
+        target = match.group(1).strip()
+        rel = _normalize_local_reference(root, source_rel, target)
+        if rel is not None and rel not in links:
+            links.append(rel)
     return tuple(links)
 
 
 def _normalize_local_reference(root: Path, source_rel: str, target: str) -> str | None:
-    target = target.split("#", 1)[0].strip().strip("<>").strip("'\"")
+    target = target.split("#", 1)[0].strip().strip("<>").strip("'\"").rstrip(".,;:")
     if not target or target.startswith(("#", "/")):
         return None
     if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", target):
@@ -1353,9 +1727,39 @@ def _normalize_local_reference(root: Path, source_rel: str, target: str) -> str 
         return None
     if not candidate.is_file():
         return None
-    if candidate.suffix.lower() not in {".md", ".markdown"}:
+    if candidate.suffix.lower() not in INSTRUCTION_REFERENCE_SUFFIXES:
         return None
     return rel_path.as_posix()
+
+
+def _resolve_case_insensitive(root: Path, rel: str) -> str | None:
+    parts = Path(rel).parts
+    current = root
+    resolved_parts: list[str] = []
+    for part in parts:
+        if not current.is_dir():
+            return None
+        try:
+            entries = {entry.name.casefold(): entry.name for entry in current.iterdir()}
+        except OSError:
+            return None
+        actual = entries.get(part.casefold())
+        if actual is None:
+            return None
+        resolved_parts.append(actual)
+        current = current / actual
+    if not current.exists():
+        return None
+    return Path(*resolved_parts).as_posix()
+
+
+def _existing_entrypoints(root: Path, rel_paths: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(
+        actual
+        for rel in rel_paths
+        if (actual := _resolve_case_insensitive(root, rel)) is not None
+        and (root / actual).is_file()
+    )
 
 
 def _existing(root: Path, rel_paths: tuple[str, ...]) -> tuple[str, ...]:
@@ -1380,6 +1784,55 @@ def _looks_structured_markdown(text: str) -> bool:
         if stripped.startswith(("#", "- ", "* ", "> ", "| ")) or re.match(r"\d+\.\s+", stripped):
             return True
     return False
+
+
+def _has_nearby_positive_contract(lines: list[str], index: int) -> bool:
+    start = max(0, index - 2)
+    end = min(len(lines), index + 3)
+    for nearby_index in range(start, end):
+        if nearby_index == index:
+            continue
+        line = lines[nearby_index].strip()
+        if not line or NEGATIVE_RULE_RE.search(line) is not None:
+            continue
+        if _has_any_term(line, POSITIVE_CONTRACT_TERMS):
+            return True
+    return False
+
+
+def _has_any_term(text: str, terms: tuple[str, ...]) -> bool:
+    lowered = text.lower()
+    return any(term in lowered for term in terms)
+
+
+def _trim_text(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    return f"{text[: limit - 3].rstrip()}..."
+
+
+def _markdown_rule_signal(root: Path, rel: str) -> dict[str, Any] | None:
+    path = root / rel
+    text = _read_text(path)
+    fallback: dict[str, Any] | None = None
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        matched = tuple(term for term in RULE_MARKDOWN_HINT_TERMS if term in stripped.lower())
+        if not matched:
+            continue
+        item = {
+            "path": rel,
+            "line": line_number,
+            "text": _trim_text(stripped, 220),
+            "matched_terms": list(matched[:5]),
+        }
+        if stripped.startswith("#"):
+            fallback = fallback or item
+            continue
+        return item
+    return fallback
 
 
 def _read_text(path: Path) -> str:

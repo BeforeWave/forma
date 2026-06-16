@@ -15,7 +15,7 @@ constraints:
   default:
     - Treat this profile stack as Forma-owned project source, not a sanitized public example.
     - Keep downstream organization-specific workflow commands, private paths, credentials, and business rules out of Forma examples.
-    - Do not write the invoking developer's home-directory path into tracked source, docs, profiles, plans, tests, examples, or generated release artifacts.
+    - Use relative paths, placeholders, or temporary paths in tracked source, docs, profiles, plans, tests, examples, and generated release artifacts; keep invoking-developer home-directory paths out of tracked files.
     - Preserve unrelated user work in the dirty worktree and keep commits scoped to the current issue.
     - Keep changes scoped to the active issue plan and tasks.
     - Use the minimum durable design surface that solves the current issue; agent-friendly structure, scripts, and references are allowed when they reduce repeated work, but do not add extra config, indirection, or persistent files without a current need.
@@ -29,7 +29,7 @@ constraints:
   seal:
     - Read README.md, README.zh-CN.md, STRUCTURE.md, AGENTS.md, active plans/issue-<id>/ files, and dist/AGENTS.md when release artifacts are in scope before writing final tasks that affect Forma governance, profile ownership, generated baselines, or documentation policy.
     - For target workflow output changes, write tasks that validate the developer CLI path and generated output behavior.
-    - If .forma changes, validate self-profile output by generating it under /tmp, /private/tmp, or $TMPDIR and running forma verify; do not write self-profile output into dist.
+    - If .forma changes, validate self-profile output by generating it under /tmp, /private/tmp, or $TMPDIR and running forma verify; dist remains product default workflow output.
     - Prefer durable profile changes for repeated behavior and one-off constraints only for temporary generated workflow output.
 validation_commands:
   default:

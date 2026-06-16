@@ -15,13 +15,13 @@ Keep user-facing output compact. Prefer 6 to 10 lines and use only sections that
 
 - Lead with the result, not process narration.
 - Omit empty sections.
-- Do not repeat the same point across sections.
-- Do not restate settled context, repo rules, or workflow explanations.
-- Do not include `Risks` unless there is a concrete unresolved risk.
-- Do not include `Next Step` unless the user must take an action now.
-- Do not include `Review Status` unless waiting for user approval is the key state.
-- Do not include `Evidence Path` unless evidence was actually created.
-- Do not claim that `plan.md` or `tasks.md` were written unless they were actually written.
+- Put each point in one section only.
+- Keep settled context, repo rules, and workflow explanations out of routine output.
+- Include `Risks` only for concrete unresolved risks.
+- Include `Next Step` only when the user must act now.
+- Include `Review Status` only when user approval is the key state.
+- Include `Evidence Path` only for evidence that was actually created.
+- Report `plan.md` or `tasks.md` as written only after they were actually written.
 
 ## `success` for Planning
 
@@ -59,12 +59,8 @@ Use this compact shape:
 - One sentence stating that the skill cannot continue yet.
 - `Missing:` followed by only the unsettled items.
 - Up to 3 short clarifying questions.
-
-Do not:
-
-- Re-list settled decisions.
-- Explain the workflow at length.
-- Repeat the same blocker in multiple phrasings.
+Keep settled decisions and workflow explanations out of `blocked`; state each
+blocker once.
 
 ## `clarifying`
 

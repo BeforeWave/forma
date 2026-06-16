@@ -4,21 +4,21 @@ profile:
 constraints:
   default:
     - When a Forma workflow step requires explicit user confirmation, prefer a host-provided structured user-input or choice capability when it is available in the current thread; otherwise ask with a concise textual `Required Confirmation:` prompt.
-    - Treat structured user-input support as an optional host capability, not a hard dependency; do not block solely because an experimental or mode-limited confirmation UI is unavailable.
+    - Treat structured user-input support as an optional host capability. When it is unavailable, continue with a concise textual `Required Confirmation:` prompt.
   shape:
     - Keep affected Forma source surfaces explicit in plans and implementation notes.
-    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
+    - Lock only decisions that belong to the current issue; future verifier, profile-composition, or generated-output decisions stay as explicit follow-up or blocking gaps.
     - Decide whether the iteration touches verifier rules, profile composition, methodology resources, examples, generated baselines, docs, or tests.
     - Decide whether committed generated outputs must be regenerated and reviewed as drift baselines.
     - Decide whether the work is profile-only, docs-only, source behavior, generated-output replacement, or cross-surface.
   gauge:
     - Keep affected Forma source surfaces explicit in plans and implementation notes.
-    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
+    - Report future verifier, profile-composition, or generated-output decisions as follow-up or blocking gaps when they are outside the current issue scope.
     - Confirm whether profile changes belong under .forma, examples/profiles, or a downstream repository.
     - Confirm current generated baselines before recommending any delete/add replacement.
   seal:
     - Keep affected Forma source surfaces explicit in finalized plans and tasks.
-    - Do not pre-lock future verifier, profile-composition, or generated-output decisions outside the current issue scope.
+    - Finalize only the current issue contract; future verifier, profile-composition, or generated-output decisions stay out of the locked task list unless the issue scope includes them.
     - Write tasks that bind each source behavior change to tests and each generated baseline change to create plus verify evidence.
     - Include documentation tasks whenever CLI semantics, profile locations, examples, or generated baseline policy changes.
     - When the staged plan diff is ready, ask for commit permission once. If the user confirms, commit that staged plan snapshot directly instead of asking for another confirmation.
@@ -32,16 +32,16 @@ workflow_adds:
   gauge:
     - 'When running in a Codex app-hosted side or forked conversation, resolve the parent thread id from host request metadata first: `x-codex-turn-metadata.forked_from_thread_id`.'
     - 'After producing the grounding handoff, send one compact grounding-result message back to the parent thread when a thread-messaging capability is available.'
-    - 'Do not guess, search, or infer the parent thread. If metadata is absent, report `Parent Handoff: blocked-no-parent-thread`. If messaging is unavailable, report `Parent Handoff: blocked-no-thread-tool`.'
-    - 'The parent message is planning input only. It must report landing points, confirmed facts, plan implications, validation surfaces, blocking gaps, and source material; it must not ask the parent thread to implement, write plan files, or proceed without user confirmation.'
+    - 'Resolve parent-thread handoff only from host metadata. If metadata is absent, report `Parent Handoff: blocked-no-parent-thread`. If messaging is unavailable, report `Parent Handoff: blocked-no-thread-tool`.'
+    - 'The parent message is planning input only. It reports landing points, confirmed facts, plan implications, validation surfaces, blocking gaps, and source material; implementation, plan writing, and confirmation remain in the parent workflow.'
     - 'Use the parent message shape `GROUNDING RESULT FOR PLAN`, `Intent`, `Landing Points`, `Recommended Plan Frame`, `Validation Surfaces`, `Blocking Gaps`, `Source Material`, and `Next Step For Main Thread`.'
     - 'Each landing point must separate `Fact`, `Plan implication`, and `Confidence`; use `Inference` or `Recommendation` labels when the item is not a confirmed fact.'
     - 'Prefer one structured parent message with multiple landing points instead of sending one message per fact, unless the grounding naturally splits into separate independent packages.'
   mend:
-    - 'After the confirmed rework contract is committed, report the committed contract path, appended task ids, and recommended execution route back to the originating host or parent thread; do not implement the rework inside the rework stage.'
+    - 'After the confirmed rework contract is committed, report the committed contract path, appended task ids, and recommended execution route back to the originating host or parent thread; execution belongs to the execute/showhand stage.'
     - 'After the user confirms a staged rework contract, commit only the rework contract file(s) and `plans/issue-<id>/tasks.md`; then resolve and report the execution handoff before stopping.'
     - 'When running in a Codex app-hosted side or forked conversation, resolve the parent thread id from host request metadata first: `x-codex-turn-metadata.forked_from_thread_id`.'
-    - 'Treat the metadata parent thread id as an optional host capability. If it is absent, do not guess, do not list or search recent threads, and do not infer the parent from thread title or history; ask the user for the parent thread id or report `Execution Handoff: blocked-no-parent-thread`.'
+    - 'Treat the metadata parent thread id as an optional host capability. If it is absent, ask the user for the parent thread id or report `Execution Handoff: blocked-no-parent-thread`; thread title/history is not a parent-thread source.'
     - 'If the parent thread id is present and a host thread-messaging capability is available, send the rework-result report and recommended execution route to that parent thread. If no thread-messaging capability is available, report `Execution Handoff: blocked-no-thread-tool`.'
     - "Rework completion requires an `Execution Handoff` disposition: `sent`, `blocked-no-parent-thread`, `blocked-no-thread-tool`, or `declined-by-user`."
 output_adds:

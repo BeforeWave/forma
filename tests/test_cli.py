@@ -1616,10 +1616,11 @@ def test_doctor_reports_ready_without_forma_profile_when_core_contracts_exist(
 def test_doctor_follows_entrypoint_document_links_for_handoff_and_evidence(
     tmp_path: Path,
 ) -> None:
-    (tmp_path / "AGENTS.md").write_text(
+    (tmp_path / "AGENTS.MD").write_text(
         """# AGENTS
 
 Before work, read [docs/INDEX.md](docs/INDEX.md).
+Also read @.cursor/rules/frontend.mdc.
 Ask for human approval before destructive, release, credential, or external-write actions.
 """,
         encoding="utf-8",
@@ -1662,6 +1663,12 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
         "Run `GOCACHE=/tmp/mimir-gocache go test <touched-packages> -count=1`.\n",
         encoding="utf-8",
     )
+    cursor_rules = tmp_path / ".cursor" / "rules"
+    cursor_rules.mkdir(parents=True)
+    (cursor_rules / "frontend.mdc").write_text(
+        "Run visual validation before accepting frontend changes.\n",
+        encoding="utf-8",
+    )
     (tmp_path / "README.md").write_text("# sample\n", encoding="utf-8")
     (tmp_path / "go.mod").write_text("module sample\n\ngo 1.23.7\n", encoding="utf-8")
     runner = CliRunner()
@@ -1671,8 +1678,10 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
     assert result.exit_code == 0, result.output
     data = json.loads(result.output)
     assert "STRUCTURE.md" not in data["agent_handoffs"][0]["read_first"]
+    assert data["facts"]["root_entrypoints"] == ["AGENTS.MD"]
     assert data["facts"]["entrypoint_references"] == [
         "docs/INDEX.md",
+        ".cursor/rules/frontend.mdc",
         "docs/ARCHITECTURE.md",
         "docs/references/OPERATIONS.md",
         "docs/references/BOUNDARIES.md",
@@ -1680,9 +1689,10 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
     ]
     assert "common/banner/handler/api_topic.go" not in data["facts"]["entrypoint_references"]
     assert data["agent_handoffs"][0]["read_first"] == [
-        "AGENTS.md",
+        "AGENTS.MD",
         "README.md",
         "docs/INDEX.md",
+        ".cursor/rules/frontend.mdc",
         "docs/ARCHITECTURE.md",
         "docs/references/OPERATIONS.md",
         "docs/references/BOUNDARIES.md",
@@ -1695,7 +1705,7 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
     assert "docs/INDEX.md" in findings["entrypoint"]["evidence"]
     assert findings["entrypoint-reference-quality"]["status"] == "contract"
     assert data["facts"]["entrypoint_reference_quality"]["status"] == "contract"
-    assert "reported references must be existing local Markdown files" in data["facts"][
+    assert "reported references must be existing local agent-readable instruction files" in data["facts"][
         "entrypoint_reference_quality"
     ]["criteria"]
     assert data["facts"]["agent_instruction_quality"]["status"] == "contract"
@@ -1715,11 +1725,67 @@ Example implementation: [api_topic.go](../../common/banner/handler/api_topic.go)
     assert "Claude Code reads CLAUDE.md" in agent.output
     assert "reference_quality:" in agent.output
     assert "standard: traversal-safety diagnostic for agent read-first Markdown" in agent.output
-    assert "reported references must be existing local Markdown files" in agent.output
+    assert "reported references must be existing local agent-readable instruction files" in agent.output
     assert "issues:" in agent.output
     assert "forma_adoption:" in agent.output
     assert "Forma turns this repository's engineering rules into a reusable agent workflow" in agent.output
     assert "The agent no longer needs repeated reminders about boundaries" in agent.output
+
+
+def test_doctor_accepts_referenced_rule_markdown(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+Read first: [maintenance rules](docs/MAINTENANCE.md).
+
+## Source Boundaries
+- Source lives in src.
+- Generated output lives in dist.
+
+## Validation
+- Run `pytest`.
+
+## Human Gates
+- Ask for human approval before destructive, release, credential, or external-write actions.
+""",
+        encoding="utf-8",
+    )
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "MAINTENANCE.md").write_text(
+        """# Maintenance Rules
+
+Agents must run the integration validation before changing release workflow files.
+""",
+        encoding="utf-8",
+    )
+    forma_refs = tmp_path / ".forma" / "references"
+    forma_refs.mkdir(parents=True)
+    (forma_refs / "PROFILE-RULES.md").write_text(
+        "Agents must keep profile source separate from project docs.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("Validate with `pytest`.\n", encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+    (tmp_path / "plans").mkdir()
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    validate = scripts / "validate.sh"
+    validate.write_text("#!/usr/bin/env sh\npytest\n", encoding="utf-8")
+    validate.chmod(0o755)
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    coverage = data["facts"]["markdown_rule_coverage"]
+    assert coverage["status"] == "contract"
+    assert coverage["unreferenced_rule_markdown_count"] == 0
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["markdown-rule-coverage"]["status"] == "contract"
 
 
 def test_doctor_stops_entrypoint_document_cycles(
@@ -1816,12 +1882,59 @@ def test_doctor_reports_provider_informed_instruction_quality_issues(
     assert "provider-informed criteria" in findings["instruction-quality"]["handoff"]
 
 
+def test_doctor_accepts_hard_risk_prohibitions_and_positive_contracts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        """# AGENTS
+
+## Source Boundaries
+- Source lives in src.
+- Generated output lives in dist.
+
+## Validation
+- Source `scripts/env_setup.sh` once, then run `pytest` in that initialized shell.
+
+## Human Gates
+- Ask for human approval before destructive, release, credential, or external-write actions.
+
+## Workflow Rules
+- Validation uses the initialized shell for all follow-up commands.
+- Do not commit secrets, credentials, or private keys.
+- Do not run destructive reset commands without explicit human approval.
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("Validate with `pytest`.\n", encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+    (tmp_path / "plans").mkdir()
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    validate = scripts / "validate.sh"
+    validate.write_text("#!/usr/bin/env sh\npytest\n", encoding="utf-8")
+    validate.chmod(0o755)
+    runner = CliRunner()
+
+    result = runner.invoke(main, ["doctor", "--format", "json", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    polarity = data["facts"]["instruction_polarity"]
+    assert polarity["status"] == "contract"
+    assert polarity["negative_rule_count"] == 2
+    assert polarity["ordinary_prohibition_count"] == 0
+    assert polarity["hard_risk_prohibition_count"] == 2
+    assert polarity["unpaired_ordinary_count"] == 0
+    findings = {item["domain"]: item for item in data["findings"]}
+    assert findings["instruction-polarity"]["status"] == "contract"
+
+
 def test_doctor_discovers_nested_agent_entrypoints(
     tmp_path: Path,
 ) -> None:
     service = tmp_path / "services" / "checkout"
     service.mkdir(parents=True)
-    (service / "AGENTS.md").write_text(
+    (service / "agents.MD").write_text(
         """# Checkout Agent Rules
 
 Read first: README.md.
@@ -1842,11 +1955,16 @@ Ask a human before destructive operations.
     assert result.exit_code == 0, result.output
     data = json.loads(result.output)
     assert data["facts"]["root_entrypoints"] == []
-    assert data["facts"]["local_entrypoints"] == ["services/checkout/AGENTS.md"]
-    assert data["facts"]["entrypoints"] == ["services/checkout/AGENTS.md"]
+    assert data["facts"]["local_entrypoints"] == ["services/checkout/agents.MD"]
+    assert data["facts"]["entrypoints"] == ["services/checkout/agents.MD"]
+    assert data["facts"]["markdown_rule_coverage"]["status"] == "contract"
+    assert data["facts"]["markdown_rule_coverage"]["unreferenced_rule_markdown_count"] == 0
     findings = {item["domain"]: item for item in data["findings"]}
-    assert findings["entrypoint"]["status"] == "contract"
+    assert findings["entrypoint"]["status"] == "signal"
+    assert "no repo-level entrypoint" in findings["entrypoint"]["summary"]
+    assert "root AGENTS.md" in findings["entrypoint"]["handoff"]
     assert findings["validation"]["status"] == "contract"
+    assert findings["markdown-rule-coverage"]["status"] == "contract"
 
 
 def test_doctor_does_not_treat_forma_profile_as_core_readiness(
@@ -2040,7 +2158,6 @@ def test_doctor_reports_needs_agent_for_sparse_repo(tmp_path: Path) -> None:
         "task-state",
         "source-boundaries",
         "validation",
-        "setup-contract",
         "human-gates",
         "noise-control",
         "instruction-quality",
